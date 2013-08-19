@@ -1,16 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
+  <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-19T23:30:58+09:00</updated>
+  <updated>2013-08-19T23:43:19+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
-    
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[first_post]]></title>
+    <link href="http://momota.github.io/blog/2013/08/19/first-post/"/>
+    
+    <updated>2013-08-19T23:40:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/19/first-post</id>
+    
+    <content type="html"><![CDATA[<h1>this is my first post using octopress</h1>
+
+<ul>
+<li>create github repository (yourname.github.io)</li>
+<li>install ruby 1.9.3</li>
+</ul>
+
+]]></content>
+    
+  </entry>
   
 </feed>
