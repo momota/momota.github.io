@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: octopress | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2013-08-20T22:49:14+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[octopressでblog]]></title>
+    <link href="http://momota.github.io/blog/2013/08/19/first-post/"/>
+    <updated>2013-08-19T23:40:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/19/first-post</id>
+    <content type="html"><![CDATA[<h1>octopress setting</h1>
+
+<h2>create new github repository</h2>
+
+<p>githubへログイン後、github pages用リポジトリを作成する。<a href="https://github.com/new">https://github.com/new</a>
+リポジトリ名は、「username.github.io」。</p>
+
+<h2>install ruby 1.9.3 by rbenv</h2>
+
+<p>```sh</p>
+
+<pre><code>$ rbenv install 1.9.3-pxx
+$ rbenv local 1.9.3-pxx
+$ rbenv rehash
+$ ruby -v   # =&gt; 1.9.3-pxx
+</code></pre>
+
+<p>```</p>
+
+<h2>configure octopress</h2>
+
+<ul>
+<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
+<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+<li>最新版のoctopressコードをクローンする。</li>
+</ul>
+
+
+<p>```sh</p>
+
+<pre><code>$ git clone git://github.com/imathis/octopress.git username.github.io
+</code></pre>
+
+<p>```</p>
+
+<ul>
+<li>bundlerをインストールし、関連gemをインストールする。</li>
+</ul>
+
+
+<p>```sh</p>
+
+<pre><code>$ cd /path/to/username.github.io
+$ gem install bundler
+$ bundle install --path vendor/bundle
+</code></pre>
+
+<p>```</p>
+
+<h3>install octopress theme</h3>
+
+<ul>
+<li>default theme</li>
+</ul>
+
+
+<p>```sh</p>
+
+<pre><code>$ bundle exec rake install
+</code></pre>
+
+<p>```</p>
+
+<ul>
+<li>3rd party theme</li>
+</ul>
+
+
+<p><a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes</a></p>
+
+<p>```sh</p>
+
+<pre><code>$ bundle exec rake install\['theme you like'\]
+</code></pre>
+
+<p>```</p>
+
+<h3>はてなブックマークボタンを設置する</h3>
+
+<ul>
+<li>source/_includes/post/sharing.html に以下を追加</li>
+<li><code>\{\{ site.url \}\}\{\{ page.url \}\}</code>部分の<code>\{\}</code>はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。</li>
+</ul>
+
+
+<p>```html</p>
+
+<pre><code>&lt;div style="float:left"&gt;
+&lt;a href="http://b.hatena.ne.jp/entry/\{\{ site.url \}\}\{\{ page.url \}\}" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"&gt;&lt;img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /&gt;&lt;/a&gt;
+&lt;script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"&gt;&lt;/script&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>```</p>
+
+<h2>deploy github pages</h2>
+
+<ul>
+<li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>
+</ul>
+
+
+<p>```sh</p>
+
+<pre><code>$ bundle exec rake setup_github_pages
+# Enter the read/write url for your repository:
+# --&gt; git@github.com:username/username.github.io.git
+$ bundle exec rake generate
+$ bundle exec rake deploy
+</code></pre>
+
+<p>```</p>
+
+<p>ソースもgit pushする</p>
+
+<p>```sh</p>
+
+<pre><code>$ git add .
+$ git commit -m 'commit comment'
+$ git push origin source
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>
