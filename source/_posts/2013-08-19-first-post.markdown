@@ -77,7 +77,6 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
     $ bundle exec rake setup_github_pages
     # Enter the read/write url for your repository:
     # --> git@github.com:username/username.github.io.git
-    
     $ bundle exec rake generate
     $ bundle exec rake deploy
 ```
@@ -89,6 +88,4 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
     $ git commit -m 'commit comment'
     $ git push origin source
 ```
-
-
 

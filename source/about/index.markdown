@@ -9,4 +9,4 @@ footer: true
 momota
 
 * [github](https://github.com/momota)
-* [twitter](https://twitter.com/momota)
+* [@momota](https://twitter.com/momota)
