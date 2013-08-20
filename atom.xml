@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-20T00:31:25+09:00</updated>
+  <updated>2013-08-20T22:31:28+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -15,19 +15,21 @@
   
   <entry>
     
-    <title type="html"><![CDATA[first_post]]></title>
+    <title type="html"><![CDATA[octopress]]></title>
     <link href="http://momota.github.io/blog/2013/08/19/first-post/"/>
     
     <updated>2013-08-19T23:40:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/08/19/first-post</id>
     
-    <content type="html"><![CDATA[<h1>this is my first post using octopress</h1>
+    <content type="html"><![CDATA[<h1>octopress setting</h1>
 
-<ul>
-<li>create github repository (yourname.github.io)</li>
-<li>install ruby 1.9.3</li>
-</ul>
+<h2>create new github repository</h2>
 
+<p>githubへログイン後、github pages用リポジトリを作成する。
+リポジトリ名は、「username.github.io」。
+<a href="https://github.com/new">https://github.com/new</a> を参考に。</p>
+
+<h2>install ruby 1.9.3 by rbenv</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -40,25 +42,62 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li><p>git clone octopress</p>
+<h2>configure octopress</h2>
 
 <ul>
 <li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
-</ul>
-</li>
-<li><p>configure octopress</p>
-
-<ul>
 <li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+<li>最新版のoctopressコードをクローンする。</li>
 </ul>
-</li>
-<li><p>はてなブックマークボタンを設置する</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git username.github.io
+</span></code></pre></td></tr></table></div></figure>
+
 
 <ul>
-<li><code>\{\}</code>はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。</li>
+<li>bundlerをインストールし、関連gemをインストールする。</li>
 </ul>
-</li>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /path/to/username.github.io
+</span><span class='line'><span class="nv">$ </span>gem install bundler
+</span><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>install octopress theme</h3>
+
+<ul>
+<li>default theme</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>3rd party theme
+<a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake install<span class="se">\[</span><span class="s1">&#39;theme you like&#39;</span><span class="se">\]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>はてなブックマークボタンを設置する</h3>
+
+<ul>
+<li>source/_includes/post/sharing.html に以下を追加</li>
+<li><code>\{\{ site.url \}\}\{\{ page.url \}\}</code>部分の<code>\{\}</code>はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。</li>
 </ul>
 
 
@@ -73,14 +112,39 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li>deploy github pages
+<h2>deploy github pages</h2>
 
 <ul>
-<li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a></li>
+<li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>
 </ul>
-</li>
-</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake setup_github_pages
+</span><span class='line'><span class="c"># Enter the read/write url for your repository:</span>
+</span><span class='line'><span class="c"># --&gt; git@github.com:username/username.github.io.git</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake generate
+</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ソースもgit pushする</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git add .
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s1">&#39;commit comment&#39;</span>
+</span><span class='line'><span class="nv">$ </span>git push origin <span class="nb">source</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 
 ]]></content>
     
