@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[momota.txt]]></title>
+  <link href="http://momota.github.io/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2013-08-20T00:31:25+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    
+    <title type="html"><![CDATA[first_post]]></title>
+    <link href="http://momota.github.io/blog/2013/08/19/first-post/"/>
+    
+    <updated>2013-08-19T23:40:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/19/first-post</id>
+    
+    <content type="html"><![CDATA[<h1>this is my first post using octopress</h1>
+
+<ul>
+<li>create github repository (yourname.github.io)</li>
+<li>install ruby 1.9.3</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-pxx
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span><span class='line'><span class="nv">$ </span>ruby -v <span class="c"># =&gt; 1.9.3-pxx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>git clone octopress</p>
+
+<ul>
+<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
+</ul>
+</li>
+<li><p>configure octopress</p>
+
+<ul>
+<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+</ul>
+</li>
+<li><p>はてなブックマークボタンを設置する</p>
+
+<ul>
+<li><code>\{\}</code>はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;float:left&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://b.hatena.ne.jp/entry/\{\{ site.url \}\}\{\{ page.url \}\}&quot;</span> <span class="na">class=</span><span class="s">&quot;hatena-bookmark-button&quot;</span> <span class="na">data-hatena-bookmark-layout=</span><span class="s">&quot;standard&quot;</span> <span class="na">title=</span><span class="s">&quot;このエントリーをはてなブックマークに追加&quot;</span><span class="nt">&gt;&lt;img</span> <span class="na">src=</span><span class="s">&quot;http://b.st-hatena.com/images/entry-button/button-only.gif&quot;</span> <span class="na">alt=</span><span class="s">&quot;このエントリーをはてなブックマークに追加&quot;</span> <span class="na">width=</span><span class="s">&quot;20&quot;</span> <span class="na">height=</span><span class="s">&quot;20&quot;</span> <span class="na">style=</span><span class="s">&quot;border: none;&quot;</span> <span class="nt">/&gt;&lt;/a&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;http://b.st-hatena.com/js/bookmark_button.js&quot;</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span> <span class="na">async=</span><span class="s">&quot;async&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>deploy github pages
+
+<ul>
+<li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a></li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+    
+  </entry>
+  
+</feed>
