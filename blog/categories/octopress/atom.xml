@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-20T22:49:14+09:00</updated>
+  <updated>2013-08-20T23:19:08+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -19,6 +19,15 @@
     <updated>2013-08-19T23:40:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/08/19/first-post</id>
     <content type="html"><![CDATA[<h1>octopress setting</h1>
+
+<h2>環境</h2>
+
+<ul>
+<li>mac os x 10.8.4</li>
+<li>git version 1.7.9.6 (Apple Git-31.1)</li>
+<li>zsh</li>
+</ul>
+
 
 <h2>create new github repository</h2>
 
@@ -63,6 +72,29 @@ $ ruby -v   # =&gt; 1.9.3-pxx
 <pre><code>$ cd /path/to/username.github.io
 $ gem install bundler
 $ bundle install --path vendor/bundle
+</code></pre>
+
+<p>```</p>
+
+<ul>
+<li>_config.ymlを編集する。とりあえず以下のフィールドを自分に合わせて修正。</li>
+</ul>
+
+
+<p>```yaml</p>
+
+<pre><code>url: http://momota.github.io
+title: momota.txt
+subtitle: momota memo
+author: momota
+date_format: "%Y-%m-%d"
+
+email: makoto.momota@gmail.com
+
+github_user: momota
+twitter_user: momota
+disqus_short_name: momota
+facebook_like: true
 </code></pre>
 
 <p>```</p>
@@ -113,6 +145,33 @@ $ bundle install --path vendor/bundle
 
 <p>```</p>
 
+<h2>post</h2>
+
+<ul>
+<li>以下コマンドで、記事ファイル<code>source/_posts/yyyy-MM-dd-post-title.markdown</code>を生成。</li>
+<li>生成後は、vim/emacsなど自分の好きなエディタで編集する</li>
+</ul>
+
+
+<p>```sh</p>
+
+<pre><code>$ bundle exec rake new_post\['post title'\]
+</code></pre>
+
+<p>```</p>
+
+<h2>check your post</h2>
+
+<p>```sh</p>
+
+<pre><code># 記事の生成
+$ bundle exec rake generate
+# プレビュー: http://localhost:4000/ へアクセスしてみる
+$ bundle exec rake preview
+</code></pre>
+
+<p>```</p>
+
 <h2>deploy github pages</h2>
 
 <ul>
@@ -125,13 +184,15 @@ $ bundle install --path vendor/bundle
 <pre><code>$ bundle exec rake setup_github_pages
 # Enter the read/write url for your repository:
 # --&gt; git@github.com:username/username.github.io.git
-$ bundle exec rake generate
 $ bundle exec rake deploy
 </code></pre>
 
 <p>```</p>
 
-<p>ソースもgit pushする</p>
+<ul>
+<li>ソースもgit pushする</li>
+</ul>
+
 
 <p>```sh</p>
 
