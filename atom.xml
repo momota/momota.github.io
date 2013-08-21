@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-21T00:45:30+09:00</updated>
+  <updated>2013-08-22T01:24:28+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -15,10 +15,21 @@
   
   <entry>
     <title type="html"><![CDATA[octopressでblog]]></title>
-    <link href="http://momota.github.io/blog/2013/08/19/first-post/"/>
+    <link href="http://momota.github.io/blog/2013/08/19/octopress/"/>
     <updated>2013-08-19T23:40:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/08/19/first-post</id>
+    <id>http://momota.github.io/blog/2013/08/19/octopress</id>
     <content type="html"><![CDATA[<h1>octopress setting</h1>
+
+<h2>流れ</h2>
+
+<ol>
+<li>github pages用リポジトリ作成</li>
+<li>octopressコードをローカルにclone</li>
+<li>関連gemをインストール</li>
+<li>新規記事をpostする</li>
+<li>記事とソースをgithubへデプロイする</li>
+</ol>
+
 
 <h2>環境</h2>
 
@@ -33,6 +44,15 @@
 
 <p>githubへログイン後、github pages用リポジトリを作成する。<a href="https://github.com/new">https://github.com/new</a>
 リポジトリ名は、「username.github.io」。</p>
+
+<h2>最新版のoctopressコードをclone</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git username.github.io
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /path/to/username.github.io
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h2>install ruby 1.9.3 by rbenv</h2>
 
@@ -49,36 +69,18 @@
 
 <h2>configure octopress</h2>
 
-<ul>
-<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
-<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
-<li>最新版のoctopressコードをクローンする。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git username.github.io
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>bundlerをインストールし、関連gemをインストールする。</li>
-</ul>
-
+<p>bundlerをインストールし、関連gemをインストールする。
+* <a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a>
+* <a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /path/to/username.github.io
-</span><span class='line'><span class="nv">$ </span>gem install bundler
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundler
 </span><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li>_config.ymlを編集する。とりあえず以下のフィールドを自分に合わせて修正。</li>
-</ul>
-
+<p>_config.ymlを編集する。とりあえず以下のフィールドを自分に合わせて修正。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -109,20 +111,14 @@
 
 <h3>install octopress theme</h3>
 
-<ul>
-<li>default theme</li>
-</ul>
-
+<p>install default theme</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake install
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li>3rd party theme</li>
-</ul>
-
+<p>install 3rd party theme</p>
 
 <p><a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes</a></p>
 
@@ -169,7 +165,7 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># 記事の生成</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># htmlなどの生成</span>
 </span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake generate
 </span><span class='line'><span class="c"># プレビュー: http://localhost:4000/ へアクセスしてみる</span>
 </span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake preview
