@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "putty へsolarized導入"
+title: "PuTTY へsolarized導入"
 date: 2013-08-22 23:00
 comments: true
 categories: windows putty solarized
 ---
-puttyに人気のカラースキーム [Solarized](http://ethanschoonover.com/solarized) を適用する。
+![solarized](http://ethanschoonover.com/solarized/img/solarized-yinyang.png)
+
+人気のカラースキーム [Solarized](http://ethanschoonover.com/solarized) を、PuTTYへ適用する。
+ちなみにパティと発音するみたいですね。ずっとプティと発音してました。
+
 適用イメージは以下。
 
 * before
