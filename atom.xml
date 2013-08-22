@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-22T01:29:35+09:00</updated>
+  <updated>2013-08-22T23:17:39+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,13 +14,79 @@
 
   
   <entry>
+    <title type="html"><![CDATA[putty へsolarized導入]]></title>
+    <link href="http://momota.github.io/blog/2013/08/22/solarized-putty/"/>
+    <updated>2013-08-22T23:00:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/22/solarized-putty</id>
+    <content type="html"><![CDATA[<p>puttyに人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を適用する。
+適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
+
+<h1>環境</h1>
+
+<ul>
+<li>windows 7 professional service pack 1</li>
+<li>PuTTY 0.60-JP_Y-2007-08-06</li>
+<li>ちなみにフォントは、&#8221;Osakaー等幅&#8221; を利用</li>
+</ul>
+
+
+<h1>solarized_dark.reg (solarized_light.reg)をダウンロードする</h1>
+
+<p><a href="https://github.com/brantb/solarized/tree/master/putty-colors-solarized">https://github.com/brantb/solarized/tree/master/putty-colors-solarized</a></p>
+
+<p>solarized_dark.regをダウンロードし、<code>C:¥Program Files (x86)¥PuTTY¥</code> に保存</p>
+
+<h1>solarized_dark.regを修正する</h1>
+
+<p><a href="http://27213143.at.webry.info/201304/article_1.html">http://27213143.at.webry.info/201304/article_1.html</a></p>
+
+<p><code>Solarized%20Dark(Solarized%20Light)</code> をputtyのセッション名に修正する。下の例では<code>_vagrant_ubuntu</code>。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png" alt="putty session name" /></p>
+
+<h1>putty設定をインポートする</h1>
+
+<p>以下の2通りのやり方がある。</p>
+
+<h2>ダブルクリックでインポート</h2>
+
+<p>solarized_dark.reg をダブルクリックする。</p>
+
+<h2>コマンドプロンプトからインポート</h2>
+
+<p><a href="http://103px.blog.fc2.com/blog-entry-46.html">http://103px.blog.fc2.com/blog-entry-46.html</a></p>
+
+<p>windowsコマンドプロンプトから.regファイルをインポートする</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bat'><span class='line'> <span class="p">&gt;</span> <span class="n">reg</span> import C:¥Program Files (x<span class="m">86</span>)¥PuTTY¥solarized_dark.reg
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[octopressでblog]]></title>
     <link href="http://momota.github.io/blog/2013/08/19/octopress/"/>
     <updated>2013-08-19T23:40:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/08/19/octopress</id>
-    <content type="html"><![CDATA[<h1>octopress setting</h1>
-
-<h2>流れ</h2>
+    <content type="html"><![CDATA[<h1>流れ</h1>
 
 <ol>
 <li>github pages用リポジトリ作成</li>
@@ -31,7 +97,7 @@
 </ol>
 
 
-<h2>環境</h2>
+<h1>環境</h1>
 
 <ul>
 <li>mac os x 10.8.4</li>
@@ -40,12 +106,12 @@
 </ul>
 
 
-<h2>create new github repository</h2>
+<h1>create new github repository</h1>
 
 <p>githubへログイン後、github pages用リポジトリを作成する。<a href="https://github.com/new">https://github.com/new</a>
 リポジトリ名は、「username.github.io」。</p>
 
-<h2>最新版のoctopressコードをclone</h2>
+<h1>最新版のoctopressコードをclone</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -54,7 +120,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>install ruby 1.9.3 by rbenv</h2>
+<h1>install ruby 1.9.3 by rbenv</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -67,11 +133,15 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>configure octopress</h2>
+<h1>configure octopress</h1>
 
-<p>bundlerをインストールし、関連gemをインストールする。
-* <a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a>
-* <a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></p>
+<p>bundlerをインストールし、関連gemをインストールする。</p>
+
+<ul>
+<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
+<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+</ul>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -109,7 +179,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>install octopress theme</h3>
+<h2>install octopress theme</h2>
 
 <p>install default theme</p>
 
@@ -127,7 +197,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>はてなブックマークボタンを設置する</h3>
+<h2>はてなブックマークボタンを設置する</h2>
 
 <ul>
 <li>source/_includes/post/sharing.html に以下を追加</li>
@@ -146,7 +216,21 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>post</h2>
+<h2>コメント欄を設ける by disqus</h2>
+
+<p>ブログパーツとしてコメント欄を提供する <a href="http://disqus.com/">disqus</a> のアカウントを作る。
+<code>_config.yml</code> で設定する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># Disqus Comments</span>
+</span><span class='line'><span class="l-Scalar-Plain">disqus_short_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">xxxxxx</span>
+</span><span class='line'><span class="l-Scalar-Plain">disqus_show_comment_count</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>post</h1>
 
 <ul>
 <li>以下コマンドで、記事ファイル<code>source/_posts/yyyy-MM-dd-post-title.markdown</code>を生成。</li>
@@ -159,7 +243,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>check your post</h2>
+<h1>check your post</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -172,7 +256,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>deploy github pages</h2>
+<h1>deploy github pages</h1>
 
 <ul>
 <li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: putty | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/putty/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2013-08-22T23:17:39+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[putty へsolarized導入]]></title>
+    <link href="http://momota.github.io/blog/2013/08/22/solarized-putty/"/>
+    <updated>2013-08-22T23:00:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/22/solarized-putty</id>
+    <content type="html"><![CDATA[<p>puttyに人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を適用する。
+適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
+
+<h1>環境</h1>
+
+<ul>
+<li>windows 7 professional service pack 1</li>
+<li>PuTTY 0.60-JP_Y-2007-08-06</li>
+<li>ちなみにフォントは、"Osakaー等幅" を利用</li>
+</ul>
+
+
+<h1>solarized_dark.reg (solarized_light.reg)をダウンロードする</h1>
+
+<p><a href="https://github.com/brantb/solarized/tree/master/putty-colors-solarized">https://github.com/brantb/solarized/tree/master/putty-colors-solarized</a></p>
+
+<p>solarized_dark.regをダウンロードし、<code>C:¥Program Files (x86)¥PuTTY¥</code> に保存</p>
+
+<h1>solarized_dark.regを修正する</h1>
+
+<p><a href="http://27213143.at.webry.info/201304/article_1.html">http://27213143.at.webry.info/201304/article_1.html</a></p>
+
+<p><code>Solarized%20Dark(Solarized%20Light)</code> をputtyのセッション名に修正する。下の例では<code>_vagrant_ubuntu</code>。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png" alt="putty session name" /></p>
+
+<h1>putty設定をインポートする</h1>
+
+<p>以下の2通りのやり方がある。</p>
+
+<h2>ダブルクリックでインポート</h2>
+
+<p>solarized_dark.reg をダブルクリックする。</p>
+
+<h2>コマンドプロンプトからインポート</h2>
+
+<p><a href="http://103px.blog.fc2.com/blog-entry-46.html">http://103px.blog.fc2.com/blog-entry-46.html</a></p>
+
+<p>windowsコマンドプロンプトから.regファイルをインポートする
+```bat</p>
+
+<pre><code> &gt; reg import C:¥Program Files (x86)¥PuTTY¥solarized_dark.reg
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>

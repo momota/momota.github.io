@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-22T01:29:35+09:00</updated>
+  <updated>2013-08-22T23:17:39+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,9 +18,7 @@
     <link href="http://momota.github.io/blog/2013/08/19/octopress/"/>
     <updated>2013-08-19T23:40:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/08/19/octopress</id>
-    <content type="html"><![CDATA[<h1>octopress setting</h1>
-
-<h2>流れ</h2>
+    <content type="html"><![CDATA[<h1>流れ</h1>
 
 <ol>
 <li>github pages用リポジトリ作成</li>
@@ -31,7 +29,7 @@
 </ol>
 
 
-<h2>環境</h2>
+<h1>環境</h1>
 
 <ul>
 <li>mac os x 10.8.4</li>
@@ -40,12 +38,12 @@
 </ul>
 
 
-<h2>create new github repository</h2>
+<h1>create new github repository</h1>
 
 <p>githubへログイン後、github pages用リポジトリを作成する。<a href="https://github.com/new">https://github.com/new</a>
 リポジトリ名は、「username.github.io」。</p>
 
-<h2>最新版のoctopressコードをclone</h2>
+<h1>最新版のoctopressコードをclone</h1>
 
 <p>```sh</p>
 
@@ -55,7 +53,7 @@ $ cd /path/to/username.github.io
 
 <p>```</p>
 
-<h2>install ruby 1.9.3 by rbenv</h2>
+<h1>install ruby 1.9.3 by rbenv</h1>
 
 <p>```sh</p>
 
@@ -67,11 +65,15 @@ $ ruby -v   # =&gt; 1.9.3-pxx
 
 <p>```</p>
 
-<h2>configure octopress</h2>
+<h1>configure octopress</h1>
 
-<p>bundlerをインストールし、関連gemをインストールする。
-* <a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a>
-* <a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></p>
+<p>bundlerをインストールし、関連gemをインストールする。</p>
+
+<ul>
+<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
+<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+</ul>
+
 
 <p>```sh</p>
 
@@ -101,7 +103,7 @@ facebook_like: true
 
 <p>```</p>
 
-<h3>install octopress theme</h3>
+<h2>install octopress theme</h2>
 
 <p>install default theme</p>
 
@@ -123,7 +125,7 @@ facebook_like: true
 
 <p>```</p>
 
-<h3>はてなブックマークボタンを設置する</h3>
+<h2>はてなブックマークボタンを設置する</h2>
 
 <ul>
 <li>source/_includes/post/sharing.html に以下を追加</li>
@@ -141,7 +143,21 @@ facebook_like: true
 
 <p>```</p>
 
-<h2>post</h2>
+<h2>コメント欄を設ける by disqus</h2>
+
+<p>ブログパーツとしてコメント欄を提供する <a href="http://disqus.com/">disqus</a> のアカウントを作る。
+<code>_config.yml</code> で設定する。</p>
+
+<p>```yml</p>
+
+<pre><code># Disqus Comments
+disqus_short_name: xxxxxx
+disqus_show_comment_count: false
+</code></pre>
+
+<p>```</p>
+
+<h1>post</h1>
 
 <ul>
 <li>以下コマンドで、記事ファイル<code>source/_posts/yyyy-MM-dd-post-title.markdown</code>を生成。</li>
@@ -156,7 +172,7 @@ facebook_like: true
 
 <p>```</p>
 
-<h2>check your post</h2>
+<h1>check your post</h1>
 
 <p>```sh</p>
 
@@ -168,7 +184,7 @@ $ bundle exec rake preview
 
 <p>```</p>
 
-<h2>deploy github pages</h2>
+<h1>deploy github pages</h1>
 
 <ul>
 <li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>

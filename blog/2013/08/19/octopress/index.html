@@ -9,12 +9,12 @@
 
 <meta name="author" content="momota"> 
 
-<meta name="description" content="octopress setting 流れ github pages用リポジトリ作成
+<meta name="description" content="流れ github pages用リポジトリ作成
 octopressコードをローカルにclone
 関連gemをインストール
 新規記事をpostする
 記事とソースをgithubへデプロイする 環境 mac os x 10.8.4
-git version 1.7.9. &hellip;"> <meta name="keywords" content="">
+git version 1.7.9.6 (Apple Git-31.1 &hellip;"> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -101,9 +101,7 @@ $(document).ready(
 
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Octopressでblog</h2>
-	<div class="entry-content"><h1>octopress setting</h1>
-
-<h2>流れ</h2>
+	<div class="entry-content"><h1>流れ</h1>
 
 <ol>
 <li>github pages用リポジトリ作成</li>
@@ -114,7 +112,7 @@ $(document).ready(
 </ol>
 
 
-<h2>環境</h2>
+<h1>環境</h1>
 
 <ul>
 <li>mac os x 10.8.4</li>
@@ -123,12 +121,12 @@ $(document).ready(
 </ul>
 
 
-<h2>create new github repository</h2>
+<h1>create new github repository</h1>
 
 <p>githubへログイン後、github pages用リポジトリを作成する。<a href="https://github.com/new">https://github.com/new</a>
 リポジトリ名は、「username.github.io」。</p>
 
-<h2>最新版のoctopressコードをclone</h2>
+<h1>最新版のoctopressコードをclone</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -137,7 +135,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>install ruby 1.9.3 by rbenv</h2>
+<h1>install ruby 1.9.3 by rbenv</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -150,11 +148,15 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>configure octopress</h2>
+<h1>configure octopress</h1>
 
-<p>bundlerをインストールし、関連gemをインストールする。
-* <a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a>
-* <a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></p>
+<p>bundlerをインストールし、関連gemをインストールする。</p>
+
+<ul>
+<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
+<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
+</ul>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -192,7 +194,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>install octopress theme</h3>
+<h2>install octopress theme</h2>
 
 <p>install default theme</p>
 
@@ -210,7 +212,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>はてなブックマークボタンを設置する</h3>
+<h2>はてなブックマークボタンを設置する</h2>
 
 <ul>
 <li>source/_includes/post/sharing.html に以下を追加</li>
@@ -229,7 +231,21 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>post</h2>
+<h2>コメント欄を設ける by disqus</h2>
+
+<p>ブログパーツとしてコメント欄を提供する <a href="http://disqus.com/">disqus</a> のアカウントを作る。
+<code>_config.yml</code> で設定する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># Disqus Comments</span>
+</span><span class='line'><span class="l-Scalar-Plain">disqus_short_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">xxxxxx</span>
+</span><span class='line'><span class="l-Scalar-Plain">disqus_show_comment_count</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>post</h1>
 
 <ul>
 <li>以下コマンドで、記事ファイル<code>source/_posts/yyyy-MM-dd-post-title.markdown</code>を生成。</li>
@@ -242,7 +258,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>check your post</h2>
+<h1>check your post</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -255,7 +271,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>deploy github pages</h2>
+<h1>deploy github pages</h1>
 
 <ul>
 <li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>
@@ -312,8 +328,6 @@ $(document).ready(
 
 
 </div>
-	
-		<span class="comments"><a href="/blog/2013/08/19/octopress/#disqus_thread">Comments</a></span>
 	
 </div></article>
 
