@@ -5,9 +5,7 @@ date: 2013-08-19 23:40
 comments: true
 categories: octopress
 ---
-octopress setting
-=================
-## 流れ
+# 流れ
 1. github pages用リポジトリ作成
 2. octopressコードをローカルにclone
 3. 関連gemをインストール
@@ -15,18 +13,18 @@ octopress setting
 5. 記事とソースをgithubへデプロイする
 
 
-## 環境
+# 環境
 * mac os x 10.8.4
 * git version 1.7.9.6 (Apple Git-31.1)
 * zsh
 
 
-## create new github repository
+# create new github repository
 githubへログイン後、github pages用リポジトリを作成する。https://github.com/new
 リポジトリ名は、「username.github.io」。
 
 
-## 最新版のoctopressコードをclone
+# 最新版のoctopressコードをclone
 
 ```sh
     $ git clone git://github.com/imathis/octopress.git username.github.io
@@ -34,7 +32,7 @@ githubへログイン後、github pages用リポジトリを作成する。https
 ```
 
 
-## install ruby 1.9.3 by rbenv
+# install ruby 1.9.3 by rbenv
 
 ```sh
     $ rbenv install 1.9.3-pxx
@@ -45,8 +43,9 @@ githubへログイン後、github pages用リポジトリを作成する。https
 
 
 
-## configure octopress
+# configure octopress
 bundlerをインストールし、関連gemをインストールする。
+
 * http://octopress.org/docs/setup/
 * http://octopress.org/docs/configuring/
 
@@ -74,7 +73,7 @@ _config.ymlを編集する。とりあえず以下のフィールドを自分に
 ```
 
 
-### install octopress theme
+## install octopress theme
 
 install default theme
 
@@ -91,7 +90,7 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
 ```
 
 
-### はてなブックマークボタンを設置する
+## はてなブックマークボタンを設置する
 * source/_includes/post/sharing.html に以下を追加
 * `\{\{ site.url \}\}\{\{ page.url \}\}`部分の`\{\}`はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。
 
@@ -103,7 +102,19 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
 ```
 
 
-## post
+## コメント欄を設ける by disqus
+ブログパーツとしてコメント欄を提供する [disqus](http://disqus.com/) のアカウントを作る。
+`_config.yml` で設定する。
+
+```yml
+    # Disqus Comments
+    disqus_short_name: xxxxxx
+    disqus_show_comment_count: false
+```
+
+
+
+# post
 
 * 以下コマンドで、記事ファイル`source/_posts/yyyy-MM-dd-post-title.markdown`を生成。
 * 生成後は、vim/emacsなど自分の好きなエディタで編集する
@@ -112,7 +123,7 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
     $ bundle exec rake new_post\['post title'\]
 ```
 
-## check your post
+# check your post
 
 ```sh
     # htmlなどの生成
@@ -122,7 +133,7 @@ https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes
 ```
 
 
-## deploy github pages
+# deploy github pages
 * http://octopress.org/docs/deploying/github/ を参考に。
 
 ```sh
