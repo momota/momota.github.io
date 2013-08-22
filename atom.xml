@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-22T23:17:39+09:00</updated>
+  <updated>2013-08-22T23:28:09+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,12 +14,16 @@
 
   
   <entry>
-    <title type="html"><![CDATA[putty へsolarized導入]]></title>
+    <title type="html"><![CDATA[PuTTY へsolarized導入]]></title>
     <link href="http://momota.github.io/blog/2013/08/22/solarized-putty/"/>
     <updated>2013-08-22T23:00:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/08/22/solarized-putty</id>
-    <content type="html"><![CDATA[<p>puttyに人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を適用する。
-適用イメージは以下。</p>
+    <content type="html"><![CDATA[<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
+
+<p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、PuTTYへ適用する。
+ちなみにパティと発音するみたいですね。ずっとプティと発音してました。</p>
+
+<p>適用イメージは以下。</p>
 
 <ul>
 <li>before</li>
