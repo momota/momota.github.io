@@ -38,18 +38,18 @@ solarized_dark.regをダウンロードし、`C:¥Program Files (x86)¥PuTTY¥` 
 
 http://27213143.at.webry.info/201304/article_1.html
     
-`Solarized%20Dark(Solarized%20Light)` をputtyのセッション名に修正する。下の例では`_vagrant_ubuntu`。
+solarized_dark.regをテキストエディタで開き、ファイル中の `Solarized%20Dark(Solarized%20Light)` 部分をputtyのセッション名に修正する。下の例では セッション名は `_vagrant_ubuntu`。
 
 ![putty session name](https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png)
 
 
 # putty設定をインポートする
-以下の2通りのやり方がある。
+以下の2通りのやり方がある。お好きな方でどうぞ。
 
-## ダブルクリックでインポート
+## (1) ダブルクリックでインポート
 solarized_dark.reg をダブルクリックする。
      
-## コマンドプロンプトからインポート
+## (2) コマンドプロンプトからインポート
 http://103px.blog.fc2.com/blog-entry-46.html
      
 windowsコマンドプロンプトから.regファイルをインポートする
