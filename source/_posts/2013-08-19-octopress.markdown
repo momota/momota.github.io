@@ -19,6 +19,8 @@ categories: octopress
 * zsh
 
 
+<!-- more -->
+
 # create new github repository
 githubへログイン後、github pages用リポジトリを作成する。https://github.com/new
 リポジトリ名は、「username.github.io」。

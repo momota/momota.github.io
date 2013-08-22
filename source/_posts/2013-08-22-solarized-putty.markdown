@@ -21,6 +21,8 @@ categories: windows putty solarized
 ![putty after](https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png)
 
 
+<!-- more -->
+
 # 環境
 * windows 7 professional service pack 1
 * PuTTY 0.60-JP_Y-2007-08-06
