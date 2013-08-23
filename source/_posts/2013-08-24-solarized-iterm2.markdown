@@ -3,7 +3,7 @@ layout: post
 title: "iTerm2へsolarized導入"
 date: 2013-08-24 00:52
 comments: true
-categories: solarized, iterm2
+categories: solarized iterm2 mac
 ---
 ![solarized](http://ethanschoonover.com/solarized/img/solarized-yinyang.png)
 
