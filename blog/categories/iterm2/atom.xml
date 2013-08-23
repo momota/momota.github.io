@@ -4,7 +4,7 @@
   <title><![CDATA[Category: iterm2 | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/iterm2/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-24T01:20:38+09:00</updated>
+  <updated>2013-08-24T01:35:24+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -21,6 +21,22 @@
     <content type="html"><![CDATA[<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
 
 <p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、iTerm2へ適用する。</p>
+
+<p>適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/before_iterm.png" alt="iterm before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/after_iterm.png" alt="iterm after" /></p>
 
 <!-- more -->
 
