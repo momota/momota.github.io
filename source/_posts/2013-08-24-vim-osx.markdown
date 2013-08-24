@@ -1,0 +1,80 @@
+---
+layout: post
+title: "vim7.4 を mac (osx) にインストール"
+date: 2013-08-24 12:56
+comments: true
+categories: vim mac
+---
+[vim 7.4がリリースされた](http://vim-jp.org/blog/2013/08/10/vim_7.4_released.html)ので、macのvimをupdateする。
+
+<!-- more -->
+
+## install mercurial
+最新のvimをリポジトリから引っ張ってくる(後述の`hg clone http://...`)ため、分散型バージョン管理システムであるmercurialをインストールする。mercurialはgitの親戚かな。
+
+1. インストーラをダウンロードする
+
+    mercurial インストーラをダウンロードする from http://mercurial.selenic.com/
+
+
+2. install
+
+    ダウンロードしたファイルを unzip する。
+    解凍した `*.mpkg` をダブルクリックし、インストーラを起動する。そのあとはポチポチと次へ的なボタンを押す簡単なお仕事。
+
+
+## install vim
+
+http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x を参考にした。
+
+
+### (1) 事前確認
+
+現状のバイナリへのpathやバージョンを確認する。
+
+```sh
+    $ which vim
+    /usr/bin/vim
+    $ vim --version | head -n 2
+    VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Jun 20 2012 13:16:02)
+    Compiled by root@apple.com
+```
+
+
+### (2) インストールと設定
+
+```sh
+    $ cd /opt/local/bin
+
+    # download, compile, and install the latest vim
+    $ sudo hg clone https://code.google.com/p/vim/
+    $ mv vim vim_
+    $ cd vim_
+    $ sudo ./configure --prefix=/opt/local
+    $ sudo make
+    $ sudo make install
+
+
+    # add the binary to your path, ahead of /usr/bin
+    $ echo 'export PATH="/opt/local/bin:$PATH"' >> ~/.zshrc
+
+    # reload zshrc so the changes take effect in this window
+    $ source ~/.zshrc
+```
+
+リポジトリからクローンしたときにディレクトリ名が`vim`のままだと`make install`時にエラーになるので、`vim_`など適当なディレクトリ名に変更しました。
+
+
+### (3) 事後確認
+
+7.4になりました。enjoy your vim life.
+
+
+```sh
+    $ which vim
+    /opt/local/bin/vim
+    $ vim --version | head -n 2
+    IM - Vi IMproved 7.4 (2013 Aug 10, compiled Aug 24 2013 12:28:42)
+    MacOS X (unix) version
+```
+
