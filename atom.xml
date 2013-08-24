@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-24T01:41:18+09:00</updated>
+  <updated>2013-08-24T13:22:52+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[vim7.4 を mac (osx) にインストール]]></title>
+    <link href="http://momota.github.io/blog/2013/08/24/vim-osx/"/>
+    <updated>2013-08-24T12:56:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/24/vim-osx</id>
+    <content type="html"><![CDATA[<p><a href="http://vim-jp.org/blog/2013/08/10/vim_7.4_released.html">vim 7.4がリリースされた</a>ので、macのvimをupdateする。</p>
+
+<!-- more -->
+
+
+<h2>install mercurial</h2>
+
+<p>最新のvimをリポジトリから引っ張ってくる(後述の<code>hg clone http://...</code>)ため、分散型バージョン管理システムであるmercurialをインストールする。mercurialはgitの親戚かな。</p>
+
+<ol>
+<li><p>インストーラをダウンロードする</p>
+
+<p> mercurial インストーラをダウンロードする from <a href="http://mercurial.selenic.com/">http://mercurial.selenic.com/</a></p></li>
+<li><p>install</p>
+
+<p> ダウンロードしたファイルを unzip する。
+ 解凍した <code>*.mpkg</code> をダブルクリックし、インストーラを起動する。そのあとはポチポチと次へ的なボタンを押す簡単なお仕事。</p></li>
+</ol>
+
+
+<h2>install vim</h2>
+
+<p><a href="http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x">http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x</a> を参考にした。</p>
+
+<h3>(1) 事前確認</h3>
+
+<p>現状のバイナリへのpathやバージョンを確認する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>which vim
+</span><span class='line'>/usr/bin/vim
+</span><span class='line'><span class="nv">$ </span>vim --version | head -n 2
+</span><span class='line'>VIM - Vi IMproved 7.3 <span class="o">(</span>2010 Aug 15, compiled Jun 20 2012 13:16:02<span class="o">)</span>
+</span><span class='line'>Compiled by root@apple.com
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>(2) インストールと設定</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /opt/local/bin
+</span><span class='line'>
+</span><span class='line'><span class="c"># download, compile, and install the latest vim</span>
+</span><span class='line'><span class="nv">$ </span>sudo hg clone https://code.google.com/p/vim/
+</span><span class='line'><span class="nv">$ </span>mv vim vim_
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>vim_
+</span><span class='line'><span class="nv">$ </span>sudo ./configure --prefix<span class="o">=</span>/opt/local
+</span><span class='line'><span class="nv">$ </span>sudo make
+</span><span class='line'><span class="nv">$ </span>sudo make install
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># add the binary to your path, ahead of /usr/bin</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;/opt/local/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'>
+</span><span class='line'><span class="c"># reload zshrc so the changes take effect in this window</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">source</span> ~/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>リポジトリからクローンしたときにディレクトリ名が<code>vim</code>のままだと<code>make install</code>時にエラーになるので、<code>vim_</code>など適当なディレクトリ名に変更しました。</p>
+
+<h3>(3) 事後確認</h3>
+
+<p>7.4になりました。enjoy your vim life.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>which vim
+</span><span class='line'>/opt/local/bin/vim
+</span><span class='line'><span class="nv">$ </span>vim --version | head -n 2
+</span><span class='line'>IM - Vi IMproved 7.4 <span class="o">(</span>2013 Aug 10, compiled Aug 24 2013 12:28:42<span class="o">)</span>
+</span><span class='line'>MacOS X <span class="o">(</span>unix<span class="o">)</span> version
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[iTerm2へsolarized導入]]></title>
