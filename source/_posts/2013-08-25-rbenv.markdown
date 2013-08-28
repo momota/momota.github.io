@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "rbenv"
+title: "rbenv でrubyバージョンにはもう泣かされない"
 date: 2013-08-25 22:06
 comments: true
 categories: ruby rbenv mac 
@@ -12,18 +12,20 @@ categories: ruby rbenv mac
 そこでrbenvという便利なrubyバージョン管理ツールがある。
 rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。
 
+<!-- more -->
 
-# rbenvをインストールする
+# ruby install by rbenv
 
+githubの`README.md`参照。
 
+ 
+# rbenv operations
 
-# 1. ruby install by rbenv
 ```sh
-    # list all available versions
-    # "install" command require that install ruby-build
-    #   -> https://github.com/sstephenson/ruby-build
-    $ rbenv install -l
-```
+# list all available versions
+# "install" command require that install ruby-build
+#   -> https://github.com/sstephenson/ruby-build
+$ rbenv install -l
 
 # List all Ruby versions known by rbenv
 $ rbenv versions
@@ -53,10 +55,4 @@ $ brew link -f ruby-build
 # path to installed ruby or gem
 $ rbenv rehash
 
-rbenvとruby-buildでRuby環境を最新に保つ
-https://gist.github.com/mochiz/4736183
-
-
-ruby-build
-https://github.com/sstephenson/ruby-build
-
+```
