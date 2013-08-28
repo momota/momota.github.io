@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-29T02:11:55+09:00</updated>
+  <updated>2013-08-29T02:14:22+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -24,6 +24,9 @@
 <code>/home/you/foo</code>以下は既存コードがあるから1.8系のままでで動かしたいし、<code>/home/you/bar</code>以下は新しい試みとして2.0系を動かしたいとか。
 そこでrbenvという便利なrubyバージョン管理ツールがある。
 rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
+
+<!-- more -->
+
 
 <h1>ruby install by rbenv</h1>
 
