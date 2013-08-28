@@ -1,0 +1,62 @@
+---
+layout: post
+title: "rbenv"
+date: 2013-08-25 22:06
+comments: true
+categories: ruby rbenv mac 
+---
+ソフトウェアバージョンの差異に悩まされる人は多いと思う。
+
+同じOS上で違うバージョンのrubyを動かしたいことはまあある。
+`/home/you/foo`以下は既存コードがあるから1.8系のままでで動かしたいし、`/home/you/bar`以下は新しい試みとして2.0系を動かしたいとか。
+そこでrbenvという便利なrubyバージョン管理ツールがある。
+rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。
+
+
+# rbenvをインストールする
+
+
+
+# 1. ruby install by rbenv
+```sh
+    # list all available versions
+    # "install" command require that install ruby-build
+    #   -> https://github.com/sstephenson/ruby-build
+    $ rbenv install -l
+```
+
+# List all Ruby versions known by rbenv
+$ rbenv versions
+
+# install
+$ rbenv install 1.9.3-pxx
+
+# switch
+$ rbenv global 1.9.3-pxx
+
+# back to system default
+$ rbenv global system
+
+
+# 特定のディレクトリ以下のRubyバージョンを切り替え
+$ rbenv local 1.9.3-p327
+
+# ローカル設定を解除
+$ rbenv local --unset
+
+
+# get the latest ruby versions for rbenv
+$ brew install ruby-build
+$ brew link -f ruby-build
+
+
+# path to installed ruby or gem
+$ rbenv rehash
+
+rbenvとruby-buildでRuby環境を最新に保つ
+https://gist.github.com/mochiz/4736183
+
+
+ruby-build
+https://github.com/sstephenson/ruby-build
+
