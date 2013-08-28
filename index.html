@@ -9,7 +9,7 @@
 
 <meta name="author" content="momota"> 
 
-<meta name="description" content=" vim 7.4がリリースされたので、macのvimをupdateする。 続きを読む &rarr; 2013-08-24 mac, vim "> <meta name="keywords" content="">
+<meta name="description" content=" vimはhjklな変態的キーバインドから敬遠されがちだと思うけど強力なプラグインがあってこそ、やめられないとまらないわけであって、ここではプラグインの導入方法や管理方法を記載します。 続きを読む &rarr; 2013-08-29 pugin, vim "> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -95,6 +95,146 @@ $(document).ready(
 </header>
 
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/29/vim-plugins/">
+		
+			Vim プラグインで幸せな生活を送る</a>
+	</h2>
+	<div class="entry-content">
+		<p>vimはhjklな変態的キーバインドから敬遠されがちだと思うけど強力なプラグインがあってこそ、やめられないとまらないわけであって、ここではプラグインの導入方法や管理方法を記載します。</p>
+
+
+		
+		<a href="/blog/2013/08/29/vim-plugins/" class="more-link">続きを読む &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-29T00:38:00+09:00" pubdate data-updated="true">2013-08-29</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/pugin/'>pugin</a>, <a class='category' href='/blog/categories/vim/'>vim</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/25/rbenv/">
+		
+			Rbenv</a>
+	</h2>
+	<div class="entry-content">
+		<p>ソフトウェアバージョンの差異に悩まされる人は多いと思う。</p>
+
+<p>同じOS上で違うバージョンのrubyを動かしたいことはまあある。
+<code>/home/you/foo</code>以下は既存コードがあるから1.8系のままでで動かしたいし、<code>/home/you/bar</code>以下は新しい試みとして2.0系を動かしたいとか。
+そこでrbenvという便利なrubyバージョン管理ツールがある。
+rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
+
+<h1>rbenvをインストールする</h1>
+
+<h1>1. ruby install by rbenv</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># list all available versions</span>
+</span><span class='line'><span class="c"># &quot;install&quot; command require that install ruby-build</span>
+</span><span class='line'><span class="c">#   -&gt; https://github.com/sstephenson/ruby-build</span>
+</span><span class='line'><span class="nv">$ </span>rbenv install -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>List all Ruby versions known by rbenv</h1>
+
+<p>$ rbenv versions</p>
+
+<h1>install</h1>
+
+<p>$ rbenv install 1.9.3-pxx</p>
+
+<h1>switch</h1>
+
+<p>$ rbenv global 1.9.3-pxx</p>
+
+<h1>back to system default</h1>
+
+<p>$ rbenv global system</p>
+
+<h1>特定のディレクトリ以下のRubyバージョンを切り替え</h1>
+
+<p>$ rbenv local 1.9.3-p327</p>
+
+<h1>ローカル設定を解除</h1>
+
+<p>$ rbenv local &mdash;unset</p>
+
+<h1>get the latest ruby versions for rbenv</h1>
+
+<p>$ brew install ruby-build
+$ brew link -f ruby-build</p>
+
+<h1>path to installed ruby or gem</h1>
+
+<p>$ rbenv rehash</p>
+
+<p>rbenvとruby-buildでRuby環境を最新に保つ
+<a href="https://gist.github.com/mochiz/4736183">https://gist.github.com/mochiz/4736183</a></p>
+
+<p>ruby-build
+<a href="https://github.com/sstephenson/ruby-build">https://github.com/sstephenson/ruby-build</a></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-25T22:06:00+09:00" pubdate data-updated="true">2013-08-25</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/mac/'>mac</a>, <a class='category' href='/blog/categories/rbenv/'>rbenv</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+
+
+</div>
+	
+</div></article>
 
 
     <article class="post">

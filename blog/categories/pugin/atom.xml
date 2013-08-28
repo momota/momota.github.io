@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: vim | momota.txt]]></title>
-  <link href="http://momota.github.io/blog/categories/vim/atom.xml" rel="self"/>
+  <title><![CDATA[Category: pugin | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/pugin/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
   <updated>2013-08-29T02:00:45+09:00</updated>
   <id>http://momota.github.io/</id>
@@ -251,93 +251,6 @@ NeoBundle &lsquo;<a href="https://bitbucket.org/ns9tks/vim-fuzzyfinder">https://
 </tbody>
 </table>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[vim7.4 を mac (osx) にインストール]]></title>
-    <link href="http://momota.github.io/blog/2013/08/24/vim-osx/"/>
-    <updated>2013-08-24T12:56:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/08/24/vim-osx</id>
-    <content type="html"><![CDATA[<p><a href="http://vim-jp.org/blog/2013/08/10/vim_7.4_released.html">vim 7.4がリリースされた</a>ので、macのvimをupdateする。</p>
-
-<!-- more -->
-
-
-<h2>install mercurial</h2>
-
-<p>最新のvimをリポジトリから引っ張ってくる(後述の<code>hg clone http://...</code>)ため、分散型バージョン管理システムであるmercurialをインストールする。mercurialはgitの親戚かな。</p>
-
-<ol>
-<li><p>インストーラをダウンロードする</p>
-
-<p> mercurial インストーラをダウンロードする from <a href="http://mercurial.selenic.com/">http://mercurial.selenic.com/</a></p></li>
-<li><p>install</p>
-
-<p> ダウンロードしたファイルを unzip する。
- 解凍した <code>*.mpkg</code> をダブルクリックし、インストーラを起動する。そのあとはポチポチと次へ的なボタンを押す簡単なお仕事。</p></li>
-</ol>
-
-
-<h2>install vim</h2>
-
-<p><a href="http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x">http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x</a> を参考にした。</p>
-
-<h3>(1) 事前確認</h3>
-
-<p>現状のバイナリへのpathやバージョンを確認する。</p>
-
-<p>```sh</p>
-
-<pre><code>$ which vim
-/usr/bin/vim
-$ vim --version | head -n 2
-VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Jun 20 2012 13:16:02)
-Compiled by root@apple.com
-</code></pre>
-
-<p>```</p>
-
-<h3>(2) インストールと設定</h3>
-
-<p>```sh</p>
-
-<pre><code>$ cd /opt/local/bin
-
-# download, compile, and install the latest vim
-$ sudo hg clone https://code.google.com/p/vim/
-$ mv vim vim_
-$ cd vim_
-$ sudo ./configure --prefix=/opt/local
-$ sudo make
-$ sudo make install
-
-
-# add the binary to your path, ahead of /usr/bin
-$ echo 'export PATH="/opt/local/bin:$PATH"' &gt;&gt; ~/.zshrc
-
-# reload zshrc so the changes take effect in this window
-$ source ~/.zshrc
-</code></pre>
-
-<p>```</p>
-
-<p>リポジトリからクローンしたときにディレクトリ名が<code>vim</code>のままだと<code>make install</code>時にエラーになるので、<code>vim_</code>など適当なディレクトリ名に変更しました。</p>
-
-<h3>(3) 事後確認</h3>
-
-<p>7.4になりました。enjoy your vim life.</p>
-
-<p>```sh</p>
-
-<pre><code>$ which vim
-/opt/local/bin/vim
-$ vim --version | head -n 2
-IM - Vi IMproved 7.4 (2013 Aug 10, compiled Aug 24 2013 12:28:42)
-MacOS X (unix) version
-</code></pre>
-
-<p>```</p>
 ]]></content>
   </entry>
   

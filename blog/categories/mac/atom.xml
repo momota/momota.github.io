@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-24T18:13:28+09:00</updated>
+  <updated>2013-08-29T02:00:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,73 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[rbenv]]></title>
+    <link href="http://momota.github.io/blog/2013/08/25/rbenv/"/>
+    <updated>2013-08-25T22:06:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/25/rbenv</id>
+    <content type="html"><![CDATA[<p>ソフトウェアバージョンの差異に悩まされる人は多いと思う。</p>
+
+<p>同じOS上で違うバージョンのrubyを動かしたいことはまあある。
+<code>/home/you/foo</code>以下は既存コードがあるから1.8系のままでで動かしたいし、<code>/home/you/bar</code>以下は新しい試みとして2.0系を動かしたいとか。
+そこでrbenvという便利なrubyバージョン管理ツールがある。
+rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
+
+<h1>rbenvをインストールする</h1>
+
+<h1>1. ruby install by rbenv</h1>
+
+<p>```sh</p>
+
+<pre><code># list all available versions
+# "install" command require that install ruby-build
+#   -&gt; https://github.com/sstephenson/ruby-build
+$ rbenv install -l
+</code></pre>
+
+<p>```</p>
+
+<h1>List all Ruby versions known by rbenv</h1>
+
+<p>$ rbenv versions</p>
+
+<h1>install</h1>
+
+<p>$ rbenv install 1.9.3-pxx</p>
+
+<h1>switch</h1>
+
+<p>$ rbenv global 1.9.3-pxx</p>
+
+<h1>back to system default</h1>
+
+<p>$ rbenv global system</p>
+
+<h1>特定のディレクトリ以下のRubyバージョンを切り替え</h1>
+
+<p>$ rbenv local 1.9.3-p327</p>
+
+<h1>ローカル設定を解除</h1>
+
+<p>$ rbenv local &mdash;unset</p>
+
+<h1>get the latest ruby versions for rbenv</h1>
+
+<p>$ brew install ruby-build
+$ brew link -f ruby-build</p>
+
+<h1>path to installed ruby or gem</h1>
+
+<p>$ rbenv rehash</p>
+
+<p>rbenvとruby-buildでRuby環境を最新に保つ
+<a href="https://gist.github.com/mochiz/4736183">https://gist.github.com/mochiz/4736183</a></p>
+
+<p>ruby-build
+<a href="https://github.com/sstephenson/ruby-build">https://github.com/sstephenson/ruby-build</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[vim7.4 を mac (osx) にインストール]]></title>
