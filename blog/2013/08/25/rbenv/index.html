@@ -104,59 +104,76 @@ $(document).ready(
 そこでrbenvという便利なrubyバージョン管理ツールがある。
 rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
 
-<h1>rbenvをインストールする</h1>
+<h1>ruby install by rbenv</h1>
 
-<h1>1. ruby install by rbenv</h1>
+<h1>rbenv operations</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># list all available versions</span>
 </span><span class='line'><span class="c"># &quot;install&quot; command require that install ruby-build</span>
 </span><span class='line'><span class="c">#   -&gt; https://github.com/sstephenson/ruby-build</span>
 </span><span class='line'><span class="nv">$ </span>rbenv install -l
+</span><span class='line'>
+</span><span class='line'><span class="c"># List all Ruby versions known by rbenv</span>
+</span><span class='line'><span class="nv">$ </span>rbenv versions
+</span><span class='line'>
+</span><span class='line'><span class="c"># install</span>
+</span><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
+</span><span class='line'>
+</span><span class='line'><span class="c"># switch</span>
+</span><span class='line'><span class="nv">$ </span>rbenv global 1.9.3-pxx
+</span><span class='line'>
+</span><span class='line'><span class="c"># back to system default</span>
+</span><span class='line'><span class="nv">$ </span>rbenv global system
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 特定のディレクトリ以下のRubyバージョンを切り替え</span>
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-p327
+</span><span class='line'>
+</span><span class='line'><span class="c"># ローカル設定を解除</span>
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local</span> --unset
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># get the latest ruby versions for rbenv</span>
+</span><span class='line'><span class="nv">$ </span>brew install ruby-build
+</span><span class='line'><span class="nv">$ </span>brew link -f ruby-build
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># path to installed ruby or gem</span>
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
 </span></code></pre></td></tr></table></div></figure>
 
-
-<h1>List all Ruby versions known by rbenv</h1>
-
-<p>$ rbenv versions</p>
-
-<h1>install</h1>
-
-<p>$ rbenv install 1.9.3-pxx</p>
-
-<h1>switch</h1>
-
-<p>$ rbenv global 1.9.3-pxx</p>
-
-<h1>back to system default</h1>
-
-<p>$ rbenv global system</p>
-
-<h1>特定のディレクトリ以下のRubyバージョンを切り替え</h1>
-
-<p>$ rbenv local 1.9.3-p327</p>
-
-<h1>ローカル設定を解除</h1>
-
-<p>$ rbenv local &mdash;unset</p>
-
-<h1>get the latest ruby versions for rbenv</h1>
-
-<p>$ brew install ruby-build
-$ brew link -f ruby-build</p>
-
-<h1>path to installed ruby or gem</h1>
-
-<p>$ rbenv rehash</p>
-
-<p>rbenvとruby-buildでRuby環境を最新に保つ
-<a href="https://gist.github.com/mochiz/4736183">https://gist.github.com/mochiz/4736183</a></p>
-
-<p>ruby-build
-<a href="https://github.com/sstephenson/ruby-build">https://github.com/sstephenson/ruby-build</a></p>
 </div>
 
 
