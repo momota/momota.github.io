@@ -120,10 +120,7 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li>helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)</li>
-</ul>
-
+<p>helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -167,7 +164,7 @@ $(document).ready(
 <p>上述したプラグイン導入を続けていくと、<code>$HOME/.vim/</code> 以下が散らかっていくことが容易に想像できるでしょう。散らかるだけで実害がなければ良いのですが、あるプラグインだけ削除したいときなどに難易度高くて困ります。
 そこで、プラグインの相互独立性を担保しながら管理できるプラグインを導入します。</p>
 
-<p>代表的なプラグインパッケージ管理プラグインは、以下です。ここでは、runtimepathを<code>~./.vim/</code>とします。</p>
+<p>代表的なプラグインパッケージ管理プラグインは、以下です。</p>
 
 <table>
 <thead>
@@ -186,7 +183,7 @@ $(document).ready(
 <tr>
 <td></td>
 <td><a href="https://github.com/gmarik/vundle">vundle</a>             </td>
-<td>Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理シス>テム。自分で <code>~/.vim/bundle</code> git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。</td>
+<td>Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理システム。自分で <code>~/.vim/bundle</code> git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。</td>
 </tr>
 <tr>
 <td></td>
@@ -197,14 +194,14 @@ $(document).ready(
 </table>
 
 
-<p>ここでは、NeoBundleを選びたいと思います。</p>
+<p>上記よりNeoBundleを選びたいと思います。</p>
 
 <h2>NeoBundleインストールと設定</h2>
 
 <h3>1. NeoBundleをセットアップする</h3>
 
 <ul>
-<li>githubから最新NeoBundleのソースを clone する。</li>
+<li>githubから最新NeoBundleのソースを clone する。ここでは、runtimepathを<code>~./.vim/</code>とします。</li>
 </ul>
 
 
