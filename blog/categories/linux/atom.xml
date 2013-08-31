@@ -4,7 +4,7 @@
   <title><![CDATA[Category: linux | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-31T22:52:40+09:00</updated>
+  <updated>2013-08-31T22:57:24+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -20,7 +20,9 @@
     <id>http://momota.github.io/blog/2013/08/31/shell-man-color</id>
     <content type="html"><![CDATA[<h1>man コマンドで表示するマニュアルページに色付けする</h1>
 
-<p><code>~/.zshrc</code> [bash 使いなら <code>~/.bash_profile</code> ] に以下を追記するとman に色がついて読みやすい。</p>
+<p>man コマンド、man コマンド、マンコマンド… 連呼している私はもう今年で31歳です。こんばんわ。</p>
+
+<p><code>~/.zshrc</code> [bash 使いなら <code>~/.bash_profile</code> ] に以下を追記するとman に色がついて読みやすいっす。</p>
 
 <!-- more -->
 
