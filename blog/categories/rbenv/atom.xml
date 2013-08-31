@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rbenv | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/rbenv/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-29T23:40:38+09:00</updated>
+  <updated>2013-08-31T15:36:41+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -28,15 +28,59 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 <!-- more -->
 
 
-<h1>ruby install by rbenv</h1>
+<h1>rbenv をインストールする</h1>
 
-<p>githubの<code>README.md</code>参照。</p>
+<p>詳細はgithubの<code>README.md</code>参照。<a href="https://github.com/sstephenson/rbenv">https://github.com/sstephenson/rbenv</a></p>
 
-<h1>rbenv operations</h1>
+<h2>1. 最新コードをローカルにチェックアウトする</h2>
+
+<p>githubから最新版を <code>~/.rbenv</code> にチェックアウトする</p>
+
+<p><code>sh
+$ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+</code></p>
+
+<h2>2. pathを通すため、shellの設定を変更する</h2>
+
+<ul>
+<li><code>~/.rbenv/bin</code> を <code>$PATH</code> に追加する</li>
+</ul>
+
+
+<p><code>sh
+$ echo 'export PATH="$HOME/.rbenv/bin:$PATH"' &gt;&gt; ~/.zshrc
+</code></p>
+
+<ul>
+<li>shim と 自動補完を有効にする</li>
+</ul>
+
+
+<p><code>sh
+$ echo 'eval "$(rbenv init -)"' &gt;&gt; ~/.zshrc
+</code></p>
+
+<p>bash ユーザは <code>~/.zshrc</code> の代わりに <code>~/.bash_profile</code> へ。
+ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code> へ。</p>
+
+<h2>3. 設定変更内容を反映するため、shell を再起動する</h2>
+
+<p><code>sh
+$ exec $SHELL -l
+</code></p>
+
+<h2>(番外編) rbenv を最新版にアップグレードする</h2>
+
+<p><code>sh
+$ cd ~/.rbenv
+$ git pull
+</code></p>
+
+<h1>rbenv で任意バージョンの ruby インストールしたり、切り替えたり</h1>
 
 <p>```sh</p>
 
-<h1>list all available versions</h1>
+<h1>インストール可能な ruby バージョンを一覧表示する</h1>
 
 <h1>&ldquo;install&rdquo; command require that install ruby-build</h1>
 
@@ -52,7 +96,7 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 
 <p>$ rbenv install 1.9.3-pxx</p>
 
-<h1>switch</h1>
+<h1>switch version</h1>
 
 <p>$ rbenv global 1.9.3-pxx</p>
 
@@ -75,9 +119,8 @@ $ brew link -f ruby-build</p>
 
 <h1>path to installed ruby or gem</h1>
 
-<p>$ rbenv rehash</p>
-
-<p>```</p>
+<p>$ rbenv rehash
+```</p>
 ]]></content>
   </entry>
   
