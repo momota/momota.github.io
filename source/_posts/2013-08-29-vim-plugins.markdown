@@ -3,7 +3,7 @@ layout: post
 title: "vim プラグインで幸せな生活を送る"
 date: 2013-08-29 00:38
 comments: true
-categories: vim pugin
+categories: vim plugin
 ---
 vimはhjklな変態的キーバインドから敬遠されがちだと思うけど強力なプラグインがあってこそ、やめられないとまらないわけであって、ここではプラグインの導入方法や管理方法を記載します。
 
@@ -22,7 +22,7 @@ vimはhjklな変態的キーバインドから敬遠されがちだと思うけ�
 :set runtimepath
 ```
 
-  - helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)
+helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)
 
 ```vim
  :help runtimepath
@@ -50,15 +50,15 @@ vimはhjklな変態的キーバインドから敬遠されがちだと思うけ�
 上述したプラグイン導入を続けていくと、`$HOME/.vim/` 以下が散らかっていくことが容易に想像できるでしょう。散らかるだけで実害がなければ良いのですが、あるプラグインだけ削除したいときなどに難易度高くて困ります。
 そこで、プラグインの相互独立性を担保しながら管理できるプラグインを導入します。
 
-代表的なプラグインパッケージ管理プラグインは、以下です。ここでは、runtimepathを`~./.vim/`とします。
+代表的なプラグインパッケージ管理プラグインは、以下です。
 
 |プラグイン名 |概要       |
 |-------------|-----------|
 |[pathogen](https://github.com/tpope/vim-pathogen)      | `~/.vim/bundle/<プラグイン名>/` 以下の各ディレクトリも `~/.vim/` 直下と同じように読み込むようにするプラグイン。これにより、`~/.vim/bundle/` 以下にプラグインごとに別のディレクトリを切って管理をすることができるようになる。
-|[vundle](https://github.com/gmarik/vundle)             |Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理シス>テム。自分で `~/.vim/bundle` git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。
+|[vundle](https://github.com/gmarik/vundle)             |Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理システム。自分で `~/.vim/bundle` git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。
 |[neobundle](https://github.com/Shougo/neobundle.vim)   |Vundleにインスパイアされたプラグイン管理システム。Vundleの改良版。
 
-ここでは、NeoBundleを選びたいと思います。
+上記よりNeoBundleを選びたいと思います。
 
 
 
@@ -66,7 +66,8 @@ vimはhjklな変態的キーバインドから敬遠されがちだと思うけ�
 
 ### 1. NeoBundleをセットアップする
 
-- githubから最新NeoBundleのソースを clone する。
+- githubから最新NeoBundleのソースを clone する。ここでは、runtimepathを`~./.vim/`とします。
+
 
 ```sh
 $ mkdir -p ~/.vim/bundle
