@@ -7,7 +7,9 @@ categories: zsh bash linux
 ---
 # man コマンドで表示するマニュアルページに色付けする
 
-`~/.zshrc` [bash 使いなら `~/.bash_profile` ] に以下を追記するとman に色がついて読みやすい。
+man コマンド、man コマンド、マンコマンド… 連呼している私はもう今年で31歳です。こんばんわ。
+
+`~/.zshrc` [bash 使いなら `~/.bash_profile` ] に以下を追記するとman に色がついて読みやすいっす。
 
 
 <!-- more -->
