@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-31T15:36:41+09:00</updated>
+  <updated>2013-08-31T22:52:40+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[man ページに色付けする (zsh, bash)]]></title>
+    <link href="http://momota.github.io/blog/2013/08/31/shell-man-color/"/>
+    <updated>2013-08-31T22:31:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/31/shell-man-color</id>
+    <content type="html"><![CDATA[<h1>man コマンドで表示するマニュアルページに色付けする</h1>
+
+<p><code>~/.zshrc</code> [bash 使いなら <code>~/.bash_profile</code> ] に以下を追記するとman に色がついて読みやすい。</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>man<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        env <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_mb</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[1;31m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_md</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[1;31m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_me</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[0m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_se</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[0m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_so</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[1;44;33m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_ue</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[0m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                <span class="nv">LESS_TERMCAP_us</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s2">&quot;\e[1;32m&quot;</span><span class="k">)</span> <span class="se">\</span>
+</span><span class='line'>                man <span class="s2">&quot;$@&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_before.png" alt="before_man" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_after.png" alt="after_man" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[vim プラグインで幸せな生活を送る]]></title>

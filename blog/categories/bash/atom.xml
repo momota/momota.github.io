@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: bash | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/bash/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2013-08-31T22:52:40+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[man ページに色付けする (zsh, bash)]]></title>
+    <link href="http://momota.github.io/blog/2013/08/31/shell-man-color/"/>
+    <updated>2013-08-31T22:31:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/31/shell-man-color</id>
+    <content type="html"><![CDATA[<h1>man コマンドで表示するマニュアルページに色付けする</h1>
+
+<p><code>~/.zshrc</code> [bash 使いなら <code>~/.bash_profile</code> ] に以下を追記するとman に色がついて読みやすい。</p>
+
+<!-- more -->
+
+
+<p>```sh
+man() {</p>
+
+<pre><code>    env \
+            LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+            LESS_TERMCAP_md=$(printf "\e[1;31m") \
+            LESS_TERMCAP_me=$(printf "\e[0m") \
+            LESS_TERMCAP_se=$(printf "\e[0m") \
+            LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+            LESS_TERMCAP_ue=$(printf "\e[0m") \
+            LESS_TERMCAP_us=$(printf "\e[1;32m") \
+            man "$@"
+</code></pre>
+
+<p>}
+```</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_before.png" alt="before_man" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_after.png" alt="after_man" /></p>
+]]></content>
+  </entry>
+  
+</feed>
