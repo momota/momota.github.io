@@ -1,0 +1,167 @@
+---
+layout: post
+title: "zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh)"
+date: 2013-09-07 00:04
+comments: true
+categories: zsh mac centos ubuntu
+---
+bash や tcsh でいいよ、って人もだまされたと思って zsh 試してほしい。もう元に戻れないくらい便利だと感じてもらえるだろう。本番環境のサーバにも入れたいくらい。
+
+zsh そのままでも十分便利だけど、*oh-my-zsh* を入れるとさらに便利になるよ。
+oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。
+
+以下では、zsh インストールと oh-my-zsh の導入について記載するよ。
+
+
+<!-- more -->
+
+
+## 0. zsh の特徴, つまり導入メリット
+
+[wikipedia に zsh の特徴がまとめられている](http://ja.wikipedia.org/wiki/Z_Shell)が、その中でも特に以下が個人的に便利だと思う。
+
+- プログラム可能な補完機能に拠って、多くのユーザーコマンドのオプションや引数を打つのを支援する
+    - インストールの時点で数百のコマンドをサポートしている
+- スペル修正機能
+    - 間違いを正すのはもちろん、大文字を小文字に変換してくれたり
+- ユーザーの起動している全てのzshでコマンド履歴を共有することができる
+    - screen や tmux 使いにはうれしい
+
+
+その他、Wikipediaには以下の特徴が列挙されている。
+
+- 拡張ファイル名生成（ワイルドカード展開）に拠って "find" のような外部コマンドを呼び出さないで、ファイル名を展開する。
+- 変数や配列の処理が改善されている。
+- 複数行コマンドがバッファーで編集できる。
+- 様々な互換モードが在る。例えば、zshをshとして実行したとき、bashの振りをするようにできる。
+- プロンプトテーマ
+- 端末の右端に情報を表示し長いコマンドを打っているときは自動的に隠れる右プロンプトを表示できる。
+- 殆ど全部のカスタマイズが可能。
+
+
+
+## 1. zsh をインストールする
+
+失うものが何もなくなったところで zsh をインストールしよう。
+
+centos だと yum でインストールする。
+
+```sh
+$ sudo yum -y install zsh
+```
+
+macだと homebrew でインストールする。
+
+```sh
+$ sudo brew install zsh
+```
+
+ubuntu だと apt でインストールする。
+
+```sh
+$ sudo apt-get install zsh
+```
+
+
+インストールできたかどうかを確認する。(上述したすべてのOSで共通、たぶん)
+
+```sh
+$ zsh --version
+zsh 4.3.17 (x86_64-unknown-linux-gnu)
+$ which zsh
+/usr/bin/zsh
+```
+
+
+## 2. ログインシェルを zsh にする
+
+ログイン直後にデフォルトで起動する shell を zsh にするよ。
+ここでは ubuntu 12.04 でのコマンド例ですが、たぶん mac や centos とかでも一緒でOKだと思う。
+
+
+現在利用可能なシェルの一覧は以下で確認できる。
+
+```sh
+$ cat /etc/shells
+# /etc/shells: valid login shells
+/bin/sh
+/bin/dash
+/bin/bash
+/bin/rbash
+/bin/zsh
+/usr/bin/zsh
+/usr/bin/tmux
+```
+
+それではログインシェルを zsh に変えよう。
+インタラクティブにパスワードと zsh への path を入力しよう。
+
+```sh
+$ chsh
+Password:
+Changing the login shell for momota
+Enter the new value, or press ENTER for the default
+        Login Shell [/bin/bash]: /usr/bin/zsh
+```
+
+再度ログインして、ログインシェルが zsh へ変わったことを確認しよう。
+
+```sh
+$ echo $SHELL
+/usr/bin/zsh
+```
+
+ここで、`‾/.zshrc` を作りたい衝動を抑えて、次に進もう。
+
+
+## 3. [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh) を導入する
+
+繰り返しになりますが、oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。`.zshrc`もテンプレがあるのでコピれば楽ちん。
+カスタマイズしたければ oh-my-zsh を導入してからにしよう。
+導入方法は github に書いてあるとおり `curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh` でいいと思うけど、シェルスクリプトの中身をチェックするのがめんどかったのでわたしはマニュアルで入れました。
+
+
+### 3.1. リポジトリから 最新版を clone する
+
+```sh
+$ git clone git://github.com/robbyrussell/oh-my-zsh.git ‾/.oh-my-zsh
+```
+
+### 3.2. すでに `‾/.zshrc` を作っているひとはバックアップしよう
+
+```sh
+cp ‾/.zshrc ‾/.zshrc.orig
+```
+
+### 3.3. `.zshrc` テンプレートをコピる
+
+```sh
+cp ‾/.oh-my-zsh/templates/zshrc.zsh-template ‾/.zshrc
+```
+
+### 3.4. 新しい `.zshrc` を読み込もう
+
+```sh
+$ source ‾/.zshrc
+```
+
+`source` の代わりに再ログインしてもいいけど。
+こんな感じで git のステータスも見やすくなる。
+
+![zsh](https://dl.dropboxusercontent.com/u/28495046/octopress/20130907_oh-my-zsh/zsh.png)
+
+
+### 3.5. テーマを変更する
+
+[ここにいろいろなテーマがある](https://github.com/robbyrussell/oh-my-zsh/wiki/themes) ので好きなテーマ名を `‾/.zshrc` 中の `ZSH_THEME` にセットしてあげればOK。
+
+```sh
+ZSH_THEME="wedisagree"
+```
+
+変更したら、以下で `‾/.zshrc` を再読み込み。
+
+```sh
+$ source ‾/.zshrc
+```
+

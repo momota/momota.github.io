@@ -28,6 +28,9 @@ man() {
 }
 ```
 
+設定変更後は、適当に `$ source ~/.zshrc` とかしてください。
+
+
 - before
 
 ![before_man](https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_before.png)
