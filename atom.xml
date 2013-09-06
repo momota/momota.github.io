@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-08-31T22:57:24+09:00</updated>
+  <updated>2013-09-07T00:45:31+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/07/oh-my-zsh/"/>
+    <updated>2013-09-07T00:04:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/07/oh-my-zsh</id>
+    <content type="html"><![CDATA[<p>bash や tcsh でいいよ、って人もだまされたと思って zsh 試してほしい。もう元に戻れないくらい便利だと感じてもらえるだろう。本番環境のサーバにも入れたいくらい。</p>
+
+<p>zsh そのままでも十分便利だけど、<em>oh-my-zsh</em> を入れるとさらに便利になるよ。
+oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。</p>
+
+<p>以下では、zsh インストールと oh-my-zsh の導入について記載するよ。</p>
+
+<!-- more -->
+
+
+<h2>zsh の特徴, つまり導入メリット</h2>
+
+<p><a href="http://ja.wikipedia.org/wiki/Z_Shell">wikipedia に zsh の特徴がまとめられている</a>が、その中でも特に以下が個人的に便利だと思う。</p>
+
+<ul>
+<li>プログラム可能な補完機能に拠って、多くのユーザーコマンドのオプションや引数を打つのを支援する
+
+<ul>
+<li>インストールの時点で数百のコマンドをサポートしている</li>
+</ul>
+</li>
+<li>スペル修正機能
+
+<ul>
+<li>間違いを正すのはもちろん、大文字を小文字に変換してくれたり</li>
+</ul>
+</li>
+<li>ユーザーの起動している全てのzshでコマンド履歴を共有することができる
+
+<ul>
+<li>screen や tmux 使いにはうれしい</li>
+</ul>
+</li>
+</ul>
+
+
+<p>その他、Wikipediaには以下の特徴が列挙されている。</p>
+
+<ul>
+<li>拡張ファイル名生成（ワイルドカード展開）に拠って &ldquo;find&rdquo; のような外部コマンドを呼び出さないで、ファイル名を展開する。</li>
+<li>変数や配列の処理が改善されている。</li>
+<li>複数行コマンドがバッファーで編集できる。</li>
+<li>様々な互換モードが在る。例えば、zshをshとして実行したとき、bashの振りをするようにできる。</li>
+<li>プロンプトテーマ</li>
+<li>端末の右端に情報を表示し長いコマンドを打っているときは自動的に隠れる右プロンプトを表示できる。</li>
+<li>殆ど全部のカスタマイズが可能。</li>
+</ul>
+
+
+<h2>zsh をインストールする</h2>
+
+<p>失うものが何もなくなったところで zsh をインストールしよう。</p>
+
+<p>centos だと yum でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo yum -y install zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>macだと homebrew でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo brew install zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ubuntu だと apt でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>インストールできたかどうかを確認する。(上述したすべてのOSで共通、たぶん)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>zsh --version
+</span><span class='line'>zsh 4.3.17 <span class="o">(</span>x86_64-unknown-linux-gnu<span class="o">)</span>
+</span><span class='line'><span class="nv">$ </span>which zsh
+</span><span class='line'>/usr/bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2. ログインシェルを zsh にする</h2>
+
+<p>ログイン直後にデフォルトで起動する shell を zsh にするよ。
+ここでは ubuntu 12.04 でのコマンド例ですが、たぶん mac や centos とかでも一緒でOKだと思う。</p>
+
+<p>現在利用可能なシェルの一覧は以下で確認できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat /etc/shells
+</span><span class='line'><span class="c"># /etc/shells: valid login shells</span>
+</span><span class='line'>/bin/sh
+</span><span class='line'>/bin/dash
+</span><span class='line'>/bin/bash
+</span><span class='line'>/bin/rbash
+</span><span class='line'>/bin/zsh
+</span><span class='line'>/usr/bin/zsh
+</span><span class='line'>/usr/bin/tmux
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>それではログインシェルを zsh に変えよう。
+インタラクティブにパスワードと zsh への path を入力しよう。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>chsh
+</span><span class='line'>Password:
+</span><span class='line'>Changing the login shell <span class="k">for </span>momota
+</span><span class='line'>Enter the new value, or press ENTER <span class="k">for </span>the default
+</span><span class='line'>        Login Shell <span class="o">[</span>/bin/bash<span class="o">]</span>: /usr/bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再度ログインして、ログインシェルが zsh へ変わったことを確認しよう。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$SHELL</span>
+</span><span class='line'>/usr/bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここで、<code>‾/.zshrc</code> を作りたい衝動を抑えて、次に進もう。</p>
+
+<h2>3. <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a> を導入する</h2>
+
+<p>繰り返しになりますが、oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。<code>.zshrc</code>もテンプレがあるのでコピれば楽ちん。
+カスタマイズしたければ oh-my-zsh を導入してからにしよう。
+導入方法は github に書いてあるとおり <code>curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh</code> でいいと思うけど、シェルスクリプトの中身をチェックするのがめんどかったのでわたしはマニュアルで入れました。</p>
+
+<h3>3.1. リポジトリから 最新版を clone する</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/robbyrussell/oh-my-zsh.git ‾/.oh-my-zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.2. すでに <code>‾/.zshrc</code> を作っているひとはバックアップしよう</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>cp ‾/.zshrc ‾/.zshrc.orig
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.3. <code>.zshrc</code> テンプレートをコピる</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>cp ‾/.oh-my-zsh/templates/zshrc.zsh-template ‾/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.4. 新しい <code>.zshrc</code> を読み込もう</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">source</span> ‾/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>source</code> の代わりに再ログインしてもいいけど。
+こんな感じで git のステータスも見やすくなる。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130907_oh-my-zsh/zsh.png" alt="zsh" /></p>
+
+<h3>3.5. テーマを変更する</h3>
+
+<p><a href="https://github.com/robbyrussell/oh-my-zsh/wiki/themes">ここにいろいろなテーマがある</a> ので好きなテーマ名を <code>‾/.zshrc</code> 中の <code>ZSH_THEME</code> にセットしてあげればOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">ZSH_THEME</span><span class="o">=</span><span class="s2">&quot;wedisagree&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>変更したら、以下で <code>‾/.zshrc</code> を再読み込み。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">source</span> ‾/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[man ページに色付けする (zsh, bash)]]></title>
@@ -53,6 +259,8 @@
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p>設定変更後は、適当に <code>$ source ~/.zshrc</code> とかしてください。</p>
 
 <ul>
 <li>before</li>
