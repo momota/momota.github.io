@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ubuntu | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ubuntu/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-07T00:45:31+09:00</updated>
+  <updated>2013-09-07T00:47:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -28,7 +28,7 @@ oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマ�
 <!-- more -->
 
 
-<h2>zsh の特徴, つまり導入メリット</h2>
+<h2>0. zsh の特徴, つまり導入メリット</h2>
 
 <p><a href="http://ja.wikipedia.org/wiki/Z_Shell">wikipedia に zsh の特徴がまとめられている</a>が、その中でも特に以下が個人的に便利だと思う。</p>
 
@@ -67,7 +67,7 @@ oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマ�
 </ul>
 
 
-<h2>zsh をインストールする</h2>
+<h2>1. zsh をインストールする</h2>
 
 <p>失うものが何もなくなったところで zsh をインストールしよう。</p>
 
