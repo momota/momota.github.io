@@ -9,8 +9,7 @@
 
 <meta name="author" content="momota"> 
 
-<meta name="description" content="bash や tcsh でいいよ、って人もだまされたと思って zsh 試してほしい。もう元に戻れないくらい便利だと感じてもらえるだろう。本番環境のサーバにも入れたいくらい。 zsh そのままでも十分便利だけど、oh-my-zsh を入れるとさらに便利になるよ。
-oh-my-zsh &hellip;"> <meta name="keywords" content="">
+<meta name="description" content="junos の firewall filter の設定で定義の順序について。(EXシリーズを想定) 以下、すべてconfiguration mode での操作。 下記のようなフィルタがすでに設定されている場合に、TERM10 と TERM20 の間に TERM15 を挿入したいことがある。 &hellip;"> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -96,6 +95,75 @@ $(document).ready(
 </header>
 
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/09/14/junos-filter/">
+		
+			Junos Firewall Filter Term 定義を挿入する方法</a>
+	</h2>
+	<div class="entry-content">
+		<p><img src="http://upload.wikimedia.org/wikipedia/en/8/86/Junos_sw_logo.jpg" alt="junos" /></p>
+
+<p>junos の firewall filter の設定で定義の順序について。(EXシリーズを想定)</p>
+
+<p>以下、すべてconfiguration mode での操作。</p>
+
+<p>下記のようなフィルタがすでに設定されている場合に、<code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入したいことがある。フィルタは上から順に評価されるし。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># show | display set 
+</span><span class='line'>...
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from tcp-established
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 then accept
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then discard
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2013/09/14/junos-filter/" class="more-link">続きを読む &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-14T12:36:00+09:00" pubdate data-updated="true">2013-09-14</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/filter/'>filter</a>, <a class='category' href='/blog/categories/juniper/'>juniper</a>, <a class='category' href='/blog/categories/junos/'>junos</a>, <a class='category' href='/blog/categories/network/'>network</a>, <a class='category' href='/blog/categories/security/'>security</a>
+
+
+</div>
+	
+</div></article>
 
 
     <article class="post">
