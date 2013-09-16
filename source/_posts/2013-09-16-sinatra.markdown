@@ -1,0 +1,256 @@
+---
+layout: post
+title: "rails から外れた僕らは sinatra で i did it my way"
+date: 2013-09-16 17:37
+comments: true
+categories: sinatra ruby
+---
+
+![sinatra](http://www.sinatrarb.com/images/logo.png)
+
+
+sinatra は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+本稿では以下について書く。
+
+1. sinatra インストール
+2. hello world アプリケーション
+3. ルーティング
+4. テンプレートの呼び出し
+
+
+<!-- more -->
+
+## 前準備: インストール
+
+ruby 2.0 を rbenv でインストールする。
+以下、作業は `/Users/momota/dev/sinatra/` で行う。
+
+```sh
+$ rbenv install 2.0.0-p247
+$ rbenv local 2.0.0-p247
+$ rbenv rehash
+$ rbenv version
+2.0.0-p247 (set by /Users/momota/dev/sinatra/.ruby-version)
+$ ruby -v
+ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-darwin12.4.0]
+```
+
+bundler で sinatra と関連 gem をインストールする。
+
+```sh
+$ gem install bundler
+$ bundle -v
+Bundler version 1.3.5
+$ bundle init
+Writing new Gemfile to /Users/momota/dev/sinatra/Gemfile
+$ cat << EOF >> ./Gemfile
+heredoc> gem "activerecord", "3.2.13"
+heredoc> gem "sqlite3", "1.3.7"
+heredoc> gem "sinatra", "1.4.3"
+heredoc> gem "sinatra-contrib", "1.4.0"
+heredoc> EOF
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/...........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Installing i18n (0.6.1)
+Installing multi_json (1.8.0)
+Installing activesupport (3.2.13)
+Installing builder (3.0.4)
+Installing activemodel (3.2.13)
+Installing arel (3.0.2)
+Installing tzinfo (0.3.37)
+Installing activerecord (3.2.13)
+Installing backports (3.3.4)
+Installing eventmachine (1.0.3)
+Installing rack (1.5.2)
+Installing rack-protection (1.5.0)
+Installing rack-test (0.6.2)
+Installing tilt (1.4.1)
+Installing sinatra (1.4.3)
+Installing sinatra-contrib (1.4.0)
+Installing sqlite3 (1.3.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+It was installed into ./vendor/bundle
+```
+
+## hello world を返す sinatra アプリケーションを書く
+
+サイトのルートへアクセスが遇ったときに "hello world" を返す `main.rb` を作成する。適当なエディタで以下を書いて保存する。
+
+```ruby
+require 'sinatra'
+
+get '/' do
+  "hello world"
+end
+```
+
+アプリケーションを実行する。
+
+```sh
+$ bundle exec ruby main.rb
+```
+
+動作確認をする。
+
+```sh
+$ curl http://localhost:4567/
+hello world%
+```
+
+ちゃんと返ってきている。簡単。
+ここでは、 `curl` で確認したが、もちろん web ブラウザで http://localhost:4567/ へアクセスして確認してもOK。
+アプリケーションの終了は `Ctrl-c` でOK。
+
+
+## ルーティング: 複数のリクエストをさばく
+
+先ほど書いた `main.rb` を修正していろいろな HTTP GET リクエストに対応する。
+ここでは http://localhost:4567/about にアクセスが有った場合、 "about this site" 文字列を返すように追記する。
+以下は、`git diff` の結果を示す。
+
+```diff
+diff --git a/main.rb b/main.rb
+index 713861d..9423680 100644
+--- a/main.rb
++++ b/main.rb
+@@ -1,5 +1,11 @@
+ require 'sinatra'
++require 'sinatra/reloader'
+
+ get '/' do
+   "hello world"
+ end
++
++get '/about' do
++  "about this site"
++end
++
+```
+
+通常、スクリプトの修正をアプリケーションへ反映するためには、アプリケーションの再起動が必要となる。`require 'sinatra/reloader'` により、その必要がなくなる。
+
+
+## URL からのパラメータを扱う
+
+以下のメソッドを書くことにより、http://localhost:4567/hello/SOME_NAME へアクセスすると SOME_NAME 部分を扱うことができる。
+
+```ruby
+get '/hello/:name' do
+  "hello #{params[:name]}"
+end
+```
+
+これは以下のようにも書ける。
+
+```ruby
+get '/hello/:name' do |n|
+  "hello #{n}"
+end
+
+```
+
+複数のパラメータを扱うときは以下のように書く。
+http://localhost:4567/hello/FAMILY_NAME/LAST_NAME へアクセスすると、FAMILY_NAME と LAST_NAME を扱える。
+
+```ruby
+get '/hello/:fname/?:lname?' do |f, l|
+  "hello #{f} #{l}"
+end
+```
+
+パラメータは、ワイルドカードや正規表現で扱うことができる。
+
+```ruby
+get '/from/*/to/*' do |f, t|
+  "from #{f} to #{t}"
+end
+```
+
+結果は以下のとおり。
+
+```sh
+$ curl http://localhost:4567/from/fukuoka/to/tokyo
+from fukuoka to tokyo%
+```
+
+正規表現で扱う場合は、以下。ここでは、`/users/` 以下がすべて数字であるアクセスの場合にマッチングさせている。
+
+```ruby
+get %r{/users/([0-9]+)} do |i|
+  "user id = #{i}"
+end
+```
+
+結果は以下のとおり。
+
+```sh
+$ curl http://localhost:4567/users/12345
+user id = 12345%
+```
+
+
+
+## テンプレートエンジンを扱う
+
+sinatra では様々なテンプレートエンジンを扱うことができる。
+例えば、haml, erb, sass, markdown, slim, coffescript など。詳細は http://www.sinatrarb.com/intro.html#Available%20Template%20Languages このあたりを参照。
+
+ここでは、erb の例を示す。
+
+`views/index.erb` を作成する。スクリプトからは以下のように呼び出せばOK。
+
+```ruby
+get '/' do
+  erb :index
+end
+```
+
+### テンプレートエンジンにパラメータを渡す
+
+インスタンス変数に渡して、テンプレート側からコールする。
+
+```ruby
+get '/:name' do |n|
+  @name  = n
+  @title = 'sinatra sample'
+  erb :index
+end
+```
+
+`views/index.erb` は以下。
+
+```erb
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meata charset="urf-8">
+  <title><%= @title %></title>
+</head>
+<body>
+<h1>hello <%= @name %></h1>
+</body>
+</html>
+```
+
+実行結果は以下のとおり。
+
+```sh
+$ curl http://localhost:4567/taro
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meata charset="urf-8">
+  <title>sinatra sample</title>
+</head>
+<body>
+<h1>hello taro</h1>
+</body>
+</html>
+```
+
+
+疲れたし、今日はこの辺まで。
+
