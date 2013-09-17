@@ -100,13 +100,15 @@ $(document).ready(
 	<h2 class="title">Rails から外れた僕らは Sinatra で I Did It My Way</h2>
 	<div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
 
-<p>sinatra は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+<p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。</p>
 
 <ol>
 <li>sinatra インストール</li>
 <li>hello world アプリケーション</li>
 <li>ルーティング</li>
+<li>フィルタ</li>
+<li>ヘルパー</li>
 <li>テンプレートの呼び出し</li>
 </ol>
 
@@ -250,6 +252,73 @@ $(document).ready(
 
 <h2>ルーティング: 複数のリクエストをさばく</h2>
 
+<p>sintra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># show something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># create something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">put</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># replace something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">patch</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># modify something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">delete</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># annihilate something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">options</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># appease something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">link</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># affiliate something</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">unlink</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># separate something</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>先ほど書いた <code>main.rb</code> を修正していろいろな HTTP GET リクエストに対応する。
 ここでは <a href="http://localhost:4567/about">http://localhost:4567/about</a> にアクセスが有った場合、 &ldquo;about this site&rdquo; 文字列を返すように追記する。
 以下は、<code>git diff</code> の結果を示す。</p>
@@ -367,6 +436,98 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h2>before/after filter</h2>
+
+<p>sinatra のフィルタは、ルーティングされたコンテキストを実行する前後(before / after)で、リクエストとレスポンスを変更することができる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@before_value</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="s2">&quot;before_value has been set to </span><span class="si">#{</span><span class="vi">@before_value</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">after</span> <span class="k">do</span>
+</span><span class='line'> <span class="nb">puts</span> <span class="s2">&quot;After filter called to perform some task.&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下のように記述することで、フィルタは特定パスのリクエストにのみ評価される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="s1">&#39;/path/you/want/*&#39;</span>
+</span><span class='line'>  <span class="c1"># execute only before the &#39;/path/you/want/*&#39; route</span>
+</span><span class='line'>  <span class="n">authenticate</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>helper</h2>
+
+<p>ヘルパーメソッドを定義して、ルートハンドラーやテンプレートとして使える。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">helpers</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># 共通関数を書ける</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hello</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span>
+</span><span class='line'>    <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">say_hello</span><span class="p">(</span> <span class="n">n</span> <span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記は、モジュールとしても記述できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Hello</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hello</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span> <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Goodbye</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span> <span class="s2">&quot;goodbye, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">helpers</span> <span class="no">Hello</span><span class="p">,</span> <span class="no">Goodbye</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h2>テンプレートエンジンを扱う</h2>
 
 <p>sinatra では様々なテンプレートエンジンを扱うことができる。
@@ -417,7 +578,7 @@ $(document).ready(
 </pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
 </span><span class='line'><span class="x">&lt;html lang=&quot;ja&quot;&gt;</span>
 </span><span class='line'><span class="x">&lt;head&gt;</span>
-</span><span class='line'><span class="x">  &lt;meata charset=&quot;urf-8&quot;&gt;</span>
+</span><span class='line'><span class="x">  &lt;meta charset=&quot;urf-8&quot;&gt;</span>
 </span><span class='line'><span class="x">  &lt;title&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@title</span> <span class="cp">%&gt;</span><span class="x">&lt;/title&gt;</span>
 </span><span class='line'><span class="x">&lt;/head&gt;</span>
 </span><span class='line'><span class="x">&lt;body&gt;</span>
@@ -444,7 +605,7 @@ $(document).ready(
 </span><span class='line'>&lt;!DOCTYPE html&gt;
 </span><span class='line'>&lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span>&gt;
 </span><span class='line'>&lt;head&gt;
-</span><span class='line'>  &lt;meata <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;urf-8&quot;</span>&gt;
+</span><span class='line'>  &lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;urf-8&quot;</span>&gt;
 </span><span class='line'>  &lt;title&gt;sinatra sample&lt;/title&gt;
 </span><span class='line'>&lt;/head&gt;
 </span><span class='line'>&lt;body&gt;
@@ -454,7 +615,93 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>疲れたし、今日はこの辺まで。</p>
+<h3>layout テンプレート</h3>
+
+<p>テンプレートが複数存在するときに、ヘッダーやフッターなど、共通部分が出てくる。
+そのような共通部分を <code>views/layout.erb</code> 切り出すことができる。(erb以外のときはファイル拡張子を変えればよい。)
+<code>views/layout.erb</code> は優先的に読み込まれる。</p>
+
+<p>共通部分を <code>layout.erb</code> に記述し、個別記述部分を <code>yield</code> で呼び出す。以下に <code>layout.erb</code> の例を示す。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
+</span><span class='line'><span class="x">&lt;html lang=&quot;ja&quot;&gt;</span>
+</span><span class='line'><span class="x">&lt;head&gt;</span>
+</span><span class='line'><span class="x">  &lt;meta charset=&quot;urf-8&quot;&gt;</span>
+</span><span class='line'><span class="x">  &lt;title&gt;test&lt;/title&gt;</span>
+</span><span class='line'><span class="x">&lt;/head&gt;</span>
+</span><span class='line'><span class="x">&lt;body&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;/body&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この時、以下のような <code>index.erb</code> テンプレートと</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">  &lt;h1&gt;test&lt;/h1&gt;</span>
+</span><span class='line'><span class="x">  &lt;h2&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@name</span><span class="cp">%&gt;</span><span class="x">&lt;/h2&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下のルーティングにより</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra/reloader&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="vi">@name</span> <span class="o">=</span> <span class="n">n</span>
+</span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下の様な結果になる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/hanako
+</span><span class='line'>&lt;!DOCTYPE html&gt;
+</span><span class='line'>&lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span>&gt;
+</span><span class='line'>&lt;head&gt;
+</span><span class='line'>  &lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;urf-8&quot;</span>&gt;
+</span><span class='line'>  &lt;title&gt;test&lt;/title&gt;
+</span><span class='line'>&lt;/head&gt;
+</span><span class='line'>&lt;body&gt;
+</span><span class='line'>    &lt;h1&gt;test&lt;/h1&gt;
+</span><span class='line'>  &lt;h2&gt;hanako&lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/body&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 </div>
 
 

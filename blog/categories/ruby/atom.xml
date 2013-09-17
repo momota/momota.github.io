@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-16T17:59:23+09:00</updated>
+  <updated>2013-09-18T01:30:26+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -20,13 +20,15 @@
     <id>http://momota.github.io/blog/2013/09/16/sinatra</id>
     <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
 
-<p>sinatra は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+<p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。</p>
 
 <ol>
 <li>sinatra インストール</li>
 <li>hello world アプリケーション</li>
 <li>ルーティング</li>
+<li>フィルタ</li>
+<li>ヘルパー</li>
 <li>テンプレートの呼び出し</li>
 </ol>
 
@@ -120,6 +122,42 @@ hello world%
 
 <h2>ルーティング: 複数のリクエストをさばく</h2>
 
+<p>sintra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
+
+<p>```ruby
+get &lsquo;/&rsquo; do
+  # show something
+end</p>
+
+<p>post &lsquo;/&rsquo; do
+  # create something
+end</p>
+
+<p>put &lsquo;/&rsquo; do
+  # replace something
+end</p>
+
+<p>patch &lsquo;/&rsquo; do
+  # modify something
+end</p>
+
+<p>delete &lsquo;/&rsquo; do
+  # annihilate something
+end</p>
+
+<p>options &lsquo;/&rsquo; do
+  # appease something
+end</p>
+
+<p>link &lsquo;/&rsquo; do
+  # affiliate something
+end</p>
+
+<p>unlink &lsquo;/&rsquo; do
+  # separate something
+end
+```</p>
+
 <p>先ほど書いた <code>main.rb</code> を修正していろいろな HTTP GET リクエストに対応する。
 ここでは <a href="http://localhost:4567/about">http://localhost:4567/about</a> にアクセスが有った場合、 &ldquo;about this site&rdquo; 文字列を返すように追記する。
 以下は、<code>git diff</code> の結果を示す。</p>
@@ -203,6 +241,67 @@ $ curl http://localhost:4567/users/12345
 user id = 12345%
 </code></p>
 
+<h2>before/after filter</h2>
+
+<p>sinatra のフィルタは、ルーティングされたコンテキストを実行する前後(before / after)で、リクエストとレスポンスを変更することができる。</p>
+
+<p>```ruby
+before do
+  @before_value = &ldquo;foo&rdquo;
+end</p>
+
+<p>get &lsquo;/&rsquo; do
+  &ldquo;before_value has been set to #{@before_value}&rdquo;
+end</p>
+
+<p>after do
+ puts &ldquo;After filter called to perform some task.&rdquo;
+end
+```</p>
+
+<p>以下のように記述することで、フィルタは特定パスのリクエストにのみ評価される。</p>
+
+<p><code>ruby
+before '/path/you/want/*'
+  # execute only before the '/path/you/want/*' route
+  authenticate
+end
+</code></p>
+
+<h2>helper</h2>
+
+<p>ヘルパーメソッドを定義して、ルートハンドラーやテンプレートとして使える。</p>
+
+<p>```ruby
+helpers do
+  # 共通関数を書ける
+  def say_hello( name )</p>
+
+<pre><code>"hello, #{name}"
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>get &lsquo;/:name&rsquo; do |n|
+  say_hello( n )
+end
+```</p>
+
+<p>上記は、モジュールとしても記述できる。</p>
+
+<p>```ruby
+module Hello
+  def say_hello( name ) &ldquo;hello, #{name}&rdquo; end
+end</p>
+
+<p>module Goodbye
+  def say_goodbye( name ) &ldquo;goodbye, #{name}&rdquo; end
+end</p>
+
+<p>helpers Hello, Goodbye
+```</p>
+
 <h2>テンプレートエンジンを扱う</h2>
 
 <p>sinatra では様々なテンプレートエンジンを扱うことができる。
@@ -236,7 +335,7 @@ end
 &lt;!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meata charset="urf-8">
+  <meta charset="urf-8">
   <title>&lt;%= @title %></title>
 </head>
 <body></p>
@@ -255,7 +354,7 @@ $ curl <a href="http://localhost:4567/taro">http://localhost:4567/taro</a>
 &lt;!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meata charset="urf-8">
+  <meta charset="urf-8">
   <title>sinatra sample</title>
 </head>
 <body></p>
@@ -267,7 +366,65 @@ $ curl <a href="http://localhost:4567/taro">http://localhost:4567/taro</a>
 </html>
 ```</p>
 
-<p>疲れたし、今日はこの辺まで。</p>
+<h3>layout テンプレート</h3>
+
+<p>テンプレートが複数存在するときに、ヘッダーやフッターなど、共通部分が出てくる。
+そのような共通部分を <code>views/layout.erb</code> 切り出すことができる。(erb以外のときはファイル拡張子を変えればよい。)
+<code>views/layout.erb</code> は優先的に読み込まれる。</p>
+
+<p>共通部分を <code>layout.erb</code> に記述し、個別記述部分を <code>yield</code> で呼び出す。以下に <code>layout.erb</code> の例を示す。</p>
+
+<p><code>erb
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+  &lt;meta charset="urf-8"&gt;
+  &lt;title&gt;test&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;%= yield %&gt;
+&lt;/body&gt;
+</code></p>
+
+<p>この時、以下のような <code>index.erb</code> テンプレートと</p>
+
+<p><code>erb
+  &lt;h1&gt;test&lt;/h1&gt;
+  &lt;h2&gt;&lt;%= @name%&gt;&lt;/h2&gt;
+</code></p>
+
+<p>以下のルーティングにより</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;
+require &lsquo;sinatra/reloader&rsquo;</p>
+
+<p>get &lsquo;/:name&rsquo; do |n|
+  @name = n
+  erb :index
+end
+```</p>
+
+<p>以下の様な結果になる。</p>
+
+<p>```sh
+$ curl <a href="http://localhost:4567/hanako">http://localhost:4567/hanako</a>
+&lt;!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>test</title>
+</head>
+<body></p>
+
+<pre><code>&lt;h1&gt;test&lt;/h1&gt;
+</code></pre>
+
+<p>  <h2>hanako</h2></p>
+
+<p></body></p>
+
+<p>```</p>
 ]]></content>
   </entry>
   
