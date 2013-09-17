@@ -9,13 +9,15 @@ categories: sinatra ruby
 ![sinatra](http://www.sinatrarb.com/images/logo.png)
 
 
-sinatra は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+[sinatra](http://www.sinatrarb.com/) は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。
 
 1. sinatra インストール
 2. hello world アプリケーション
 3. ルーティング
-4. テンプレートの呼び出し
+4. フィルタ
+5. ヘルパー
+6. テンプレートの呼び出し
 
 
 <!-- more -->
@@ -107,6 +109,42 @@ hello world%
 
 ## ルーティング: 複数のリクエストをさばく
 
+sinatra では、以下のように HTTP メソッド (GET, POST, ...)とURLがペアでルーティングされる。
+
+```ruby
+get '/' do
+  # show something
+end
+
+post '/' do
+  # create something
+end
+
+put '/' do
+  # replace something
+end
+
+patch '/' do
+  # modify something
+end
+
+delete '/' do
+  # annihilate something
+end
+
+options '/' do
+  # appease something
+end
+
+link '/' do
+  # affiliate something
+end
+
+unlink '/' do
+  # separate something
+end
+```
+
 先ほど書いた `main.rb` を修正していろいろな HTTP GET リクエストに対応する。
 ここでは http://localhost:4567/about にアクセスが有った場合、 "about this site" 文字列を返すように追記する。
 以下は、`git diff` の結果を示す。
@@ -131,6 +169,7 @@ index 713861d..9423680 100644
 ```
 
 通常、スクリプトの修正をアプリケーションへ反映するためには、アプリケーションの再起動が必要となる。`require 'sinatra/reloader'` により、その必要がなくなる。
+
 
 
 ## URL からのパラメータを扱う
@@ -193,6 +232,68 @@ user id = 12345%
 
 
 
+## before/after filter
+
+sinatra のフィルタは、ルーティングされたコンテキストを実行する前後(before / after)で、リクエストとレスポンスを変更することができる。
+
+```ruby
+before do
+  @before_value = "foo"
+end
+
+get '/' do
+  "before_value has been set to #{@before_value}"
+end
+
+after do
+ puts "After filter called to perform some task."
+end
+```
+
+以下のように記述することで、フィルタは特定パスのリクエストにのみ評価される。
+
+```ruby
+before '/path/you/want/*'
+  # execute only before the '/path/you/want/*' route
+  authenticate
+end
+```
+
+
+## helper
+
+ヘルパーメソッドを定義して、ルートハンドラーやテンプレートとして使える。
+
+```ruby
+helpers do
+  # 共通関数を書ける
+  def say_hello( name )
+    "hello, #{name}"
+  end
+end
+
+get '/:name' do |n|
+  say_hello( n )
+end
+```
+
+上記は、モジュールとしても記述できる。
+
+```ruby
+module Hello
+  def say_hello( name ) "hello, #{name}" end
+end
+
+module Goodbye
+  def say_goodbye( name ) "goodbye, #{name}" end
+end
+
+helpers Hello, Goodbye
+```
+
+
+
+
 ## テンプレートエンジンを扱う
 
 sinatra では様々なテンプレートエンジンを扱うことができる。
@@ -226,7 +327,7 @@ end
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meata charset="urf-8">
+  <meta charset="urf-8">
   <title><%= @title %></title>
 </head>
 <body>
@@ -242,7 +343,7 @@ $ curl http://localhost:4567/taro
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meata charset="urf-8">
+  <meta charset="urf-8">
   <title>sinatra sample</title>
 </head>
 <body>
@@ -251,6 +352,60 @@ $ curl http://localhost:4567/taro
 </html>
 ```
 
+### layout テンプレート
 
-疲れたし、今日はこの辺まで。
+テンプレートが複数存在するときに、ヘッダーやフッターなど、共通部分が出てくる。
+そのような共通部分を `views/layout.erb` 切り出すことができる。(erb以外のときはファイル拡張子を変えればよい。)
+`views/layout.erb` は優先的に読み込まれる。
+
+共通部分を `layout.erb` に記述し、個別記述部分を `yield` で呼び出す。以下に `layout.erb` の例を示す。
+
+```erb
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>test</title>
+</head>
+<body>
+  <%= yield %>
+</body>
+```
+
+この時、以下のような `index.erb` テンプレートと
+
+```erb
+  <h1>test</h1>
+  <h2><%= @name%></h2>
+```
+
+以下のルーティングにより
+
+```ruby
+require 'sinatra'
+require 'sinatra/reloader'
+
+get '/:name' do |n|
+  @name = n
+  erb :index
+end
+```
+
+以下の様な結果になる。
+
+```sh
+$ curl http://localhost:4567/hanako
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>test</title>
+</head>
+<body>
+    <h1>test</h1>
+  <h2>hanako</h2>
+
+</body>
+
+```
 
