@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-18T01:30:26+09:00</updated>
+  <updated>2013-09-18T01:37:51+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -172,7 +172,7 @@
 
 <h2>ルーティング: 複数のリクエストをさばく</h2>
 
-<p>sintra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
+<p>sinatra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
