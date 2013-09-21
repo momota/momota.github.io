@@ -8,6 +8,7 @@ categories: sinatra ruby
 
 ![sinatra](http://www.sinatrarb.com/images/logo.png)
 
+[続編も書いた > "sinatra で rails から外れて i did it my way(2)"](http://momota.github.io/blog/2013/09/22/sinatra/)
 
 [sinatra](http://www.sinatrarb.com/) は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。
@@ -18,6 +19,7 @@ categories: sinatra ruby
 4. フィルタ
 5. ヘルパー
 6. テンプレートの呼び出し
+
 
 
 <!-- more -->
