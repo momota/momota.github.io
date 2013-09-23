@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sinatra | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/sinatra/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-23T22:49:31+09:00</updated>
+  <updated>2013-09-24T00:24:08+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -283,7 +283,7 @@ end</p>
 end
 ```</p>
 
-<p>これで、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続ができた。</p>
+<p>これを前述したとおり、<code>git commit/push</code>してあげれば、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続が確認できる。</p>
 
 <p>私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。</p>
 
@@ -301,7 +301,9 @@ $ heroku logs --tail
 
 <h1>番外編</h1>
 
-<h2>(失敗編) heroku gem をインストールする</h2>
+<p>heroku gem は将来的に廃止されるようで、heroku toolbelt をインストールすることを推奨する。</p>
+
+<h2>(失敗,というか古い情報編) heroku gem をインストールする</h2>
 
 <p>Gemfile に <code>gem "heroku"</code> を追記して bundler でインストールする。</p>
 

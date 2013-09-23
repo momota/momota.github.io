@@ -472,7 +472,7 @@ git でバージョン管理していなければ、<code>git init</code> して
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>これで、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続ができた。</p>
+<p>これを前述したとおり、<code>git commit/push</code>してあげれば、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続が確認できる。</p>
 
 <p>私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。</p>
 
@@ -491,7 +491,9 @@ git でバージョン管理していなければ、<code>git init</code> して
 
 <h1>番外編</h1>
 
-<h2>(失敗編) heroku gem をインストールする</h2>
+<p>heroku gem は将来的に廃止されるようで、heroku toolbelt をインストールすることを推奨する。</p>
+
+<h2>(失敗,というか古い情報編) heroku gem をインストールする</h2>
 
 <p>Gemfile に <code>gem "heroku"</code> を追記して bundler でインストールする。</p>
 
