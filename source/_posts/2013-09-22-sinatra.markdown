@@ -1,24 +1,37 @@
 ---
 layout: post
-title: "sinatra で rails から外れて i did it my way (2)"
+title: "rails から外れた僕らは sinatra で i did it my way (2)"
 date: 2013-09-22 06:15
 comments: true
 categories: ruby sinatra mongodb bootstrap
 ---
 ![sinatra](http://www.sinatrarb.com/images/logo.png)
 
-[前回の "sinatra で rails から外れて i did it my way" の続き](http://momota.github.io/blog/2013/09/16/sinatra/)
+[前回の "sinatra で rails から外れた僕らは sinatra で i did it my way" の続き](http://momota.github.io/blog/2013/09/16/sinatra/)
 
 
 今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
 また、bootstrap3 で簡単に見た目を綺麗にしてみる。
 
 
+
+----
+- [rails から外れた僕らは sinatra で i did it my way (1)](http://momota.github.io/blog/2013/09/16/sinatra/)
+    - sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)
+- [rails から外れた僕らは sinatra で i did it my way (2)](http://momota.github.io/blog/2013/09/22/sinatra/)
+    - sinatra で MongoDB を使ったデータ永続化
+    - HTTP POSTへの対応
+    - Bootstrap でのお化粧
+- [rails から外れた僕らは sinatra で i did it my way (3)](http://momota.github.io/blog/2013/09/23/sinatra/)
+    - sinatra の heroku へのデプロイ
+
+
 <!-- more -->
 
 ## MongoDB を使うための準備
 
-データの永続化をするために、ここでは mongodb を使う。sqlite3 でもよかったんですが。
+データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。
+
 まずは、[こちらを参考に](http://docs.mongodb.org/manual/installation/) mongodb をインストールする。
 
 
@@ -34,6 +47,7 @@ all output going to: /usr/local/var/log/mongodb/mongo.log
 ```
 
 mongodb を ruby から扱うための gem を bundler でインストールする。
+
 Gemfile に `mongo` と `bson_ext` を追加する。(以下は Gemfile の diff 結果)
 
 ```diff
@@ -104,25 +118,17 @@ before do
   @comments = @db.collection('comments')
 end
 
-#
 # helper
-#
 helpers do
   # escape html
   include Rack::Utils
   alias_method :h, :escape_html
 end
 
-#
-# GET
-#
 get '/' do
   erb :index
 end
 
-#
-# POST
-#
 post '/new' do
   @comments.insert( :body => params[:body] )
   redirect '/'
@@ -138,13 +144,14 @@ end
 
 ## フォームとか
 
+フォームとかを作るため、`views/index.erb` を修正する。
 
 `<ul>` ブロックで、mongodb からデータを抜いてきてリスト表示させている。
 
 `<form>` ブロックで新規の投稿をする。`/new` に POST しているので、上記の `post '/new' do ... end` 部分の処理にルーティングされる。
 
 `<script>` ブロックで jquery を利用して既存記事を削除する。[Google API](https://developers.google.com/speed/libraries/devguide?hl=ja)を利用。
-`/delete` に POST しているので、上記の `post '/delete' do ... end` 部分の処理にルーティングされる。
+[x] をクリックしたときに、`/delete` に POST しているので、上記の `post '/delete' do ... end` 部分の処理にルーティングされる。
 
 
 ```erb
@@ -181,6 +188,7 @@ end
 ![](https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png)
 
 これで、mongodb を使った sinatra web アプリケーションができた。
+
 ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。
 
 
@@ -219,6 +227,7 @@ bootstrap を使うため、`views/layout.erb` を以下のように修正する
 ```
 
 `views/indx.erb` も以下のように修正する。
+`<ul>` をやめて、`<table>` へ。[x]という文字列も、削除アイコンへ修正。
 
 ```erb
   <table class="table table-striped">
