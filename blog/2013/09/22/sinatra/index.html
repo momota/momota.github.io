@@ -10,7 +10,7 @@
 <meta name="author" content="momota"> 
 
 <meta name="description" content="前回の &ldquo;sinatra で rails から外れて i did it my way&rdquo; の続き 今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
-また、bootstrap3 で簡単に見た目を綺麗にしてみる。 MongoDB &hellip;"> <meta name="keywords" content="">
+また、bootstrap3 で簡単に見た目を綺麗にしてみる。 sinatra &hellip;"> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -104,13 +104,40 @@ $(document).ready(
 <p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
 また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
 
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
 <!-- more -->
 
 
 <h2>MongoDB を使うための準備</h2>
 
-<p>データの永続化をするために、ここでは mongodb を使う。sqlite3 でもよかったんですが。
-まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
+<p>データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。</p>
+
+<p>まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -131,8 +158,9 @@ $(document).ready(
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>mongodb を ruby から扱うための gem を bundler でインストールする。
-Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
+<p>mongodb を ruby から扱うための gem を bundler でインストールする。</p>
+
+<p>Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -258,14 +286,6 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
 <span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra/reloader&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mongo&#39;</span>
@@ -277,25 +297,17 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 </span><span class='line'>  <span class="vi">@comments</span> <span class="o">=</span> <span class="vi">@db</span><span class="o">.</span><span class="n">collection</span><span class="p">(</span><span class="s1">&#39;comments&#39;</span><span class="p">)</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="c1"># helper</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">helpers</span> <span class="k">do</span>
 </span><span class='line'>  <span class="c1"># escape html</span>
 </span><span class='line'>  <span class="kp">include</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Utils</span>
 </span><span class='line'>  <span class="n">alias_method</span> <span class="ss">:h</span><span class="p">,</span> <span class="ss">:escape_html</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
-</span><span class='line'><span class="c1"># GET</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
-</span><span class='line'><span class="c1"># POST</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">post</span> <span class="s1">&#39;/new&#39;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="vi">@comments</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="ss">:body</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:body</span><span class="o">]</span> <span class="p">)</span>
 </span><span class='line'>  <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
@@ -312,12 +324,14 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 
 <h2>フォームとか</h2>
 
+<p>フォームとかを作るため、<code>views/index.erb</code> を修正する。</p>
+
 <p><code>&lt;ul&gt;</code> ブロックで、mongodb からデータを抜いてきてリスト表示させている。</p>
 
 <p><code>&lt;form&gt;</code> ブロックで新規の投稿をする。<code>/new</code> に POST しているので、上記の <code>post '/new' do ... end</code> 部分の処理にルーティングされる。</p>
 
 <p><code>&lt;script&gt;</code> ブロックで jquery を利用して既存記事を削除する。<a href="https://developers.google.com/speed/libraries/devguide?hl=ja">Google API</a>を利用。
-<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
+[x] をクリックしたときに、<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -380,8 +394,9 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 
 <p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
 
-<p>これで、mongodb を使った sinatra web アプリケーションができた。
-ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
+<p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
+
+<p>ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
 
 <h2>twitter bootstrap3 を使う</h2>
 
@@ -433,7 +448,8 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>views/indx.erb</code> も以下のように修正する。</p>
+<p><code>views/indx.erb</code> も以下のように修正する。
+<code>&lt;ul&gt;</code> をやめて、<code>&lt;table&gt;</code> へ。[x]という文字列も、削除アイコンへ修正。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

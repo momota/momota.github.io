@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-22T07:13:22+09:00</updated>
+  <updated>2013-09-23T21:22:07+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,546 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[sinatra で rails から外れて i did it my way (3)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/23/sinatra/"/>
+    <updated>2013-09-23T20:39:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/23/sinatra</id>
+    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
+事前に heroku には sign up しておこう。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>heroku toolbelt をインストールする</h2>
+
+<p>heroku へデプロイするために heroku toolbelt をインストールする。
+heroku toolbelt は  <a href="https://toolbelt.heroku.com/">https://toolbelt.heroku.com/</a> から環境にあったやり方を選んでインストールする。mac ではインストーラが <code>.pkg</code> 形式で配布されているので、それをぽちぽちクリックして進めればよい。</p>
+
+<p>なお、heroku toolbelt には、以下が含まれている。</p>
+
+<ul>
+<li>heroku client: heroku アプリケーションを作成したり、管理したりする CLI ツール</li>
+<li>foreman: procfile ベースでアプリケーションの管理をする</li>
+<li>git</li>
+</ul>
+
+
+<p>shell でバージョン確認してインストールできたかを確認する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku --version
+</span><span class='line'>heroku-toolbelt/2.41.0 <span class="o">(</span>x86_64-darwin10.8.0<span class="o">)</span> ruby/1.9.3
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>インストールできているようだ。</p>
+
+<h2>heroku login</h2>
+
+<p><code>heroku login</code> で heroku への認証を通したり、ssh キーを登録したりする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku login
+</span><span class='line'>Enter your Heroku credentials.
+</span><span class='line'>Email: makoto.momota@gmail.com
+</span><span class='line'>Password <span class="o">(</span>typing will be hidden<span class="o">)</span>: ENTER_YOUR_HEROKU_PASSWORD
+</span><span class='line'>Authentication successful.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>私の場合は、すでにキー登録していたので、なにもキー登録操作がなかったが、初回実行の際は、以下のような感じになるらしい。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>Could not find an existing public key.
+</span><span class='line'>Would you like to generate one? <span class="o">[</span>Yn<span class="o">]</span>
+</span><span class='line'>Generating new SSH public key.
+</span><span class='line'>Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>foreman で sinatra が起動できるか確認する</h2>
+
+<p>foreman で複数の sinatra アプリケーション を管理したり、アプリケーションごとに異なる起動方法を単一に wrapping できる。
+heroku では、アプリケーションを起動するために foreman が必須のようだ。
+foreman でのアプリケーション起動には、 <code>Procfile</code> を書く必要がある。書式は <code>アプリケーション名: コマンド</code> を改行区切りで列挙していく。</p>
+
+<p>ここでは、<code>mongo_app.rb</code> を起動するので、以下のように記述する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>web: bundle <span class="nb">exec </span>ruby mongo_app.rb -p <span class="nv">$PORT</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>お試しに、ローカルで <code>foreman start</code> により sinatra アプリケーションを起動する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>foreman start
+</span><span class='line'>17:25:31 web.1  | started with pid 10879
+</span><span class='line'>17:25:33 web.1  | <span class="o">[</span>2013-09-23 17:25:33<span class="o">]</span> INFO  WEBrick 1.3.1
+</span><span class='line'>17:25:33 web.1  | <span class="o">[</span>2013-09-23 17:25:33<span class="o">]</span> INFO  ruby 2.0.0 <span class="o">(</span>2013-06-27<span class="o">)</span> <span class="o">[</span>x86_64-darwin12.4.0<span class="o">]</span>
+</span><span class='line'>17:25:33 web.1  | <span class="o">==</span> Sinatra/1.4.3 has taken the stage on 5000 <span class="k">for </span>development with backup from WEBrick
+</span><span class='line'>17:25:33 web.1  | <span class="o">[</span>2013-09-23 17:25:33<span class="o">]</span> INFO  WEBrick::HTTPServer#start: <span class="nv">pid</span><span class="o">=</span>10879 <span class="nv">port</span><span class="o">=</span>5000
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>5000 番ポートで起動したので、<a href="http://localhost:5000/">http://localhost:5000/</a> にアクセスしてみる。問題なさそう。</p>
+
+<h2>git リポジトリを作成して push する</h2>
+
+<p>heroku デプロイには git が必須。
+git でバージョン管理していなければ、<code>git init</code> して始めよう。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git init
+</span><span class='line'><span class="nv">$ </span>git add .
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s1">&#39;your commit message&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>heroku へデプロイする</h2>
+
+<p>いよいよ heroku 上にアプリケーションを登録する。アプリケーション名はなしでも任意の名前が付けられるが、ここでは<code>sample-mongo-app</code>にした。(のちほど変えることも可能)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku apps:create sample-mongo-app
+</span><span class='line'>Creating sample-mongo-app... <span class="k">done</span>, stack is cedar
+</span><span class='line'>http://sample-mongo-app.herokuapp.com/ | git@heroku.com:sample-mongo-app.git
+</span><span class='line'>Git remote heroku added
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このコマンドにより以下のように git リモートリポジトリに heroku リポジトリが登録される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git remote
+</span><span class='line'>heroku
+</span><span class='line'><span class="nv">$ </span>git remote show heroku
+</span><span class='line'>* remote heroku
+</span><span class='line'>Fetch URL: git@heroku.com:sample-mongo-app.git
+</span><span class='line'>Push  URL: git@heroku.com:sample-mongo-app.git
+</span><span class='line'>HEAD branch: <span class="o">(</span>unknown<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heroku リポジトリに push することで、デプロイできる。なんとシンプルな仕組み。
+ちなみに、Gemfile.lock も git で管理してないとデプロイ時にエラーとなる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git push heroku master
+</span><span class='line'>Counting objects: 90, <span class="k">done</span>.
+</span><span class='line'>Delta compression using up to 2 threads.
+</span><span class='line'>Compressing objects: 100% <span class="o">(</span>85/85<span class="o">)</span>, <span class="k">done</span>.
+</span><span class='line'>Writing objects: 100% <span class="o">(</span>90/90<span class="o">)</span>, 126.44 KiB, <span class="k">done</span>.
+</span><span class='line'>Total 90 <span class="o">(</span>delta 27<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>-----&gt; Ruby/Rack app detected
+</span><span class='line'>-----&gt; Using Ruby version: ruby-2.0.0
+</span><span class='line'>-----&gt; Installing dependencies using Bundler version 1.3.2
+</span><span class='line'>       Running: bundle install --without development:test --path vendor/bundle --binstubs vendor/bundle/bin --deployment
+</span><span class='line'>       Fetching gem metadata from https://rubygems.org/..........
+</span><span class='line'>       Fetching gem metadata from https://rubygems.org/..
+</span><span class='line'>       Installing backports <span class="o">(</span>3.3.4<span class="o">)</span>
+</span><span class='line'>       Installing bson <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>       Installing bson_ext <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>       Installing eventmachine <span class="o">(</span>1.0.3<span class="o">)</span>
+</span><span class='line'>       Installing mongo <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>       Installing rack <span class="o">(</span>1.5.2<span class="o">)</span>
+</span><span class='line'>       Installing rack-protection <span class="o">(</span>1.5.0<span class="o">)</span>
+</span><span class='line'>       Installing rack-test <span class="o">(</span>0.6.2<span class="o">)</span>
+</span><span class='line'>       Installing tilt <span class="o">(</span>1.4.1<span class="o">)</span>
+</span><span class='line'>       Installing sinatra <span class="o">(</span>1.4.3<span class="o">)</span>
+</span><span class='line'>       Installing sinatra-contrib <span class="o">(</span>1.4.0<span class="o">)</span>
+</span><span class='line'>       Using bundler <span class="o">(</span>1.3.2<span class="o">)</span>
+</span><span class='line'>       Your bundle is <span class="nb">complete</span>! It was installed into ./vendor/bundle
+</span><span class='line'>       Cleaning up the bundler cache.
+</span><span class='line'>-----&gt; WARNINGS:
+</span><span class='line'>       You have not declared a Ruby version in your Gemfile.
+</span><span class='line'>       To <span class="nb">set </span>your Ruby version add this line to your Gemfile:
+</span><span class='line'>       ruby <span class="s1">&#39;2.0.0&#39;</span>
+</span><span class='line'>       <span class="c"># See https://devcenter.heroku.com/articles/ruby-versions for more information.&quot;</span>
+</span><span class='line'>-----&gt; Discovering process types
+</span><span class='line'>       Procfile declares types     -&gt; web
+</span><span class='line'>       Default types <span class="k">for </span>Ruby/Rack -&gt; console, rake
+</span><span class='line'>
+</span><span class='line'>-----&gt; Compiled slug size: 26.4MB
+</span><span class='line'>-----&gt; Launching... <span class="k">done</span>, v3
+</span><span class='line'>       http://sample-mongo-app.herokuapp.com deployed to Heroku
+</span><span class='line'>
+</span><span class='line'>To git@heroku.com:sample-mongo-app.git
+</span><span class='line'> * <span class="o">[</span>new branch<span class="o">]</span>      master -&gt; master
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>mongodb を heroku で使う</h2>
+
+<p>heroku ではさまざまな add-on が提供されており、その中から mongodb のホスティングである <a href="https://addons.heroku.com/mongohq">MongoHQ</a> を利用する。</p>
+
+<p>add-on を利用するにはクレジットカード情報の登録が必要となるので、済ませておく。<a href="https://heroku.com/verify">https://heroku.com/verify</a></p>
+
+<p>以下で、add-on の設定をする。ここでは、無料プランの ”sandbox” を選ぶ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku addons:add mongohq:sandbox
+</span><span class='line'>Adding mongohq:sandbox on sample-mongo-app... <span class="k">done</span>, v4 <span class="o">(</span>free<span class="o">)</span>
+</span><span class='line'>Use <span class="sb">`</span>heroku addons:docs mongohq<span class="sb">`</span> to view documentation.
+</span><span class='line'><span class="nv">$ </span>heroku <span class="nv">config</span>
+</span><span class='line'><span class="o">===</span> sample-mongo-app Config Vars
+</span><span class='line'>MONGOHQ_URL: mongodb://ID:パスワード@paulo.mongohq.com:10014/データベース名
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>sinatraの DB 接続部分を mongohq 用に書き換える。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/mongohq">公式サイト</a>通り、 DB コネクションをメソッド化する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra/reloader&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mongo&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">get_connection</span>
+</span><span class='line'>  <span class="k">return</span> <span class="vi">@db_connection</span> <span class="k">if</span> <span class="vi">@db_connection</span>
+</span><span class='line'>  <span class="n">db</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;MONGOHQ_URL&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">db_name</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/^\//</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@db_connection</span> <span class="o">=</span> <span class="ss">Mongo</span><span class="p">:</span><span class="ss">:Connection</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">db</span><span class="o">.</span><span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">db</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@db_connection</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">db</span><span class="o">.</span><span class="n">password</span><span class="p">)</span> <span class="k">unless</span> <span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span> <span class="o">||</span> <span class="n">db</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">nil?</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@db_connection</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">db_con</span> <span class="o">=</span> <span class="n">get_connection</span>
+</span><span class='line'>  <span class="vi">@comments</span> <span class="o">=</span> <span class="n">db_con</span><span class="o">.</span><span class="n">collection</span><span class="p">(</span><span class="s1">&#39;comments&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">helpers</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># escape html</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Utils</span>
+</span><span class='line'>  <span class="n">alias_method</span> <span class="ss">:h</span><span class="p">,</span> <span class="ss">:escape_html</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/new&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@comments</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="ss">:body</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:body</span><span class="o">]</span> <span class="p">)</span>
+</span><span class='line'>  <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/delete&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="nb">id</span> <span class="o">=</span> <span class="ss">BSON</span><span class="p">:</span><span class="ss">:ObjectId</span><span class="p">(</span> <span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span> <span class="p">)</span>
+</span><span class='line'>  <span class="vi">@comments</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;_id&#39;</span> <span class="o">=&gt;</span> <span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">d_comment</span><span class="o">|</span>
+</span><span class='line'>    <span class="vi">@comments</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span> <span class="n">d_comment</span> <span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続ができた。</p>
+
+<p>私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。</p>
+
+<p><a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
+
+<h3>heroku でのデバッグ</h3>
+
+<p>以下でアプリケーションログを <code>tail -f</code> しているように参照できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku logs --tail
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<h1>番外編</h1>
+
+<h2>(失敗編) heroku gem をインストールする</h2>
+
+<p>Gemfile に <code>gem "heroku"</code> を追記して bundler でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gh">diff --git a/Gemfile b/Gemfile</span>
+</span><span class='line'><span class="gh">index 74db599..734c191 100644</span>
+</span><span class='line'><span class="gd">--- a/Gemfile</span>
+</span><span class='line'><span class="gi">+++ b/Gemfile</span>
+</span><span class='line'><span class="gu">@@ -8,4 +8,5 @@ gem &quot;sinatra&quot;, &quot;1.4.3&quot;</span>
+</span><span class='line'> gem &quot;sinatra-contrib&quot;, &quot;1.4.0&quot;
+</span><span class='line'> gem &quot;mongo&quot;
+</span><span class='line'> gem &quot;bson_ext&quot;
+</span><span class='line'><span class="gi">+gem &quot;heroku&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>bundle install</code> する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
+</span><span class='line'>Fetching gem metadata from https://rubygems.org/...........
+</span><span class='line'>Fetching gem metadata from https://rubygems.org/..
+</span><span class='line'>Resolving dependencies...
+</span><span class='line'>Using i18n <span class="o">(</span>0.6.1<span class="o">)</span>
+</span><span class='line'>Using multi_json <span class="o">(</span>1.8.0<span class="o">)</span>
+</span><span class='line'>Using activesupport <span class="o">(</span>3.2.13<span class="o">)</span>
+</span><span class='line'>Using builder <span class="o">(</span>3.0.4<span class="o">)</span>
+</span><span class='line'>Using activemodel <span class="o">(</span>3.2.13<span class="o">)</span>
+</span><span class='line'>Using arel <span class="o">(</span>3.0.2<span class="o">)</span>
+</span><span class='line'>Using tzinfo <span class="o">(</span>0.3.37<span class="o">)</span>
+</span><span class='line'>Using activerecord <span class="o">(</span>3.2.13<span class="o">)</span>
+</span><span class='line'>Installing addressable <span class="o">(</span>2.3.5<span class="o">)</span>
+</span><span class='line'>Using backports <span class="o">(</span>3.3.4<span class="o">)</span>
+</span><span class='line'>Using bson <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>Using bson_ext <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>Using eventmachine <span class="o">(</span>1.0.3<span class="o">)</span>
+</span><span class='line'>Installing excon <span class="o">(</span>0.25.3<span class="o">)</span>
+</span><span class='line'>Installing heroku-api <span class="o">(</span>0.3.15<span class="o">)</span>
+</span><span class='line'>Installing launchy <span class="o">(</span>2.3.0<span class="o">)</span>
+</span><span class='line'>Installing netrc <span class="o">(</span>0.7.7<span class="o">)</span>
+</span><span class='line'>Installing mime-types <span class="o">(</span>1.25<span class="o">)</span>
+</span><span class='line'>Installing rest-client <span class="o">(</span>1.6.7<span class="o">)</span>
+</span><span class='line'>Installing rubyzip <span class="o">(</span>1.0.0<span class="o">)</span>
+</span><span class='line'>Installing heroku <span class="o">(</span>2.41.0<span class="o">)</span>
+</span><span class='line'>Using mongo <span class="o">(</span>1.9.2<span class="o">)</span>
+</span><span class='line'>Using rack <span class="o">(</span>1.5.2<span class="o">)</span>
+</span><span class='line'>Using rack-protection <span class="o">(</span>1.5.0<span class="o">)</span>
+</span><span class='line'>Using rack-test <span class="o">(</span>0.6.2<span class="o">)</span>
+</span><span class='line'>Using tilt <span class="o">(</span>1.4.1<span class="o">)</span>
+</span><span class='line'>Using sinatra <span class="o">(</span>1.4.3<span class="o">)</span>
+</span><span class='line'>Using sinatra-contrib <span class="o">(</span>1.4.0<span class="o">)</span>
+</span><span class='line'>Using sqlite3 <span class="o">(</span>1.3.7<span class="o">)</span>
+</span><span class='line'>Using bundler <span class="o">(</span>1.3.5<span class="o">)</span>
+</span><span class='line'>Your bundle is <span class="nb">complete</span>!
+</span><span class='line'>It was installed into ./vendor/bundle
+</span><span class='line'>Post-install message from heroku:
+</span><span class='line'> !    The <span class="sb">`</span>heroku<span class="sb">`</span> gem has been deprecated and replaced with the Heroku Toolbelt.
+</span><span class='line'> !    Download and install from: https://toolbelt.heroku.com
+</span><span class='line'> !    For API access, see: https://github.com/heroku/heroku.rb
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>なんか heroku gem は、もう廃止されるみたいなメッセージが出た。
+アンインストールすることにしよう。</p>
+
+<h3>heroku gem アンインストール</h3>
+
+<p>Gemfile から先ほど追加した <code>gem "heroku"</code> 行を消す。
+そのあとに <code>bundle clean</code> でアンインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle clean
+</span><span class='line'>Resolving dependencies...
+</span><span class='line'>Removing addressable <span class="o">(</span>2.3.5<span class="o">)</span>
+</span><span class='line'>Removing excon <span class="o">(</span>0.25.3<span class="o">)</span>
+</span><span class='line'>Removing heroku <span class="o">(</span>2.41.0<span class="o">)</span>
+</span><span class='line'>Removing heroku-api <span class="o">(</span>0.3.15<span class="o">)</span>
+</span><span class='line'>Removing launchy <span class="o">(</span>2.3.0<span class="o">)</span>
+</span><span class='line'>Removing mime-types <span class="o">(</span>1.25<span class="o">)</span>
+</span><span class='line'>Removing netrc <span class="o">(</span>0.7.7<span class="o">)</span>
+</span><span class='line'>Removing rest-client <span class="o">(</span>1.6.7<span class="o">)</span>
+</span><span class='line'>Removing rubyzip <span class="o">(</span>1.0.0<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[sinatra で rails から外れて i did it my way (2)]]></title>
@@ -25,13 +565,40 @@
 <p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
 また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
 
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
 <!-- more -->
 
 
 <h2>MongoDB を使うための準備</h2>
 
-<p>データの永続化をするために、ここでは mongodb を使う。sqlite3 でもよかったんですが。
-まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
+<p>データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。</p>
+
+<p>まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -52,8 +619,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>mongodb を ruby から扱うための gem を bundler でインストールする。
-Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
+<p>mongodb を ruby から扱うための gem を bundler でインストールする。</p>
+
+<p>Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -179,14 +747,6 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
 <span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra/reloader&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mongo&#39;</span>
@@ -198,25 +758,17 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 </span><span class='line'>  <span class="vi">@comments</span> <span class="o">=</span> <span class="vi">@db</span><span class="o">.</span><span class="n">collection</span><span class="p">(</span><span class="s1">&#39;comments&#39;</span><span class="p">)</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="c1"># helper</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">helpers</span> <span class="k">do</span>
 </span><span class='line'>  <span class="c1"># escape html</span>
 </span><span class='line'>  <span class="kp">include</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Utils</span>
 </span><span class='line'>  <span class="n">alias_method</span> <span class="ss">:h</span><span class="p">,</span> <span class="ss">:escape_html</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
-</span><span class='line'><span class="c1"># GET</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#</span>
-</span><span class='line'><span class="c1"># POST</span>
-</span><span class='line'><span class="c1">#</span>
 </span><span class='line'><span class="n">post</span> <span class="s1">&#39;/new&#39;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="vi">@comments</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="ss">:body</span> <span class="o">=&gt;</span> <span class="n">params</span><span class="o">[</span><span class="ss">:body</span><span class="o">]</span> <span class="p">)</span>
 </span><span class='line'>  <span class="n">redirect</span> <span class="s1">&#39;/&#39;</span>
@@ -233,12 +785,14 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 
 <h2>フォームとか</h2>
 
+<p>フォームとかを作るため、<code>views/index.erb</code> を修正する。</p>
+
 <p><code>&lt;ul&gt;</code> ブロックで、mongodb からデータを抜いてきてリスト表示させている。</p>
 
 <p><code>&lt;form&gt;</code> ブロックで新規の投稿をする。<code>/new</code> に POST しているので、上記の <code>post '/new' do ... end</code> 部分の処理にルーティングされる。</p>
 
 <p><code>&lt;script&gt;</code> ブロックで jquery を利用して既存記事を削除する。<a href="https://developers.google.com/speed/libraries/devguide?hl=ja">Google API</a>を利用。
-<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
+[x] をクリックしたときに、<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -301,8 +855,9 @@ Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以�
 
 <p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
 
-<p>これで、mongodb を使った sinatra web アプリケーションができた。
-ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
+<p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
+
+<p>ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
 
 <h2>twitter bootstrap3 を使う</h2>
 
@@ -354,7 +909,8 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>views/indx.erb</code> も以下のように修正する。</p>
+<p><code>views/indx.erb</code> も以下のように修正する。
+<code>&lt;ul&gt;</code> をやめて、<code>&lt;table&gt;</code> へ。[x]という文字列も、削除アイコンへ修正。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -442,13 +998,11 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way]]></title>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (1)]]></title>
     <link href="http://momota.github.io/blog/2013/09/16/sinatra/"/>
     <updated>2013-09-16T17:37:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/09/16/sinatra</id>
     <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p><a href="http://momota.github.io/blog/2013/09/22/sinatra/">続編も書いた > &ldquo;sinatra で rails から外れて i did it my way(2)&rdquo;</a></p>
 
 <p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。</p>
@@ -461,6 +1015,32 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 <li>ヘルパー</li>
 <li>テンプレートの呼び出し</li>
 </ol>
+
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
 
 
 <!-- more -->

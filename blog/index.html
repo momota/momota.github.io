@@ -9,8 +9,8 @@
 
 <meta name="author" content="momota"> 
 
-<meta name="description" content="前回の &ldquo;sinatra で rails から外れて i did it my way&rdquo; の続き 今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
-また、bootstrap3 で簡単に見た目を綺麗にしてみる。 続きを読む & &hellip;"> <meta name="keywords" content="">
+<meta name="description" content="今回はこれまで作った sinatra アプリケーションを PaaS の heroku へデプロイする。
+事前に heroku には sign up しておこう。 sinatra で rails から外れて i did it my way (1) sinatra の基本 (ルーティング、ヘルパー、 &hellip;"> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -101,6 +101,76 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2013/09/23/sinatra/">
+		
+			Sinatra で Rails から外れて I Did It My Way (3)</a>
+	</h2>
+	<div class="entry-content">
+		<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
+事前に heroku には sign up しておこう。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2013/09/23/sinatra/" class="more-link">続きを読む &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-23T20:39:00+09:00" pubdate data-updated="true">2013-09-23</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/heroku/'>heroku</a>, <a class='category' href='/blog/categories/mongodb/'>mongodb</a>, <a class='category' href='/blog/categories/mongohq/'>mongohq</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/sinatra/'>sinatra</a>
+
+
+</div>
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2013/09/22/sinatra/">
 		
 			Sinatra で Rails から外れて I Did It My Way (2)</a>
@@ -112,6 +182,32 @@ $(document).ready(
 
 <p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
 また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
 
 
 		
@@ -149,12 +245,10 @@ $(document).ready(
 		
 		<a href="/blog/2013/09/16/sinatra/">
 		
-			Rails から外れた僕らは Sinatra で I Did It My Way</a>
+			Rails から外れた僕らは Sinatra で I Did It My Way (1)</a>
 	</h2>
 	<div class="entry-content">
 		<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p><a href="http://momota.github.io/blog/2013/09/22/sinatra/">続編も書いた > &ldquo;sinatra で rails から外れて i did it my way(2)&rdquo;</a></p>
 
 <p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
 本稿では以下について書く。</p>
@@ -167,6 +261,32 @@ $(document).ready(
 <li>ヘルパー</li>
 <li>テンプレートの呼び出し</li>
 </ol>
+
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
 
 
 
@@ -540,66 +660,6 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 
 
 	<a class='category' href='/blog/categories/iterm2/'>iterm2</a>, <a class='category' href='/blog/categories/mac/'>mac</a>, <a class='category' href='/blog/categories/solarized/'>solarized</a>
-
-
-</div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/22/solarized-putty/">
-		
-			PuTTY へsolarized導入</a>
-	</h2>
-	<div class="entry-content">
-		<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
-
-<p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、PuTTYへ適用する。
-ちなみにパティと発音するみたいですね。ずっとプティと発音してました。</p>
-
-<p>適用イメージは以下。</p>
-
-<ul>
-<li>before</li>
-</ul>
-
-
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
-
-<ul>
-<li>after</li>
-</ul>
-
-
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
-
-
-		
-		<a href="/blog/2013/08/22/solarized-putty/" class="more-link">続きを読む &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-22T23:00:00+09:00" pubdate data-updated="true">2013-08-22</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/putty/'>putty</a>, <a class='category' href='/blog/categories/solarized/'>solarized</a>, <a class='category' href='/blog/categories/windows/'>windows</a>
 
 
 </div>
