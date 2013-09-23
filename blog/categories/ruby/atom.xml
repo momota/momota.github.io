@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-09-23T22:05:01+09:00</updated>
+  <updated>2013-09-23T22:49:31+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[sinatra で rails から外れて i did it my way (3)]]></title>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (3)]]></title>
     <link href="http://momota.github.io/blog/2013/09/23/sinatra/"/>
     <updated>2013-09-23T20:39:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/09/23/sinatra</id>
@@ -29,13 +29,13 @@
 <hr />
 
 <ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
 
 <ul>
 <li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
 
 <ul>
 <li>sinatra で MongoDB を使ったデータ永続化</li>
@@ -43,7 +43,7 @@
 <li>Bootstrap でのお化粧</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
 
 <ul>
 <li>sinatra の heroku へのデプロイ</li>
@@ -387,13 +387,13 @@ Removing rubyzip (1.0.0)
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[sinatra で rails から外れて i did it my way (2)]]></title>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (2)]]></title>
     <link href="http://momota.github.io/blog/2013/09/22/sinatra/"/>
     <updated>2013-09-22T06:15:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/09/22/sinatra</id>
     <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
 
-<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れて i did it my way&rdquo; の続き</a></p>
+<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
 
 <p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
 また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
@@ -401,13 +401,13 @@ Removing rubyzip (1.0.0)
 <hr />
 
 <ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
 
 <ul>
 <li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
 
 <ul>
 <li>sinatra で MongoDB を使ったデータ永続化</li>
@@ -415,7 +415,7 @@ Removing rubyzip (1.0.0)
 <li>Bootstrap でのお化粧</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
 
 <ul>
 <li>sinatra の heroku へのデプロイ</li>
@@ -723,13 +723,13 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 <hr />
 
 <ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">sinatra で rails から外れて i did it my way (1)</a>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
 
 <ul>
 <li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">sinatra で rails から外れて i did it my way (2)</a>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
 
 <ul>
 <li>sinatra で MongoDB を使ったデータ永続化</li>
@@ -737,7 +737,7 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 <li>Bootstrap でのお化粧</li>
 </ul>
 </li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">sinatra で rails から外れて i did it my way (3)</a>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
 
 <ul>
 <li>sinatra の heroku へのデプロイ</li>
