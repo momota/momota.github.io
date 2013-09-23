@@ -249,7 +249,7 @@ post '/delete' do
 end
 ```
 
-これで、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続ができた。
+これを前述したとおり、`git commit/push`してあげれば、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続が確認できる。
 
 私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。
 
@@ -270,7 +270,10 @@ $ heroku logs --tail
 
 # 番外編
 
-## (失敗編) heroku gem をインストールする
+heroku gem は将来的に廃止されるようで、heroku toolbelt をインストールすることを推奨する。
+
+
+## (失敗,というか古い情報編) heroku gem をインストールする
 
 Gemfile に `gem "heroku"` を追記して bundler でインストールする。
 
