@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-11-13T00:37:57+09:00</updated>
+  <updated>2013-11-13T00:43:53+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -253,7 +253,8 @@ datapath_id は仮想スイッチの IDのようだ。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>無事に動いた。</p>
+<p>無事に動いた。
+Let&rsquo;s SDN.</p>
 ]]></content>
   </entry>
   
