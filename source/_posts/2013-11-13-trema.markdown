@@ -1,0 +1,160 @@
+---
+layout: post
+title: "trema をインストールする"
+date: 2013-11-13 00:02
+comments: true
+categories: sdn openflow trema
+---
+
+[trema](https://github.com/trema/trema) は、ネットワークをソフトウェアでコントロールするという思想のSDNの中のひとつ、openflowのコントローラを開発するためのフレームワーク。
+
+インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。
+インストールする trema バージョンは 0.4.3。
+ruby バージョンは 2.0.0p247。
+
+<!-- more -->
+
+## 1. trema に必要なパッケージをインストールする
+
+```sh
+$ sudo apt-get install gcc make ruby-dev libopenssl-ruby libpcap-dev libsqlite3-dev libglib2.0-dev
+```
+
+## 2. 作業ディレクトリ dev を作り、移動する
+
+```sh
+$ mkdir dev
+$ cd dev
+```
+
+## 3. github から最新のコードをクローンする
+
+```sh
+$ git clone git@github.com:trema/trema.git
+Cloning into 'trema'...
+Enter passphrase for key '/home/momota/.ssh/id_rsa': *********************
+remote: Counting objects: 18921, done.
+remote: Compressing objects: 100% (5536/5536), done.
+remote: Total 18921 (delta 14585), reused 17492 (delta 13303)
+Receiving objects: 100% (18921/18921), 17.31 MiB | 15 KiB/s, done.
+Resolving deltas: 100% (14585/14585), done.
+
+$ cd trema
+```
+
+## 4. trema を動かすための ruby バージョンを rbenv で 2.0 系に指定する
+
+```sh
+$ rbenv local 2.0.0-p247
+$ rbenv rehash
+$ ruby -v
+ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-linux]
+```
+
+## 5. bundler で関連 gem をインストールする
+
+```sh
+$ gem install bundle
+$ bundle -v
+Bundler version 1.3.5
+
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/.........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Installing rake (10.1.0)
+Installing Platform (0.4.0)
+Installing open4 (1.3.0)
+Installing POpen4 (0.1.4)
+Installing archive-tar-minitar (0.5.2)
+Installing ffi (1.9.0)
+Installing childprocess (0.3.9)
+Installing builder (3.2.2)
+Installing diff-lcs (1.2.4)
+Installing multi_json (1.8.0)
+Installing gherkin (2.12.1)
+Installing multi_test (0.0.2)
+Installing cucumber (1.3.8)
+Installing rspec-expectations (2.14.3)
+Installing aruba (0.5.3)
+Installing bindata (1.6.0)
+Using bundler (1.3.5)
+Installing sexp_processor (4.3.0)
+Installing ruby_parser (3.2.2)
+Installing flay (2.4.0)
+Installing flog (4.1.2)
+Installing gli (2.8.0)
+Installing json (1.8.0)
+Installing mime-types (1.25)
+Installing paper_house (0.4.0)
+Installing pio (0.2.4)
+Installing rdoc (4.0.1)
+Installing redcarpet (3.0.0)
+Installing ruby2ruby (2.0.6)
+Installing reek (1.3.3)
+Installing rest-client (1.6.7)
+Installing relish (0.7)
+Installing rspec-core (2.14.5)
+Installing rspec-mocks (2.14.3)
+Installing rspec (2.14.1)
+Using trema (0.4.2) from source at /home/momota/trema_train/trema
+Installing yard (0.8.7.2)
+Your bundle is complete!
+It was installed into ./vendor/bundle
+Post-install message from rdoc:
+Depending on your version of ruby, you may need to install ruby rdoc/ri data:
+
+<= 1.8.6 : unsupported
+ = 1.8.7 : gem install rdoc-data; rdoc-data --install
+ = 1.9.1 : gem install rdoc-data; rdoc-data --install
+>= 1.9.2 : nothing to do! Yay!
+Post-install message from reek:
+Thank you for downloading Reek. For info see the reek wiki http://wiki.github.com/troessner/reek
+```
+
+## 6. trema をビルドする
+
+```sh
+$ bundle exec rake
+```
+
+
+## 7. インストールできたか確認する
+
+```sh
+$ ./trema --version
+trema version 0.4.3
+```
+
+
+## 8. サンプルプログラムを動かしてみる
+
+openflow コントローラの実装 `./src/examples/hello_trema/hello-trema.rb` のソースは以下。
+Controller クラスを継承してメソッドを実装するだけ。
+datapath_id は仮想スイッチの IDのようだ。
+
+```ruby
+class HelloTrema < Controller
+  def switch_ready datapath_id
+    info "Hello %#x!" % datapath_id
+  end
+end
+```
+
+仮想スイッチの設定ファイル `./src/examples/hello_trema/sample.conf` は以下の内容が記載されている。
+
+```
+vswitch { datapath_id "0xabc" }
+```
+
+実行してみる。
+
+```sh
+$ ./trema run ./src/examples/hello_trema/hello-trema.rb -c ./src/examples/hello_trema/sample.conf
+Hello 0xabc!
+^C
+terminated
+```
+
+無事に動いた。
+
