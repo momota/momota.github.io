@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "trema をインストールする"
+title: "trema をインストールする (Ruby 2.0)"
 date: 2013-11-13 00:02
 comments: true
 categories: sdn openflow trema
@@ -9,7 +9,9 @@ categories: sdn openflow trema
 [trema](https://github.com/trema/trema) は、ネットワークをソフトウェアでコントロールするという思想のSDNの中のひとつ、openflowのコントローラを開発するためのフレームワーク。
 
 インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。
+
 インストールする trema バージョンは 0.4.3。
+
 ruby バージョンは 2.0.0p247。
 
 <!-- more -->
@@ -157,4 +159,4 @@ terminated
 ```
 
 無事に動いた。
-Let's SDN.
+Let's enjoy SDN.
