@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sdn | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/sdn/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-11-13T00:43:53+09:00</updated>
+  <updated>2013-11-16T12:27:35+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,15 +14,17 @@
 
   
   <entry>
-    <title type="html"><![CDATA[trema をインストールする]]></title>
+    <title type="html"><![CDATA[trema をインストールする (Ruby 2.0)]]></title>
     <link href="http://momota.github.io/blog/2013/11/13/trema/"/>
     <updated>2013-11-13T00:02:00+09:00</updated>
     <id>http://momota.github.io/blog/2013/11/13/trema</id>
     <content type="html"><![CDATA[<p><a href="https://github.com/trema/trema">trema</a> は、ネットワークをソフトウェアでコントロールするという思想のSDNの中のひとつ、openflowのコントローラを開発するためのフレームワーク。</p>
 
-<p>インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。
-インストールする trema バージョンは 0.4.3。
-ruby バージョンは 2.0.0p247。</p>
+<p>インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。</p>
+
+<p>インストールする trema バージョンは 0.4.3。</p>
+
+<p>ruby バージョンは 2.0.0p247。</p>
 
 <!-- more -->
 
@@ -172,7 +174,7 @@ terminated
 </code></p>
 
 <p>無事に動いた。
-Let&rsquo;s SDN.</p>
+Let&rsquo;s enjoy SDN.</p>
 ]]></content>
   </entry>
   
