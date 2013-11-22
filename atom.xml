@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-11-16T13:38:42+09:00</updated>
+  <updated>2013-11-23T01:36:29+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,79 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか]]></title>
+    <link href="http://momota.github.io/blog/2013/11/22/redmine/"/>
+    <updated>2013-11-22T00:29:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/11/22/redmine</id>
+    <content type="html"><![CDATA[<p><img src="http://redmine.jp/images/redmine-header-logo.png" alt="redmine" /></p>
+
+<p>一時期 wiki くらいの用途でしか使わなくなっていた redmine。
+最近、問合せドリブンの雑多なタスクが増えてきてそれらのタスク管理と、チーム内への対応状況の
+シェアがめんどくさくなってきた。チケットでそのあたりのタスク管理とか、進捗管理、スケジュー
+ル管理して、チームメンバーには redmine さえ参照してもらえれば把握してもらえるようするため、
+改めて redmine を使うようになってきた。</p>
+
+<p>redmine ではチケットに期限を入れてあげるとガントチャートを自動生成してくれる。このガント
+チャートがデフォルトだとすこぶる不評だったのでもろもろいじった。そのメモ。</p>
+
+<p>環境は、CentOS, Redmine 1.3.1.stable (MySQL)。</p>
+
+<p><code>REDMINE-HOME</code> は、<code>/var/lib/redmine/</code>。</p>
+
+<!-- more -->
+
+
+<h2>redmine ガントチャートのチケット単位に担当者名を表示する</h2>
+
+<p><code>REDMINE-HOME/lib/redmine/helpers/gantt.rb</code> を修正する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gu">@@ -353,6 +353,7 @@</span>
+</span><span class='line'>           subject &lt;&lt; view.avatar(issue.assigned_to, :class =&gt; &#39;gravatar icon-gravatar&#39;, :size =&gt; 10, :title =&gt; assigned_string).to_s.html_safe
+</span><span class='line'>           end
+</span><span class='line'>           subject &lt;&lt; view.link_to_issue(issue).html_safe
+</span><span class='line'><span class="gi">+          subject &lt;&lt; &quot; - &lt;strong&gt;#{issue.assigned_to}&lt;/strong&gt;&quot;</span>
+</span><span class='line'>           subject &lt;&lt; &#39;&lt;/span&gt;&#39;.html_safe
+</span><span class='line'>           html_subject(options, subject, :css =&gt; &quot;issue-subject&quot;, :title =&gt; issue.subject) + &quot;\n&quot;
+</span><span class='line'>           when :image
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>redmine ガントチャートのチケットリストの幅を広げる</h2>
+
+<p><code>REDMINE-HOME/app/views/gantts/show.html.erb</code> を修正する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gu">@@ -32,7 +32,7 @@</span>
+</span><span class='line'> &lt;% zoom = 1
+</span><span class='line'> @gantt.zoom.times { zoom = zoom * 2 }
+</span><span class='line'>
+</span><span class='line'><span class="gd">-subject_width = 330</span>
+</span><span class='line'><span class="gi">+subject_width = 550</span>
+</span><span class='line'> header_heigth = 18
+</span><span class='line'>
+</span><span class='line'> headers_height = header_heigth
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[trema をインストールする (Ruby 2.0)]]></title>
