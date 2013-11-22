@@ -1,0 +1,57 @@
+---
+layout: post
+title: "redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか"
+date: 2013-11-22 00:29
+comments: true
+categories: redmine
+---
+
+![redmine](http://redmine.jp/images/redmine-header-logo.png)
+
+一時期 wiki くらいの用途でしか使わなくなっていた redmine。
+最近、問合せドリブンの雑多なタスクが増えてきてそれらのタスク管理と、チーム内への対応状況の
+シェアがめんどくさくなってきた。チケットでそのあたりのタスク管理とか、進捗管理、スケジュー
+ル管理して、チームメンバーには redmine さえ参照してもらえれば把握してもらえるようするため、
+改めて redmine を使うようになってきた。
+
+redmine ではチケットに期限を入れてあげるとガントチャートを自動生成してくれる。このガント
+チャートがデフォルトだとすこぶる不評だったのでもろもろいじった。そのメモ。
+
+環境は、CentOS, Redmine 1.3.1.stable (MySQL)。
+
+`REDMINE-HOME` は、`/var/lib/redmine/`。
+
+
+<!-- more -->
+
+## redmine ガントチャートのチケット単位に担当者名を表示する
+
+`REDMINE-HOME/lib/redmine/helpers/gantt.rb` を修正する。
+
+```diff
+@@ -353,6 +353,7 @@
+           subject << view.avatar(issue.assigned_to, :class => 'gravatar icon-gravatar', :size => 10, :title => assigned_string).to_s.html_safe
+           end
+           subject << view.link_to_issue(issue).html_safe
++          subject << " - <strong>#{issue.assigned_to}</strong>"
+           subject << '</span>'.html_safe
+           html_subject(options, subject, :css => "issue-subject", :title => issue.subject) + "\n"
+           when :image
+```
+
+
+## redmine ガントチャートのチケットリストの幅を広げる
+
+`REDMINE-HOME/app/views/gantts/show.html.erb` を修正する。
+
+```diff
+@@ -32,7 +32,7 @@
+ <% zoom = 1
+ @gantt.zoom.times { zoom = zoom * 2 }
+
+-subject_width = 330
++subject_width = 550
+ header_heigth = 18
+
+ headers_height = header_heigth
+```
