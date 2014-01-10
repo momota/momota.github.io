@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sinatra | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/sinatra/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2013-12-29T17:35:51+09:00</updated>
+  <updated>2014-01-11T00:14:09+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -24,7 +24,8 @@
 事前に heroku には sign up しておこう。</p>
 
 <p>最初にできあがりを示す。
-<a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
+heroke: <a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a>
+github: <a href="https://github.com/momota/heroku_sinatra_sample">https://github.com/momota/heroku_sinatra_sample</a></p>
 
 <hr />
 
