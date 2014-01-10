@@ -13,8 +13,8 @@ categories: sinatra ruby heroku mongodb mongohq
 
 
 最初にできあがりを示す。
-http://sample-mongo-app.herokuapp.com/
-
+heroke: http://sample-mongo-app.herokuapp.com/
+github: https://github.com/momota/heroku_sinatra_sample
 
 ----
 - [rails から外れた僕らは sinatra で i did it my way (1)](http://momota.github.io/blog/2013/09/16/sinatra/)
