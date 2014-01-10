@@ -13,7 +13,9 @@ categories: sinatra ruby heroku mongodb mongohq
 
 
 最初にできあがりを示す。
-heroke: http://sample-mongo-app.herokuapp.com/
+
+heroku: http://sample-mongo-app.herokuapp.com/
+
 github: https://github.com/momota/heroku_sinatra_sample
 
 ----
