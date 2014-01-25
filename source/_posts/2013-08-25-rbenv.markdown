@@ -14,12 +14,12 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 
 <!-- more -->
 
-# rbenv をインストールする
+## rbenv をインストールする
 
 詳細はgithubの`README.md`参照。https://github.com/sstephenson/rbenv
 
 
-## 1. 最新コードをローカルにチェックアウトする
+### 1. 最新コードをローカルにチェックアウトする
 
 githubから最新版を `~/.rbenv` にチェックアウトする
 
@@ -28,7 +28,7 @@ $ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
 ```
 
 
-## 2. pathを通すため、shellの設定を変更する
+### 2. pathを通すため、shellの設定を変更する
 
 - `~/.rbenv/bin` を `$PATH` に追加する
 
@@ -47,35 +47,66 @@ ubuntu ユーザは `~/.zshrc` の代わりに `~/.profile` へ。
 
 
 
-## 3. 設定変更内容を反映するため、shell を再起動する
+### 3. 設定変更内容を反映するため、shell を再起動する
 
 ```sh
 $ exec $SHELL -l
 ```
 
 
-## (番外編) rbenv を最新版にアップグレードする
+### (番外編) rbenv を最新版にアップグレードする
 
 ```sh
 $ cd ~/.rbenv
 $ git pull
 ```
 
+## ruby-build をインストールして、任意の ruby バージョンをインストールできるようにする
 
- 
-# rbenv で任意バージョンの ruby インストールしたり、切り替えたり
+`ruby-build` は rbenv のプラグインで、いろいろなバージョンの ruby のインストールを `rbenv install` コマンドでできるようになる。
+インストールは、[公式に書いてあるように以下。](https://github.com/sstephenson/ruby-build)
 
 ```sh
-# インストール可能な ruby バージョンを一覧表示する
-# "install" command require that install ruby-build
-#   -> https://github.com/sstephenson/ruby-build
-$ rbenv install -l
+$ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+```
 
+MAC使いだと homebrew でいける。
+
+```sh
+$ brew install ruby-build
+```
+
+### インストール可能な ruby バージョンを一覧表示する
+
+```sh
+$ rbenv install -l
+```
+
+### 任意のバージョンの ruby をインストールする
+
+```sh
+$ rbenv install 1.9.3-pxx
+```
+
+### ruby-build を upgrade する
+
+新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
+`git pull` してあげれば良い。
+
+```sh
+$ cd ~/.rbenv/plugins/ruby-build/
+$ git pull origin master
+```
+
+
+
+
+ 
+## rbenv で任意バージョンの ruby へ切り替えたり
+
+```sh
 # List all Ruby versions known by rbenv
 $ rbenv versions
-
-# install
-$ rbenv install 1.9.3-pxx
 
 # switch version
 $ rbenv global 1.9.3-pxx
@@ -89,11 +120,6 @@ $ rbenv local 1.9.3-p327
 
 # ローカル設定を解除
 $ rbenv local --unset
-
-
-# get the latest ruby versions for rbenv
-$ brew install ruby-build
-$ brew link -f ruby-build
 
 
 # path to installed ruby or gem
