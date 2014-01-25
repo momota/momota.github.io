@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-01-11T00:22:12+09:00</updated>
+  <updated>2014-01-26T00:56:34+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -208,11 +208,11 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 <!-- more -->
 
 
-<h1>rbenv をインストールする</h1>
+<h2>rbenv をインストールする</h2>
 
 <p>詳細はgithubの<code>README.md</code>参照。<a href="https://github.com/sstephenson/rbenv">https://github.com/sstephenson/rbenv</a></p>
 
-<h2>1. 最新コードをローカルにチェックアウトする</h2>
+<h3>1. 最新コードをローカルにチェックアウトする</h3>
 
 <p>githubから最新版を <code>~/.rbenv</code> にチェックアウトする</p>
 
@@ -220,7 +220,7 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 $ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
 </code></p>
 
-<h2>2. pathを通すため、shellの設定を変更する</h2>
+<h3>2. pathを通すため、shellの設定を変更する</h3>
 
 <ul>
 <li><code>~/.rbenv/bin</code> を <code>$PATH</code> に追加する</li>
@@ -243,38 +243,63 @@ $ echo 'eval "$(rbenv init -)"' &gt;&gt; ~/.zshrc
 <p>bash ユーザは <code>~/.zshrc</code> の代わりに <code>~/.bash_profile</code> へ。
 ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code> へ。</p>
 
-<h2>3. 設定変更内容を反映するため、shell を再起動する</h2>
+<h3>3. 設定変更内容を反映するため、shell を再起動する</h3>
 
 <p><code>sh
 $ exec $SHELL -l
 </code></p>
 
-<h2>(番外編) rbenv を最新版にアップグレードする</h2>
+<h3>(番外編) rbenv を最新版にアップグレードする</h3>
 
 <p><code>sh
 $ cd ~/.rbenv
 $ git pull
 </code></p>
 
-<h1>rbenv で任意バージョンの ruby インストールしたり、切り替えたり</h1>
+<h2>ruby-build をインストールして、任意の ruby バージョンをインストールできるようにする</h2>
+
+<p><code>ruby-build</code> は rbenv のプラグインで、いろいろなバージョンの ruby のインストールを <code>rbenv install</code> コマンドでできるようになる。
+インストールは、<a href="https://github.com/sstephenson/ruby-build">公式に書いてあるように以下。</a></p>
+
+<p><code>sh
+$ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</code></p>
+
+<p>MAC使いだと homebrew でいける。</p>
+
+<p><code>sh
+$ brew install ruby-build
+</code></p>
+
+<h3>ruby-build を upgrade する</h3>
+
+<p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
+<code>git pull</code> してあげれば良い。</p>
+
+<p><code>sh
+$ cd ~/.rbenv/plugins/ruby-build/
+$ git pull origin master
+</code></p>
+
+<p>インストール可能な ruby バージョンを一覧表示する</p>
+
+<p><code>sh
+$ rbenv install -l
+</code></p>
+
+<p>任意のバージョンの ruby をインストールする</p>
+
+<p><code>sh
+$ rbenv install 1.9.3-pxx
+</code></p>
+
+<h2>rbenv で任意バージョンの ruby へ切り替えたり</h2>
 
 <p>```sh</p>
-
-<h1>インストール可能な ruby バージョンを一覧表示する</h1>
-
-<h1>&ldquo;install&rdquo; command require that install ruby-build</h1>
-
-<h1>&ndash;> <a href="https://github.com/sstephenson/ruby-build">https://github.com/sstephenson/ruby-build</a></h1>
-
-<p>$ rbenv install -l</p>
 
 <h1>List all Ruby versions known by rbenv</h1>
 
 <p>$ rbenv versions</p>
-
-<h1>install</h1>
-
-<p>$ rbenv install 1.9.3-pxx</p>
 
 <h1>switch version</h1>
 
@@ -291,11 +316,6 @@ $ git pull
 <h1>ローカル設定を解除</h1>
 
 <p>$ rbenv local &mdash;unset</p>
-
-<h1>get the latest ruby versions for rbenv</h1>
-
-<p>$ brew install ruby-build
-$ brew link -f ruby-build</p>
 
 <h1>path to installed ruby or gem</h1>
 

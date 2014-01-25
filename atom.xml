@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-01-11T00:22:12+09:00</updated>
+  <updated>2014-01-26T00:56:34+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -2863,11 +2863,11 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 <!-- more -->
 
 
-<h1>rbenv をインストールする</h1>
+<h2>rbenv をインストールする</h2>
 
 <p>詳細はgithubの<code>README.md</code>参照。<a href="https://github.com/sstephenson/rbenv">https://github.com/sstephenson/rbenv</a></p>
 
-<h2>1. 最新コードをローカルにチェックアウトする</h2>
+<h3>1. 最新コードをローカルにチェックアウトする</h3>
 
 <p>githubから最新版を <code>~/.rbenv</code> にチェックアウトする</p>
 
@@ -2876,7 +2876,7 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>2. pathを通すため、shellの設定を変更する</h2>
+<h3>2. pathを通すため、shellの設定を変更する</h3>
 
 <ul>
 <li><code>~/.rbenv/bin</code> を <code>$PATH</code> に追加する</li>
@@ -2901,14 +2901,14 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 <p>bash ユーザは <code>~/.zshrc</code> の代わりに <code>~/.bash_profile</code> へ。
 ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code> へ。</p>
 
-<h2>3. 設定変更内容を反映するため、shell を再起動する</h2>
+<h3>3. 設定変更内容を反映するため、shell を再起動する</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">exec</span> <span class="nv">$SHELL</span> -l
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>(番外編) rbenv を最新版にアップグレードする</h2>
+<h3>(番外編) rbenv を最新版にアップグレードする</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -2917,7 +2917,50 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>rbenv で任意バージョンの ruby インストールしたり、切り替えたり</h1>
+<h2>ruby-build をインストールして、任意の ruby バージョンをインストールできるようにする</h2>
+
+<p><code>ruby-build</code> は rbenv のプラグインで、いろいろなバージョンの ruby のインストールを <code>rbenv install</code> コマンドでできるようになる。
+インストールは、<a href="https://github.com/sstephenson/ruby-build">公式に書いてあるように以下。</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>MAC使いだと homebrew でいける。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew install ruby-build
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ruby-build を upgrade する</h3>
+
+<p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
+<code>git pull</code> してあげれば良い。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/.rbenv/plugins/ruby-build/
+</span><span class='line'><span class="nv">$ </span>git pull origin master
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>インストール可能な ruby バージョンを一覧表示する</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>任意のバージョンの ruby をインストールする</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>rbenv で任意バージョンの ruby へ切り替えたり</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -2938,29 +2981,8 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># インストール可能な ruby バージョンを一覧表示する</span>
-</span><span class='line'><span class="c"># &quot;install&quot; command require that install ruby-build</span>
-</span><span class='line'><span class="c">#   -&gt; https://github.com/sstephenson/ruby-build</span>
-</span><span class='line'><span class="nv">$ </span>rbenv install -l
-</span><span class='line'>
-</span><span class='line'><span class="c"># List all Ruby versions known by rbenv</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># List all Ruby versions known by rbenv</span>
 </span><span class='line'><span class="nv">$ </span>rbenv versions
-</span><span class='line'>
-</span><span class='line'><span class="c"># install</span>
-</span><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
 </span><span class='line'>
 </span><span class='line'><span class="c"># switch version</span>
 </span><span class='line'><span class="nv">$ </span>rbenv global 1.9.3-pxx
@@ -2974,11 +2996,6 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 </span><span class='line'>
 </span><span class='line'><span class="c"># ローカル設定を解除</span>
 </span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local</span> --unset
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c"># get the latest ruby versions for rbenv</span>
-</span><span class='line'><span class="nv">$ </span>brew install ruby-build
-</span><span class='line'><span class="nv">$ </span>brew link -f ruby-build
 </span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="c"># path to installed ruby or gem</span>
