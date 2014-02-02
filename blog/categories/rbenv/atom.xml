@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rbenv | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/rbenv/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-01-26T00:56:34+09:00</updated>
+  <updated>2014-02-02T12:34:28+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -91,6 +91,18 @@ $ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-
 $ brew install ruby-build
 </code></p>
 
+<h3>インストール可能な ruby バージョンを一覧表示する</h3>
+
+<p><code>sh
+$ rbenv install -l
+</code></p>
+
+<h3>任意のバージョンの ruby をインストールする</h3>
+
+<p><code>sh
+$ rbenv install 1.9.3-pxx
+</code></p>
+
 <h3>ruby-build を upgrade する</h3>
 
 <p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
@@ -99,18 +111,6 @@ $ brew install ruby-build
 <p><code>sh
 $ cd ~/.rbenv/plugins/ruby-build/
 $ git pull origin master
-</code></p>
-
-<p>インストール可能な ruby バージョンを一覧表示する</p>
-
-<p><code>sh
-$ rbenv install -l
-</code></p>
-
-<p>任意のバージョンの ruby をインストールする</p>
-
-<p><code>sh
-$ rbenv install 1.9.3-pxx
 </code></p>
 
 <h2>rbenv で任意バージョンの ruby へ切り替えたり</h2>

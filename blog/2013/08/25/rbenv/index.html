@@ -20,6 +20,19 @@
 	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+    <!-- google analytics -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    
+      ga('create', 'UA-2571447-2', 'momota.github.io');
+      ga('send', 'pageview');
+    
+    </script>
+
 	<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
 <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
 
@@ -58,6 +71,7 @@ $(document).ready(
 </script>
 	
 </head>
+
 
 
 <body>
@@ -178,6 +192,20 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>インストール可能な ruby バージョンを一覧表示する</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>任意のバージョンの ruby をインストールする</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h3>ruby-build を upgrade する</h3>
 
 <p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
@@ -187,20 +215,6 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/.rbenv/plugins/ruby-build/
 </span><span class='line'><span class="nv">$ </span>git pull origin master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>インストール可能な ruby バージョンを一覧表示する</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>任意のバージョンの ruby をインストールする</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
 </span></code></pre></td></tr></table></div></figure>
 
 

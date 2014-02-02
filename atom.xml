@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-01-26T00:56:34+09:00</updated>
+  <updated>2014-02-02T12:34:28+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -2934,6 +2934,20 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>インストール可能な ruby バージョンを一覧表示する</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>任意のバージョンの ruby をインストールする</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h3>ruby-build を upgrade する</h3>
 
 <p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
@@ -2943,20 +2957,6 @@ ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/.rbenv/plugins/ruby-build/
 </span><span class='line'><span class="nv">$ </span>git pull origin master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>インストール可能な ruby バージョンを一覧表示する</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>任意のバージョンの ruby をインストールする</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
 </span></code></pre></td></tr></table></div></figure>
 
 
