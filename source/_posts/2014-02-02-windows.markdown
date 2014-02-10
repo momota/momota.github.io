@@ -29,6 +29,18 @@ categories: windows work
 - ウィンドウ分割
 
 
+## IME
+
+### Google 日本語入力
+
+
+## font
+
+windows で文字を書くことが仕事の大部分を占めるのでフォントにはこだわりたい。
+アンチエイリアスがかかって、等幅で、文字の識別がしやすい(例えば、"l" と "1"、 "O" と "0"、"," と ".")ものを使っている。
+
+- [Osaka 等幅](http://osaka.is.land.to/)
+- [MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/migmix/)
 
 ## ランチャ
 
@@ -136,11 +148,6 @@ ctrl + shift + I で起動する developer tools も便利。
 ### IE
 
 社内の申請サイトでは IE しか機能しないものもあるためたまに利用。
-
-
-## IME
-
-### Google 日本語入力
 
 
 ## 開発環境
