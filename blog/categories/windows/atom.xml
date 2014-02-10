@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windows | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/windows/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-02-10T18:58:29+09:00</updated>
+  <updated>2014-02-10T19:20:40+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -41,6 +41,21 @@
 <li>補完機能</li>
 <li>レジスタ</li>
 <li>ウィンドウ分割</li>
+</ul>
+
+
+<h2>IME</h2>
+
+<h3>Google 日本語入力</h3>
+
+<h2>font</h2>
+
+<p>windows で文字を書くことが仕事の大部分を占めるのでフォントにはこだわりたい。
+アンチエイリアスがかかって、等幅で、文字の識別がしやすい(例えば、"l" と &ldquo;1"、 "O&rdquo; と &ldquo;0"、&rdquo;,&ldquo; と &rdquo;.&ldquo;)ものを使っている。</p>
+
+<ul>
+<li><a href="http://osaka.is.land.to/">Osaka 等幅</a></li>
+<li><a href="http://mix-mplus-ipa.sourceforge.jp/migmix/">MigMix 2M</a></li>
 </ul>
 
 
@@ -212,10 +227,6 @@ ctrl + shift + I で起動する developer tools も便利。</p>
 <h3>IE</h3>
 
 <p>社内の申請サイトでは IE しか機能しないものもあるためたまに利用。</p>
-
-<h2>IME</h2>
-
-<h3>Google 日本語入力</h3>
 
 <h2>開発環境</h2>
 
