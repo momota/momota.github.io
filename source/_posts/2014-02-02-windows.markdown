@@ -1,0 +1,204 @@
+---
+layout: post
+title: "これだけは入れとけ! 個人的に仕事でよく使う windows ソフト"
+date: 2014-02-02 17:53
+comments: true
+categories: windows work
+---
+自分の windows マシンへのインストール記録として。ちなみに windows 7。
+何かよいソフトがあれば追記していくつもり。
+
+後半疲れて雑になっている感じはある。
+
+
+<!-- more -->
+
+## テキストエディタ
+
+### vim
+
+[kaoriya-vim](http://www.kaoriya.net/software/vim/) を使っている。
+
+別エントリにするつもりだが、機能が豊富かつ軽量なのが選定理由。
+
+- syntax highlight
+- 正規表現での文字列検索・置換
+- ファイル横断の文字列検索
+- 補完機能
+- レジスタ
+- ウィンドウ分割
+
+
+
+## ランチャ
+
+### fenrir
+
+[fenrir - 窓の杜ライブラリ](http://www.forest.impress.co.jp/lib/dktp/desktop/launcher/fenrir.html)
+
+キーワードマッチング型のランチャ。mac の spotlight みたいなアプリケーション。
+デスクトップがすっきりする。アプリケーションの起動だけでなく、ショートカットもいける。
+fenrir 起動は、任意のキーがアサイン可能で、個人的に使い道がない capslock をキーアサインしている。
+
+
+
+## 付箋
+
+### stickypaper
+
+![stickypaper](http://www.pentacom.jp/pentacom/bin/paperhelp/img/head_sc121.jpg)
+
+[stickypaper](http://www.pentacom.jp/pentacom/bin/paperhelp/index.html)
+
+なんとなくカラフルで見た目がきれいだし、付箋タイトル部分をダブルクリックで折りたためるし便利。
+よくやりとりする人の連絡先だったり、ちょっとしたメモだったり、カレンダーとかも。
+
+ウィンドウを最前に持ってこれるショートカットキー(stickypaper ではホットキーと呼んでいる)が設定できる。
+これまた通常使わない、かつ、めったに押さない "shift + 0" をアサインしている。
+
+
+## デスクトップアイコンのリスト化
+
+### desktopListview
+
+![desktoplistview](http://desktoplistview.googlecode.com/files/screenshot.jpg)
+
+[desktoplistview - list view for your desktop](http://code.google.com/p/desktoplistview/)
+
+windows xp 時代は”ぴたすちお”を使っていたけど、widows 7だとうまく動かない(というか機能が競合してめんどくさかった)のでこちらを使っている。
+
+
+
+## ファイラ
+
+### QTTabBar
+
+![QTTabBar](http://qttabbar-ja.wdfiles.com/local--files/repository/qttabbar_top.png)
+
+[QTTabBar - QuizoApps](http://qttabbar-ja.wikidot.com/)
+
+
+エクスプローラをタブ化したいと思ってインストール。
+その他、ファイルプレビュー機能とか空白部分のダブルクリックで1つ上の階層に移動できたりとかする機能とかが便利。
+
+
+
+## コミュニケーション
+
+### メーラ thunderbird
+
+プラグインが多くて学生時代から使っている。本当は mutt を使おうとしてみたがうまくメール受信できなくて断念した。
+あとはチャットクライアントとして時々使っている。
+以下のようなプラグインを使っている。
+
+|プラグイン名|機能|
+|:-----------|:---|
+|[external editor](http://globs.org/articles.php?pg=2&lng=en)|好きなエディタでメールを作成できる。vim でメール編集するために利用。|
+|[nostalgy](https://addons.mozilla.org/ja/thunderbird/addon/nostalgy/)|キーボードショートカットでフォルダの移動やメールの移動などができる。|
+|[color folders](https://addons.mozilla.org/ja/thunderbird/addon/color-folders/)|フォルダの色付けができる。長年仕事しているとすごいフォルダ階層がすごいことになるので色付けして分かりやすくする|
+|[extra folder columns](https://addons.mozilla.org/ja/thunderbird/addon/extra-folder-columns/)|フォルダペインにフォルダに含まれるメール数やサイズなどの表示項目を追加できる|
+|[xnote++](https://addons.mozilla.org/ja/thunderbird/addon/xnotepp/)|メール単位に付箋が貼れる|
+|[thunderbird conversations](https://addons.mozilla.org/ja/thunderbird/addon/gmail-conversation-view/)|スレッドビューを追加できる|
+|[keyword highlight](https://addons.mozilla.org/ja/thunderbird/addon/keyword-highlight/)|登録しておいたキーワードをサイズとか色とか変更してくれる。自分の名前とかを登録。|
+|[chat notifier for thunderbird](https://addons.mozilla.org/ja/thunderbird/addon/chat-notifier-for-thunderbid/)|チャットメッセージを受信したらお知らせしてくれる|
+
+
+### Psi
+
+XMPP クライアント。http://psi-im.org/
+
+### IP Messanger
+
+最近はあまり使ってない http://ipmsg.org/
+
+
+
+
+## ブラウザ
+
+### google chrome
+
+軽量なブラウザ。
+プラグインも充実してきたため、3年前くらいから徐々に firefox から切り替え。
+ctrl + shift + I で起動する developer tools も便利。
+
+|プラグイン名|機能|
+|:-----------|:---|
+|[autoPagerize](https://chrome.google.com/webstore/detail/autopagerize/igiofjhpmpihnifddepnpngfjhkfenbp?hl=ja)|例えば複数ページで構成される検索結果ページなどで、自動で次のページをロードしてくれる|
+|[awesome screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=ja)|web 画面のキャプチャ用|
+|[gestures for google chrome](https://chrome.google.com/webstore/detail/gestures-for-google-chrom/jpkfjicglakibpenojifdiepckckakgk?hl=ja)|マウスジェスチャー用|
+|[frame two pages](https://chrome.google.com/webstore/detail/frame-two-pages/eldgpcphflnopbjadiaonofideekgdgm)|フレーム分割して 1 つのタブで複数ページを表示する|
+|[proxy switchy](https://chrome.google.com/webstore/detail/proxy-switchy/caehdcpeofiiigpdhbabniblemipncjj)|社内プロキシの切り替え用。|
+|[はてなブックマーク google chrome拡張](https://chrome.google.com/webstore/detail/%E3%81%AF%E3%81%A6%E3%81%AA%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF-googlechrome-%E6%8B%A1%E5%BC%B5/dnlfpnhinnjdgmjfpccajboogcjocdla?hl=ja)|ブックマーク用|
+
+
+
+### IE
+
+社内の申請サイトでは IE しか機能しないものもあるためたまに利用。
+
+
+## IME
+
+### Google 日本語入力
+
+
+## 開発環境
+
+### virtual box + vagrant
+
+検証用に自前サーバがほしいときとか。
+ずっと VMware Player を使ってたけど、1年前くらいから vagrant に切り替え。
+
+### ターミナルソフト
+
+既存資産の teraterm マクロを利用する必要がない限りは putty。
+
+### ファイル転送
+
+winscp
+
+
+
+## バージョン管理
+
+### git
+
+クライアントソフトは [github for windows](http://windows.github.com/) を利用。
+一緒にインストールされる、bash が結構便利。
+
+
+
+## diff ツール
+
+### winmerge
+
+行内比較がしやすいのと、ディレクトリ比較もできるので [winmerge](http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge.html) を使っている。
+
+
+## network
+
+
+### wireshark
+
+パケット解析用に [wireshark](http://sourceforge.jp/projects/wireshark/) を使っている。
+パケットキャプチャは比較的簡単だけど、パケット解析のほうが断然手間なのであまり簡単に「キャプチャしようぜ！」なんて言うな。 > 各位
+
+
+### exping
+
+宛先リストを作っておいて、そこに列挙した宛先に対して、ping や traceroute を実行してくれる。
+実行回数や間隔なども調整できる。
+
+
+### RouteDiff
+
+cisco 社のルーティングテーブル情報 (show ip route) 用 diff ツール。
+最近は Juniper 社機器を使うことが多いのであまり使わなくなった。
+
+
+### その他
+
+疎通確認用に zenmap とか構成管理用に rancid とか気になっているけどまだ触れていない。
+
+
