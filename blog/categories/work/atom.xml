@@ -4,7 +4,7 @@
   <title><![CDATA[Category: work | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/work/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-02-11T13:07:15+09:00</updated>
+  <updated>2014-02-11T13:24:23+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -59,11 +59,17 @@ MS Office も毎日触っているけど割愛。</p>
 <p>windows で文字を書くことが仕事の大部分を占めるのでフォントにはこだわりたい。
 アンチエイリアスがかかって、等幅で、文字の識別がしやすい(例えば、"l" と &ldquo;1"、 "O&rdquo; と &ldquo;0"、&rdquo;,&ldquo; と &rdquo;.&ldquo;)ものを使っている。</p>
 
-<ul>
-<li><a href="http://osaka.is.land.to/">Osaka 等幅</a></li>
-<li><a href="http://mix-mplus-ipa.sourceforge.jp/migmix/">MigMix 2M</a></li>
-</ul>
+<h3>Osaka</h3>
 
+<p><img src="http://osaka.is.land.to/images/example_1_osaka.gif" alt="osaka" /></p>
+
+<p>Mac OS 標準の <a href="http://osaka.is.land.to/">Osaka</a> の等幅フォントを使っている。</p>
+
+<h3>MigMix 2M</h3>
+
+<p><img src="http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png" alt="MigMix 2M" /></p>
+
+<p>最近は <a href="http://mix-mplus-ipa.sourceforge.jp/migmix/">MigMix 2M</a> を中心に使っている。</p>
 
 <h2>ランチャ</h2>
 
@@ -269,16 +275,22 @@ ruby も windows ローカルにインストールして使っていたが、最
 
 <h3>winmerge</h3>
 
+<p><img src="http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge_2_8.png" alt="winmerge" /></p>
+
 <p>行内比較がしやすいのと、ディレクトリ比較もできるので <a href="http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge.html">winmerge</a> を使っている。</p>
 
 <h2>network</h2>
 
 <h3>wireshark</h3>
 
+<p><img src="http://static.sourceforge.jp/thumb/g/0/62/640x640_0.png" alt="wireshark" /></p>
+
 <p>パケット解析用に <a href="http://sourceforge.jp/projects/wireshark/">wireshark</a> を使っている。
 パケットキャプチャは比較的簡単だけど、パケット解析のほうが断然手間なのであまり簡単に「キャプチャしようぜ！」なんて言うな。 > 各位</p>
 
 <h3>exping</h3>
+
+<p><img src="http://www.woodybells.com/image/exp2.gif" alt="exping" /></p>
 
 <p>宛先リストを作っておいて、そこに列挙した宛先に対して、ping や traceroute を実行してくれる。
 実行回数や間隔なども調整できる。</p>
