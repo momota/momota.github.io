@@ -45,8 +45,19 @@ MS Office も毎日触っているけど割愛。
 windows で文字を書くことが仕事の大部分を占めるのでフォントにはこだわりたい。
 アンチエイリアスがかかって、等幅で、文字の識別がしやすい(例えば、"l" と "1"、 "O" と "0"、"," と ".")ものを使っている。
 
-- [Osaka 等幅](http://osaka.is.land.to/)
-- [MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/migmix/)
+### Osaka
+
+![osaka](http://osaka.is.land.to/images/example_1_osaka.gif)
+
+Mac OS 標準の [Osaka](http://osaka.is.land.to/) の等幅フォントを使っている。
+
+
+### MigMix 2M
+
+![MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png)
+
+最近は [MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/migmix/) を中心に使っている。
+
 
 
 ## ランチャ
@@ -138,6 +149,7 @@ XMPP クライアント。http://psi-im.org/
 
 ## ブラウザ
 
+
 ### google chrome
 
 軽量なブラウザ。
@@ -196,6 +208,8 @@ ruby も windows ローカルにインストールして使っていたが、最
 
 ### winmerge
 
+![winmerge](http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge_2_8.png)
+
 行内比較がしやすいのと、ディレクトリ比較もできるので [winmerge](http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge.html) を使っている。
 
 
@@ -203,11 +217,15 @@ ruby も windows ローカルにインストールして使っていたが、最
 
 ### wireshark
 
+![wireshark](http://static.sourceforge.jp/thumb/g/0/62/640x640_0.png)
+
 パケット解析用に [wireshark](http://sourceforge.jp/projects/wireshark/) を使っている。
 パケットキャプチャは比較的簡単だけど、パケット解析のほうが断然手間なのであまり簡単に「キャプチャしようぜ！」なんて言うな。 > 各位
 
 
 ### exping
+
+![exping](http://www.woodybells.com/image/exp2.gif)
 
 宛先リストを作っておいて、そこに列挙した宛先に対して、ping や traceroute を実行してくれる。
 実行回数や間隔なども調整できる。
