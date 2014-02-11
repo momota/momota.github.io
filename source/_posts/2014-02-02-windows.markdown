@@ -7,6 +7,7 @@ categories: windows work
 ---
 自分の windows マシンへのインストール記録として。ちなみに windows 7。
 何かよいソフトがあれば追記していくつもり。
+MS Office も毎日触っているけど割愛。
 
 後半疲れて雑になっている感じはある。
 
@@ -17,7 +18,7 @@ categories: windows work
 
 ### vim
 
-[kaoriya-vim](http://www.kaoriya.net/software/vim/) を使っている。
+会社標準は秀丸だが、[kaoriya-vim](http://www.kaoriya.net/software/vim/) を使っている。
 
 別エントリにするつもりだが、機能が豊富かつ軽量なのが選定理由。
 
@@ -27,11 +28,16 @@ categories: windows work
 - 補完機能
 - レジスタ
 - ウィンドウ分割
+- 豊富なプラグイン
 
 
 ## IME
 
 ### Google 日本語入力
+
+[Google 日本語入力](http://www.google.co.jp/ime/) を使っている。学生の頃、学校に講演に来てくれた工藤拓さんが開発者なのでリリースされてからずっと使っている。
+
+"会社名 名前です。"とか"お疲れ様です。"的な定型文をいちいち登録しないでも学習してくれ、2, 3文字入力後 tab キーで補完してくれるので文章書くときに非常に楽。
 
 
 ## font
@@ -41,6 +47,7 @@ windows で文字を書くことが仕事の大部分を占めるのでフォン
 
 - [Osaka 等幅](http://osaka.is.land.to/)
 - [MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/migmix/)
+
 
 ## ランチャ
 
@@ -77,6 +84,9 @@ fenrir 起動は、任意のキーがアサイン可能で、個人的に使い�
 
 [desktoplistview - list view for your desktop](http://code.google.com/p/desktoplistview/)
 
+他人の散らかっているデスクトップアイコンを見ると残念な気分になる。
+自分も散らからないように、多少散らかってててもすっきり見せたい、という思いでデスクトップアイコンをリスト表示している。
+
 windows xp 時代は”ぴたすちお”を使っていたけど、widows 7だとうまく動かない(というか機能が競合してめんどくさかった)のでこちらを使っている。
 
 
@@ -105,14 +115,14 @@ windows xp 時代は”ぴたすちお”を使っていたけど、widows 7だ�
 
 |プラグイン名|機能|
 |:-----------|:---|
-|[external editor](http://globs.org/articles.php?pg=2&lng=en)|好きなエディタでメールを作成できる。vim でメール編集するために利用。|
-|[nostalgy](https://addons.mozilla.org/ja/thunderbird/addon/nostalgy/)|キーボードショートカットでフォルダの移動やメールの移動などができる。|
-|[color folders](https://addons.mozilla.org/ja/thunderbird/addon/color-folders/)|フォルダの色付けができる。長年仕事しているとすごいフォルダ階層がすごいことになるので色付けして分かりやすくする|
-|[extra folder columns](https://addons.mozilla.org/ja/thunderbird/addon/extra-folder-columns/)|フォルダペインにフォルダに含まれるメール数やサイズなどの表示項目を追加できる|
-|[xnote++](https://addons.mozilla.org/ja/thunderbird/addon/xnotepp/)|メール単位に付箋が貼れる|
-|[thunderbird conversations](https://addons.mozilla.org/ja/thunderbird/addon/gmail-conversation-view/)|スレッドビューを追加できる|
-|[keyword highlight](https://addons.mozilla.org/ja/thunderbird/addon/keyword-highlight/)|登録しておいたキーワードをサイズとか色とか変更してくれる。自分の名前とかを登録。|
-|[chat notifier for thunderbird](https://addons.mozilla.org/ja/thunderbird/addon/chat-notifier-for-thunderbid/)|チャットメッセージを受信したらお知らせしてくれる|
+|[external editor](http://globs.org/articles.php?pg=2&lng=en)|好きなエディタでメールを作成できる。vim でメール編集するために利用。 
+|[nostalgy](https://addons.mozilla.org/ja/thunderbird/addon/nostalgy/)|キーボードショートカットでフォルダの移動やメールの移動などができる。 
+|[color folders](https://addons.mozilla.org/ja/thunderbird/addon/color-folders/)|フォルダの色付けができる。長年仕事しているとすごいフォルダ階層がすごいことになるので色付けして分かりやすくする 
+|[extra folder columns](https://addons.mozilla.org/ja/thunderbird/addon/extra-folder-columns/)|フォルダペインにフォルダに含まれるメール数やサイズなどの表示項目を追加できる 
+|[xnote++](https://addons.mozilla.org/ja/thunderbird/addon/xnotepp/)|メール単位に付箋が貼れる
+|[thunderbird conversations](https://addons.mozilla.org/ja/thunderbird/addon/gmail-conversation-view/)|スレッドビューを追加できる 
+|[keyword highlight](https://addons.mozilla.org/ja/thunderbird/addon/keyword-highlight/)|登録しておいたキーワードをサイズとか色とか変更してくれる。自分の名前とかを登録。 
+|[chat notifier for thunderbird](https://addons.mozilla.org/ja/thunderbird/addon/chat-notifier-for-thunderbid/)|チャットメッセージを受信したらお知らせしてくれる 
 
 
 ### Psi
@@ -121,7 +131,7 @@ XMPP クライアント。http://psi-im.org/
 
 ### IP Messanger
 
-最近はあまり使ってない http://ipmsg.org/
+最近はあまり使ってない。 http://ipmsg.org/
 
 
 
@@ -132,16 +142,17 @@ XMPP クライアント。http://psi-im.org/
 
 軽量なブラウザ。
 プラグインも充実してきたため、3年前くらいから徐々に firefox から切り替え。
-ctrl + shift + I で起動する developer tools も便利。
+
+ctrl + shift + I で起動する developer tools も便利。Firefox で使っていた Live HTTP Headers 的な機能も付いているし。
 
 |プラグイン名|機能|
 |:-----------|:---|
-|[autoPagerize](https://chrome.google.com/webstore/detail/autopagerize/igiofjhpmpihnifddepnpngfjhkfenbp?hl=ja)|例えば複数ページで構成される検索結果ページなどで、自動で次のページをロードしてくれる|
-|[awesome screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=ja)|web 画面のキャプチャ用|
-|[gestures for google chrome](https://chrome.google.com/webstore/detail/gestures-for-google-chrom/jpkfjicglakibpenojifdiepckckakgk?hl=ja)|マウスジェスチャー用|
-|[frame two pages](https://chrome.google.com/webstore/detail/frame-two-pages/eldgpcphflnopbjadiaonofideekgdgm)|フレーム分割して 1 つのタブで複数ページを表示する|
-|[proxy switchy](https://chrome.google.com/webstore/detail/proxy-switchy/caehdcpeofiiigpdhbabniblemipncjj)|社内プロキシの切り替え用。|
-|[はてなブックマーク google chrome拡張](https://chrome.google.com/webstore/detail/%E3%81%AF%E3%81%A6%E3%81%AA%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF-googlechrome-%E6%8B%A1%E5%BC%B5/dnlfpnhinnjdgmjfpccajboogcjocdla?hl=ja)|ブックマーク用|
+|[autoPagerize](https://chrome.google.com/webstore/detail/autopagerize/igiofjhpmpihnifddepnpngfjhkfenbp?hl=ja)|例えば複数ページで構成される検索結果ページなどで、自動で次のページをロードしてくれる
+|[awesome screenshot](https://chrome.google.com/webstore/detail/awesome-screenshot-captur/alelhddbbhepgpmgidjdcjakblofbmce?hl=ja)|web 画面のキャプチャ用
+|[gestures for google chrome](https://chrome.google.com/webstore/detail/gestures-for-google-chrom/jpkfjicglakibpenojifdiepckckakgk?hl=ja)|マウスジェスチャー用
+|[frame two pages](https://chrome.google.com/webstore/detail/frame-two-pages/eldgpcphflnopbjadiaonofideekgdgm)|フレーム分割して 1 つのタブで複数ページを表示する
+|[proxy switchy](https://chrome.google.com/webstore/detail/proxy-switchy/caehdcpeofiiigpdhbabniblemipncjj)|社内プロキシの切り替え用。
+|[はてなブックマーク google chrome拡張](https://chrome.google.com/webstore/detail/%E3%81%AF%E3%81%A6%E3%81%AA%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF-googlechrome-%E6%8B%A1%E5%BC%B5/dnlfpnhinnjdgmjfpccajboogcjocdla?hl=ja)|ブックマーク用
 
 
 
@@ -155,7 +166,10 @@ ctrl + shift + I で起動する developer tools も便利。
 ### virtual box + vagrant
 
 検証用に自前サーバがほしいときとか。
+
 ずっと VMware Player を使ってたけど、1年前くらいから vagrant に切り替え。
+ruby も windows ローカルにインストールして使っていたが、最近は `vagrant up` したあと Linux で ruby を使うことにしている。
+
 
 ### ターミナルソフト
 
@@ -163,7 +177,7 @@ ctrl + shift + I で起動する developer tools も便利。
 
 ### ファイル転送
 
-winscp
+基本、winscp。たまに ffftp。
 
 
 
@@ -171,9 +185,11 @@ winscp
 
 ### git
 
+個人的なドキュメントなどのバージョン管理は git で行っている。
 クライアントソフトは [github for windows](http://windows.github.com/) を利用。
 一緒にインストールされる、bash が結構便利。
 
+仕事上のドキュメントのバージョン管理(やファイル共有)については、某社のプロダクトを使っている。
 
 
 ## diff ツール
@@ -184,7 +200,6 @@ winscp
 
 
 ## network
-
 
 ### wireshark
 
