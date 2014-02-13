@@ -35,13 +35,14 @@ MS Office も毎日触っているけど割愛。
 
 ### Google 日本語入力
 
-[Google 日本語入力](http://www.google.co.jp/ime/) を使っている。学生の頃、学校に講演に来てくれた工藤拓さんが開発者なのでリリースされてからずっと使っている。
+[Google 日本語入力](http://www.google.co.jp/ime/) を使っている。学生の頃、学校に講演に来てくれた工藤拓さんが開発者。なので、なんか親しみ深くリリースされてからずっと使っている。
 
-"会社名 名前です。"とか"お疲れ様です。"的な定型文をいちいち登録しないでも学習してくれ、2, 3文字入力後 tab キーで補完してくれるので文章書くときに非常に楽。
+"XX(会社名) YY(名前)です。" とか "お疲れ様です。" 的な定型文をいちいち登録しないでも学習してくれ、2, 3文字入力後 tab キーで補完してくれるので文章書くときに非常に楽。
 
 
 ## font
 
+font はソフトか? という疑問はあるが。
 windows で文字を書くことが仕事の大部分を占めるのでフォントにはこだわりたい。
 アンチエイリアスがかかって、等幅で、文字の識別がしやすい(例えば、"l" と "1"、 "O" と "0"、"," と ".")ものを使っている。
 
@@ -177,15 +178,19 @@ ctrl + shift + I で起動する developer tools も便利。Firefox で使っ�
 
 ### virtual box + vagrant
 
+![vagrant](http://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Vagrant.png/150px-Vagrant.png)
 検証用に自前サーバがほしいときとか。
 
 ずっと VMware Player を使ってたけど、1年前くらいから vagrant に切り替え。
-ruby も windows ローカルにインストールして使っていたが、最近は `vagrant up` したあと Linux で ruby を使うことにしている。
+vagrant プラグインの sahara をインストールして OS のスナップショット的なものをとっている。 `vagrant sandbox on` で on したタイミングに`vagrant sandbox rollback` でいつでも戻せる。`vagrant sandbox on` 以降の変更点の反映は `vagrant sandbox commit` で。
+
+以前は、ruby も windows ローカルにインストールして使っていたが、最近は `vagrant up` したあと Linux で ruby を使うことにしている。
 
 
 ### ターミナルソフト
 
-既存資産の teraterm マクロを利用する必要がない限りは putty。
+既存資産の teraterm マクロを利用する必要がない限りは学生時代から愛用している putty を使っている。
+
 
 ### ファイル転送
 
@@ -241,4 +246,5 @@ cisco 社のルーティングテーブル情報 (show ip route) 用 diff ツー
 
 疎通確認用に zenmap とか構成管理用に rancid とか気になっているけどまだ触れていない。
 
+evernote や dropbox は会社で使っちゃだめってことになったので使ってない。
 
