@@ -4,7 +4,7 @@
   <title><![CDATA[Category: work | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/work/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-02-13T23:51:25+09:00</updated>
+  <updated>2014-02-23T01:07:21+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -271,7 +271,7 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 
 <p>個人的なドキュメントなどのバージョン管理は git で行っている。
 クライアントソフトは <a href="http://windows.github.com/">github for windows</a> を利用。
-一緒にインストールされる、bash が結構便利。</p>
+一緒にインストールされる、git bash が結構便利。</p>
 
 <p>仕事上のドキュメントのバージョン管理(やファイル共有)については、某社のプロダクトを使っている。</p>
 
@@ -304,7 +304,11 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 <p>cisco 社のルーティングテーブル情報 (show ip route) 用 diff ツール。
 最近は Juniper 社機器を使うことが多いのであまり使わなくなった。</p>
 
-<h3>その他</h3>
+<h2>その他</h2>
+
+<h3>CLCL</h3>
+
+<p>クリップボード履歴管理ツール<a href="http://www.nakka.com/soft/clcl/">CLCL</a>を使っている。</p>
 
 <p>疎通確認用に zenmap とか構成管理用に rancid とか気になっているけどまだ触れていない。</p>
 
