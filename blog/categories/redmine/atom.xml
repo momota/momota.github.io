@@ -4,7 +4,7 @@
   <title><![CDATA[Category: redmine | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/redmine/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-02-23T01:07:21+09:00</updated>
+  <updated>2014-05-06T19:04:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -74,6 +74,10 @@
 
 <p> headers_height = header_heigth
 ```</p>
+
+<p>チケットリストの幅ってのはこれ。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20131122_redmine/gant_redmine.png" alt="subject_width" /></p>
 ]]></content>
   </entry>
   
