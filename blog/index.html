@@ -9,9 +9,7 @@
 
 <meta name="author" content="momota"> 
 
-<meta name="description" content=" 自分の windows マシンへのインストール記録として。ちなみに windows 7。
-何かよいソフトがあれば追記していくつもり。
-MS Office も毎日触っているけど割愛。 後半疲れて雑になっている感じはある。 続きを読む &rarr; 2014-02-02 windows, work "> <meta name="keywords" content="">
+<meta name="description" content="rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。 ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。 &hellip;"> <meta name="keywords" content="">
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -111,6 +109,96 @@ $(document).ready(
 </header>
 
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/10/activerecord/">
+		
+			Rails じゃなくても ActiveRecord を使う</a>
+	</h2>
+	<div class="entry-content">
+		<p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
+
+<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
+Ruby on Rails 標準で、モデル層で使われる。</p>
+
+<p>環境は以下。</p>
+
+<ul>
+<li>Mac OSX</li>
+<li>ruby 2.1.1p76</li>
+<li>MySQL mysqld5.6.17</li>
+</ul>
+
+
+<p>最終的なディレクトリ構成は以下のようになる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>.
+</span><span class='line'>├── Gemfile
+</span><span class='line'>├── Gemfile.lock
+</span><span class='line'>├── Rakefile
+</span><span class='line'>├── config
+</span><span class='line'>│   └── database.yml
+</span><span class='line'>├── db
+</span><span class='line'>│   └── migrate
+</span><span class='line'>│       └── 20140510_create_hoges.rb
+</span><span class='line'>├── log
+</span><span class='line'>│   ├── database.log
+</span><span class='line'>│   └── trace.txt
+</span><span class='line'>└── vendor
+</span><span class='line'>    └── bundle
+</span><span class='line'>            └── <span class="o">(</span>略<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2014/05/10/activerecord/" class="more-link">続きを読む &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-10T14:54:00+09:00" pubdate data-updated="true">2014-05-10</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/activerecord/'>activerecord</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/rake/'>rake</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+
+
+</div>
+	
+</div></article>
 
 
     <article class="post">
@@ -637,51 +725,6 @@ oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマ�
 
 
 	<a class='category' href='/blog/categories/centos/'>centos</a>, <a class='category' href='/blog/categories/mac/'>mac</a>, <a class='category' href='/blog/categories/ubuntu/'>ubuntu</a>, <a class='category' href='/blog/categories/zsh/'>zsh</a>
-
-
-</div>
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/31/shell-man-color/">
-		
-			Man ページに色付けする (Zsh, Bash)</a>
-	</h2>
-	<div class="entry-content">
-		<h1>man コマンドで表示するマニュアルページに色付けする</h1>
-
-<p>man コマンド、man コマンド、マンコマンド… 連呼している私はもう今年で31歳です。こんばんわ。</p>
-
-<p><code>~/.zshrc</code> [bash 使いなら <code>~/.bash_profile</code> ] に以下を追記するとman に色がついて読みやすいっす。</p>
-
-
-		
-		<a href="/blog/2013/08/31/shell-man-color/" class="more-link">続きを読む &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-31T22:31:00+09:00" pubdate data-updated="true">2013-08-31</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/bash/'>bash</a>, <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/zsh/'>zsh</a>
 
 
 </div>
