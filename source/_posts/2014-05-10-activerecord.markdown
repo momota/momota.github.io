@@ -260,9 +260,7 @@ Empty set (0.00 sec)
 
 
 
-## select とか
-
-CRUDのCが終わったのでRUDを書こうかな。
+## select とか CRUD 操作について
 
 疲れたのであとで書く。
 
