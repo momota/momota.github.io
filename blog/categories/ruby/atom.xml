@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-05-10T17:14:26+09:00</updated>
+  <updated>2014-05-10T17:47:49+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -284,9 +284,7 @@ mysql> desc schema_migrations;
 Empty set (0.00 sec)
 ```</p>
 
-<h2>select とか</h2>
-
-<p>CRUDのCが終わったのでRUDを書こうかな。</p>
+<h2>select とか CRUD 操作について</h2>
 
 <p>疲れたのであとで書く。</p>
 ]]></content>
