@@ -23,7 +23,12 @@ Ruby on Rails 標準で、モデル層で使われる。
 .
 ├── Gemfile
 ├── Gemfile.lock
+├── README.md
 ├── Rakefile
+├── app
+│   └── models
+│       └── hoges.rb
+├── app.rb
 ├── config
 │   └── database.yml
 ├── db
@@ -31,7 +36,7 @@ Ruby on Rails 標準で、モデル層で使われる。
 │       └── 20140510_create_hoges.rb
 ├── log
 │   ├── database.log
-│   └── trace.txt
+│   └── trace.log
 └── vendor
     └── bundle
             └── (略)
@@ -221,11 +226,24 @@ rake migrate  # Migrate database
 # debug 用に--traceオプションをつけ、標準エラーをlog/trace.txtへリダイレクト。
 # bundle exec rake ENV=development でもOK
 $ bundle exec rake ENV=development --trace 2> log/trace.txt
+== 20140510 CreateHoges: migrating ============================================
+-- create_table(:hoges)
+   -> 0.1159s
+== 20140510 CreateHoges: migrated (0.1160s) ===================================
 ```
 
 問題なければテーブルが作成されているはず。
 
 ```
+mysql> show tables;
++--------------------------+
+| Tables_in_dev_********** |
++--------------------------+
+| hoges                    |
+| schema_migrations        |
++--------------------------+
+2 rows in set (0.00 sec)
+
 mysql> desc schema_migrations;
 +---------+--------------+------+-----+---------+-------+
 | Field   | Type         | Null | Key | Default | Extra |
@@ -259,8 +277,253 @@ Empty set (0.00 sec)
 ```
 
 
+## CRUD 操作について
 
-## select とか CRUD 操作について
+ActiveRecordを使って CRUD 操作する。(insert/select/update/delete)
 
-疲れたのであとで書く。
+ActiveRecord では、`ActiveRecord::Base` を継承したクラスがDBの1テーブルに対応し、そのクラスの属性がテーブルの各カラムに対応する。
+このクラスのことを一般的に「モデル」と呼ぶ。
+Rails では、Rails アプリを生成した段階で MVC 別にディレクトリが生成されるので、`app/models` 以下にこの `ActiveRecord::Base` 継承クラスを作る。
+今回は Rails ではないのでそれに従う必要はない。が、モデルが増えた場合を考慮すると `app/models` 以下に整理できておいたほうがコードの可読性とかメンテナンスはしやすそうなので、`app/models/hoges.rb` ファイルを作ることにする。
+Rails って理にかなっているんだな。
 
+
+```ruby
+class Hoges < ActiveRecord::Base
+end
+```
+
+この `Hoges` は対応するテーブル名にあわせる。これもCoC。
+レコードを単数形で扱うため、テーブル名を複数形にすることが多いみたい。
+
+
+### Create: テーブルへ insert する
+
+CRUD の C。
+
+`app.rb` をつくる。
+
+モデルを `new` して属性値をセットしてあげればOK。
+
+```ruby
+require "active_record"
+require "yaml"
+require "erb"
+require "./app/models/hoges"
+
+
+db_conf = YAML.load( ERB.new( File.read("./config/database.yml") ).result )
+
+# 開発用DB接続パラメータ読み込み, 接続する
+ActiveRecord::Base.establish_connection(db_conf["db"]["development"])
+
+
+test_name = "momota.txt"
+test_url  = "http://momota.github.io/"
+
+hoge = Hoges.new { |h|
+  h.name = test_name
+  h.url  = test_url
+}
+p hoge
+hoge.save
+p hoge
+```
+
+なお、`save` しないと insert されない。
+
+こんな感じで生成時にハッシュを渡してもOK。
+
+```ruby
+hoge = Hoges.new(:name => test_name, :url => test_url)
+hoge.save
+```
+
+それでは実行してみる。
+
+```sh
+$ bundle exec ruby app.rb
+#<Hoges id: nil, name: "momota.txt", url: "http://momota.github.io/", created_at: nil, updated_at: nil>
+#<Hoges id: 1, name: "momota.txt", url: "http://momota.github.io/", created_at: "2014-05-10 23:50:46", updated_at: "2014-05-10 23:50:46">
+```
+
+上記から、saveしないと `id` や `created_at` などの値が空なので insert されていないことが分かる。
+
+実際にテーブルの内容を見てみよう。ちゃんと insert されている。
+
+```
+mysql> select * from hoges;
++----+------------+--------------------------+---------------------+---------------------+
+| id | name       | url                      | created_at          | updated_at          |
++----+------------+--------------------------+---------------------+---------------------+
+|  1 | momota.txt | http://momota.github.io/ | 2014-05-10 23:50:46 | 2014-05-10 23:50:46 |
++----+------------+--------------------------+---------------------+---------------------+
+1 row in set (0.00 sec)
+```
+
+
+### Read: レコードを select する
+
+CRUD の R。
+
+
+主キーで select する場合は、`find` メソッドを使う。
+
+```ruby
+hoges = Hoges.find( 1 )
+```
+
+これは以下の SQL と同じ。
+
+```sql
+SELECT * FROM hoges where hoges.id = 1 LIMIT 1;
+```
+
+
+主キー以外だと、`find_by` メソッドを使う。
+
+該当するレコードがなければ `nil` が返ってくる。
+
+```ruby
+hoges = Hoges.find_by name: "momota.txt"
+```
+
+これは以下のような書き方もできる。
+
+```ruby
+hoges = Hoges.where(name: "momota.txt").take
+```
+
+
+これらは以下の SQL と同じ。
+
+```sql
+SELECT * FROM hoges where hoges.name = "momota.txt" LIMIT 1;
+```
+
+`find_by` メソッドを使ってレコードが存在しないときにだけ insert するように `app.rb` を書き変えてみよう。
+
+
+```diff
+-hoge = Hoges.new { |h|
+-  h.name = test_name
+-  h.url  = test_url
+-}
+-p hoge
+-hoge.save
+-p hoge
++rec = Hoges.find_by url: test_url
++unless rec
++  hoge = Hoges.new { |h|
++    h.name = test_name
++    h.url  = test_url
++  }
++  hoge.save
++  puts "すでにデータは insert 済みなのでここには入らない"
++end
+
++p rec
+```
+
+実行すると最終行の `p rec` が呼ばれていることが分かる。
+
+```sh
+$ bundle exec ruby app.rb
+<Hoges id: 1, name: "momota.txt", url: "http://momota.github.io/", created_at: "2014-05-10 23:50:46", updated_at: "2014-05-10 23:50:46">
+```
+
+`find_or_create_by` メソッドによりさらにスマートな書き方ができる。
+
+```diff
+-rec = Hoges.find_by url: test_url
+-unless rec
+-  hoge = Hoges.new { |h|
+-    h.name = test_name
+-    h.url  = test_url
+-  }
+-  hoge.save
++rec = Hoges.find_or_create_by( url: test_url ) do |h|
++  h.name = test_name
+  puts "すでにデータは insert 済みなのでここには入らない"
+end
+```
+
+その他いろいろと以下のページが参考になる。
+
+- [Active Record Query Interface](http://edgeguides.rubyonrails.org/active_record_querying.html)
+
+
+
+### Update: レコードを update する
+
+CRUD の U。
+
+
+これはオブジェクトの属性を更新して `save` するだけ。
+
+```ruby
+changed_name = "momota.log"
+hoges = Hoges.find_by url: test_url
+hoges.name = changed_name
+hoges.save
+```
+
+
+
+### Delete: レコードを delete する
+
+CRUD の D。
+
+
+これも簡単でモデルオブジェクトから `destroy` or `delete` メソッドを呼ぶだけ。`save` は不要。
+
+`delete` はレコードの削除のみなので高速。`destroy` はレコードとオブジェクトも削除してくれるが、`delete` に比べて低速。
+
+
+```ruby
+hoges = Hoges.find( 1 )
+hoges.destroy
+```
+
+`where` で複数のレコードをひっかけて全部削除したい場合は、`destroy_all` or `delete_all` メソッドを呼ぶ。
+
+```ruby
+hoges = Hoges.destroy_all(url: test_url)
+```
+
+`find_by` してからでもOK。
+
+```ruby
+hoges = Hoges.find_by url: test_url
+hoges.destroy_all
+```
+
+`app.rb` を書き換えてみる。
+
+```ruby
+-rec = Hoges.find_or_create_by( url: test_url ) do |h|
++hoges = Hoges.find_or_create_by( url: test_url ) do |h|
+   h.name = test_name
+-  puts "すでにデータは insert 済みなのでここには入らない"
+ end
+
+-p rec
++puts "[before delete]record count: #{Hoges.count}"
++Hoges.delete_all(url: test_url)
+```
+
+実行すると、確かにレコードが削除されている。
+
+```sh
+$ bundle exec ruby app.rb
+[before delete]record count: 1
+[after delete] record count: 0
+```
+
+sqlでも確認できる。
+
+```
+mysql> select * from hoges;
+Empty set (0.00 sec)
+
+```
