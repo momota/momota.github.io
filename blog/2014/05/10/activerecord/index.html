@@ -776,6 +776,8 @@ Rails って理にかなっているんだな。</p>
 
 <p>これも簡単でモデルオブジェクトから <code>destroy</code> or <code>delete</code> メソッドを呼ぶだけ。<code>save</code> は不要。</p>
 
+<p><code>delete</code> はレコードの削除のみなので高速。<code>destroy</code> はレコードとオブジェクトも削除してくれるが、<code>delete</code> に比べて低速。</p>
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>

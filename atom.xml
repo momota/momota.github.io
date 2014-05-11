@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-05-11T10:28:42+09:00</updated>
+  <updated>2014-05-11T11:37:08+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -683,6 +683,8 @@ Rails って理にかなっているんだな。</p>
 <p>CRUD の D。</p>
 
 <p>これも簡単でモデルオブジェクトから <code>destroy</code> or <code>delete</code> メソッドを呼ぶだけ。<code>save</code> は不要。</p>
+
+<p><code>delete</code> はレコードの削除のみなので高速。<code>destroy</code> はレコードとオブジェクトも削除してくれるが、<code>delete</code> に比べて低速。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
