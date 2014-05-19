@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-05-15T01:14:50+09:00</updated>
+  <updated>2014-05-20T01:47:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,155 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[初めてのteraterm macro]]></title>
+    <link href="http://momota.github.io/blog/2014/05/20/teraterm-macro/"/>
+    <updated>2014-05-20T01:17:00+09:00</updated>
+    <id>http://momota.github.io/blog/2014/05/20/teraterm-macro</id>
+    <content type="html"><![CDATA[<p>先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。</p>
+
+<p>通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
+892J のpingは、リピート回数に上限があるので、上限回数を超えた時に再度pingコマンドを叩く必要があった。
+人間がpingの終わりを観察して終わったことを確認して再度実行するのは「ないわーーー」なので初めてのテラタームマクロを書いた。</p>
+
+<!-- more -->
+
+
+<p>pingが終わったら、打ち直す的な単純な処理だったら、意外と簡単に書けるので好き嫌いせず書いてみるのも悪くないと思った。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
+</span><span class='line'>; Cisco ルータのpingリピート回数に上限があるので、上限回数を超えた時に
+</span><span class='line'>; 再度pingを実行するマクロ
+</span><span class='line'>; 拡張pingを実行するため、enableモードで本マクロを読み込むこと
+</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
+</span><span class='line'>LOOP_LIMIT <span class="p">=</span> <span class="m">1000</span>
+</span><span class='line'>
+</span><span class='line'>sendln
+</span><span class='line'><span class="k">for</span> <span class="k">i</span> <span class="m">1</span> LOOP_LIMIT
+</span><span class='line'>  <span class="k">call</span> ping
+</span><span class='line'>next
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">:</span>ping
+</span><span class='line'>  wait <span class="s1">&#39;YOUR-ROUTER#&#39;</span>
+</span><span class='line'>  sendln <span class="s1">&#39;ping vrf VR-NAME TARGET-IP repeat 10000 timeout 1&#39;</span>
+</span><span class='line'><span class="k">return</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>linux/unix環境だとshell scriptでやったほうが手っ取り早いけど、ネットワーク機器みたいな特殊な環境だとteraterm macroみたいなのが便利なんだなといまさらながら思った。</p>
+
+<p>意外に楽しくなってきたので、もっと書きたくなってきた。</p>
+
+<p>Juniperの情報取得については、改行区切りの複数のコマンドをコピペで流し込むと出力結果の途中に入力コマンドが入り込んでしまう。プロンプトが返ってくるのを待ってから1行ずつコマンドを実行すれば本事象は回避できるので、そのようなteraterm macroを利用しているが、その中身が自分好みではなかったので書き換えてみた。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
+</span><span class='line'>; commandlist.txt から<span class="m">1</span>行ずつコマンドを読み込み、実行する
+</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
+</span><span class='line'>sendln
+</span><span class='line'>
+</span><span class='line'>commandlist <span class="p">=</span> <span class="s1">&#39;./commandlist.txt&#39;</span>
+</span><span class='line'>fileopen filehandle commandlist <span class="m">0</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">while</span> <span class="m">1</span>
+</span><span class='line'>  filereadln filehandle command
+</span><span class='line'>  <span class="k">if</span> result <span class="p">=</span> <span class="m">1</span> <span class="k">break</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">call</span> wait_prompt
+</span><span class='line'>  sendln command
+</span><span class='line'><span class="k">endwhile</span>
+</span><span class='line'>
+</span><span class='line'>fileclose filehandle
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
+</span><span class='line'>; Juniper のプロンプトを待つサブルーチン
+</span><span class='line'><span class="p">:</span>wait_prompt
+</span><span class='line'>  wait <span class="s1">&#39;@YOUR-HOSTNAME&gt;&#39;</span>
+</span><span class='line'><span class="k">return</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>commandlist.txt</code>には実行したいコマンドを改行区切りで列挙する。(ここではEXシリーズの例)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'>show system uptime <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show <span class="k">version</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show configuration <span class="p">|</span> <span class="nb">display</span> <span class="k">set</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show chassis environment <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show chassis routing<span class="p">-</span>engine <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show virtual<span class="p">-</span>chassis <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show virtual<span class="p">-</span>chassis vc<span class="p">-</span>port <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show ethernet<span class="p">-</span>switching table brief <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show arp <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show lacp interfaces <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show route <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show vlans detail <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show interfaces <span class="nb">terse</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show firewall <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span><span class='line'>show log <span class="k">messages</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[rails じゃなくても ActiveRecord を使う]]></title>
