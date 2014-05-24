@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-05-20T01:50:19+09:00</updated>
+  <updated>2014-05-24T12:22:22+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -963,6 +963,13 @@ windows で文字を書くことが仕事の大部分を占めるのでフォン
 
 <p>最近は <a href="http://mix-mplus-ipa.sourceforge.jp/migmix/">MigMix 2M</a> を中心に使っている。</p>
 
+<h3>MacType</h3>
+
+<p><img src="https://code.google.com/p/mactype/" alt="Mactype" /> はMSゴシックなどのデフォルトフォントでもアンチエイリアスをかけてくれるレンダリングソフト。</p>
+
+<p>word, excel などの MS Office を使った資料で人からもらうものや配布するものに上述した標準でないフォントは使えないので。
+デスクトップアプリケーション全般のフォントがきれいになる。</p>
+
 <h2>ランチャ</h2>
 
 <h3>fenrir</h3>
@@ -1127,6 +1134,11 @@ fenrir 起動は、任意のキーがアサイン可能で、個人的に使い�
 <td></td>
 <td align="left"><a href="https://chrome.google.com/webstore/detail/%E3%81%AF%E3%81%A6%E3%81%AA%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF-googlechrome-%E6%8B%A1%E5%BC%B5/dnlfpnhinnjdgmjfpccajboogcjocdla?hl=ja">はてなブックマーク google chrome拡張</a></td>
 <td align="left">ブックマーク用</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"><a href="https://chrome.google.com/webstore/detail/vichrome/gghkfhpblkcmlkmpcpgaajbbiikbhpdi">Vichrome</a></td>
+<td align="left">viチックに操作できる。マウスいらず。</td>
 </tr>
 </tbody>
 </table>
