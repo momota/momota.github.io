@@ -4,7 +4,7 @@
   <title><![CDATA[Category: work | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/work/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2014-05-24T12:22:22+09:00</updated>
+  <updated>2014-05-24T12:50:47+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -68,16 +68,30 @@ windows で文字を書くことが仕事の大部分を占めるのでフォン
 
 <h3>MigMix 2M</h3>
 
-<p><img src="http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png" alt="MigMix 2M" /></p>
+<p><a href="http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png">MigMix 2M</a></p>
 
 <p>最近は <a href="http://mix-mplus-ipa.sourceforge.jp/migmix/">MigMix 2M</a> を中心に使っている。</p>
 
 <h3>MacType</h3>
 
-<p><img src="https://code.google.com/p/mactype/" alt="Mactype" /> はMSゴシックなどのデフォルトフォントでもアンチエイリアスをかけてくれるレンダリングソフト。</p>
+<p><a href="https://code.google.com/p/mactype/">Mactype</a> はMSゴシックなどのデフォルトフォントでもアンチエイリアスをかけてくれるレンダリングソフト。</p>
 
-<p>word, excel などの MS Office を使った資料で人からもらうものや配布するものに上述した標準でないフォントは使えないので。
-デスクトップアプリケーション全般のフォントがきれいになる。</p>
+<p>デスクトップアプリケーション全般のフォントがきれいになる。
+また、word, excel などの MS Office を使った資料で人からもらうものや配布するものに上述した標準でないフォントは使えないので、そのような資料もきれいなフォントで見られる。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_before.png" alt="mactype_before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_after.png" alt="mactype_after" /></p>
 
 <h2>ランチャ</h2>
 
