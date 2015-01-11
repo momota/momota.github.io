@@ -4,7 +4,7 @@
   <title><![CDATA[Category: slack | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/slack/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T23:07:35+09:00</updated>
+  <updated>2015-01-11T23:31:44+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -152,10 +152,10 @@ Lita.configure do |config|
   config.robot.adapter   = :slack</p>
 
 <p>  # Slack のAPIキーを指定する
+  # 後述する heoku コマンドで heroku の環境変数を設定する
   config.adapters.slack.token = ENV[&ldquo;SLACK_API_KEY&rdquo;]</p>
 
 <p>  # heroku の redis アドオン Redis To Go 関連の設定
-  # 後述する heoku コマンドで heroku の環境変数を設定する
   config.redis[:url] = ENV[&ldquo;REDISTOGO_URL&rdquo;]
   config.http.port   = ENV[&ldquo;PORT&rdquo;]
 end

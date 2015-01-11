@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T23:07:35+09:00</updated>
+  <updated>2015-01-11T23:31:44+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -195,10 +195,10 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 </span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">adapter</span>   <span class="o">=</span> <span class="ss">:slack</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="c1"># Slack のAPIキーを指定する</span>
+</span><span class='line'>  <span class="c1"># 後述する heoku コマンドで heroku の環境変数を設定する</span>
 </span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">slack</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;SLACK_API_KEY&quot;</span><span class="o">]</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="c1"># heroku の redis アドオン Redis To Go 関連の設定</span>
-</span><span class='line'>  <span class="c1"># 後述する heoku コマンドで heroku の環境変数を設定する</span>
 </span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">redis</span><span class="o">[</span><span class="ss">:url</span><span class="o">]</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;REDISTOGO_URL&quot;</span><span class="o">]</span>
 </span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">port</span>   <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;PORT&quot;</span><span class="o">]</span>
 </span><span class='line'><span class="k">end</span>
