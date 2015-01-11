@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T23:46:45+09:00</updated>
+  <updated>2015-01-12T00:12:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -1427,6 +1427,10 @@ fenrir 起動は、任意のキーがアサイン可能で、個人的に使い�
 
 <p>最近はあまり使ってない。 <a href="http://ipmsg.org/">http://ipmsg.org/</a></p>
 
+<h3>limechat</h3>
+
+<p>IRC クライアント。</p>
+
 <h2>ブラウザ</h2>
 
 <h3>google chrome</h3>
@@ -1552,6 +1556,18 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 <h3>CLCL</h3>
 
 <p>クリップボード履歴管理ツール<a href="http://www.nakka.com/soft/clcl/">CLCL</a>を使っている。</p>
+
+<h3>everything search engine</h3>
+
+<p>高速ファイル検索 <a href="http://www.voidtools.com/">Everything search engine</a>。
+高速にファイル名で検索したいときに使う。
+正規表現も使える。</p>
+
+<h3>relaxtools addin</h3>
+
+<p>Excelの複数のマクロを体系的にまとめた多機能アドイン。</p>
+
+<p><a href="http://software.opensquare.net/relaxtools/about/">http://software.opensquare.net/relaxtools/about/</a></p>
 
 <p>疎通確認用に zenmap とか構成管理用に rancid とか気になっているけどまだ触れていない。</p>
 
