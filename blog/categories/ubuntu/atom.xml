@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ubuntu | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/ubuntu/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/07/oh-my-zsh/"/>
+    <updated>2013-09-07T00:04:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/07/oh-my-zsh</id>
+    <content type="html"><![CDATA[<p>bash や tcsh でいいよ、って人もだまされたと思って zsh 試してほしい。もう元に戻れないくらい便利だと感じてもらえるだろう。本番環境のサーバにも入れたいくらい。</p>
+
+<p>zsh そのままでも十分便利だけど、<em>oh-my-zsh</em> を入れるとさらに便利になるよ。
+oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。</p>
+
+<p>以下では、zsh インストールと oh-my-zsh の導入について記載するよ。</p>
+
+<!-- more -->
+
+
+<h2>0. zsh の特徴, つまり導入メリット</h2>
+
+<p><a href="http://ja.wikipedia.org/wiki/Z_Shell">wikipedia に zsh の特徴がまとめられている</a>が、その中でも特に以下が個人的に便利だと思う。</p>
+
+<ul>
+<li>プログラム可能な補完機能に拠って、多くのユーザーコマンドのオプションや引数を打つのを支援する
+
+<ul>
+<li>インストールの時点で数百のコマンドをサポートしている</li>
+</ul>
+</li>
+<li>スペル修正機能
+
+<ul>
+<li>間違いを正すのはもちろん、大文字を小文字に変換してくれたり</li>
+</ul>
+</li>
+<li>ユーザーの起動している全てのzshでコマンド履歴を共有することができる
+
+<ul>
+<li>screen や tmux 使いにはうれしい</li>
+</ul>
+</li>
+</ul>
+
+
+<p>その他、Wikipediaには以下の特徴が列挙されている。</p>
+
+<ul>
+<li>拡張ファイル名生成（ワイルドカード展開）に拠って &ldquo;find&rdquo; のような外部コマンドを呼び出さないで、ファイル名を展開する。</li>
+<li>変数や配列の処理が改善されている。</li>
+<li>複数行コマンドがバッファーで編集できる。</li>
+<li>様々な互換モードが在る。例えば、zshをshとして実行したとき、bashの振りをするようにできる。</li>
+<li>プロンプトテーマ</li>
+<li>端末の右端に情報を表示し長いコマンドを打っているときは自動的に隠れる右プロンプトを表示できる。</li>
+<li>殆ど全部のカスタマイズが可能。</li>
+</ul>
+
+
+<h2>1. zsh をインストールする</h2>
+
+<p>失うものが何もなくなったところで zsh をインストールしよう。</p>
+
+<p>centos だと yum でインストールする。</p>
+
+<p><code>sh
+$ sudo yum -y install zsh
+</code></p>
+
+<p>macだと homebrew でインストールする。</p>
+
+<p><code>sh
+$ sudo brew install zsh
+</code></p>
+
+<p>ubuntu だと apt でインストールする。</p>
+
+<p><code>sh
+$ sudo apt-get install zsh
+</code></p>
+
+<p>インストールできたかどうかを確認する。(上述したすべてのOSで共通、たぶん)</p>
+
+<p><code>sh
+$ zsh --version
+zsh 4.3.17 (x86_64-unknown-linux-gnu)
+$ which zsh
+/usr/bin/zsh
+</code></p>
+
+<h2>2. ログインシェルを zsh にする</h2>
+
+<p>ログイン直後にデフォルトで起動する shell を zsh にするよ。
+ここでは ubuntu 12.04 でのコマンド例ですが、たぶん mac や centos とかでも一緒でOKだと思う。</p>
+
+<p>現在利用可能なシェルの一覧は以下で確認できる。</p>
+
+<p>```sh
+$ cat /etc/shells</p>
+
+<h1>/etc/shells: valid login shells</h1>
+
+<p>/bin/sh
+/bin/dash
+/bin/bash
+/bin/rbash
+/bin/zsh
+/usr/bin/zsh
+/usr/bin/tmux
+```</p>
+
+<p>それではログインシェルを zsh に変えよう。
+インタラクティブにパスワードと zsh への path を入力しよう。</p>
+
+<p>```sh
+$ chsh
+Password:
+Changing the login shell for momota
+Enter the new value, or press ENTER for the default</p>
+
+<pre><code>    Login Shell [/bin/bash]: /usr/bin/zsh
+</code></pre>
+
+<p>```</p>
+
+<p>再度ログインして、ログインシェルが zsh へ変わったことを確認しよう。</p>
+
+<p><code>sh
+$ echo $SHELL
+/usr/bin/zsh
+</code></p>
+
+<p>ここで、<code>‾/.zshrc</code> を作りたい衝動を抑えて、次に進もう。</p>
+
+<h2>3. <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a> を導入する</h2>
+
+<p>繰り返しになりますが、oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。<code>.zshrc</code>もテンプレがあるのでコピれば楽ちん。
+カスタマイズしたければ oh-my-zsh を導入してからにしよう。
+導入方法は github に書いてあるとおり <code>curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh</code> でいいと思うけど、シェルスクリプトの中身をチェックするのがめんどかったのでわたしはマニュアルで入れました。</p>
+
+<h3>3.1. リポジトリから 最新版を clone する</h3>
+
+<p><code>sh
+$ git clone git://github.com/robbyrussell/oh-my-zsh.git ‾/.oh-my-zsh
+</code></p>
+
+<h3>3.2. すでに <code>‾/.zshrc</code> を作っているひとはバックアップしよう</h3>
+
+<p><code>sh
+cp ‾/.zshrc ‾/.zshrc.orig
+</code></p>
+
+<h3>3.3. <code>.zshrc</code> テンプレートをコピる</h3>
+
+<p><code>sh
+cp ‾/.oh-my-zsh/templates/zshrc.zsh-template ‾/.zshrc
+</code></p>
+
+<h3>3.4. 新しい <code>.zshrc</code> を読み込もう</h3>
+
+<p><code>sh
+$ source ‾/.zshrc
+</code></p>
+
+<p><code>source</code> の代わりに再ログインしてもいいけど。
+こんな感じで git のステータスも見やすくなる。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130907_oh-my-zsh/zsh.png" alt="zsh" /></p>
+
+<h3>3.5. テーマを変更する</h3>
+
+<p><a href="https://github.com/robbyrussell/oh-my-zsh/wiki/themes">ここにいろいろなテーマがある</a> ので好きなテーマ名を <code>‾/.zshrc</code> 中の <code>ZSH_THEME</code> にセットしてあげればOK。</p>
+
+<p><code>sh
+ZSH_THEME="wedisagree"
+</code></p>
+
+<p>変更したら、以下で <code>‾/.zshrc</code> を再読み込み。</p>
+
+<p><code>sh
+$ source ‾/.zshrc
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: teraterm | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/teraterm/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[初めてのteraterm macro]]></title>
+    <link href="http://momota.github.io/blog/2014/05/20/teraterm-macro/"/>
+    <updated>2014-05-20T01:17:00+09:00</updated>
+    <id>http://momota.github.io/blog/2014/05/20/teraterm-macro</id>
+    <content type="html"><![CDATA[<p>先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。</p>
+
+<p>通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
+892J のpingは、リピート回数に上限があるので、上限回数を超えた時に再度pingコマンドを叩く必要があった。
+人間がpingの終わりを観察して終わったことを確認して再度実行するのは「ないわーーー」なので初めてのテラタームマクロを書いた。</p>
+
+<!-- more -->
+
+
+<p>pingが終わったら、打ち直す的な単純な処理だったら、意外と簡単に書けるので好き嫌いせず書いてみるのも悪くないと思った。</p>
+
+<p>```vim
+; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+; Cisco ルータのpingリピート回数に上限があるので、上限回数を超えた時に
+; 再度pingを実行するマクロ
+; 拡張pingを実行するため、enableモードで本マクロを読み込むこと
+; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+LOOP_LIMIT = 1000</p>
+
+<p>sendln
+for i 1 LOOP_LIMIT
+  call ping
+next
+end</p>
+
+<p>:ping
+  wait &lsquo;YOUR-ROUTER#&rsquo;
+  sendln &lsquo;ping vrf VR-NAME TARGET-IP repeat 10000 timeout 1&rsquo;
+return
+```</p>
+
+<p>linux/unix環境だとshell scriptでやったほうが手っ取り早いけど、ネットワーク機器みたいな特殊な環境だとteraterm macroみたいなのが便利なんだなといまさらながら思った。</p>
+
+<p>意外に楽しくなってきたので、もっと書きたくなってきた。</p>
+
+<p>Juniperの情報取得については、改行区切りの複数のコマンドをコピペで流し込むと出力結果の途中に入力コマンドが入り込んでしまう。プロンプトが返ってくるのを待ってから1行ずつコマンドを実行すれば本事象は回避できるので、そのようなteraterm macroを利用しているが、その中身が自分好みではなかったので書き換えてみた。</p>
+
+<p>```vim
+; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+; commandlist.txt から1行ずつコマンドを読み込み、実行する
+; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+sendln</p>
+
+<p>commandlist = &lsquo;./commandlist.txt&rsquo;
+fileopen filehandle commandlist 0</p>
+
+<p>while 1
+  filereadln filehandle command
+  if result = 1 break</p>
+
+<p>  call wait_prompt
+  sendln command
+endwhile</p>
+
+<p>fileclose filehandle
+end</p>
+
+<p>; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+; Juniper のプロンプトを待つサブルーチン
+:wait_prompt
+  wait &lsquo;@YOUR-HOSTNAME>&rsquo;
+return
+```</p>
+
+<p>上記、<code>.ttl</code> ファイルと同じところに <code>commandlist.txt</code> を置く。
+<code>commandlist.txt</code> には実行したいコマンドを改行区切りで列挙する以下はEXシリーズのコマンド例。</p>
+
+<p><code>
+show system uptime | no-more
+show version | no-more
+show configuration | display set | no-more
+show chassis environment | no-more
+show chassis routing-engine | no-more
+show virtual-chassis | no-more
+show virtual-chassis vc-port | no-more
+show ethernet-switching table brief | no-more
+show arp | no-more
+show lacp interfaces | no-more
+show route | no-more
+show vlans detail | no-more
+show interfaces terse | no-more
+show firewall | no-more
+show log messages | no-more
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

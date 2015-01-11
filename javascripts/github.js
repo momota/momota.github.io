@@ -12,16 +12,18 @@ var github = (function(){
   }
   return {
     showRepos: function(options){
+      options.blacklist = options.blacklist.split(',');
       $.ajax({
-          url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed&callback=?"
-        , dataType: 'jsonp'
+          url: "https://api.github.com/users/"+options.user+"/repos?sort=pushed"
+        , dataType: 'json'
         , error: function (err) { $(options.target + ' li.loading').addClass('error').text("Error loading feed"); }
         , success: function(data) {
           var repos = [];
-          if (!data || !data.data) { return; }
-          for (var i = 0; i < data.data.length; i++) {
-            if (options.skip_forks && data.data[i].fork) { continue; }
-            repos.push(data.data[i]);
+          if (!data ) { return; }
+          for (var i = 0; i < data.length; i++) {
+            if (options.skip_forks && data[i].fork) { continue; }
+            if (options.blacklist instanceof Array && options.blacklist.indexOf(data[i].name) !== -1) { continue; }
+            repos.push(data[i]);
           }
           if (options.count) { repos.splice(options.count); }
           render(options.target, repos);

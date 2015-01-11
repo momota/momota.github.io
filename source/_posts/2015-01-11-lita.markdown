@@ -1,0 +1,266 @@
+---
+layout: post
+title: "lita で Slack Bot (on heroku) をつくる"
+date: 2015-01-11 21:36
+comments: true
+categories: lita ruby slack heroku chatops
+---
+![lita](https://www.lita.io/assets/lita-94f070fbb79e8ec62cc7a21ca39f8448.png)
+
+チャットツール [slack](https://slack.com/) に常駐する bot をつくったので、そのときの導入メモ。
+bot 開発には [lita](https://www.lita.io/) を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。
+
+
+環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.
+
+
+ゆくゆくは、[iRKit](http://www.amazon.co.jp/gp/product/B00H91KK26/ref=as_li_ss_tl?ie=UTF8&camp=247&creative=7399&creativeASIN=B00H91KK26&linkCode=as2&tag=mmtmkt-22) とか使って家電と連携したりしたい。
+
+<!-- more  -->
+
+
+## 1. 事前準備: もろもろインストールする
+
+### 1.1 lita をインストール
+
+
+lita は gem でインストールできる。
+
+```sh
+$ gem install lita
+```
+
+
+### 1.2 redis をインストール
+
+lita はデータ永続化ストレージとして redis を使うことが前提となっている。
+つまり、ローカル環境で lita を実行するには、redis が必要なため、redis をインストールする。
+
+```sh
+$ sudo apt-get update
+$ sudo apt-get install redis-server
+```
+
+redis を起動する。
+
+```sh
+$ sudo service redis-server start
+$ sudo service redis-server status
+#=> redis の起動状態確認
+#=> ps aux | grep redis とかで確認してもいい
+```
+
+
+## 2. lita プロジェクト作成、起動
+
+lita プロジェクト"sample"を作成する。
+
+```sh
+$ lita new sample
+#=> sample ディレクトリが生成される
+$ cd sample
+```
+
+ruby のバージョンを rbenv で指定しておく。
+
+```sh
+$ rbenv local 2.1.5
+$ rbenv rehash
+$ ruby -v
+```
+
+bundler でインストールする。
+
+```
+$ bundle install --path vendor/bundle
+```
+
+
+`lita start` で lita をローカル環境で起動してみる。
+`lita help` で返ってくればOK。
+
+```sh
+$ bundle exec lita start
+Type "exit" or "quit" to end the session.
+Lita > lita info
+Lita 4.0.4 - https://www.lita.io/
+Redis 2.8.4 - Memory used: 414.04K
+Lita > lita help
+Lita: help - Lists help information for terms and command the robot will respond to.
+Lita: help COMMAND - Lists help information for terms or commands that begin with COMMAND.
+Lita: info - Replies with the current version of Lita.
+Lita > exit
+$ 
+```
+
+[lita プラグイン](https://www.lita.io/plugins) もたくさんあるので、適当に `Gemfile` に追加して `bundle install` するとよい。
+
+
+
+## 3. herokuへデプロイして Slack と連携する
+
+lita bot を heroku へデプロイする。
+また、アダプタ [lita-slack](https://github.com/kenjij/lita-slack) を利用して Slack と連携する。
+
+
+### 3.1 事前準備
+
+heroku へのデプロイは、git push して行うので、git でバージョン管理を開始する。
+
+```sh
+$ git init
+$ git add .
+$ git commit -m "first commit"
+```
+
+heroku で ruby バージョンを指定するには、`Gemfile`で`ruby "VERSION"`と記述する。
+また、Slack と連携するため、`lita-slack` アダプタもインストールする。
+この時点で、`Gemfile`は以下の通り。
+
+```ruby
+source "https://rubygems.org"
+ruby "2.1.5"
+
+gem "lita"
+gem "lita-slack"
+```
+
+bundler でインストールする。
+
+```sh
+$ bundle install --path vendor/bundle
+```
+
+slack とつなげたり、Redis To Go を利用するために、`lita_config.rb` を以下のように修正する。
+
+```ruby
+Lita.configure do |config|
+  config.robot.name      = "lita"
+  config.robot.log_level = :info
+
+  # アダプタの指定。Slack とつなげるので、:slack と修正する
+  config.robot.adapter   = :slack
+
+  # Slack のAPIキーを指定する
+  config.adapters.slack.token = ENV["SLACK_API_KEY"]
+
+  # heroku の redis アドオン Redis To Go 関連の設定
+  # 後述する heoku コマンドで heroku の環境変数を設定する
+  config.redis[:url] = ENV["REDISTOGO_URL"]
+  config.http.port   = ENV["PORT"]
+end
+```
+
+heroku でのアプリケーション起動には foreman でのアプリケーション起動が必要となる。
+以下の `Procfile` を作成する。
+
+```ruby
+web: bundle exec lita
+```
+
+
+### 3.2 heroku の設定
+
+新規に heroku アプリケーションを作成する。
+ここでは、`lita-sample` という名前にした。
+
+```sh
+$ heroku apps:create lita-sample
+```
+
+heroku の redis アドオン Redis To Go をアプリケーションへ追加する。
+事前に heroku へクレジットカードの登録が必要。
+
+```sh
+$ heroku addons:add redistogo --app lita-sample
+```
+
+heroku の環境変数を設定する。
+設定するのは、Slack APIキーのみでOK。
+Slack API キーは、https://YOUR-DOMAIN.slack.com/services/new/lita から Integration の設定をしたら入手可能。
+
+`REDISTOGO_URL` などは、アドオン追加時に自動で設定されている。
+
+```sh
+$ heroku config:set SLACK_API_KEY="your-slack-api-key"
+$ heroku config
+#=> heroku 上で設定されている環境変数が出力されるので正しく設定されているか確認する
+```
+
+
+### 3.3 heroku へデプロイする
+
+git commit して git push してあげる。
+そうすると heoku アプリケーションが起動する。
+
+```sh
+$ git commit -m "make it better"
+$ git push heroku master
+```
+
+Slack に lita さんが見えるはずなので 適当なチャンネルに招待して `@lita help` とか声をかけると答えてくれる。
+
+
+### 3.4 heroku アプリケーションをたたき起こす
+
+heroku を無料で使う 1 web dyno (webサーバインスタンス) のときは、1時間アクセスがないとアプリケーションがスリープする。つまり、せっかくデプロイした bot も眠ってしまうため、定期的にhttpアクセスさせてたたき起こしておく。
+なお、`lita-cron` で bot に定期的に投稿させてもだめだったので、heroku アプリケーションへの http アクセスが必要なもよう。
+
+定期的な http アクセスには [Uptime Robot](http://uptimerobot.com/) を利用した。
+
+
+
+## 4. handler 作成
+
+以下のように handler のひな形を生成する。
+`lita-` というプレフィックスが自動で付与される。
+
+```sh
+$ mkdir handlers
+$ cd handlers
+$ bundle exec lita hello_handler
+#=> lita-hello_handler ディレクトリが生成される
+```
+
+`handlers/lita-hello_handler/lib/lita/handlers/hello_hundler.rb` を修正する。
+`route` で正規表現にマッチした場合の処理へルーティングする。
+
+
+```ruby
+module Lita
+  module Handlers
+    class HelloHandler < Handler
+      route /^java\s+(.+)/, :with_java, help: { "java TEXT" => "reply back with java." }
+
+      def with_java( response )
+        word = response.matches[0][0]
+        response.reply("!!! #{word} とジャバ !!!")
+      end
+    end
+
+    Lita.register_handler(HelloHandler)
+  end
+end
+```
+
+`Gemfile` に以下を追記し、 `bundle install` する。
+
+```ruby
+gem "lita-hello_handler", path: "handlers/lita-hello_handler"
+```
+
+commit して再度 heroku へ push してデプロイする。
+
+```sh
+$ git commit -a -m "make it better"
+$ git push heroku master
+```
+
+slack 上で `@lita java あなた` とかつぶやくとサイコーにジャバな気分になる。
+
+![lita java](https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png)
+
+
+
+

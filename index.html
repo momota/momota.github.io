@@ -9,9 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="octopress setting create new github repository githubへログイン後、github pages用リポジトリを作成する。
-リポジトリ名は、「username.github.io」。
-https://github.com/new を参考に。 &hellip;">
+  <meta name="description" content="先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。 通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
+892J のpingは、リピート回数に上限があるので、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,29 +19,44 @@ https://github.com/new を参考に。 &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://momota.github.io">
+  <link rel="canonical" href="http://momota.github.io/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+
   
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
 
 </head>
 
-<body   class="collapse-sidebar sidebar-footer" >
-  <header role="banner">
-	<div class="header-title"><a href="/">momota.txt</a></div>
-
-
-	<br><div class="header-subtitle">momota memo</div>
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
 
 </header>
   <nav role="navigation"><ul class="subscription" data-subscription="rss">
@@ -60,7 +74,6 @@ https://github.com/new を参考に。 &hellip;">
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
-  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
@@ -73,11 +86,9 @@ https://github.com/new を参考に。 &hellip;">
     <article>
       
   <header>
-  
     
-      <h1 class="entry-title"><a href="/blog/2013/08/19/first-post/">Octopress</a></h1>
-      
-      
+      <h1 class="entry-title"><a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm Macro</a></h1>
+    
     
       <p class="meta">
         
@@ -92,112 +103,73 @@ https://github.com/new を参考に。 &hellip;">
   
 
 
-<time datetime="2013-08-19T23:40:00+09:00" pubdate data-updated="true">2013-08-19</time>
-        
-         | <a href="/blog/2013/08/19/first-post/#disqus_thread">Comments</a>
+<time datetime="2014-05-20T01:17:00+09:00" pubdate data-updated="true">2014-05-20</time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>octopress setting</h1>
+  <div class="entry-content"><p>先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。</p>
 
-<h2>create new github repository</h2>
+<p>通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
+892J のpingは、リピート回数に上限があるので、上限回数を超えた時に再度pingコマンドを叩く必要があった。
+人間がpingの終わりを観察して終わったことを確認して再度実行するのは「ないわーーー」なので初めてのテラタームマクロを書いた。</p>
 
-<p>githubへログイン後、github pages用リポジトリを作成する。
-リポジトリ名は、「username.github.io」。
-<a href="https://github.com/new">https://github.com/new</a> を参考に。</p>
-
-<h2>install ruby 1.9.3 by rbenv</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-pxx
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span><span class='line'><span class="nv">$ </span>ruby -v <span class="c"># =&gt; 1.9.3-pxx</span>
-</span></code></pre></td></tr></table></div></figure>
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/20/teraterm-macro/">続きを読む &rarr;</a>
+    </footer>
+  
 
 
-<h2>configure octopress</h2>
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/10/activerecord/">Rails じゃなくても ActiveRecord を使う</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-10T14:54:00+09:00" pubdate data-updated="true">2014-05-10</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
+
+<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
+Ruby on Rails 標準で、モデル層で使われる。</p>
+
+<p>環境は以下。</p>
 
 <ul>
-<li><a href="http://octopress.org/docs/setup/">http://octopress.org/docs/setup/</a></li>
-<li><a href="http://octopress.org/docs/configuring/">http://octopress.org/docs/configuring/</a></li>
-<li>最新版のoctopressコードをクローンする。</li>
+<li>Mac OSX</li>
+<li>ruby 2.1.1p76</li>
+<li>MySQL mysqld5.6.17</li>
 </ul>
 
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git username.github.io
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>bundlerをインストールし、関連gemをインストールする。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /path/to/username.github.io
-</span><span class='line'><span class="nv">$ </span>gem install bundler
-</span><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>install octopress theme</h3>
-
-<ul>
-<li>default theme</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake install
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>3rd party theme
-<a href="https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes">https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Themes</a></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake install<span class="se">\[</span><span class="s1">&#39;theme you like&#39;</span><span class="se">\]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>はてなブックマークボタンを設置する</h3>
-
-<ul>
-<li>source/_includes/post/sharing.html に以下を追加</li>
-<li><code>\{\{ site.url \}\}\{\{ page.url \}\}</code>部分の<code>\{\}</code>はバックスラッシュなしでOK。ここでは本URLに変換されるためバックスラッシュでエスケープしている。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;float:left&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;http://b.hatena.ne.jp/entry/\{\{ site.url \}\}\{\{ page.url \}\}&quot;</span> <span class="na">class=</span><span class="s">&quot;hatena-bookmark-button&quot;</span> <span class="na">data-hatena-bookmark-layout=</span><span class="s">&quot;standard&quot;</span> <span class="na">title=</span><span class="s">&quot;このエントリーをはてなブックマークに追加&quot;</span><span class="nt">&gt;&lt;img</span> <span class="na">src=</span><span class="s">&quot;http://b.st-hatena.com/images/entry-button/button-only.gif&quot;</span> <span class="na">alt=</span><span class="s">&quot;このエントリーをはてなブックマークに追加&quot;</span> <span class="na">width=</span><span class="s">&quot;20&quot;</span> <span class="na">height=</span><span class="s">&quot;20&quot;</span> <span class="na">style=</span><span class="s">&quot;border: none;&quot;</span> <span class="nt">/&gt;&lt;/a&gt;</span>
-</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src=</span><span class="s">&quot;http://b.st-hatena.com/js/bookmark_button.js&quot;</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span> <span class="na">async=</span><span class="s">&quot;async&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'><span class="nt">&lt;/div&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>deploy github pages</h2>
-
-<ul>
-<li><a href="http://octopress.org/docs/deploying/github/">http://octopress.org/docs/deploying/github/</a> を参考に。</li>
-</ul>
-
+<p>最終的なディレクトリ構成は以下のようになる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -205,35 +177,547 @@ https://github.com/new を参考に。 &hellip;">
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake setup_github_pages
-</span><span class='line'><span class="c"># Enter the read/write url for your repository:</span>
-</span><span class='line'><span class="c"># --&gt; git@github.com:username/username.github.io.git</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake generate
-</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake deploy
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>.
+</span><span class='line'>├── Gemfile
+</span><span class='line'>├── Gemfile.lock
+</span><span class='line'>├── README.md
+</span><span class='line'>├── Rakefile
+</span><span class='line'>├── app
+</span><span class='line'>│   └── models
+</span><span class='line'>│       └── hoges.rb
+</span><span class='line'>├── app.rb
+</span><span class='line'>├── config
+</span><span class='line'>│   └── database.yml
+</span><span class='line'>├── db
+</span><span class='line'>│   └── migrate
+</span><span class='line'>│       └── 20140510_create_hoges.rb
+</span><span class='line'>├── log
+</span><span class='line'>│   ├── database.log
+</span><span class='line'>│   └── trace.log
+</span><span class='line'>└── vendor
+</span><span class='line'>    └── bundle
+</span><span class='line'>            └── <span class="o">(</span>略<span class="o">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>ソースもgit pushする</p>
+<ul>
+<li><a href="https://github.com/momota/activerecord_sample">https://github.com/momota/activerecord_sample</a></li>
+</ul>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/10/activerecord/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/02/windows/">これだけは入れとけ! 個人的に仕事でよく使う Windows ソフト</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-02T17:53:00+09:00" pubdate data-updated="true">2014-02-02</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>自分の windows マシンへのインストール記録として。ちなみに windows 7。
+何かよいソフトがあれば追記していくつもり。
+MS Office も毎日触っているけど割愛。</p>
+
+<p>後半疲れて雑になっている感じはある。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/02/02/windows/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/22/redmine/">Redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-22T00:29:00+09:00" pubdate data-updated="true">2013-11-22</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://redmine.jp/images/redmine-header-logo.png" alt="redmine" /></p>
+
+<p>一時期 wiki くらいの用途でしか使わなくなっていた redmine。
+最近、問合せドリブンの雑多なタスクが増えてきてそれらのタスク管理と、チーム内への対応状況の
+シェアがめんどくさくなってきた。チケットでそのあたりのタスク管理とか、進捗管理、スケジュー
+ル管理して、チームメンバーには redmine さえ参照してもらえれば把握してもらえるようするため、
+改めて redmine を使うようになってきた。</p>
+
+<p>redmine ではチケットに期限を入れてあげるとガントチャートを自動生成してくれる。このガント
+チャートがデフォルトだとすこぶる不評だったのでもろもろいじった。そのメモ。</p>
+
+<p>環境は、CentOS, Redmine 1.3.1.stable (MySQL)。</p>
+
+<p><code>REDMINE-HOME</code> は、<code>/var/lib/redmine/</code>。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/22/redmine/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/13/trema/">Trema をインストールする (Ruby 2.0)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-13T00:02:00+09:00" pubdate data-updated="true">2013-11-13</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://github.com/trema/trema">trema</a> は、ネットワークをソフトウェアでコントロールするという思想のSDNの中のひとつ、openflowのコントローラを開発するためのフレームワーク。</p>
+
+<p>インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。</p>
+
+<p>インストールする trema バージョンは 0.4.3。</p>
+
+<p>ruby バージョンは 2.0.0p247。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/13/trema/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/13/music/">眠れなくて、高校の頃聴いてた音楽を思い返していたら楽しくなってきた</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-13T04:38:00+09:00" pubdate data-updated="true">2013-10-13</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>眠れなくて、最近同僚に「高校の頃、どんな音楽聴いてたの？」と言われたのを思い出して、そういえば俺どんな音楽聴いてたんだっけ？って思い出してたらなんか楽しくなってきたので記す。
+今でも聴いている音楽とかもあるけど、最近なぜかあまり聴かなくなったやつを中心に書く。そういえば、MD プレイヤーとかで登下校中に聴いてたなあ。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/13/music/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/23/sinatra/">Rails から外れた僕らは Sinatra で I Did It My Way (3)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-23T20:39:00+09:00" pubdate data-updated="true">2013-09-23</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
+事前に heroku には sign up しておこう。</p>
+
+<p>最初にできあがりを示す。</p>
+
+<p>heroku: <a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
+
+<p>github: <a href="https://github.com/momota/heroku_sinatra_sample">https://github.com/momota/heroku_sinatra_sample</a></p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/23/sinatra/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/22/sinatra/">Rails から外れた僕らは Sinatra で I Did It My Way (2)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-22T06:15:00+09:00" pubdate data-updated="true">2013-09-22</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
+
+<p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
+また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/22/sinatra/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/16/sinatra/">Rails から外れた僕らは Sinatra で I Did It My Way (1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-16T17:37:00+09:00" pubdate data-updated="true">2013-09-16</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+本稿では以下について書く。</p>
+
+<ol>
+<li>sinatra インストール</li>
+<li>hello world アプリケーション</li>
+<li>ルーティング</li>
+<li>フィルタ</li>
+<li>ヘルパー</li>
+<li>テンプレートの呼び出し</li>
+</ol>
+
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/16/sinatra/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/14/junos-filter/">Junos Firewall Filter Term 定義を挿入する方法</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-14T12:36:00+09:00" pubdate data-updated="true">2013-09-14</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://upload.wikimedia.org/wikipedia/en/8/86/Junos_sw_logo.jpg" alt="junos" /></p>
+
+<p>junos の firewall filter の設定で定義の順序について。(EXシリーズを想定)</p>
+
+<p>以下、すべてconfiguration mode での操作。</p>
+
+<p>下記のようなフィルタがすでに設定されている場合に、<code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入したいことがある。フィルタは上から順に評価されるし。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git add .
-</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s1">&#39;commit comment&#39;</span>
-</span><span class='line'><span class="nv">$ </span>git push origin <span class="nb">source</span>
-</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># show | display set 
+</span><span class='line'>...
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from tcp-established
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 then accept
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
+</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then discard
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
 
 
 
 </div>
   
   
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/14/junos-filter/">続きを読む &rarr;</a>
+    </footer>
+  
 
 
     </article>
   
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -246,7 +730,23 @@ https://github.com/new を参考に。 &hellip;">
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/08/19/first-post/">octopress</a>
+        <a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm macro</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/10/activerecord/">rails じゃなくても ActiveRecord を使う</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/02/windows/">これだけは入れとけ! 個人的に仕事でよく使う windows ソフト</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/22/redmine/">redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/13/trema/">trema をインストールする (Ruby 2.0)</a>
       </li>
     
   </ul>
@@ -261,7 +761,7 @@ https://github.com/new を参考に。 &hellip;">
   <a href="https://github.com/momota">@momota</a> on GitHub
   
   <script type="text/javascript">
-    $(document).ready(function(){
+    $.domReady(function(){
         if (!window.jXHR){
             var jxhr = document.createElement('script');
             jxhr.type = 'text/javascript';
@@ -274,15 +774,13 @@ https://github.com/new を参考に。 &hellip;">
             user: 'momota',
             count: 0,
             skip_forks: true,
-            target: '#gh_repos'
+            target: '#gh_repos',
+            blacklist: ''
         });
     });
   </script>
   <script src="/javascripts/github.js" type="text/javascript"> </script>
 </section>
-
-
-
 
 
   
@@ -291,10 +789,8 @@ https://github.com/new を参考に。 &hellip;">
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 -  momota <br/>
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> + <a href="https://github.com/ioveracker/mnml">mnml</a>.
-	  
-  </span>
+  Copyright &copy; 2014 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
 </footer>
@@ -319,12 +815,20 @@ https://github.com/new を参考に。 &hellip;">
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
+  js = d.createElement(s); js.id = id;
   js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
 
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
 
 
 

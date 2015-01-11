@@ -55,10 +55,25 @@ Mac OS 標準の [Osaka](http://osaka.is.land.to/) の等幅フォントを使�
 
 ### MigMix 2M
 
-![MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png)
+[MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/images/migmix2m.png)
 
 最近は [MigMix 2M](http://mix-mplus-ipa.sourceforge.jp/migmix/) を中心に使っている。
 
+
+### MacType
+
+[Mactype](https://code.google.com/p/mactype/) はMSゴシックなどのデフォルトフォントでもアンチエイリアスをかけてくれるレンダリングソフト。
+
+デスクトップアプリケーション全般のフォントがきれいになる。
+また、word, excel などの MS Office を使った資料で人からもらうものや配布するものに上述した標準でないフォントは使えないので、そのような資料もきれいなフォントで見られる。
+
+- before
+
+![mactype_before](https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_before.png)
+
+- after
+
+![mactype_after](https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_after.png)
 
 
 ## ランチャ
@@ -166,6 +181,7 @@ ctrl + shift + I で起動する developer tools も便利。Firefox で使っ�
 |[frame two pages](https://chrome.google.com/webstore/detail/frame-two-pages/eldgpcphflnopbjadiaonofideekgdgm)|フレーム分割して 1 つのタブで複数ページを表示する
 |[proxy switchy](https://chrome.google.com/webstore/detail/proxy-switchy/caehdcpeofiiigpdhbabniblemipncjj)|社内プロキシの切り替え用。
 |[はてなブックマーク google chrome拡張](https://chrome.google.com/webstore/detail/%E3%81%AF%E3%81%A6%E3%81%AA%E3%83%96%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF-googlechrome-%E6%8B%A1%E5%BC%B5/dnlfpnhinnjdgmjfpccajboogcjocdla?hl=ja)|ブックマーク用
+|[Vichrome](https://chrome.google.com/webstore/detail/vichrome/gghkfhpblkcmlkmpcpgaajbbiikbhpdi)|viチックに操作できる。マウスいらず。
 
 
 

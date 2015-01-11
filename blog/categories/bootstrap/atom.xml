@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: bootstrap | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/bootstrap/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (2)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/22/sinatra/"/>
+    <updated>2013-09-22T06:15:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/22/sinatra</id>
+    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
+
+<p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
+また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>MongoDB を使うための準備</h2>
+
+<p>データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。</p>
+
+<p>まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
+
+<p>```sh
+$ brew update
+$ brew install mongodb
+$ mongo &mdash;version
+MongoDB shell version: 2.4.6</p>
+
+<h1>mongod を起動する</h1>
+
+<p>$ /usr/local/bin/mongod &mdash;fork
+all output going to: /usr/local/var/log/mongodb/mongo.log
+```</p>
+
+<p>mongodb を ruby から扱うための gem を bundler でインストールする。</p>
+
+<p>Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
+
+<p><code>diff
+diff --git a/Gemfile b/Gemfile
+index 140fec0..74db599 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -6,3 +6,6 @@ gem "activerecord", "3.2.13"
+ gem "sqlite3", "1.3.7"
+ gem "sinatra", "1.4.3"
+ gem "sinatra-contrib", "1.4.0"
++gem "mongo"
++gem "bson_ext"
+</code></p>
+
+<p>bundler でインストールする。</p>
+
+<p><code>sh
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/...........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Using i18n (0.6.1)
+Using multi_json (1.8.0)
+Using activesupport (3.2.13)
+Using builder (3.0.4)
+Using activemodel (3.2.13)
+Using arel (3.0.2)
+Using tzinfo (0.3.37)
+Using activerecord (3.2.13)
+Using backports (3.3.4)
+Installing bson (1.9.2)
+Installing bson_ext (1.9.2)
+Using eventmachine (1.0.3)
+Installing mongo (1.9.2)
+Using rack (1.5.2)
+Using rack-protection (1.5.0)
+Using rack-test (0.6.2)
+Using tilt (1.4.1)
+Using sinatra (1.4.3)
+Using sinatra-contrib (1.4.0)
+Using sqlite3 (1.3.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+</code></p>
+
+<h2>ルーティング処理を追加する</h2>
+
+<p>まず、mongodb を ruby から扱うために <code>require 'mongo'</code> しておく。</p>
+
+<p>before filter で mongodb とのコネクションを張っておく。</p>
+
+<p>helper には、html エスケープ処理の alias を定義しておく。(のちほど <code>views/index.erb</code> で使う)</p>
+
+<p>ブラウザから投稿"/new"と削除"/delete"の HTTP POST リクエストを受け付けるため、各ルーティング処理を追加している。
+投稿では、mongodb への insert 処理を、削除では、mongodb からの remove 処理を記述している。</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;
+require &lsquo;sinatra/reloader&rsquo;
+require &lsquo;mongo&rsquo;</p>
+
+<h1>filter</h1>
+
+<p>before do
+  db_con = Mongo::Connection.new(&lsquo;localhost&rsquo;, 27017)
+  @db    = db_con.db(&lsquo;sinatra_sample&rsquo;)
+  @comments = @db.collection(&lsquo;comments&rsquo;)
+end</p>
+
+<h1>helper</h1>
+
+<p>helpers do
+  # escape html
+  include Rack::Utils
+  alias_method :h, :escape_html
+end</p>
+
+<p>get &lsquo;/&rsquo; do
+  erb :index
+end</p>
+
+<p>post &lsquo;/new&rsquo; do
+  @comments.insert( :body => params[:body] )
+  redirect &lsquo;/&rsquo;
+end</p>
+
+<p>post &lsquo;/delete&rsquo; do
+  id = BSON::ObjectId( params[:id] )
+  @comments.find(&lsquo;_id&rsquo; => id).each { |d_comment|</p>
+
+<pre><code>@comments.remove( d_comment )
+</code></pre>
+
+<p>  }
+end
+```</p>
+
+<h2>フォームとか</h2>
+
+<p>フォームとかを作るため、<code>views/index.erb</code> を修正する。</p>
+
+<p><code>&lt;ul&gt;</code> ブロックで、mongodb からデータを抜いてきてリスト表示させている。</p>
+
+<p><code>&lt;form&gt;</code> ブロックで新規の投稿をする。<code>/new</code> に POST しているので、上記の <code>post '/new' do ... end</code> 部分の処理にルーティングされる。</p>
+
+<p><code>&lt;script&gt;</code> ブロックで jquery を利用して既存記事を削除する。<a href="https://developers.google.com/speed/libraries/devguide?hl=ja">Google API</a>を利用。
+[x] をクリックしたときに、<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
+
+<p>```erb
+  <h1>sinatra sample</h1>
+  <ul></p>
+
+<pre><code>&lt;% @comments.find.each { |comment| %&gt;
+&lt;li data-id="&lt;%= comment["_id"]%&gt;"&gt;
+  &lt;%= h comment["body"] %&gt;
+  &lt;span class="deleteCmd" style="cursor:pointer; color:blue"&gt;[x]&lt;/span&gt;
+  &lt;/li&gt;
+&lt;% } %&gt;
+</code></pre>
+
+<p>  </ul></p>
+
+<p>  <h2>Add new</h2>
+  <form method="post" action="new"></p>
+
+<pre><code>&lt;input type="text" name="body"&gt; &lt;input type="submit" value="post"&gt;
+</code></pre>
+
+<p>  </form></p>
+
+<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script></p>
+
+<pre><code>$('.deleteCmd').click(function() {
+  var el = $( this ).parent();
+  if(confirm('are you sure to delete ?')) {
+    $.post('/delete', {
+      id: el.data('id')
+      }, function() {
+        el.fadeOut( 800 );
+      });
+  }
+  })
+</code></pre>
+
+<p>  </script>
+```</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
+
+<p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
+
+<p>ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
+
+<h2>twitter bootstrap3 を使う</h2>
+
+<p>できあがったものがかなりそっけないので、CSS フレームワークである <a href="http://getbootstrap.com/">twitter bootstrap</a> を使って、すこしだけおしゃれにする。
+<a href="https://github.com/twbs/bootstrap/releases/download/v3.0.0/bootstrap-3.0.0-dist.zip">zip ファイル</a> で配布されているので、ダウンロードして解凍する。
+sinatra では静的ファイルを <code>public/</code> 以下につっこむため、解凍したディレクトリを public にリネームして sinatra アプリを作っているワーキングディレクトリへ置いておく。</p>
+
+<h3>layout テンプレートの修正</h3>
+
+<p>bootstrap を使うため、<code>views/layout.erb</code> を以下のように修正する。
+落としてきた css とscript を指定するのと、bootstrap を使う上で必須な jquery を指定している。</p>
+
+<p>```erb
+&lt;!DOCTYPE html>
+<html lang="ja">
+  <head></p>
+
+<pre><code>&lt;meata charset="urf-8"&gt;
+&lt;title&gt;sinatra test&lt;/title&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;link href="css/bootstrap.min.css" rel="stylesheet" media="screen"&gt;
+</code></pre>
+
+<p>  </head>
+  <body>
+  <div class="container" syle="padding:20px 0"></p>
+
+<pre><code>&lt;h1&gt;Sinatra Sample&lt;/h1&gt;
+&lt;%= yield %&gt;
+</code></pre>
+
+<p>  </div></p>
+
+<p>  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
+```</p>
+
+<p><code>views/indx.erb</code> も以下のように修正する。
+<code>&lt;ul&gt;</code> をやめて、<code>&lt;table&gt;</code> へ。[x]という文字列も、削除アイコンへ修正。</p>
+
+<p>```erb
+  <table class="table table-striped"></p>
+
+<pre><code>&lt;% @comments.find.each { |comment| %&gt;
+&lt;tr data-id="&lt;%= comment["_id"]%&gt;"&gt;
+  &lt;td&gt;
+  &lt;%= h comment["body"] %&gt;
+    &lt;span class="deleteCmd" style="cursor:pointer;"&gt;
+      &lt;i class="glyphicon glyphicon-remove"&gt;&lt;/i&gt;
+    &lt;/span&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;
+&lt;% } %&gt;
+</code></pre>
+
+<p>  </table></p>
+
+<p>  <h2>Add new</h2>
+  <form method="post" action="new"></p>
+
+<pre><code>&lt;div class="form-group"&gt;
+  &lt;label class="control-label" for="comment" &gt;comment&lt;/label&gt;
+  &lt;input type="text" name="body" class="form-control" placeholder="your comment"&gt;
+&lt;/div&gt;
+&lt;div class="form-group"&gt;
+  &lt;input type="submit" value="post" class="btn btn-primary"&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>  </form></p>
+
+<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script></p>
+
+<pre><code>$('.deleteCmd').click(function() {
+  var el = $( this ).parent().parent();
+  if(confirm('are you sure to delete ?')) {
+    $.post('/delete', {
+      id: el.data('id')
+      }, function() {
+        el.fadeOut( 800 );
+      });
+  }
+  })
+</code></pre>
+
+<p>  </script>
+```</p>
+
+<p>これで、<code>bundle exec ruby main.rb</code> で sinatra を起動して <a href="http://localhost:4567/">http://localhost:4567/</a> にアクセスする。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png" alt="" /></p>
+
+<p>こんな感じでちょっとだけおしゃれになる。</p>
+]]></content>
+  </entry>
+  
+</feed>

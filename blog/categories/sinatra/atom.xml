@@ -1,0 +1,1149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: sinatra | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/sinatra/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (3)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/23/sinatra/"/>
+    <updated>2013-09-23T20:39:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/23/sinatra</id>
+    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
+事前に heroku には sign up しておこう。</p>
+
+<p>最初にできあがりを示す。</p>
+
+<p>heroku: <a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
+
+<p>github: <a href="https://github.com/momota/heroku_sinatra_sample">https://github.com/momota/heroku_sinatra_sample</a></p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>heroku toolbelt をインストールする</h2>
+
+<p>heroku へデプロイするために heroku toolbelt をインストールする。
+heroku toolbelt は  <a href="https://toolbelt.heroku.com/">https://toolbelt.heroku.com/</a> から環境にあったやり方を選んでインストールする。mac ではインストーラが <code>.pkg</code> 形式で配布されているので、それをぽちぽちクリックして進めればよい。</p>
+
+<p>なお、heroku toolbelt には、以下が含まれている。</p>
+
+<ul>
+<li>heroku client: heroku アプリケーションを作成したり、管理したりする CLI ツール</li>
+<li>foreman: procfile ベースでアプリケーションの管理をする</li>
+<li>git</li>
+</ul>
+
+
+<p>shell でバージョン確認してインストールできたかを確認する。</p>
+
+<p><code>sh
+$ heroku --version
+heroku-toolbelt/2.41.0 (x86_64-darwin10.8.0) ruby/1.9.3
+</code></p>
+
+<p>インストールできているようだ。</p>
+
+<h2>heroku login</h2>
+
+<p><code>heroku login</code> で heroku への認証を通したり、ssh キーを登録したりする。</p>
+
+<p><code>sh
+$ heroku login
+Enter your Heroku credentials.
+Email: makoto.momota@gmail.com
+Password (typing will be hidden): ENTER_YOUR_HEROKU_PASSWORD
+Authentication successful.
+</code></p>
+
+<p>私の場合は、すでにキー登録していたので、なにもキー登録操作がなかったが、初回実行の際は、以下のような感じになるらしい。</p>
+
+<p><code>sh
+Could not find an existing public key.
+Would you like to generate one? [Yn]
+Generating new SSH public key.
+Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
+</code></p>
+
+<h2>foreman で sinatra が起動できるか確認する</h2>
+
+<p>foreman で複数の sinatra アプリケーション を管理したり、アプリケーションごとに異なる起動方法を単一に wrapping できる。
+heroku では、アプリケーションを起動するために foreman が必須のようだ。
+foreman でのアプリケーション起動には、 <code>Procfile</code> を書く必要がある。書式は <code>アプリケーション名: コマンド</code> を改行区切りで列挙していく。</p>
+
+<p>ここでは、<code>mongo_app.rb</code> を起動するので、以下のように記述する。</p>
+
+<p><code>
+web: bundle exec ruby mongo_app.rb -p $PORT
+</code></p>
+
+<p>お試しに、ローカルで <code>foreman start</code> により sinatra アプリケーションを起動する。</p>
+
+<p><code>sh
+$ foreman start
+17:25:31 web.1  | started with pid 10879
+17:25:33 web.1  | [2013-09-23 17:25:33] INFO  WEBrick 1.3.1
+17:25:33 web.1  | [2013-09-23 17:25:33] INFO  ruby 2.0.0 (2013-06-27) [x86_64-darwin12.4.0]
+17:25:33 web.1  | == Sinatra/1.4.3 has taken the stage on 5000 for development with backup from WEBrick
+17:25:33 web.1  | [2013-09-23 17:25:33] INFO  WEBrick::HTTPServer#start: pid=10879 port=5000
+</code></p>
+
+<p>5000 番ポートで起動したので、<a href="http://localhost:5000/">http://localhost:5000/</a> にアクセスしてみる。問題なさそう。</p>
+
+<h2>git リポジトリを作成して push する</h2>
+
+<p>heroku デプロイには git が必須。
+git でバージョン管理していなければ、<code>git init</code> して始めよう。</p>
+
+<p><code>sh
+$ git init
+$ git add .
+$ git commit -m 'your commit message'
+</code></p>
+
+<h2>heroku へデプロイする</h2>
+
+<p>いよいよ heroku 上にアプリケーションを登録する。アプリケーション名はなしでも任意の名前が付けられるが、ここでは<code>sample-mongo-app</code>にした。(のちほど変えることも可能)</p>
+
+<p><code>sh
+$ heroku apps:create sample-mongo-app
+Creating sample-mongo-app... done, stack is cedar
+http://sample-mongo-app.herokuapp.com/ | git@heroku.com:sample-mongo-app.git
+Git remote heroku added
+</code></p>
+
+<p>このコマンドにより以下のように git リモートリポジトリに heroku リポジトリが登録される。</p>
+
+<p><code>sh
+$ git remote
+heroku
+$ git remote show heroku
+* remote heroku
+Fetch URL: git@heroku.com:sample-mongo-app.git
+Push  URL: git@heroku.com:sample-mongo-app.git
+HEAD branch: (unknown)
+</code></p>
+
+<p>heroku リポジトリに push することで、デプロイできる。なんとシンプルな仕組み。
+ちなみに、Gemfile.lock も git で管理してないとデプロイ時にエラーとなる。</p>
+
+<p>```sh
+$ git push heroku master
+Counting objects: 90, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (85/85), done.
+Writing objects: 100% (90/90), 126.44 KiB, done.
+Total 90 (delta 27), reused 0 (delta 0)</p>
+
+<p>&mdash;&mdash;&ndash;> Ruby/Rack app detected
+&mdash;&mdash;&ndash;> Using Ruby version: ruby-2.0.0
+&mdash;&mdash;&ndash;> Installing dependencies using Bundler version 1.3.2</p>
+
+<pre><code>   Running: bundle install --without development:test --path vendor/bundle --binstubs vendor/bundle/bin --deployment
+   Fetching gem metadata from https://rubygems.org/..........
+   Fetching gem metadata from https://rubygems.org/..
+   Installing backports (3.3.4)
+   Installing bson (1.9.2)
+   Installing bson_ext (1.9.2)
+   Installing eventmachine (1.0.3)
+   Installing mongo (1.9.2)
+   Installing rack (1.5.2)
+   Installing rack-protection (1.5.0)
+   Installing rack-test (0.6.2)
+   Installing tilt (1.4.1)
+   Installing sinatra (1.4.3)
+   Installing sinatra-contrib (1.4.0)
+   Using bundler (1.3.2)
+   Your bundle is complete! It was installed into ./vendor/bundle
+   Cleaning up the bundler cache.
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> WARNINGS:</p>
+
+<pre><code>   You have not declared a Ruby version in your Gemfile.
+   To set your Ruby version add this line to your Gemfile:
+   ruby '2.0.0'
+   # See https://devcenter.heroku.com/articles/ruby-versions for more information."
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> Discovering process types</p>
+
+<pre><code>   Procfile declares types     -&gt; web
+   Default types for Ruby/Rack -&gt; console, rake
+</code></pre>
+
+<p>&mdash;&mdash;&ndash;> Compiled slug size: 26.4MB
+&mdash;&mdash;&ndash;> Launching&hellip; done, v3</p>
+
+<pre><code>   http://sample-mongo-app.herokuapp.com deployed to Heroku
+</code></pre>
+
+<p>To git@heroku.com:sample-mongo-app.git
+ * [new branch]      master &ndash;> master
+```</p>
+
+<h2>mongodb を heroku で使う</h2>
+
+<p>heroku ではさまざまな add-on が提供されており、その中から mongodb のホスティングである <a href="https://addons.heroku.com/mongohq">MongoHQ</a> を利用する。</p>
+
+<p>add-on を利用するにはクレジットカード情報の登録が必要となるので、済ませておく。<a href="https://heroku.com/verify">https://heroku.com/verify</a></p>
+
+<p>以下で、add-on の設定をする。ここでは、無料プランの ”sandbox” を選ぶ。</p>
+
+<p><code>sh
+$ heroku addons:add mongohq:sandbox
+Adding mongohq:sandbox on sample-mongo-app... done, v4 (free)
+Use `heroku addons:docs mongohq` to view documentation.
+$ heroku config
+=== sample-mongo-app Config Vars
+MONGOHQ_URL: mongodb://ID:パスワード@paulo.mongohq.com:10014/データベース名
+</code></p>
+
+<p>sinatraの DB 接続部分を mongohq 用に書き換える。</p>
+
+<p><a href="https://devcenter.heroku.com/articles/mongohq">公式サイト</a>通り、 DB コネクションをメソッド化する。</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;
+require &lsquo;sinatra/reloader&rsquo;
+require &lsquo;mongo&rsquo;
+require &lsquo;uri&rsquo;</p>
+
+<p>def get_connection
+  return @db_connection if @db_connection
+  db = URI.parse(ENV[&lsquo;MONGOHQ_URL&rsquo;])
+  db_name = db.path.gsub(/^\//, &lsquo;&rsquo;)
+  @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
+  @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
+  @db_connection
+end</p>
+
+<p>before do
+  db_con = get_connection
+  @comments = db_con.collection(&lsquo;comments&rsquo;)
+end</p>
+
+<p>helpers do
+  # escape html
+  include Rack::Utils
+  alias_method :h, :escape_html
+end</p>
+
+<p>get &lsquo;/&rsquo; do
+  erb :index
+end</p>
+
+<p>post &lsquo;/new&rsquo; do
+  @comments.insert( :body => params[:body] )
+  redirect &lsquo;/&rsquo;
+end</p>
+
+<p>post &lsquo;/delete&rsquo; do
+  id = BSON::ObjectId( params[:id] )
+  @comments.find(&lsquo;_id&rsquo; => id).each { |d_comment|</p>
+
+<pre><code>@comments.remove( d_comment )
+</code></pre>
+
+<p>  }
+end
+```</p>
+
+<p>これを前述したとおり、<code>git commit/push</code>してあげれば、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続が確認できる。</p>
+
+<p>私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。</p>
+
+<p><a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
+
+<h3>heroku でのデバッグ</h3>
+
+<p>以下でアプリケーションログを <code>tail -f</code> しているように参照できる。</p>
+
+<p><code>sh
+$ heroku logs --tail
+</code></p>
+
+<hr />
+
+<h1>番外編</h1>
+
+<p>heroku gem は将来的に廃止されるようで、heroku toolbelt をインストールすることを推奨する。</p>
+
+<h2>(失敗,というか古い情報編) heroku gem をインストールする</h2>
+
+<p>Gemfile に <code>gem "heroku"</code> を追記して bundler でインストールする。</p>
+
+<p><code>diff
+diff --git a/Gemfile b/Gemfile
+index 74db599..734c191 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -8,4 +8,5 @@ gem "sinatra", "1.4.3"
+ gem "sinatra-contrib", "1.4.0"
+ gem "mongo"
+ gem "bson_ext"
++gem "heroku"
+</code></p>
+
+<p><code>bundle install</code> する。</p>
+
+<p><code>sh
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/...........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Using i18n (0.6.1)
+Using multi_json (1.8.0)
+Using activesupport (3.2.13)
+Using builder (3.0.4)
+Using activemodel (3.2.13)
+Using arel (3.0.2)
+Using tzinfo (0.3.37)
+Using activerecord (3.2.13)
+Installing addressable (2.3.5)
+Using backports (3.3.4)
+Using bson (1.9.2)
+Using bson_ext (1.9.2)
+Using eventmachine (1.0.3)
+Installing excon (0.25.3)
+Installing heroku-api (0.3.15)
+Installing launchy (2.3.0)
+Installing netrc (0.7.7)
+Installing mime-types (1.25)
+Installing rest-client (1.6.7)
+Installing rubyzip (1.0.0)
+Installing heroku (2.41.0)
+Using mongo (1.9.2)
+Using rack (1.5.2)
+Using rack-protection (1.5.0)
+Using rack-test (0.6.2)
+Using tilt (1.4.1)
+Using sinatra (1.4.3)
+Using sinatra-contrib (1.4.0)
+Using sqlite3 (1.3.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+It was installed into ./vendor/bundle
+Post-install message from heroku:
+ !    The `heroku` gem has been deprecated and replaced with the Heroku Toolbelt.
+ !    Download and install from: https://toolbelt.heroku.com
+ !    For API access, see: https://github.com/heroku/heroku.rb
+</code></p>
+
+<p>なんか heroku gem は、もう廃止されるみたいなメッセージが出た。
+アンインストールすることにしよう。</p>
+
+<h3>heroku gem アンインストール</h3>
+
+<p>Gemfile から先ほど追加した <code>gem "heroku"</code> 行を消す。
+そのあとに <code>bundle clean</code> でアンインストールする。</p>
+
+<p><code>sh
+$ bundle clean
+Resolving dependencies...
+Removing addressable (2.3.5)
+Removing excon (0.25.3)
+Removing heroku (2.41.0)
+Removing heroku-api (0.3.15)
+Removing launchy (2.3.0)
+Removing mime-types (1.25)
+Removing netrc (0.7.7)
+Removing rest-client (1.6.7)
+Removing rubyzip (1.0.0)
+</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (2)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/22/sinatra/"/>
+    <updated>2013-09-22T06:15:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/22/sinatra</id>
+    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
+
+<p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
+また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>MongoDB を使うための準備</h2>
+
+<p>データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。</p>
+
+<p>まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
+
+<p>```sh
+$ brew update
+$ brew install mongodb
+$ mongo &mdash;version
+MongoDB shell version: 2.4.6</p>
+
+<h1>mongod を起動する</h1>
+
+<p>$ /usr/local/bin/mongod &mdash;fork
+all output going to: /usr/local/var/log/mongodb/mongo.log
+```</p>
+
+<p>mongodb を ruby から扱うための gem を bundler でインストールする。</p>
+
+<p>Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
+
+<p><code>diff
+diff --git a/Gemfile b/Gemfile
+index 140fec0..74db599 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -6,3 +6,6 @@ gem "activerecord", "3.2.13"
+ gem "sqlite3", "1.3.7"
+ gem "sinatra", "1.4.3"
+ gem "sinatra-contrib", "1.4.0"
++gem "mongo"
++gem "bson_ext"
+</code></p>
+
+<p>bundler でインストールする。</p>
+
+<p><code>sh
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/...........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Using i18n (0.6.1)
+Using multi_json (1.8.0)
+Using activesupport (3.2.13)
+Using builder (3.0.4)
+Using activemodel (3.2.13)
+Using arel (3.0.2)
+Using tzinfo (0.3.37)
+Using activerecord (3.2.13)
+Using backports (3.3.4)
+Installing bson (1.9.2)
+Installing bson_ext (1.9.2)
+Using eventmachine (1.0.3)
+Installing mongo (1.9.2)
+Using rack (1.5.2)
+Using rack-protection (1.5.0)
+Using rack-test (0.6.2)
+Using tilt (1.4.1)
+Using sinatra (1.4.3)
+Using sinatra-contrib (1.4.0)
+Using sqlite3 (1.3.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+</code></p>
+
+<h2>ルーティング処理を追加する</h2>
+
+<p>まず、mongodb を ruby から扱うために <code>require 'mongo'</code> しておく。</p>
+
+<p>before filter で mongodb とのコネクションを張っておく。</p>
+
+<p>helper には、html エスケープ処理の alias を定義しておく。(のちほど <code>views/index.erb</code> で使う)</p>
+
+<p>ブラウザから投稿"/new"と削除"/delete"の HTTP POST リクエストを受け付けるため、各ルーティング処理を追加している。
+投稿では、mongodb への insert 処理を、削除では、mongodb からの remove 処理を記述している。</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;
+require &lsquo;sinatra/reloader&rsquo;
+require &lsquo;mongo&rsquo;</p>
+
+<h1>filter</h1>
+
+<p>before do
+  db_con = Mongo::Connection.new(&lsquo;localhost&rsquo;, 27017)
+  @db    = db_con.db(&lsquo;sinatra_sample&rsquo;)
+  @comments = @db.collection(&lsquo;comments&rsquo;)
+end</p>
+
+<h1>helper</h1>
+
+<p>helpers do
+  # escape html
+  include Rack::Utils
+  alias_method :h, :escape_html
+end</p>
+
+<p>get &lsquo;/&rsquo; do
+  erb :index
+end</p>
+
+<p>post &lsquo;/new&rsquo; do
+  @comments.insert( :body => params[:body] )
+  redirect &lsquo;/&rsquo;
+end</p>
+
+<p>post &lsquo;/delete&rsquo; do
+  id = BSON::ObjectId( params[:id] )
+  @comments.find(&lsquo;_id&rsquo; => id).each { |d_comment|</p>
+
+<pre><code>@comments.remove( d_comment )
+</code></pre>
+
+<p>  }
+end
+```</p>
+
+<h2>フォームとか</h2>
+
+<p>フォームとかを作るため、<code>views/index.erb</code> を修正する。</p>
+
+<p><code>&lt;ul&gt;</code> ブロックで、mongodb からデータを抜いてきてリスト表示させている。</p>
+
+<p><code>&lt;form&gt;</code> ブロックで新規の投稿をする。<code>/new</code> に POST しているので、上記の <code>post '/new' do ... end</code> 部分の処理にルーティングされる。</p>
+
+<p><code>&lt;script&gt;</code> ブロックで jquery を利用して既存記事を削除する。<a href="https://developers.google.com/speed/libraries/devguide?hl=ja">Google API</a>を利用。
+[x] をクリックしたときに、<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
+
+<p>```erb
+  <h1>sinatra sample</h1>
+  <ul></p>
+
+<pre><code>&lt;% @comments.find.each { |comment| %&gt;
+&lt;li data-id="&lt;%= comment["_id"]%&gt;"&gt;
+  &lt;%= h comment["body"] %&gt;
+  &lt;span class="deleteCmd" style="cursor:pointer; color:blue"&gt;[x]&lt;/span&gt;
+  &lt;/li&gt;
+&lt;% } %&gt;
+</code></pre>
+
+<p>  </ul></p>
+
+<p>  <h2>Add new</h2>
+  <form method="post" action="new"></p>
+
+<pre><code>&lt;input type="text" name="body"&gt; &lt;input type="submit" value="post"&gt;
+</code></pre>
+
+<p>  </form></p>
+
+<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script></p>
+
+<pre><code>$('.deleteCmd').click(function() {
+  var el = $( this ).parent();
+  if(confirm('are you sure to delete ?')) {
+    $.post('/delete', {
+      id: el.data('id')
+      }, function() {
+        el.fadeOut( 800 );
+      });
+  }
+  })
+</code></pre>
+
+<p>  </script>
+```</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
+
+<p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
+
+<p>ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
+
+<h2>twitter bootstrap3 を使う</h2>
+
+<p>できあがったものがかなりそっけないので、CSS フレームワークである <a href="http://getbootstrap.com/">twitter bootstrap</a> を使って、すこしだけおしゃれにする。
+<a href="https://github.com/twbs/bootstrap/releases/download/v3.0.0/bootstrap-3.0.0-dist.zip">zip ファイル</a> で配布されているので、ダウンロードして解凍する。
+sinatra では静的ファイルを <code>public/</code> 以下につっこむため、解凍したディレクトリを public にリネームして sinatra アプリを作っているワーキングディレクトリへ置いておく。</p>
+
+<h3>layout テンプレートの修正</h3>
+
+<p>bootstrap を使うため、<code>views/layout.erb</code> を以下のように修正する。
+落としてきた css とscript を指定するのと、bootstrap を使う上で必須な jquery を指定している。</p>
+
+<p>```erb
+&lt;!DOCTYPE html>
+<html lang="ja">
+  <head></p>
+
+<pre><code>&lt;meata charset="urf-8"&gt;
+&lt;title&gt;sinatra test&lt;/title&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;link href="css/bootstrap.min.css" rel="stylesheet" media="screen"&gt;
+</code></pre>
+
+<p>  </head>
+  <body>
+  <div class="container" syle="padding:20px 0"></p>
+
+<pre><code>&lt;h1&gt;Sinatra Sample&lt;/h1&gt;
+&lt;%= yield %&gt;
+</code></pre>
+
+<p>  </div></p>
+
+<p>  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
+```</p>
+
+<p><code>views/indx.erb</code> も以下のように修正する。
+<code>&lt;ul&gt;</code> をやめて、<code>&lt;table&gt;</code> へ。[x]という文字列も、削除アイコンへ修正。</p>
+
+<p>```erb
+  <table class="table table-striped"></p>
+
+<pre><code>&lt;% @comments.find.each { |comment| %&gt;
+&lt;tr data-id="&lt;%= comment["_id"]%&gt;"&gt;
+  &lt;td&gt;
+  &lt;%= h comment["body"] %&gt;
+    &lt;span class="deleteCmd" style="cursor:pointer;"&gt;
+      &lt;i class="glyphicon glyphicon-remove"&gt;&lt;/i&gt;
+    &lt;/span&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;
+&lt;% } %&gt;
+</code></pre>
+
+<p>  </table></p>
+
+<p>  <h2>Add new</h2>
+  <form method="post" action="new"></p>
+
+<pre><code>&lt;div class="form-group"&gt;
+  &lt;label class="control-label" for="comment" &gt;comment&lt;/label&gt;
+  &lt;input type="text" name="body" class="form-control" placeholder="your comment"&gt;
+&lt;/div&gt;
+&lt;div class="form-group"&gt;
+  &lt;input type="submit" value="post" class="btn btn-primary"&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>  </form></p>
+
+<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script></p>
+
+<pre><code>$('.deleteCmd').click(function() {
+  var el = $( this ).parent().parent();
+  if(confirm('are you sure to delete ?')) {
+    $.post('/delete', {
+      id: el.data('id')
+      }, function() {
+        el.fadeOut( 800 );
+      });
+  }
+  })
+</code></pre>
+
+<p>  </script>
+```</p>
+
+<p>これで、<code>bundle exec ruby main.rb</code> で sinatra を起動して <a href="http://localhost:4567/">http://localhost:4567/</a> にアクセスする。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png" alt="" /></p>
+
+<p>こんな感じでちょっとだけおしゃれになる。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (1)]]></title>
+    <link href="http://momota.github.io/blog/2013/09/16/sinatra/"/>
+    <updated>2013-09-16T17:37:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/16/sinatra</id>
+    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
+本稿では以下について書く。</p>
+
+<ol>
+<li>sinatra インストール</li>
+<li>hello world アプリケーション</li>
+<li>ルーティング</li>
+<li>フィルタ</li>
+<li>ヘルパー</li>
+<li>テンプレートの呼び出し</li>
+</ol>
+
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>前準備: インストール</h2>
+
+<p>ruby 2.0 を rbenv でインストールする。
+以下、作業は <code>/Users/momota/dev/sinatra/</code> で行う。</p>
+
+<p><code>sh
+$ rbenv install 2.0.0-p247
+$ rbenv local 2.0.0-p247
+$ rbenv rehash
+$ rbenv version
+2.0.0-p247 (set by /Users/momota/dev/sinatra/.ruby-version)
+$ ruby -v
+ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-darwin12.4.0]
+</code></p>
+
+<p>bundler で sinatra と関連 gem をインストールする。</p>
+
+<p><code>sh
+$ gem install bundler
+$ bundle -v
+Bundler version 1.3.5
+$ bundle init
+Writing new Gemfile to /Users/momota/dev/sinatra/Gemfile
+$ cat &lt;&lt; EOF &gt;&gt; ./Gemfile
+heredoc&gt; gem "activerecord", "3.2.13"
+heredoc&gt; gem "sqlite3", "1.3.7"
+heredoc&gt; gem "sinatra", "1.4.3"
+heredoc&gt; gem "sinatra-contrib", "1.4.0"
+heredoc&gt; EOF
+$ bundle install --path vendor/bundle
+Fetching gem metadata from https://rubygems.org/...........
+Fetching gem metadata from https://rubygems.org/..
+Resolving dependencies...
+Installing i18n (0.6.1)
+Installing multi_json (1.8.0)
+Installing activesupport (3.2.13)
+Installing builder (3.0.4)
+Installing activemodel (3.2.13)
+Installing arel (3.0.2)
+Installing tzinfo (0.3.37)
+Installing activerecord (3.2.13)
+Installing backports (3.3.4)
+Installing eventmachine (1.0.3)
+Installing rack (1.5.2)
+Installing rack-protection (1.5.0)
+Installing rack-test (0.6.2)
+Installing tilt (1.4.1)
+Installing sinatra (1.4.3)
+Installing sinatra-contrib (1.4.0)
+Installing sqlite3 (1.3.7)
+Using bundler (1.3.5)
+Your bundle is complete!
+It was installed into ./vendor/bundle
+</code></p>
+
+<h2>hello world を返す sinatra アプリケーションを書く</h2>
+
+<p>サイトのルートへアクセスが遇ったときに &ldquo;hello world&rdquo; を返す <code>main.rb</code> を作成する。適当なエディタで以下を書いて保存する。</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;</p>
+
+<p>get &lsquo;/&rsquo; do
+  &ldquo;hello world&rdquo;
+end
+```</p>
+
+<p>アプリケーションを実行する。</p>
+
+<p><code>sh
+$ bundle exec ruby main.rb
+</code></p>
+
+<p>動作確認をする。</p>
+
+<p><code>sh
+$ curl http://localhost:4567/
+hello world%
+</code></p>
+
+<p>ちゃんと返ってきている。簡単。
+ここでは、 <code>curl</code> で確認したが、もちろん web ブラウザで <a href="http://localhost:4567/">http://localhost:4567/</a> へアクセスして確認してもOK。
+アプリケーションの終了は <code>Ctrl-c</code> でOK。</p>
+
+<h2>ルーティング: 複数のリクエストをさばく</h2>
+
+<p>sinatra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
+
+<p>```ruby
+get &lsquo;/&rsquo; do
+  # show something
+end</p>
+
+<p>post &lsquo;/&rsquo; do
+  # create something
+end</p>
+
+<p>put &lsquo;/&rsquo; do
+  # replace something
+end</p>
+
+<p>patch &lsquo;/&rsquo; do
+  # modify something
+end</p>
+
+<p>delete &lsquo;/&rsquo; do
+  # annihilate something
+end</p>
+
+<p>options &lsquo;/&rsquo; do
+  # appease something
+end</p>
+
+<p>link &lsquo;/&rsquo; do
+  # affiliate something
+end</p>
+
+<p>unlink &lsquo;/&rsquo; do
+  # separate something
+end
+```</p>
+
+<p>先ほど書いた <code>main.rb</code> を修正していろいろな HTTP GET リクエストに対応する。
+ここでは <a href="http://localhost:4567/about">http://localhost:4567/about</a> にアクセスが有った場合、 &ldquo;about this site&rdquo; 文字列を返すように追記する。
+以下は、<code>git diff</code> の結果を示す。</p>
+
+<p>```diff
+diff &mdash;git a/main.rb b/main.rb
+index 713861d..9423680 100644
+&mdash;&ndash; a/main.rb
++++ b/main.rb
+@@ -1,5 +1,11 @@
+ require &lsquo;sinatra&rsquo;
++require &lsquo;sinatra/reloader&rsquo;</p>
+
+<p> get &lsquo;/&rsquo; do
+   &ldquo;hello world&rdquo;
+ end
++
++get &lsquo;/about&rsquo; do
++  &ldquo;about this site&rdquo;
++end
++
+```</p>
+
+<p>通常、スクリプトの修正をアプリケーションへ反映するためには、アプリケーションの再起動が必要となる。<code>require 'sinatra/reloader'</code> により、その必要がなくなる。</p>
+
+<h2>URL からのパラメータを扱う</h2>
+
+<p>以下のメソッドを書くことにより、<a href="http://localhost:4567/hello/SOME_NAME">http://localhost:4567/hello/SOME_NAME</a> へアクセスすると SOME_NAME 部分を扱うことができる。</p>
+
+<p><code>ruby
+get '/hello/:name' do
+  "hello #{params[:name]}"
+end
+</code></p>
+
+<p>これは以下のようにも書ける。</p>
+
+<p>```ruby
+get &lsquo;/hello/:name&rsquo; do |n|
+  &ldquo;hello #{n}&rdquo;
+end</p>
+
+<p>```</p>
+
+<p>複数のパラメータを扱うときは以下のように書く。
+<a href="http://localhost:4567/hello/FAMILY_NAME/LAST_NAME">http://localhost:4567/hello/FAMILY_NAME/LAST_NAME</a> へアクセスすると、FAMILY_NAME と LAST_NAME を扱える。</p>
+
+<p><code>ruby
+get '/hello/:fname/?:lname?' do |f, l|
+  "hello #{f} #{l}"
+end
+</code></p>
+
+<p>パラメータは、ワイルドカードや正規表現で扱うことができる。</p>
+
+<p><code>ruby
+get '/from/*/to/*' do |f, t|
+  "from #{f} to #{t}"
+end
+</code></p>
+
+<p>結果は以下のとおり。</p>
+
+<p><code>sh
+$ curl http://localhost:4567/from/fukuoka/to/tokyo
+from fukuoka to tokyo%
+</code></p>
+
+<p>正規表現で扱う場合は、以下。ここでは、<code>/users/</code> 以下がすべて数字であるアクセスの場合にマッチングさせている。</p>
+
+<p><code>ruby
+get %r{/users/([0-9]+)} do |i|
+  "user id = #{i}"
+end
+</code></p>
+
+<p>結果は以下のとおり。</p>
+
+<p><code>sh
+$ curl http://localhost:4567/users/12345
+user id = 12345%
+</code></p>
+
+<h2>before/after filter</h2>
+
+<p>sinatra のフィルタは、ルーティングされたコンテキストを実行する前後(before / after)で、リクエストとレスポンスを変更することができる。</p>
+
+<p>```ruby
+before do
+  @before_value = &ldquo;foo&rdquo;
+end</p>
+
+<p>get &lsquo;/&rsquo; do
+  &ldquo;before_value has been set to #{@before_value}&rdquo;
+end</p>
+
+<p>after do
+ puts &ldquo;After filter called to perform some task.&rdquo;
+end
+```</p>
+
+<p>以下のように記述することで、フィルタは特定パスのリクエストにのみ評価される。</p>
+
+<p><code>ruby
+before '/path/you/want/*'
+  # execute only before the '/path/you/want/*' route
+  authenticate
+end
+</code></p>
+
+<h2>helper</h2>
+
+<p>ヘルパーメソッドを定義して、ルートハンドラーやテンプレートとして使える。</p>
+
+<p>```ruby
+helpers do
+  # 共通関数を書ける
+  def say_hello( name )</p>
+
+<pre><code>"hello, #{name}"
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>get &lsquo;/:name&rsquo; do |n|
+  say_hello( n )
+end
+```</p>
+
+<p>上記は、モジュールとしても記述できる。</p>
+
+<p>```ruby
+module Hello
+  def say_hello( name ) &ldquo;hello, #{name}&rdquo; end
+end</p>
+
+<p>module Goodbye
+  def say_goodbye( name ) &ldquo;goodbye, #{name}&rdquo; end
+end</p>
+
+<p>helpers Hello, Goodbye
+```</p>
+
+<h2>テンプレートエンジンを扱う</h2>
+
+<p>sinatra では様々なテンプレートエンジンを扱うことができる。
+例えば、haml, erb, sass, markdown, slim, coffescript など。詳細は <a href="http://www.sinatrarb.com/intro.html#Available%20Template%20Languages">http://www.sinatrarb.com/intro.html#Available%20Template%20Languages</a> このあたりを参照。</p>
+
+<p>ここでは、erb の例を示す。</p>
+
+<p><code>views/index.erb</code> を作成する。スクリプトからは以下のように呼び出せばOK。</p>
+
+<p><code>ruby
+get '/' do
+  erb :index
+end
+</code></p>
+
+<h3>テンプレートエンジンにパラメータを渡す</h3>
+
+<p>インスタンス変数に渡して、テンプレート側からコールする。</p>
+
+<p><code>ruby
+get '/:name' do |n|
+  @name  = n
+  @title = 'sinatra sample'
+  erb :index
+end
+</code></p>
+
+<p><code>views/index.erb</code> は以下。</p>
+
+<p>```erb
+&lt;!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>&lt;%= @title %></title>
+</head>
+<body></p>
+
+<h1>hello <%= @name %></h1>
+
+
+<p></body>
+</html>
+```</p>
+
+<p>実行結果は以下のとおり。</p>
+
+<p>```sh
+$ curl <a href="http://localhost:4567/taro">http://localhost:4567/taro</a>
+&lt;!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>sinatra sample</title>
+</head>
+<body></p>
+
+<h1>hello taro</h1>
+
+
+<p></body>
+</html>
+```</p>
+
+<h3>layout テンプレート</h3>
+
+<p>テンプレートが複数存在するときに、ヘッダーやフッターなど、共通部分が出てくる。
+そのような共通部分を <code>views/layout.erb</code> 切り出すことができる。(erb以外のときはファイル拡張子を変えればよい。)
+<code>views/layout.erb</code> は優先的に読み込まれる。</p>
+
+<p>共通部分を <code>layout.erb</code> に記述し、個別記述部分を <code>yield</code> で呼び出す。以下に <code>layout.erb</code> の例を示す。</p>
+
+<p><code>erb
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+  &lt;meta charset="urf-8"&gt;
+  &lt;title&gt;test&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;%= yield %&gt;
+&lt;/body&gt;
+</code></p>
+
+<p>この時、以下のような <code>index.erb</code> テンプレートと</p>
+
+<p><code>erb
+  &lt;h1&gt;test&lt;/h1&gt;
+  &lt;h2&gt;&lt;%= @name%&gt;&lt;/h2&gt;
+</code></p>
+
+<p>以下のルーティングにより</p>
+
+<p>```ruby
+require &lsquo;sinatra&rsquo;
+require &lsquo;sinatra/reloader&rsquo;</p>
+
+<p>get &lsquo;/:name&rsquo; do |n|
+  @name = n
+  erb :index
+end
+```</p>
+
+<p>以下の様な結果になる。</p>
+
+<p>```sh
+$ curl <a href="http://localhost:4567/hanako">http://localhost:4567/hanako</a>
+&lt;!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="urf-8">
+  <title>test</title>
+</head>
+<body></p>
+
+<pre><code>&lt;h1&gt;test&lt;/h1&gt;
+</code></pre>
+
+<p>  <h2>hanako</h2></p>
+
+<p></body></p>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>

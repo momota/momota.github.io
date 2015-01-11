@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: vim | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/vim/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[vim プラグインで幸せな生活を送る]]></title>
+    <link href="http://momota.github.io/blog/2013/08/29/vim-plugins/"/>
+    <updated>2013-08-29T00:38:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/29/vim-plugins</id>
+    <content type="html"><![CDATA[<p>vimはhjklな変態的キーバインドから敬遠されがちだと思うけど強力なプラグインがあってこそ、やめられないとまらないわけであって、ここではプラグインの導入方法や管理方法を記載します。</p>
+
+<!-- more -->
+
+
+<h2>ノーマルなプラグイン導入</h2>
+
+<ol>
+<li><p>プラグインファイルをダウンロードしてくる</p></li>
+<li><p>ダウンロードしたプラグインファイル一式を runtimepathで指定されたディレクトリ以下に放り込む</p>
+
+<ul>
+<li>通常は <code>$HOME/.vim</code> 。runtimepathは以下のviコマンドで確認できる。</li>
+</ul>
+</li>
+</ol>
+
+
+<p><code>vim
+:set runtimepath
+</code></p>
+
+<p>helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)</p>
+
+<p>```vim
+ :help runtimepath
+ # => 以下抜粋
+ &lsquo;runtimepath&rsquo; &lsquo;rtp&rsquo; 文字列  (既定値:</p>
+
+<pre><code>             Unix: "$HOME/.vim,
+             $VIM/vimfiles,
+             $VIMRUNTIME,
+             $VIM/vimfiles/after,
+             $HOME/.vim/after"
+             DOS, MS-Win系, OS/2: "$HOME/vimfiles,
+             $VIM/vimfiles,
+             $VIMRUNTIME,
+             $VIM/vimfiles/after,
+             $HOME/vimfiles/after"
+             Macintosh: "$VIM:vimfiles,
+             $VIMRUNTIME,
+             $VIM:vimfiles:after"
+             )
+</code></pre>
+
+<p>```</p>
+
+<h2>プラグインによるプラグインパッケージ管理</h2>
+
+<p>上述したプラグイン導入を続けていくと、<code>$HOME/.vim/</code> 以下が散らかっていくことが容易に想像できるでしょう。散らかるだけで実害がなければ良いのですが、あるプラグインだけ削除したいときなどに難易度高くて困ります。
+そこで、プラグインの相互独立性を担保しながら管理できるプラグインを導入します。</p>
+
+<p>代表的なプラグインパッケージ管理プラグインは、以下です。</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>プラグイン名 </th>
+<th>概要       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><a href="https://github.com/tpope/vim-pathogen">pathogen</a>      </td>
+<td> <code>~/.vim/bundle/&lt;プラグイン名&gt;/</code> 以下の各ディレクトリも <code>~/.vim/</code> 直下と同じように読み込むようにするプラグイン。これにより、<code>~/.vim/bundle/</code> 以下にプラグインごとに別のディレクトリを切って管理をすることができるようになる。</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/gmarik/vundle">vundle</a>             </td>
+<td>Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理システム。自分で <code>~/.vim/bundle</code> git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/Shougo/neobundle.vim">neobundle</a>   </td>
+<td>Vundleにインスパイアされたプラグイン管理システム。Vundleの改良版。</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>上記よりNeoBundleを選びたいと思います。</p>
+
+<h2>NeoBundleインストールと設定</h2>
+
+<h3>1. NeoBundleをセットアップする</h3>
+
+<ul>
+<li>githubから最新NeoBundleのソースを clone する。ここでは、runtimepathを<code>~./.vim/</code>とします。</li>
+</ul>
+
+
+<p>```sh
+$ mkdir -p ~/.vim/bundle
+$ git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim</p>
+
+<p>```</p>
+
+<h3>2. NeoBundleを設定する</h3>
+
+<ul>
+<li><code>~/.vimrc</code> にNeoBundleの設定を加える。</li>
+</ul>
+
+
+<p>```vim
+&ldquo; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+&rdquo;   neobundle
+&ldquo; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+set nocompatible               &rdquo; Be iMproved</p>
+
+<p>if has(&lsquo;vim_starting&rsquo;)
+set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif</p>
+
+<p>call neobundle#rc(expand(&lsquo;~/.vim/bundle/&rsquo;))</p>
+
+<p>&ldquo; Let NeoBundle manage NeoBundle
+NeoBundleFetch &lsquo;Shougo/neobundle.vim&rsquo;</p>
+
+<p>&ldquo; Recommended to install
+&rdquo; After install, turn shell ~/.vim/bundle/vimproc, (n,g)make -f your_machines_makefile
+NeoBundle &lsquo;Shougo/vimproc&rsquo;, {</p>
+
+<pre><code>    \ 'build' : {
+            \ 'windows' : 'make -f make_mingw32.mak',
+            \ 'cygwin' : 'make -f make_cygwin.mak',
+            \ 'mac' : 'make -f make_mac.mak',
+            \ 'unix' : 'make -f make_unix.mak',
+    \ },
+</code></pre>
+
+<p>\ }</p>
+
+<p>filetype plugin indent on     &ldquo; Required!</p>
+
+<p>&ldquo; Brief help
+&rdquo; :NeoBundleList          &ndash; list configured bundles
+&ldquo; :NeoBundleInstall(!)    &ndash; install(update) bundles
+&rdquo; :NeoBundleClean(!)      &ndash; confirm(or auto-approve) removal of unused bundles</p>
+
+<p>&ldquo; Installation check.
+NeoBundleCheck
+```</p>
+
+<h3>3. プラグインの取得</h3>
+
+<ul>
+<li><code>~/.vimrc</code>にインストールするプラグインを列挙する。(以下は例)</li>
+<li>保存したあと、vim を起動し<code>:NeoBundleInstall</code> を実行するとプラグインがインストールされる。プラグインファイルは、<code>.vim/bundle/</code>以下にプラグイン別に保存される。もちろん各プラグインの設定は個別に <code>.vimrc</code> へ記述する必要がある。</li>
+</ul>
+
+
+<p>```vim
+&ldquo; GitHubリポジトリにあるプラグインを利用する
+&rdquo; &mdash;> NeoBundle &lsquo;USER/REPOSITORY-NAME&rsquo;
+NeoBundle &lsquo;Shougo/neocomplcache&rsquo;
+NeoBundle &lsquo;Shougo/neosnippet&rsquo;
+NeoBundle &lsquo;Shougo/unite.vim&rsquo;
+NeoBundle &lsquo;thinca/vim-quickrun&rsquo;
+NeoBundle &lsquo;davidoc/taskpaper.vim&rsquo;
+NeoBundle &lsquo;itchyny/lightline.vim&rsquo;
+NeoBundle &lsquo;altercation/vim-colors-solarized&rsquo;</p>
+
+<p>&ldquo;GitHub以外のGitリポジトリにあるプラグインを利用する
+NeoBundle &lsquo;git://git.wincent.com/command-t.git&rsquo;</p>
+
+<p>&ldquo; vim-scripts リポジトリにあるプラグインを利用する
+NeoBundle &lsquo;surround.vim&rsquo;</p>
+
+<p>&ldquo;Git以外のリポジトリにあるプラグインを利用する
+NeoBundle &lsquo;<a href="http://svn.macports.org/repository/macports/contrib/mpvim/">http://svn.macports.org/repository/macports/contrib/mpvim/</a>&rsquo;
+NeoBundle &lsquo;<a href="https://bitbucket.org/ns9tks/vim-fuzzyfinder">https://bitbucket.org/ns9tks/vim-fuzzyfinder</a>&rsquo;
+```</p>
+
+<ul>
+<li>プラグインをアンインストールしたい場合は、<code>.vimrc</code>から当該プラグインの記述を消し、<code>:NeoBundleClean</code>を実行する。</li>
+</ul>
+
+
+<h2>おすすめプラグイン</h2>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>プラグイン名  </th>
+<th>概要                                        </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><a href="https://github.com/Shougo/neocomplcache.vim">neocomplcache</a> </td>
+<td>入力補完機能を提供する</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/Shougo/neosnippet.vim">neosnippet</a>    </td>
+<td>スニペット入力サポート</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/itchyny/lightline.vim">lightline.vim</a> </td>
+<td>ステータスライン表示をおしゃれに</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/davidoc/taskpaper.vim">taskpaper.vim</a> </td>
+<td>タスク・TODOリストを管理</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/Shougo/unite.vim">unite.vim</a>     </td>
+<td>ファイラとして利用</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://github.com/altercation/vim-colors-solarized">solarized</a>     </td>
+<td>カラースキーム</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="http://www.vim.org/scripts/script.php?script_id=1697">surround</a>      </td>
+<td>HTMLタグなど"囲まれているもの"の編集補助</td>
+</tr>
+</tbody>
+</table>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[vim7.4 を mac (osx) にインストール]]></title>
+    <link href="http://momota.github.io/blog/2013/08/24/vim-osx/"/>
+    <updated>2013-08-24T12:56:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/24/vim-osx</id>
+    <content type="html"><![CDATA[<p><a href="http://vim-jp.org/blog/2013/08/10/vim_7.4_released.html">vim 7.4がリリースされた</a>ので、macのvimをupdateする。</p>
+
+<!-- more -->
+
+
+<h2>install mercurial</h2>
+
+<p>最新のvimをリポジトリから引っ張ってくる(後述の<code>hg clone http://...</code>)ため、分散型バージョン管理システムであるmercurialをインストールする。mercurialはgitの親戚かな。</p>
+
+<ol>
+<li><p>インストーラをダウンロードする</p>
+
+<p> mercurial インストーラをダウンロードする from <a href="http://mercurial.selenic.com/">http://mercurial.selenic.com/</a></p></li>
+<li><p>install</p>
+
+<p> ダウンロードしたファイルを unzip する。
+ 解凍した <code>*.mpkg</code> をダブルクリックし、インストーラを起動する。そのあとはポチポチと次へ的なボタンを押す簡単なお仕事。</p></li>
+</ol>
+
+
+<h2>install vim</h2>
+
+<p><a href="http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x">http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x</a> を参考にした。</p>
+
+<h3>(1) 事前確認</h3>
+
+<p>現状のバイナリへのpathやバージョンを確認する。</p>
+
+<p>```sh</p>
+
+<pre><code>$ which vim
+/usr/bin/vim
+$ vim --version | head -n 2
+VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Jun 20 2012 13:16:02)
+Compiled by root@apple.com
+</code></pre>
+
+<p>```</p>
+
+<h3>(2) インストールと設定</h3>
+
+<p>```sh</p>
+
+<pre><code>$ cd /opt/local/bin
+
+# download, compile, and install the latest vim
+$ sudo hg clone https://code.google.com/p/vim/
+$ mv vim vim_
+$ cd vim_
+$ sudo ./configure --prefix=/opt/local
+$ sudo make
+$ sudo make install
+
+
+# add the binary to your path, ahead of /usr/bin
+$ echo 'export PATH="/opt/local/bin:$PATH"' &gt;&gt; ~/.zshrc
+
+# reload zshrc so the changes take effect in this window
+$ source ~/.zshrc
+</code></pre>
+
+<p>```</p>
+
+<p>リポジトリからクローンしたときにディレクトリ名が<code>vim</code>のままだと<code>make install</code>時にエラーになるので、<code>vim_</code>など適当なディレクトリ名に変更しました。</p>
+
+<h3>(3) 事後確認</h3>
+
+<p>7.4になりました。enjoy your vim life.</p>
+
+<p>```sh</p>
+
+<pre><code>$ which vim
+/opt/local/bin/vim
+$ vim --version | head -n 2
+IM - Vi IMproved 7.4 (2013 Aug 10, compiled Aug 24 2013 12:28:42)
+MacOS X (unix) version
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>

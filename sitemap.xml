@@ -1,23 +1,99 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://momota.github.io/blog/2013/08/19/first-post/</loc>
-        <lastmod>2013-08-20T22:30:25+09:00</lastmod>
+        <loc>http://momota.github.io/blog/2013/08/19/octopress/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/22/solarized-putty/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/24/solarized-iterm2/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/24/vim-osx/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/25/rbenv/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/29/vim-plugins/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/08/31/shell-man-color/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/09/07/oh-my-zsh/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/09/14/junos-filter/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/09/16/sinatra/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/09/22/sinatra/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/09/23/sinatra/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/10/13/music/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/11/13/trema/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2013/11/22/redmine/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2014/02/02/windows/</loc>
+        <lastmod>2014-05-24T12:50:40+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2014/05/10/activerecord/</loc>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/2014/05/20/teraterm-macro/</loc>
+        <lastmod>2014-05-20T01:50:13+09:00</lastmod>
     </url>
     <url>
         <loc>http://momota.github.io/about/</loc>
-        <lastmod>2013-08-20T22:23:24+09:00</lastmod>
+        <lastmod>2014-05-13T00:42:35+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/archives/</loc>
+        <lastmod>2014-05-24T12:50:40+09:00</lastmod>
     </url>
     <url>
         <loc>http://momota.github.io/blog/archives/</loc>
-        <lastmod>2013-08-20T22:30:25+09:00</lastmod>
+        <lastmod>2014-05-24T12:50:40+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://momota.github.io/blog/</loc>
+        <lastmod>2014-05-24T12:50:40+09:00</lastmod>
     </url>
     <url>
         <loc>http://momota.github.io/</loc>
-        <lastmod>2013-08-20T22:30:25+09:00</lastmod>
+        <lastmod>2014-05-24T12:50:40+09:00</lastmod>
     </url>
     <url>
         <loc>http://momota.github.io/robots.txt</loc>
-        <lastmod>2013-08-20T22:23:24+09:00</lastmod>
+        <lastmod>2013-08-20T23:13:40+09:00</lastmod>
     </url>
 </urlset>

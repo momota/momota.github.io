@@ -1,0 +1,1040 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>rails じゃなくても ActiveRecord を使う - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。 ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2014/05/10/activerecord/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rails じゃなくても ActiveRecord を使う</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-10T14:54:00+09:00" pubdate data-updated="true">2014-05-10</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
+
+<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
+Ruby on Rails 標準で、モデル層で使われる。</p>
+
+<p>環境は以下。</p>
+
+<ul>
+<li>Mac OSX</li>
+<li>ruby 2.1.1p76</li>
+<li>MySQL mysqld5.6.17</li>
+</ul>
+
+
+<p>最終的なディレクトリ構成は以下のようになる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>.
+</span><span class='line'>├── Gemfile
+</span><span class='line'>├── Gemfile.lock
+</span><span class='line'>├── README.md
+</span><span class='line'>├── Rakefile
+</span><span class='line'>├── app
+</span><span class='line'>│   └── models
+</span><span class='line'>│       └── hoges.rb
+</span><span class='line'>├── app.rb
+</span><span class='line'>├── config
+</span><span class='line'>│   └── database.yml
+</span><span class='line'>├── db
+</span><span class='line'>│   └── migrate
+</span><span class='line'>│       └── 20140510_create_hoges.rb
+</span><span class='line'>├── log
+</span><span class='line'>│   ├── database.log
+</span><span class='line'>│   └── trace.log
+</span><span class='line'>└── vendor
+</span><span class='line'>    └── bundle
+</span><span class='line'>            └── <span class="o">(</span>略<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://github.com/momota/activerecord_sample">https://github.com/momota/activerecord_sample</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>前準備</h2>
+
+<h3>ruby</h3>
+
+<p>rbenv で ruby 2.1.1 をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 2.1.1
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>2.1.1
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span><span class='line'><span class="nv">$ </span>ruby -v
+</span><span class='line'>ruby 2.1.1p76 <span class="o">(</span>2014-02-24 revision 45161<span class="o">)</span> <span class="o">[</span>x86_64-darwin13.0<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>gem</h3>
+
+<p>bundler で gem をインストールする。
+まず、bundler をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundle
+</span><span class='line'><span class="nv">$ </span>bundle -v
+</span><span class='line'>Bundler version 1.6.2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下の <code>Gemfile</code> をつくって<code>bundle install --path vendor/bundle</code> して gem をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;https://rubygems.org&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;activerecord&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rake&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;mysql2&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;pry&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>mysql2</code> はDBアダプタ。MySQLと接続するために必要。</p>
+
+<p><code>pry</code> はなくてもよい。<code>irb</code> の便利バージョン。</p>
+
+<h3>mysql</h3>
+
+<p>homebrew でインストールした。</p>
+
+<p><code>my.cnf</code>はよしなに。</p>
+
+<p><code>create database</code> とか <code>grant</code> でユーザやデータベースなどはあらかじめ作っておく。</p>
+
+<h2>create table: rake タスクを使ってテーブルを作成する</h2>
+
+<p><code>rake</code> (makeみたいなもん) でテーブルを作成する。(マイグレーション)</p>
+
+<p>マイグレーションは、SQLを使わずにデータベースのテーブルやカラムなどの構造を変更できる仕組みで、移行と解釈するとややこしい。データベース移行をしやすくする仕組み、くらいに捉えておくとよい。</p>
+
+<h3>マイグレーション用ファイルを作成する</h3>
+
+<p><code>db/migrate</code> ディレクトリを作ってマイグレーション用ファイルを作る。</p>
+
+<p>ここでは hoges テーブルを作ることにする。
+マイグレーション用ファイルには、テーブル定義を書く。ここでは <code>db/migrate/20140510_create_hoges.rb</code> を作成する。</p>
+
+<p>このファイル名が大事で <code>20140510</code> の部分がバージョンとして管理される。<code>schema_migrations</code> テーブルが自動生成され、そこで管理される。また、マイグレーション用ファイル中に class 名を<code>CreateHoges</code> のようにキャメルケースで定義した場合は、ファイル名は <code>VERSION_create_hoge.rb</code> のようにスネークケースとして命名する必要がある。ファイル名がこの命名規約に反するとマイグレーションがこける。</p>
+
+<p>rails文化の「設定より規約」(CoC: Convention over Configuration)ってやつですね。</p>
+
+<p><code>ActiveRecord::Migration</code> を継承したクラス <code>Createhoges</code> を定義する。
+シンボル <code>:hoges</code> がテーブル名。カラム定義は見ての通りだと思う。
+主キーは自動的に <code>id</code> というカラム名で生成されるので書かない。(書くとエラーになる)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateHoges</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:hoges</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>  <span class="ss">:name</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>  <span class="ss">:url</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>  <span class="c1"># =&gt; これでcreated_atとupdated_atカラムが定義される</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
+</span><span class='line'>    <span class="n">drop_table</span> <span class="ss">:hoges</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>書き方の詳細は、<a href="http://guides.rubyonrails.org/migrations.html">Active Record Migrations</a> を見れば良いと思う。</p>
+
+<h3>データベース接続情報を yaml に書き出す</h3>
+
+<p>MySQL への接続情報(DBユーザ名とかパスワードとか使うDB名とか)を yaml ファイルに書き出しておく。めんどくさい、かつ、使い捨てのコードならハードコーディングしといてもOK。</p>
+
+<p>ここでは、以下の内容で <code>config/database.yml</code> を作成した。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">db:</span>
+</span><span class='line'><span class="x">  production:</span>
+</span><span class='line'><span class="x">    adapter:  mysql2</span>
+</span><span class='line'><span class="x">    host:     localhost</span>
+</span><span class='line'><span class="x">    username: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_USERNAME&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    password: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    database: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_NAME&#39;</span><span class="o">]</span><span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'>
+</span><span class='line'><span class="x">  development:</span>
+</span><span class='line'><span class="x">    adapter:  mysql2</span>
+</span><span class='line'><span class="x">    host:     localhost</span>
+</span><span class='line'><span class="x">    username: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_USERNAME&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    password: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_PASSWORD&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    database: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_NAME&#39;</span><span class="o">]</span><span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>パスワードなどの秘匿情報は環境変数から読み込むようにする。(ここではERB形式で書いた)
+パスワードをべた書きしといて、間違えて github とかで公開しちゃうと大変なので。</p>
+
+<p><code>~/.zshrc</code> とか <code>~/.bashrc</code> にあらかじめ作っておいたデータベース名とかユーザ名を以下のように足して <code>source ~/.zshrc</code> で読み込めばいいと思う。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_NAME</span><span class="o">=</span><span class="s2">&quot;hoge_db&quot;</span>
+</span><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_USERNAME</span><span class="o">=</span><span class="s2">&quot;hoge_user&quot;</span>
+</span><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_PASSWORD</span><span class="o">=</span><span class="s2">&quot;hoge_password&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Rakefile をつくって rakeタスクを実行する</h3>
+
+<p>以下の内容で <code>Rakefile</code> を作る。
+DB接続用の設定や環境指定(development/production) やバージョン指定の設定を書いてます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;active_record&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;erb&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;logger&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:migrate</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Migrate database&quot;</span>
+</span><span class='line'><span class="n">task</span> <span class="ss">:migrate</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migrator</span><span class="o">.</span><span class="n">migrate</span><span class="p">(</span><span class="s1">&#39;db/migrate&#39;</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;VERSION&quot;</span><span class="o">]</span> <span class="p">?</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;VERSION&quot;</span><span class="o">].</span><span class="n">to_i</span> <span class="p">:</span> <span class="kp">nil</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">db_conf</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="no">ERB</span><span class="o">.</span><span class="n">new</span><span class="p">(</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;./config/database.yml&quot;</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">result</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># `rake ENV=development`/`rake ENV=production`で切り替え可能</span>
+</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span><span class="p">(</span> <span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db&quot;</span><span class="o">][</span><span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;ENV&quot;</span><span class="o">]]</span> <span class="p">)</span>
+</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="no">Logger</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;log/database.log&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下を参考。</p>
+
+<ul>
+<li><a href="http://qiita.com/foloinfo/items/6ecfe3c5fd1b56f1dceb">非Rails AppでActiveRecord::Migrationを使う + Rakeでバージョン管理する</a></li>
+</ul>
+
+
+<h3>rake タスクを実行する</h3>
+
+<p>まずは rake タスクの確認。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake -T
+</span><span class='line'>rake migrate  <span class="c"># Migrate database</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>開発環境設定で実行する。(ENV=development)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># debug 用に--traceオプションをつけ、標準エラーをlog/trace.txtへリダイレクト。</span>
+</span><span class='line'><span class="c"># bundle exec rake ENV=development でもOK</span>
+</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake <span class="nv">ENV</span><span class="o">=</span>development --trace 2&gt; log/trace.txt
+</span><span class='line'><span class="o">==</span> 20140510 CreateHoges: <span class="nv">migrating</span> <span class="o">============================================</span>
+</span><span class='line'>-- create_table<span class="o">(</span>:hoges<span class="o">)</span>
+</span><span class='line'>   -&gt; 0.1159s
+</span><span class='line'><span class="o">==</span> 20140510 CreateHoges: migrated <span class="o">(</span>0.1160s<span class="o">)</span> <span class="o">===================================</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>問題なければテーブルが作成されているはず。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; show tables;
+</span><span class='line'>+--------------------------+
+</span><span class='line'>| Tables_in_dev_********** |
+</span><span class='line'>+--------------------------+
+</span><span class='line'>| hoges                    |
+</span><span class='line'>| schema_migrations        |
+</span><span class='line'>+--------------------------+
+</span><span class='line'>2 rows in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>mysql&gt; desc schema_migrations;
+</span><span class='line'>+---------+--------------+------+-----+---------+-------+
+</span><span class='line'>| Field   | Type         | Null | Key | Default | Extra |
+</span><span class='line'>+---------+--------------+------+-----+---------+-------+
+</span><span class='line'>| version | varchar<span class="o">(</span>255<span class="o">)</span> | NO   | PRI | NULL    |       |
+</span><span class='line'>+---------+--------------+------+-----+---------+-------+
+</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>mysql&gt; <span class="k">select</span> * from schema_migrations;
+</span><span class='line'>+----------+
+</span><span class='line'>| version  |
+</span><span class='line'>+----------+
+</span><span class='line'>| 20140510 |
+</span><span class='line'>+----------+
+</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>mysql&gt; desc hoges;
+</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
+</span><span class='line'>| Field      | Type         | Null | Key | Default | Extra          |
+</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
+</span><span class='line'>| id         | int<span class="o">(</span>11<span class="o">)</span>      | NO   | PRI | NULL    | auto_increment |
+</span><span class='line'>| name       | varchar<span class="o">(</span>255<span class="o">)</span> | YES  |     | NULL    |                |
+</span><span class='line'>| url        | varchar<span class="o">(</span>255<span class="o">)</span> | YES  |     | NULL    |                |
+</span><span class='line'>| created_at | datetime     | YES  |     | NULL    |                |
+</span><span class='line'>| updated_at | datetime     | YES  |     | NULL    |                |
+</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
+</span><span class='line'>5 rows in <span class="nb">set</span> <span class="o">(</span>0.01 sec<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
+</span><span class='line'>Empty <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>CRUD 操作について</h2>
+
+<p>ActiveRecordを使って CRUD 操作する。(insert/select/update/delete)</p>
+
+<p>ActiveRecord では、<code>ActiveRecord::Base</code> を継承したクラスがDBの1テーブルに対応し、そのクラスの属性がテーブルの各カラムに対応する。
+このクラスのことを一般的に「モデル」と呼ぶ。
+Rails では、Rails アプリを生成した段階で MVC 別にディレクトリが生成されるので、<code>app/models</code> 以下にこの <code>ActiveRecord::Base</code> 継承クラスを作る。
+今回は Rails ではないのでそれに従う必要はない。が、モデルが増えた場合を考慮すると <code>app/models</code> 以下に整理できておいたほうがコードの可読性とかメンテナンスはしやすそうなので、<code>app/models/hoges.rb</code> ファイルを作ることにする。
+Rails って理にかなっているんだな。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Hoges</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この <code>Hoges</code> は対応するテーブル名にあわせる。これもCoC。
+レコードを単数形で扱うため、テーブル名を複数形にすることが多いみたい。</p>
+
+<h3>Create: テーブルへ insert する</h3>
+
+<p>CRUD の C。</p>
+
+<p><code>app.rb</code> をつくる。</p>
+
+<p>モデルを <code>new</code> して属性値をセットしてあげればOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;active_record&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;erb&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./app/models/hoges&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">db_conf</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="no">ERB</span><span class="o">.</span><span class="n">new</span><span class="p">(</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;./config/database.yml&quot;</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">result</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 開発用DB接続パラメータ読み込み, 接続する</span>
+</span><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span><span class="p">(</span><span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db&quot;</span><span class="o">][</span><span class="s2">&quot;development&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">test_name</span> <span class="o">=</span> <span class="s2">&quot;momota.txt&quot;</span>
+</span><span class='line'><span class="n">test_url</span>  <span class="o">=</span> <span class="s2">&quot;http://momota.github.io/&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">hoge</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">h</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">test_name</span>
+</span><span class='line'>  <span class="n">h</span><span class="o">.</span><span class="n">url</span>  <span class="o">=</span> <span class="n">test_url</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nb">p</span> <span class="n">hoge</span>
+</span><span class='line'><span class="n">hoge</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'><span class="nb">p</span> <span class="n">hoge</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>なお、<code>save</code> しないと insert されない。</p>
+
+<p>こんな感じで生成時にハッシュを渡してもOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoge</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">test_name</span><span class="p">,</span> <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="n">test_url</span><span class="p">)</span>
+</span><span class='line'><span class="n">hoge</span><span class="o">.</span><span class="n">save</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>それでは実行してみる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
+</span><span class='line'><span class="c">#&lt;Hoges id: nil, name: &quot;momota.txt&quot;, url: &quot;http://momota.github.io/&quot;, created_at: nil, updated_at: nil&gt;</span>
+</span><span class='line'><span class="c">#&lt;Hoges id: 1, name: &quot;momota.txt&quot;, url: &quot;http://momota.github.io/&quot;, created_at: &quot;2014-05-10 23:50:46&quot;, updated_at: &quot;2014-05-10 23:50:46&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記から、saveしないと <code>id</code> や <code>created_at</code> などの値が空なので insert されていないことが分かる。</p>
+
+<p>実際にテーブルの内容を見てみよう。ちゃんと insert されている。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
+</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
+</span><span class='line'>| id | name       | url                      | created_at          | updated_at          |
+</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
+</span><span class='line'>|  1 | momota.txt | http://momota.github.io/ | 2014-05-10 23:50:46 | 2014-05-10 23:50:46 |
+</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
+</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Read: レコードを select する</h3>
+
+<p>CRUD の R。</p>
+
+<p>主キーで select する場合は、<code>find</code> メソッドを使う。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これは以下の SQL と同じ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">hoges</span> <span class="k">where</span> <span class="n">hoges</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">LIMIT</span> <span class="mi">1</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>主キー以外だと、<code>find_by</code> メソッドを使う。</p>
+
+<p>該当するレコードがなければ <code>nil</code> が返ってくる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;momota.txt&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これは以下のような書き方もできる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;momota.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">take</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これらは以下の SQL と同じ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">hoges</span> <span class="k">where</span> <span class="n">hoges</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="ss">&quot;momota.txt&quot;</span> <span class="k">LIMIT</span> <span class="mi">1</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>find_by</code> メソッドを使ってレコードが存在しないときにだけ insert するように <code>app.rb</code> を書き変えてみよう。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">-hoge = Hoges.new { |h|</span>
+</span><span class='line'><span class="gd">-  h.name = test_name</span>
+</span><span class='line'><span class="gd">-  h.url  = test_url</span>
+</span><span class='line'><span class="gd">-}</span>
+</span><span class='line'><span class="gd">-p hoge</span>
+</span><span class='line'><span class="gd">-hoge.save</span>
+</span><span class='line'><span class="gd">-p hoge</span>
+</span><span class='line'><span class="gi">+rec = Hoges.find_by url: test_url</span>
+</span><span class='line'><span class="gi">+unless rec</span>
+</span><span class='line'><span class="gi">+  hoge = Hoges.new { |h|</span>
+</span><span class='line'><span class="gi">+    h.name = test_name</span>
+</span><span class='line'><span class="gi">+    h.url  = test_url</span>
+</span><span class='line'><span class="gi">+  }</span>
+</span><span class='line'><span class="gi">+  hoge.save</span>
+</span><span class='line'><span class="gi">+  puts &quot;すでにデータは insert 済みなのでここには入らない&quot;</span>
+</span><span class='line'><span class="gi">+end</span>
+</span><span class='line'>
+</span><span class='line'><span class="gi">+p rec</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>実行すると最終行の <code>p rec</code> が呼ばれていることが分かる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
+</span><span class='line'>&lt;Hoges id: 1, name: <span class="s2">&quot;momota.txt&quot;</span>, url: <span class="s2">&quot;http://momota.github.io/&quot;</span>, created_at: <span class="s2">&quot;2014-05-10 23:50:46&quot;</span>, updated_at: <span class="s2">&quot;2014-05-10 23:50:46&quot;</span>&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>find_or_create_by</code> メソッドによりさらにスマートな書き方ができる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">-rec = Hoges.find_by url: test_url</span>
+</span><span class='line'><span class="gd">-unless rec</span>
+</span><span class='line'><span class="gd">-  hoge = Hoges.new { |h|</span>
+</span><span class='line'><span class="gd">-    h.name = test_name</span>
+</span><span class='line'><span class="gd">-    h.url  = test_url</span>
+</span><span class='line'><span class="gd">-  }</span>
+</span><span class='line'><span class="gd">-  hoge.save</span>
+</span><span class='line'><span class="gi">+rec = Hoges.find_or_create_by( url: test_url ) do |h|</span>
+</span><span class='line'><span class="gi">+  h.name = test_name</span>
+</span><span class='line'>  puts &quot;すでにデータは insert 済みなのでここには入らない&quot;
+</span><span class='line'>end
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>その他いろいろと以下のページが参考になる。</p>
+
+<ul>
+<li><a href="http://edgeguides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a></li>
+</ul>
+
+
+<h3>Update: レコードを update する</h3>
+
+<p>CRUD の U。</p>
+
+<p>これはオブジェクトの属性を更新して <code>save</code> するだけ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">changed_name</span> <span class="o">=</span> <span class="s2">&quot;momota.log&quot;</span>
+</span><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span>
+</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">changed_name</span>
+</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">save</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Delete: レコードを delete する</h3>
+
+<p>CRUD の D。</p>
+
+<p>これも簡単でモデルオブジェクトから <code>destroy</code> or <code>delete</code> メソッドを呼ぶだけ。<code>save</code> は不要。</p>
+
+<p><code>delete</code> はレコードの削除のみなので高速。<code>destroy</code> はレコードとオブジェクトも削除してくれるが、<code>delete</code> に比べて低速。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">destroy</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>where</code> で複数のレコードをひっかけて全部削除したい場合は、<code>destroy_all</code> or <code>delete_all</code> メソッドを呼ぶ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">destroy_all</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>find_by</code> してからでもOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span>
+</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">destroy_all</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>app.rb</code> を書き換えてみる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">rec</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
+</span><span class='line'><span class="o">+</span><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
+</span><span class='line'>   <span class="n">h</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">test_name</span>
+</span><span class='line'><span class="o">-</span>  <span class="nb">puts</span> <span class="s2">&quot;すでにデータは insert 済みなのでここには入らない&quot;</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-</span><span class="nb">p</span> <span class="n">rec</span>
+</span><span class='line'><span class="o">+</span><span class="nb">puts</span> <span class="s2">&quot;[before delete]record count: </span><span class="si">#{</span><span class="no">Hoges</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="o">+</span><span class="no">Hoges</span><span class="o">.</span><span class="n">delete_all</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>実行すると、確かにレコードが削除されている。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
+</span><span class='line'><span class="o">[</span>before delete<span class="o">]</span>record count: 1
+</span><span class='line'><span class="o">[</span>after delete<span class="o">]</span> record count: 0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>sqlでも確認できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
+</span><span class='line'>Empty <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-10T14:54:00+09:00" pubdate data-updated="true">2014-05-10</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/activerecord/'>activerecord</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/rake/'>rake</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2014/05/10/activerecord/" data-via="momota" data-counturl="http://momota.github.io/blog/2014/05/10/activerecord/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2014/05/10/activerecord/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/02/02/windows/" title="Previous Post: これだけは入れとけ! 個人的に仕事でよく使う windows ソフト">&laquo; これだけは入れとけ! 個人的に仕事でよく使う windows ソフト</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/05/20/teraterm-macro/" title="Next Post: 初めてのteraterm macro">初めてのteraterm macro &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm macro</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/10/activerecord/">rails じゃなくても ActiveRecord を使う</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/02/windows/">これだけは入れとけ! 個人的に仕事でよく使う windows ソフト</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/22/redmine/">redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/13/trema/">trema をインストールする (Ruby 2.0)</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2014/05/10/activerecord/';
+        var disqus_url = 'http://momota.github.io/blog/2014/05/10/activerecord/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: solarized | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/solarized/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2014-05-24T12:50:47+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[iTerm2へsolarized導入]]></title>
+    <link href="http://momota.github.io/blog/2013/08/24/solarized-iterm2/"/>
+    <updated>2013-08-24T00:52:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/24/solarized-iterm2</id>
+    <content type="html"><![CDATA[<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
+
+<p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、iTerm2へ適用する。</p>
+
+<p>適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/before_iterm.png" alt="iterm before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/after_iterm.png" alt="iterm after" /></p>
+
+<!-- more -->
+
+
+<ol>
+<li><p>Solarized*.itermcolors をダウンロードする</p>
+
+<p> <a href="https://github.com/altercation/solarized/tree/master/iterm2-colors-solarized">https://github.com/altercation/solarized/tree/master/iterm2-colors-solarized</a> からSolarized*.itermcolors ファイルをダウンロードする</p></li>
+<li><p>iterm2 を開く</p>
+
+<p> ちなみにわたしは、<code>ctrl + space</code> でSpotlightを開き、<code>ite</code>入力くらいで起動しています。</p></li>
+<li><p>preferencesダイアログを開く</p>
+
+<p> <code>command + o</code> でprofilesダイアログを開いて、<code>Edit Profiles...</code> ボタンを押下する。</p></li>
+<li><p>solarized用のprofileを作成する</p>
+
+<p> preferences ダイアログの<code>Profiles</code>タブから、左下の方の<code>+</code>を押下し、プロファイルを追加する。
+ <code>General</code>タブのBasicのNameを<code>solarized</code>とかに修正する</p></li>
+<li><ol>
+<li>でダウンロードしたファイルを読み込ませる</li>
+</ol>
+
+
+<p> <code>Colors</code> タブから <code>Load Presets...</code> ボタンを押下後、<code>import</code> を押す。1. でダウンロードしたSolarized*.itermcolorsファイルを選択する。</p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[PuTTY へsolarized導入]]></title>
+    <link href="http://momota.github.io/blog/2013/08/22/solarized-putty/"/>
+    <updated>2013-08-22T23:00:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/22/solarized-putty</id>
+    <content type="html"><![CDATA[<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
+
+<p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、PuTTYへ適用する。
+ちなみにパティと発音するみたいですね。ずっとプティと発音してました。</p>
+
+<p>適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
+
+<!-- more -->
+
+
+<h1>環境</h1>
+
+<ul>
+<li>windows 7 professional service pack 1</li>
+<li>PuTTY 0.60-JP_Y-2007-08-06</li>
+<li>ちなみにフォントは、"Osakaー等幅" を利用</li>
+</ul>
+
+
+<h1>solarized_dark.reg (solarized_light.reg)をダウンロードする</h1>
+
+<p><a href="https://github.com/brantb/solarized/tree/master/putty-colors-solarized">https://github.com/brantb/solarized/tree/master/putty-colors-solarized</a></p>
+
+<p>solarized_dark.regをダウンロードし、<code>C:¥Program Files (x86)¥PuTTY¥</code> に保存</p>
+
+<h1>solarized_dark.regを修正する</h1>
+
+<p><a href="http://27213143.at.webry.info/201304/article_1.html">http://27213143.at.webry.info/201304/article_1.html</a></p>
+
+<p>solarized_dark.regをテキストエディタで開き、ファイル中の <code>Solarized%20Dark(Solarized%20Light)</code> 部分をputtyのセッション名に修正する。下の例では セッション名は <code>_vagrant_ubuntu</code>。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png" alt="putty session name" /></p>
+
+<h1>putty設定をインポートする</h1>
+
+<p>以下の2通りのやり方がある。お好きな方でどうぞ。</p>
+
+<h2>(1) ダブルクリックでインポート</h2>
+
+<p>solarized_dark.reg をダブルクリックする。</p>
+
+<h2>(2) コマンドプロンプトからインポート</h2>
+
+<p><a href="http://103px.blog.fc2.com/blog-entry-46.html">http://103px.blog.fc2.com/blog-entry-46.html</a></p>
+
+<p>windowsコマンドプロンプトから.regファイルをインポートする
+```bat</p>
+
+<pre><code> &gt; reg import C:¥Program Files (x86)¥PuTTY¥solarized_dark.reg
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
+  
+</feed>
