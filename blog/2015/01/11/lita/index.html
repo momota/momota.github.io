@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>lita で Slack Bot (on heroku) をつくる - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="チャットツール slack に常駐する bot をつくったので、そのときの導入メモ。
+bot は lita を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+js (coffee script) よりも ruby &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2015/01/11/lita/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Lita で Slack Bot (on Heroku) をつくる</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T21:36:00+09:00" pubdate data-updated="true">2015-01-11</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>チャットツール <a href="https://slack.com/">slack</a> に常駐する bot をつくったので、そのときの導入メモ。
+bot は <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
+
+<p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.</p>
+
+<!-- more  -->
+
+
+<h2>1. 事前準備: もろもろインストールする</h2>
+
+<h3>1.1 lita をインストール</h3>
+
+<p>lita は gem でインストールできる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install lita
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.2 redis をインストール</h3>
+
+<p>lita はデータ永続化ストレージとして redis を使うことが前提となっている。
+つまり、ローカル環境で lita を実行するには、redis が必要なため、redis をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get update
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install redis-server
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>redis を起動する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo service redis-server start
+</span><span class='line'><span class="nv">$ </span>sudo service redis-server status
+</span><span class='line'><span class="c">#=&gt; redis の起動状態確認</span>
+</span><span class='line'><span class="c">#=&gt; ps aux | grep redis とかで確認してもいい</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2. lita プロジェクト作成、起動</h2>
+
+<p>lita プロジェクト&#8221;sample&#8221;を作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>lita new sample
+</span><span class='line'><span class="c">#=&gt; sample ディレクトリが生成される</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>sample
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby のバージョンを rbenv で指定しておく。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>2.1.5
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span><span class='line'><span class="nv">$ </span>ruby -v
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>bundler でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>lita start</code> で lita をローカル環境で起動してみる。
+<code>lita help</code> で返ってくればOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>lita start
+</span><span class='line'>Type <span class="s2">&quot;exit&quot;</span> or <span class="s2">&quot;quit&quot;</span> to end the session.
+</span><span class='line'>Lita &gt; lita info
+</span><span class='line'>Lita 4.0.4 - https://www.lita.io/
+</span><span class='line'>Redis 2.8.4 - Memory used: 414.04K
+</span><span class='line'>Lita &gt; lita <span class="nb">help</span>
+</span><span class='line'>Lita: <span class="nb">help</span> - Lists <span class="nb">help </span>information <span class="k">for </span>terms and <span class="nb">command </span>the robot will respond to.
+</span><span class='line'>Lita: <span class="nb">help </span>COMMAND - Lists <span class="nb">help </span>information <span class="k">for </span>terms or commands that begin with COMMAND.
+</span><span class='line'>Lita: info - Replies with the current version of Lita.
+</span><span class='line'>Lita &gt; <span class="nb">exit</span>
+</span><span class='line'><span class="nv">$ </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://www.lita.io/plugins">lita プラグイン</a> もたくさんあるので、適当に <code>Gemfile</code> に追加して <code>bundle install</code> するとよい。</p>
+
+<h2>3. herokuへデプロイして Slack と連携する</h2>
+
+<p>lita bot を heroku へデプロイする。
+また、アダプタ <a href="https://github.com/kenjij/lita-slack">lita-slack</a> を利用して Slack と連携する。</p>
+
+<h3>3.1 事前準備</h3>
+
+<p>heroku へのデプロイは、git push して行うので、git でバージョン管理を開始する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git init
+</span><span class='line'><span class="nv">$ </span>git add .
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;first commit&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heroku で ruby バージョンを指定するには、<code>Gemfile</code>で<code>ruby "VERSION"</code>と記述する。
+また、Slack と連携するため、<code>lita-slack</code> アダプタもインストールする。
+この時点で、<code>Gemfile</code>は以下の通り。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;https://rubygems.org&quot;</span>
+</span><span class='line'><span class="n">ruby</span> <span class="s2">&quot;2.1.5&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita-slack&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>bundler でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>slack とつなげたり、Redis To Go を利用するために、<code>lita_config.rb</code> を以下のように修正する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Lita</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span>      <span class="o">=</span> <span class="s2">&quot;lita&quot;</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:info</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># アダプタの指定。Slack とつなげるので、:slack と修正する</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">adapter</span>   <span class="o">=</span> <span class="ss">:slack</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Slack のAPIキーを指定する</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">slack</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;SLACK_API_KEY&quot;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># heroku の redis アドオン Redis To Go 関連の設定</span>
+</span><span class='line'>  <span class="c1"># 後述する heoku コマンドで heroku の環境変数を設定する</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">redis</span><span class="o">[</span><span class="ss">:url</span><span class="o">]</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;REDISTOGO_URL&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">port</span>   <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;PORT&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heroku でのアプリケーション起動には foreman でのアプリケーション起動が必要となる。
+以下の <code>Procfile</code> を作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">web</span><span class="p">:</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">lita</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.2 heroku の設定</h3>
+
+<p>新規に heroku アプリケーションを作成する。
+ここでは、<code>lita-sample</code> という名前にした。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku apps:create lita-sample
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heroku の redis アドオン Redis To Go をアプリケーションへ追加する。
+事前に heroku へクレジットカードの登録が必要。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku addons:add redistogo --app lita-sample
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>heroku の環境変数を設定する。
+設定するのは、Slack APIキーのみでOK。
+Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">https://YOUR-DOMAIN.slack.com/services/new/lita</a> から Integration の設定をしたら入手可能。</p>
+
+<p><code>REDISTOGO_URL</code> などは、アドオン追加時に自動で設定されている。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku config:set <span class="nv">SLACK_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-slack-api-key&quot;</span>
+</span><span class='line'><span class="nv">$ </span>heroku config
+</span><span class='line'><span class="c">#=&gt; heroku 上で設定されている環境変数が出力されるので正しく設定されているか確認する</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.3 heroku へデプロイする</h3>
+
+<p>git commit して git push してあげる。
+そうすると heoku アプリケーションが起動する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;make it better&quot;</span>
+</span><span class='line'><span class="nv">$ </span>git push heroku master
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Slack に lita さんが見えるはずなので 適当なチャンネルに招待して <code>@lita help</code> とか声をかけると答えてくれる。</p>
+
+<h2>4. handler 作成</h2>
+
+<p>以下のように handler のひな形を生成する。
+<code>lita-</code> というプレフィックスが自動で付与される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mkdir handlers
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>handlers
+</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>lita hello_handler
+</span><span class='line'><span class="c">#=&gt; lita-hello_handler ディレクトリが生成される</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>handlers/lita-hello_handler/lib/lita/handlers/hello_hundler.rb</code> を修正する。
+<code>route</code> で正規表現にマッチした場合の処理へルーティングする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Lita</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Handlers</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">HelloHandler</span> <span class="o">&lt;</span> <span class="no">Handler</span>
+</span><span class='line'>      <span class="n">route</span> <span class="sr">/^java\s+(.+)/</span><span class="p">,</span> <span class="ss">:with_java</span><span class="p">,</span> <span class="ss">help</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;java TEXT&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;reply back with java.&quot;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">with_java</span><span class="p">(</span> <span class="n">response</span> <span class="p">)</span>
+</span><span class='line'>        <span class="n">word</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">matches</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>        <span class="n">response</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;!!! </span><span class="si">#{</span><span class="n">word</span><span class="si">}</span><span class="s2"> とジャバ !!!&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="no">Lita</span><span class="o">.</span><span class="n">register_handler</span><span class="p">(</span><span class="no">HelloHandler</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Gemfile</code> に以下を追記し、 <code>bundle install</code> する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita-hello_handler&quot;</span><span class="p">,</span> <span class="ss">path</span><span class="p">:</span> <span class="s2">&quot;handlers/lita-hello_handler&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>commit して再度 heroku へ push してデプロイする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">a</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;make it better&quot;</span>
+</span><span class='line'><span class="err">$</span> <span class="n">git</span> <span class="n">push</span> <span class="n">heroku</span> <span class="n">master</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>slack 上で <code>@lita java あなた</code> とかつぶやくとジャバな気分になる。</p>
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png" alt="lita java" /></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T21:36:00+09:00" pubdate data-updated="true">2015-01-11</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/heroku/'>heroku</a>, <a class='category' href='/blog/categories/lita/'>lita</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/slack/'>slack</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2015/01/11/lita/" data-via="momota" data-counturl="http://momota.github.io/blog/2015/01/11/lita/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2015/01/11/lita/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/20/teraterm-macro/" title="Previous Post: 初めてのteraterm macro">&laquo; 初めてのteraterm macro</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/lita/">lita で Slack Bot (on heroku) をつくる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm macro</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/10/activerecord/">rails じゃなくても ActiveRecord を使う</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/02/windows/">これだけは入れとけ! 個人的に仕事でよく使う windows ソフト</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/22/redmine/">redmine のガントチャートでチケット単位に担当者名を入れたりとか、幅を広げたりとか</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2015/01/11/lita/';
+        var disqus_url = 'http://momota.github.io/blog/2015/01/11/lita/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

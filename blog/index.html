@@ -9,8 +9,9 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。 通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
-892J のpingは、リピート回数に上限があるので、 &hellip;">
+  <meta name="description" content="チャットツール slack に常駐する bot をつくったので、そのときの導入メモ。
+bot は lita を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+js (coffee script) よりも ruby &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +81,49 @@
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/lita/">Lita で Slack Bot (on Heroku) をつくる</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T21:36:00+09:00" pubdate data-updated="true">2015-01-11</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>チャットツール <a href="https://slack.com/">slack</a> に常駐する bot をつくったので、そのときの導入メモ。
+bot は <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
+
+<p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/11/lita/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -627,73 +671,6 @@ MS Office も毎日触っているけど割愛。</p>
 
 </article>
 
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/09/14/junos-filter/">Junos Firewall Filter Term 定義を挿入する方法</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-14T12:36:00+09:00" pubdate data-updated="true">2013-09-14</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="http://upload.wikimedia.org/wikipedia/en/8/86/Junos_sw_logo.jpg" alt="junos" /></p>
-
-<p>junos の firewall filter の設定で定義の順序について。(EXシリーズを想定)</p>
-
-<p>以下、すべてconfiguration mode での操作。</p>
-
-<p>下記のようなフィルタがすでに設定されている場合に、<code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入したいことがある。フィルタは上から順に評価されるし。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># show | display set 
-</span><span class='line'>...
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from tcp-established
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 then accept
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then discard
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/09/14/junos-filter/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
 <nav id="pagenavi">
     
     
@@ -704,7 +681,7 @@ MS Office も毎日触っているけど割愛。</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - momota -
+  Copyright &copy; 2015 - momota -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
