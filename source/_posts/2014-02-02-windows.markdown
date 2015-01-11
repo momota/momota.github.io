@@ -161,6 +161,10 @@ XMPP クライアント。http://psi-im.org/
 最近はあまり使ってない。 http://ipmsg.org/
 
 
+### limechat
+
+IRC クライアント。
+
 
 
 ## ブラウザ
@@ -263,6 +267,20 @@ cisco 社のルーティングテーブル情報 (show ip route) 用 diff ツー
 ### CLCL
 
 クリップボード履歴管理ツール[CLCL](http://www.nakka.com/soft/clcl/)を使っている。
+
+
+### everything search engine
+
+高速ファイル検索 [Everything search engine](http://www.voidtools.com/)。
+高速にファイル名で検索したいときに使う。
+正規表現も使える。
+
+
+### relaxtools addin
+
+Excelの複数のマクロを体系的にまとめた多機能アドイン。
+
+http://software.opensquare.net/relaxtools/about/
 
 
 
