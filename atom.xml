@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T23:31:44+09:00</updated>
+  <updated>2015-01-11T23:46:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -24,7 +24,7 @@
 bot 開発には <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
 js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
 
-<p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.</p>
+<p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.0.4.</p>
 
 <p>ゆくゆくは、<a href="http://www.amazon.co.jp/gp/product/B00H91KK26/ref=as_li_ss_tl?ie=UTF8&amp;camp=247&amp;creative=7399&amp;creativeASIN=B00H91KK26&amp;linkCode=as2&amp;tag=mmtmkt-22">iRKit</a> とか使って家電と連携したりしたい。</p>
 
