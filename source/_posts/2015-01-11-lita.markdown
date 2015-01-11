@@ -12,7 +12,7 @@ bot 開発には [lita](https://www.lita.io/) を利用した。lita は Ruby �
 js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。
 
 
-環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.
+環境は、ubuntu 14.04, ruby 2.1.5, lita 4.0.4.
 
 
 ゆくゆくは、[iRKit](http://www.amazon.co.jp/gp/product/B00H91KK26/ref=as_li_ss_tl?ie=UTF8&camp=247&creative=7399&creativeASIN=B00H91KK26&linkCode=as2&tag=mmtmkt-22) とか使って家電と連携したりしたい。
@@ -143,10 +143,10 @@ Lita.configure do |config|
   config.robot.adapter   = :slack
 
   # Slack のAPIキーを指定する
+  # 後述する heoku コマンドで heroku の環境変数を設定する
   config.adapters.slack.token = ENV["SLACK_API_KEY"]
 
   # heroku の redis アドオン Redis To Go 関連の設定
-  # 後述する heoku コマンドで heroku の環境変数を設定する
   config.redis[:url] = ENV["REDISTOGO_URL"]
   config.http.port   = ENV["PORT"]
 end
