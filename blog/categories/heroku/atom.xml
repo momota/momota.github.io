@@ -4,7 +4,7 @@
   <title><![CDATA[Category: heroku | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T22:49:14+09:00</updated>
+  <updated>2015-01-11T23:02:16+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -19,10 +19,12 @@
     <updated>2015-01-11T21:36:00+09:00</updated>
     <id>http://momota.github.io/blog/2015/01/11/lita</id>
     <content type="html"><![CDATA[<p>チャットツール <a href="https://slack.com/">slack</a> に常駐する bot をつくったので、そのときの導入メモ。
-bot は <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+bot 開発には <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
 js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
 
 <p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.</p>
+
+<p>ゆくゆくは、iRKit とか使って家電と連携したりしたい。</p>
 
 <!-- more  -->
 
@@ -206,6 +208,13 @@ $ git push heroku master
 
 <p>Slack に lita さんが見えるはずなので 適当なチャンネルに招待して <code>@lita help</code> とか声をかけると答えてくれる。</p>
 
+<h3>3.4 heroku アプリケーションをたたき起こす</h3>
+
+<p>heroku を無料で使う 1 web dyno (webサーバインスタンス) のときは、1時間アクセスがないとアプリケーションがスリープする。つまり、せっかくデプロイした bot も眠ってしまうため、定期的にhttpアクセスさせてたたき起こしておく。
+なお、<code>lita-cron</code> で bot に定期的に投稿させてもだめだったので、heroku アプリケーションへの http アクセスが必要なもよう。</p>
+
+<p>定期的な http アクセスには <a href="http://uptimerobot.com/">Uptime Robot</a> を利用した。</p>
+
 <h2>4. handler 作成</h2>
 
 <p>以下のように handler のひな形を生成する。
@@ -251,12 +260,12 @@ gem "lita-hello_handler", path: "handlers/lita-hello_handler"
 
 <p>commit して再度 heroku へ push してデプロイする。</p>
 
-<p><code>
+<p><code>sh
 $ git commit -a -m "make it better"
 $ git push heroku master
 </code></p>
 
-<p>slack 上で <code>@lita java あなた</code> とかつぶやくとジャバな気分になる。</p>
+<p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
 
 <p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png" alt="lita java" /></p>
 ]]></content>

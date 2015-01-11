@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-01-11T22:49:14+09:00</updated>
+  <updated>2015-01-11T23:02:16+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -19,10 +19,12 @@
     <updated>2015-01-11T21:36:00+09:00</updated>
     <id>http://momota.github.io/blog/2015/01/11/lita</id>
     <content type="html"><![CDATA[<p>チャットツール <a href="https://slack.com/">slack</a> に常駐する bot をつくったので、そのときの導入メモ。
-bot は <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
+bot 開発には <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
 js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
 
 <p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.1.0.</p>
+
+<p>ゆくゆくは、iRKit とか使って家電と連携したりしたい。</p>
 
 <!-- more  -->
 
@@ -256,6 +258,13 @@ Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">
 
 <p>Slack に lita さんが見えるはずなので 適当なチャンネルに招待して <code>@lita help</code> とか声をかけると答えてくれる。</p>
 
+<h3>3.4 heroku アプリケーションをたたき起こす</h3>
+
+<p>heroku を無料で使う 1 web dyno (webサーバインスタンス) のときは、1時間アクセスがないとアプリケーションがスリープする。つまり、せっかくデプロイした bot も眠ってしまうため、定期的にhttpアクセスさせてたたき起こしておく。
+なお、<code>lita-cron</code> で bot に定期的に投稿させてもだめだったので、heroku アプリケーションへの http アクセスが必要なもよう。</p>
+
+<p>定期的な http アクセスには <a href="http://uptimerobot.com/">Uptime Robot</a> を利用した。</p>
+
 <h2>4. handler 作成</h2>
 
 <p>以下のように handler のひな形を生成する。
@@ -317,12 +326,12 @@ Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">a</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;make it better&quot;</span>
-</span><span class='line'><span class="err">$</span> <span class="n">git</span> <span class="n">push</span> <span class="n">heroku</span> <span class="n">master</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git commit -a -m <span class="s2">&quot;make it better&quot;</span>
+</span><span class='line'><span class="nv">$ </span>git push heroku master
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>slack 上で <code>@lita java あなた</code> とかつぶやくとジャバな気分になる。</p>
+<p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
 
 <p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png" alt="lita java" /></p>
 ]]></content>
