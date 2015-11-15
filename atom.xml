@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-11-11T23:09:57+09:00</updated>
+  <updated>2015-11-15T21:25:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CentOS 7 を USB メモリからインストール]]></title>
+    <link href="http://momota.github.io/blog/2015/11/15/centos-install/"/>
+    <updated>2015-11-15T21:15:00+09:00</updated>
+    <id>http://momota.github.io/blog/2015/11/15/centos-install</id>
+    <content type="html"><![CDATA[<p>新しい PC が来たので、もともと使ってた東芝 Dynabook R731/B (windows 7)に CentOS7 をインストールした。
+今までは DVD-R に ISO を焼いていたけど、自前の PC の DVD ドライブが壊れていたので
+USB メモリを使ってインストールしてみた。</p>
+
+<!-- more -->
+
+
+<h2>1. USB メモリをフォーマットする</h2>
+
+<p>MAC で USB メモリをフォーマット (初期化) しておく。</p>
+
+<ol>
+<li>ディスクユーティリティを起動する (アプリケーション > ディスクユーティリティ)</li>
+<li>左側のペインからフォーマットしたいデバイスを選択し、<code>消去</code> タブをクリックする</li>
+<li>容量や、ドライブ名などから判断</li>
+<li>フォーマット形式は MS-DOS (FAT) を選択し、消去をクリックする</li>
+</ol>
+
+
+<h2>2. インストールイメージをダウンロードする</h2>
+
+<p><a href="https://www.centos.org/download/">CentOS7 の DVD ISO をダウンロードする。</a></p>
+
+<p><a href="http://ftp.jaist.ac.jp/pub/Linux/CentOS/7/isos/x86_64/md5sum.txt">md5 ハッシュもチェックしておく。</a></p>
+
+<p>ダウンロードされた ISO イメージが正しくダウンロードされていることを確認する。(linux だと <code>md5sum</code> コマンド)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ md5 CentOS-7-x86_64-DVD-1503-01.iso | grep 99e450fb1b22d2e528757653fcbf5fdc</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3. USB メモリにインストールイメージを書き込む</h2>
+
+<p>USB メモリにインストールイメージを書き込む
+ターミナルから.iso を .img へ変換する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ hdiutil convert -format UDRW -o centos7.img DOWNLOADED_ISO.iso
+</span><span class='line'>#=&gt; centos7.img.dmg が出力される
+</span><span class='line'>$ mv centos7.img.dmg centos7.img</span></code></pre></td></tr></table></div></figure>
+
+
+<p>USB メモリをアンマウントする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># USB メモリがどう認識されているかを確認する (/dev/diskXX)
+</span><span class='line'>$ diskutil list
+</span><span class='line'># USB メモリをアンマウントする (/dev/disk1の場合)
+</span><span class='line'>$ diskutil unMountDisk /dev/disk1
+</span><span class='line'>$ diskutil list</span></code></pre></td></tr></table></div></figure>
+
+
+<p>dd で USB メモリにインストールイメージを書き込む。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo dd if=hoge.img of=/dev/disk1 bs=1m
+</span><span class='line'>$ echo $?
+</span><span class='line'>#=&gt;0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>書き込みは結構時間がかかる。
+完了後、「この Mac では読めない形式だ」的なダイアログが出るが無視。</p>
+
+<p>USB メモリをイジェクトして取り外す。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo diskutil eject /dev/disk1</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>4. ノート PC にインストールする</h2>
+
+<p>※ USB メモリをノートPC側で使える前提。USBメモリのドライバがインストールされた状態からスタート。</p>
+
+<p>BIOS設定画面から起動デバイスの優先順位を変更する。
+USB デバイスを最優先にしておく。</p>
+
+<p>インストールイメージを焼いた USB メモリを刺したままノート PC を起動してみて「CentOSをインストール？それともお試しインストール？」みたいな画面が出てくる。
+お試しインストールしてみて、キーボードやタッチパッドが使えることを確認する。
+確認ができたら再起動し、インストールする。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[lita で Slack Bot (on heroku) をつくる]]></title>
