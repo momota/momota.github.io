@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2015-11-15T21:25:48+09:00</updated>
+  <updated>2016-01-27T01:00:50+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -126,6 +126,10 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 <!-- more  -->
 
 
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/lita.png" alt="network" /></p>
+
+<p>今回の構成図を上記に示す。</p>
+
 <h2>1. 事前準備: もろもろインストールする</h2>
 
 <h3>1.1 lita をインストール</h3>
@@ -140,7 +144,7 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 <h3>1.2 redis をインストール</h3>
 
 <p>lita はデータ永続化ストレージとして redis を使うことが前提となっている。
-つまり、ローカル環境で lita を実行するには、redis が必要なため、redis をインストールする。</p>
+つまり、ローカル環境で lita を実行するには(開発するには)、redis が必要なため、redis をインストールする。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
