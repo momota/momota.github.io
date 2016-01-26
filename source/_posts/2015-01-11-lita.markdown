@@ -19,6 +19,9 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 
 <!-- more  -->
 
+![network](https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/lita.png)
+
+今回の構成図を上記に示す。
 
 ## 1. 事前準備: もろもろインストールする
 
@@ -35,7 +38,7 @@ $ gem install lita
 ### 1.2 redis をインストール
 
 lita はデータ永続化ストレージとして redis を使うことが前提となっている。
-つまり、ローカル環境で lita を実行するには、redis が必要なため、redis をインストールする。
+つまり、ローカル環境で lita を実行するには(開発するには)、redis が必要なため、redis をインストールする。
 
 ```sh
 $ sudo apt-get update
