@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-01-29T19:08:03+09:00</updated>
+  <updated>2016-01-29T20:20:05+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,12 +18,126 @@
     <link href="http://momota.github.io/blog/2016/01/29/octopress/"/>
     <updated>2016-01-29T19:03:00+09:00</updated>
     <id>http://momota.github.io/blog/2016/01/29/octopress</id>
-    <content type="html"><![CDATA[<p>以下を参考に。</p>
+    <content type="html"><![CDATA[<p>最近、自宅の Mac Mini が重くなってきたので、別環境でブログを書くべく環境を整備した。
+5年目選手くらいなので、そろそろ買い換えたいな…</p>
+
+<p>結論としては、以下を参考にやればOK。deploy のとこでちょいハマりしたのでメモ。</p>
 
 <ul>
 <li><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">Clone your Octopess to blog From Two Places</a></li>
 </ul>
 
+
+<!-- more -->
+
+
+<h2>1. 新しいマシンで git cloneする</h2>
+
+<p>octopess のレポジトリは、<code>source</code> と <code>master</code> の 2 つのブランチがある。</p>
+
+<p><code>source</code> はその名の通り、編集する markdown ファイルや scss ファイルなどを管
+理するブランチ。</p>
+
+<p><code>master</code> は、公開用のHTMLファイルなどを管理するブランチ。<code>rake generate</code> で
+生成されるファイル群を管理するブランチ。</p>
+
+<p>まずは、任意の場所で <code>source</code> ブランチをクローンする。</p>
+
+<p><code>sh
+$ git clone -b source https://github.com/YOU/YOU.github.io.git blog
+</code></p>
+
+<p>次に、<code>master</code> ブランチを <code>_deploy</code> というディレクトリ名でクローンする。</p>
+
+<p><code>sh
+$ cd blog
+$ git clone https://github.com/YOU/YOU.github.io.git _deploy
+</code></p>
+
+<h2>2. インストールする</h2>
+
+<p>octopress をビルドするため、bundler をインストールする。</p>
+
+<p><code>sh
+$ gem install bundler
+</code></p>
+
+<p>別の環境とシェアするので、 rbenv で ruby バージョンを合わせておく。
+シェアしなければ octopess が動くバージョンで <code>.ruby-version</code> を上書けばよいと思う。</p>
+
+<p><code>sh
+$ rbenv install X.X.X-pXXX
+$ rbenv local X.X.X-pXXX
+$ rbenv rehash
+</code></p>
+
+<p>ビルドする。</p>
+
+<p><code>sh
+$ bundle install
+$ rake setup_githubpages
+Enter the read/write url for your repository
+(For example, 'git@github.com:your_username/your_username.github.com):
+</code></p>
+
+<p>自分の github pages のやつを入力すればOK。</p>
+
+<h2>3. お試しポストしてみる</h2>
+
+<p>```sh
+$ rake new_post[&lsquo;test&rsquo;]</p>
+
+<h1>=> source/_post/YYYY-MM-DD-test.markdown が生成される</h1>
+
+<p>$ source/_post/YYYY-MM-DD-test.markdown</p>
+
+<h1>=> 記事を編集する</h1>
+
+<p>$ rake generate
+$ rake preview</p>
+
+<h1>=> <a href="http://localhost:4000/%E3%81%AB%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%81%97%E3%81%A6%E8%A8%98%E4%BA%8B%E3%81%8C%E7%94%9F%E6%88%90%E3%81%A7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B">http://localhost:4000/%E3%81%AB%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%81%97%E3%81%A6%E8%A8%98%E4%BA%8B%E3%81%8C%E7%94%9F%E6%88%90%E3%81%A7%E3%81%8D%E3%81%A6%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8%E3%82%92%E7%A2%BA%E8%AA%8D%E3%81%99%E3%82%8B</a></h1>
+
+<p>$ rake deploy
+```</p>
+
+<p>自分の場合、<code>rake deploy</code> でコケた。
+<code>git push</code> するところでコケたようだ。</p>
+
+<p><code>
+ ! [rejected]        master -&gt; master (non-fast-forward)
+ error: failed to push some refs to '*******************'
+ hint: Updates were rejected because the tip of your current branch is behind
+ hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+ hint: before pushing again.
+ hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+</code></p>
+
+<p>認証プロキシを通してる環境だったので、そのせいかなーと疑ったけどちがった。
+単純に <code>master</code> ブランチが conflict してるだけだった。</p>
+
+<p><code>git pull</code> して解決した。</p>
+
+<p>```sh
+$ cd _deploy
+$ git pull origin master</p>
+
+<h1>=> master ブランチを pull</h1>
+
+<p>$ cd ../
+$ rake deploy
+```</p>
+
+<p>あとは、<code>source</code> のほうもcommitしておく。</p>
+
+<p>```
+$ git add .
+$ git commit -m &ldquo;posted&rdquo;
+$ git push origin sorce</p>
+
+<h1>=> source ブランチも更新する</h1>
+
+<p>```</p>
 ]]></content>
   </entry>
   

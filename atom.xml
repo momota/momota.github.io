@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-01-29T19:08:03+09:00</updated>
+  <updated>2016-01-29T20:20:05+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,11 +18,159 @@
     <link href="http://momota.github.io/blog/2016/01/29/octopress/"/>
     <updated>2016-01-29T19:03:00+09:00</updated>
     <id>http://momota.github.io/blog/2016/01/29/octopress</id>
-    <content type="html"><![CDATA[<p>以下を参考に。</p>
+    <content type="html"><![CDATA[<p>最近、自宅の Mac Mini が重くなってきたので、別環境でブログを書くべく環境を整備した。
+5年目選手くらいなので、そろそろ買い換えたいな…</p>
+
+<p>結論としては、以下を参考にやればOK。deploy のとこでちょいハマりしたのでメモ。</p>
 
 <ul>
 <li><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">Clone your Octopess to blog From Two Places</a></li>
 </ul>
+
+
+<!-- more -->
+
+
+<h2>1. 新しいマシンで git cloneする</h2>
+
+<p>octopess のレポジトリは、<code>source</code> と <code>master</code> の 2 つのブランチがある。</p>
+
+<p><code>source</code> はその名の通り、編集する markdown ファイルや scss ファイルなどを管
+理するブランチ。</p>
+
+<p><code>master</code> は、公開用のHTMLファイルなどを管理するブランチ。<code>rake generate</code> で
+生成されるファイル群を管理するブランチ。</p>
+
+<p>まずは、任意の場所で <code>source</code> ブランチをクローンする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone -b <span class="nb">source </span>https://github.com/YOU/YOU.github.io.git blog
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>次に、<code>master</code> ブランチを <code>_deploy</code> というディレクトリ名でクローンする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd </span>blog
+</span><span class='line'><span class="nv">$ </span>git clone https://github.com/YOU/YOU.github.io.git _deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2. インストールする</h2>
+
+<p>octopress をビルドするため、bundler をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundler
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>別の環境とシェアするので、 rbenv で ruby バージョンを合わせておく。
+シェアしなければ octopess が動くバージョンで <code>.ruby-version</code> を上書けばよいと思う。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install X.X.X-pXXX
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>X.X.X-pXXX
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ビルドする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install
+</span><span class='line'><span class="nv">$ </span>rake setup_githubpages
+</span><span class='line'>Enter the <span class="nb">read</span>/write url <span class="k">for </span>your repository
+</span><span class='line'><span class="o">(</span>For example, <span class="err">&#39;</span>git@github.com:your_username/your_username.github.com<span class="o">)</span>:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自分の github pages のやつを入力すればOK。</p>
+
+<h2>3. お試しポストしてみる</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rake new_post<span class="se">\[</span><span class="s1">&#39;test&#39;</span><span class="se">\]</span>
+</span><span class='line'><span class="c">#=&gt; source/_post/YYYY-MM-DD-test.markdown が生成される</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span><span class="nb">source</span>/_post/YYYY-MM-DD-test.markdown
+</span><span class='line'><span class="c">#=&gt; 記事を編集する</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>rake generate
+</span><span class='line'><span class="nv">$ </span>rake preview
+</span><span class='line'><span class="c">#=&gt; http://localhost:4000/にアクセスして記事が生成できていることを確認する</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>rake deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自分の場合、<code>rake deploy</code> でコケた。
+<code>git push</code> するところでコケたようだ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> ! <span class="o">[</span>rejected<span class="o">]</span>        master -&gt; master <span class="o">(</span>non-fast-forward<span class="o">)</span>
+</span><span class='line'> error: failed to push some refs to <span class="s1">&#39;*******************&#39;</span>
+</span><span class='line'> hint: Updates were rejected because the tip of your current branch is behind
+</span><span class='line'> hint: its remote counterpart. Merge the remote changes <span class="o">(</span>e.g. <span class="s1">&#39;git pull&#39;</span><span class="o">)</span>
+</span><span class='line'> hint: before pushing again.
+</span><span class='line'> hint: See the <span class="s1">&#39;Note about fast-forwards&#39;</span> in <span class="s1">&#39;git push --help&#39;</span> <span class="k">for </span>details.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>認証プロキシを通してる環境だったので、そのせいかなーと疑ったけどちがった。
+単純に <code>master</code> ブランチが conflict してるだけだった。</p>
+
+<p><code>git pull</code> して解決した。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd </span>_deploy
+</span><span class='line'><span class="nv">$ </span>git pull origin master
+</span><span class='line'><span class="c">#=&gt; master ブランチを pull</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ../
+</span><span class='line'><span class="nv">$ </span>rake deploy
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>あとは、<code>source</code> のほうもcommitしておく。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git add .
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;posted&quot;</span>
+</span><span class='line'><span class="nv">$ </span>git push origin sorce
+</span><span class='line'><span class="c">#=&gt; source ブランチも更新する</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 
 ]]></content>
   </entry>
