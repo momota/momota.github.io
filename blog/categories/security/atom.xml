@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: security | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/security/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-01-29T19:08:03+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[junos firewall filter term 定義を挿入する方法]]></title>
+    <link href="http://momota.github.io/blog/2013/09/14/junos-filter/"/>
+    <updated>2013-09-14T12:36:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/09/14/junos-filter</id>
+    <content type="html"><![CDATA[<p><img src="http://upload.wikimedia.org/wikipedia/en/8/86/Junos_sw_logo.jpg" alt="junos" /></p>
+
+<p>junos の firewall filter の設定で定義の順序について。(EXシリーズを想定)</p>
+
+<p>以下、すべてconfiguration mode での操作。</p>
+
+<p>下記のようなフィルタがすでに設定されている場合に、<code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入したいことがある。フィルタは上から順に評価されるし。</p>
+
+<p>```</p>
+
+<h1>show | display set</h1>
+
+<p>&hellip;
+set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
+set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
+set firewall family inet filter FILTER01 term TERM10 from tcp-established
+set firewall family inet filter FILTER01 term TERM10 then accept
+set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
+set firewall family inet filter FILTER01 term TERM20 then discard
+&hellip;
+```</p>
+
+<!-- more -->
+
+
+<p>単純に以下のターム定義 <code>TERM15</code> を追加で設定すると</p>
+
+<p>```</p>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from protocol tcp</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 then accept</h1>
+
+<p>```</p>
+
+<p>以下のように、意図した箇所に設定が反映されない。
+つまり、10.0.0.2/32 から 192.168.1.0/24 への FTP 通信は許可されない。</p>
+
+<p>```diff</p>
+
+<h1>show | display set</h1>
+
+<p>&hellip;
+  set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
+  set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
+  set firewall family inet filter FILTER01 term TERM10 from tcp-established
+  set firewall family inet filter FILTER01 term TERM10 then accept
+  set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
+  set firewall family inet filter FILTER01 term TERM20 then discard
++ set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32
++ set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24
++ set firewall family inet filter FILTER01 term TERM15 from protocol tcp
++ set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21
++ set firewall family inet filter FILTER01 term TERM15 then accept
+&hellip;
+```</p>
+
+<p><code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入する場合は、以下のように既存定義をすべて <code>delete</code> してから新しい定義追加済みの定義を設定し直す必要があるが、ターム定義が1000くらいあるケースを想定するとそれは避けたい。</p>
+
+<p>```</p>
+
+<h1>delete firewall family inet filter FILTER01 term TERM10</h1>
+
+<h1>delete firewall family inet filter FILTER01 term TERM20</h1>
+
+<h1></h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM10 from tcp-established</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM10 then accept</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from protocol tcp</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 then accept</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM20 then count COUNTER20</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM20 then discard</h1>
+
+<p>```</p>
+
+<p>このようなときには <code>insert</code> を使う。以下のようにターム設定後に <code>insert</code> してあげればOK。</p>
+
+<p>```</p>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from protocol tcp</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21</h1>
+
+<h1>set firewall family inet filter FILTER01 term TERM15 then accept</h1>
+
+<p>#</p>
+
+<h1>insert firewall family inet filter FILTER01 term TERM15 after term TERM_10</h1>
+
+<p>```</p>
+
+<p>そうすると、以下のように意図したとおり定義できる。</p>
+
+<p>```diff</p>
+
+<h1>show | display set</h1>
+
+<p>&hellip;
+  set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
+  set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
+  set firewall family inet filter FILTER01 term TERM10 from tcp-established
+  set firewall family inet filter FILTER01 term TERM10 then accept
++ set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32
++ set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24
++ set firewall family inet filter FILTER01 term TERM15 from protocol tcp
++ set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21
++ set firewall family inet filter FILTER01 term TERM15 then accept
+  set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
+  set firewall family inet filter FILTER01 term TERM20 then discard
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rbenv | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/rbenv/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-01-29T19:08:03+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[rbenv でrubyバージョンにはもう泣かされない]]></title>
+    <link href="http://momota.github.io/blog/2013/08/25/rbenv/"/>
+    <updated>2013-08-25T22:06:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/25/rbenv</id>
+    <content type="html"><![CDATA[<p>ソフトウェアバージョンの差異に悩まされる人は多いと思う。</p>
+
+<p>同じOS上で違うバージョンのrubyを動かしたいことはまあある。
+<code>/home/you/foo</code>以下は既存コードがあるから1.8系のままでで動かしたいし、<code>/home/you/bar</code>以下は新しい試みとして2.0系を動かしたいとか。
+そこでrbenvという便利なrubyバージョン管理ツールがある。
+rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
+
+<!-- more -->
+
+
+<h2>rbenv をインストールする</h2>
+
+<p>詳細はgithubの<code>README.md</code>参照。<a href="https://github.com/sstephenson/rbenv">https://github.com/sstephenson/rbenv</a></p>
+
+<h3>1. 最新コードをローカルにチェックアウトする</h3>
+
+<p>githubから最新版を <code>~/.rbenv</code> にチェックアウトする</p>
+
+<p><code>sh
+$ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+</code></p>
+
+<h3>2. pathを通すため、shellの設定を変更する</h3>
+
+<ul>
+<li><code>~/.rbenv/bin</code> を <code>$PATH</code> に追加する</li>
+</ul>
+
+
+<p><code>sh
+$ echo 'export PATH="$HOME/.rbenv/bin:$PATH"' &gt;&gt; ~/.zshrc
+</code></p>
+
+<ul>
+<li>shim と 自動補完を有効にする</li>
+</ul>
+
+
+<p><code>sh
+$ echo 'eval "$(rbenv init -)"' &gt;&gt; ~/.zshrc
+</code></p>
+
+<p>bash ユーザは <code>~/.zshrc</code> の代わりに <code>~/.bash_profile</code> へ。
+ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code> へ。</p>
+
+<h3>3. 設定変更内容を反映するため、shell を再起動する</h3>
+
+<p><code>sh
+$ exec $SHELL -l
+</code></p>
+
+<h3>(番外編) rbenv を最新版にアップグレードする</h3>
+
+<p><code>sh
+$ cd ~/.rbenv
+$ git pull
+</code></p>
+
+<h2>ruby-build をインストールして、任意の ruby バージョンをインストールできるようにする</h2>
+
+<p><code>ruby-build</code> は rbenv のプラグインで、いろいろなバージョンの ruby のインストールを <code>rbenv install</code> コマンドでできるようになる。
+インストールは、<a href="https://github.com/sstephenson/ruby-build">公式に書いてあるように以下。</a></p>
+
+<p><code>sh
+$ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</code></p>
+
+<p>MAC使いだと homebrew でいける。</p>
+
+<p><code>sh
+$ brew install ruby-build
+</code></p>
+
+<h3>インストール可能な ruby バージョンを一覧表示する</h3>
+
+<p><code>sh
+$ rbenv install -l
+</code></p>
+
+<h3>任意のバージョンの ruby をインストールする</h3>
+
+<p><code>sh
+$ rbenv install 1.9.3-pxx
+</code></p>
+
+<h3>ruby-build を upgrade する</h3>
+
+<p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
+<code>git pull</code> してあげれば良い。</p>
+
+<p><code>sh
+$ cd ~/.rbenv/plugins/ruby-build/
+$ git pull origin master
+</code></p>
+
+<h2>rbenv で任意バージョンの ruby へ切り替えたり</h2>
+
+<p>```sh</p>
+
+<h1>List all Ruby versions known by rbenv</h1>
+
+<p>$ rbenv versions</p>
+
+<h1>switch version</h1>
+
+<p>$ rbenv global 1.9.3-pxx</p>
+
+<h1>back to system default</h1>
+
+<p>$ rbenv global system</p>
+
+<h1>特定のディレクトリ以下のRubyバージョンを切り替え</h1>
+
+<p>$ rbenv local 1.9.3-p327</p>
+
+<h1>ローカル設定を解除</h1>
+
+<p>$ rbenv local &mdash;unset</p>
+
+<h1>path to installed ruby or gem</h1>
+
+<p>$ rbenv rehash
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

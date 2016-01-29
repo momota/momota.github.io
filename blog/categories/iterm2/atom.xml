@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: iterm2 | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/iterm2/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-01-29T19:08:03+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[iTerm2へsolarized導入]]></title>
+    <link href="http://momota.github.io/blog/2013/08/24/solarized-iterm2/"/>
+    <updated>2013-08-24T00:52:00+09:00</updated>
+    <id>http://momota.github.io/blog/2013/08/24/solarized-iterm2</id>
+    <content type="html"><![CDATA[<p><img src="http://ethanschoonover.com/solarized/img/solarized-yinyang.png" alt="solarized" /></p>
+
+<p>人気のカラースキーム <a href="http://ethanschoonover.com/solarized">Solarized</a> を、iTerm2へ適用する。</p>
+
+<p>適用イメージは以下。</p>
+
+<ul>
+<li>before</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/before_iterm.png" alt="iterm before" /></p>
+
+<ul>
+<li>after</li>
+</ul>
+
+
+<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/after_iterm.png" alt="iterm after" /></p>
+
+<!-- more -->
+
+
+<ol>
+<li><p>Solarized*.itermcolors をダウンロードする</p>
+
+<p> <a href="https://github.com/altercation/solarized/tree/master/iterm2-colors-solarized">https://github.com/altercation/solarized/tree/master/iterm2-colors-solarized</a> からSolarized*.itermcolors ファイルをダウンロードする</p></li>
+<li><p>iterm2 を開く</p>
+
+<p> ちなみにわたしは、<code>ctrl + space</code> でSpotlightを開き、<code>ite</code>入力くらいで起動しています。</p></li>
+<li><p>preferencesダイアログを開く</p>
+
+<p> <code>command + o</code> でprofilesダイアログを開いて、<code>Edit Profiles...</code> ボタンを押下する。</p></li>
+<li><p>solarized用のprofileを作成する</p>
+
+<p> preferences ダイアログの<code>Profiles</code>タブから、左下の方の<code>+</code>を押下し、プロファイルを追加する。
+ <code>General</code>タブのBasicのNameを<code>solarized</code>とかに修正する</p></li>
+<li><ol>
+<li>でダウンロードしたファイルを読み込ませる</li>
+</ol>
+
+
+<p> <code>Colors</code> タブから <code>Load Presets...</code> ボタンを押下後、<code>import</code> を押す。1. でダウンロードしたSolarized*.itermcolorsファイルを選択する。</p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>
