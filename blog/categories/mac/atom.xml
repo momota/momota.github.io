@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-08T13:03:06+09:00</updated>
+  <updated>2016-02-08T19:11:20+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -20,6 +20,8 @@
     <id>http://momota.github.io/blog/2016/02/08/ansible</id>
     <content type="html"><![CDATA[<p><a href="http://momota.github.io/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a> で書いたが、まっさらなCentOSが手元にあったので
 <a href="http://www.ansible.com/">ansible</a> を使っていろいろインストールしてみた。</p>
+
+<p>ちょっと前に、<a href="http://www.ansible.com/blog/ansible-2.0-launch">Ansible 2.0 Has Arrived</a> という記事も話題になってたし。</p>
 
 <p>ansible は Chef のような構成管理ツール。
 システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
@@ -68,6 +70,8 @@
 </tbody>
 </table>
 
+
+<p>ansible のバージョンは <code>2.0.0.2</code>。</p>
 
 <h1>0. 準備</h1>
 
