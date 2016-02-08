@@ -1,0 +1,272 @@
+---
+layout: post
+title: "ansible でノートPCをセットアップ"
+date: 2016-02-08 09:42
+comments: true
+categories: ansible
+---
+
+[CentOS 7 を USB メモリからインストール](http://momota.github.io/blog/2015/11/15/centos-install/) で書いたが、まっさらなCentOSが手元にあったので
+[ansible](http://www.ansible.com/) を使っていろいろインストールしてみた。
+
+
+ansible は Chef のような構成管理ツール。
+システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
+管理対象ノードが多いほどメリットが大きい。
+
+Chef と比較すると、エージェントレスのアーキテクチャで、Chefのように特定言語(Ruby)を学ぶ必要はなく、YAMLで構成を表現する。
+これは、Playbookと呼ばれる。Chef でいうレシピ。
+
+マネージャ側は最近は大抵プリインストールされている python とansible さえインストールすればよい。
+クライアント側は、マネージャから SSH アクセスさえできればよい。
+
+
+これを1回やってファイル群をリポジトリで管理しておけば、環境の複製が楽になるし、Infrastructure as a Code ですね。
+
+
+<!-- more -->
+
+まず、環境の説明。
+
+![ansible_diag](/images/ansible.png)
+
+本稿では、ansible実行サーバをコントローラ (Control Machine)、ansibleによる
+管理対象ノードを管理ノード (Managed Node) と呼ぶことにする。
+
+
+役割                           | ホスト名     | 物理マシン     | IPアドレス
+-------------------------------|--------------|----------------|-----------------
+コントローラ (Control Machine) | controller   | mac mini       | 192.168.11.9/24
+管理ノード   (Managed Node)    | managed_node | TOSHIBA laptop | 192.168.11.14/24
+
+
+
+
+
+0. 準備
+=======
+
+0-1. コントローラ
+-----------------
+
+1. ansible をインストールする
+```sh
+controller$ brew install ansible
+```
+
+
+0-2. 管理ノード
+---------------
+
+コントローラ～管理ノード間は、ネットワークを介して管理される。
+コントローラから管理ノードへSSHアクセスできる必要があるので、以下の設定を事前に行っておく。
+
+1. 管理ノードのネットワーク設定
+2. コントローラのSSH公開鍵の登録
+```sh
+# コントローラ側no-pass SSH key を生成
+controller$ ssh-keygen -t rsa
+# mac には ssh-copy-id がないので、scpで公開鍵をコピー
+controller$ scp ~/.ssh/id_dsa.pub 192.168.11.14:/home/momota
+
+# 管理ノード側でauthorized_keysの登録
+managed_node$ mkdir ~/.ssh
+managed_node$ chmod 700 ~/.ssh
+managed_node$ echo id_dsa.pub >> ~/.ssh/authorized_keys
+managed_node$ chmod 600 ~/.ssh/authorized_keys
+
+# SSH アクセス確認
+controller$ ssh 192.168.11.14
+```
+
+
+1. ansible 設定
+===============
+
+まずは、管理ノードへOSアカウント (guestユーザ) を追加作成してみる。
+
+ディレクトリ構成は、[Ansible オレオレベストプラクティス](http://qiita.com/yteraoka/items/5ed2bddefff32e1b9faf) を参考にして以下のように作成。
+
+```sh
+controller$ tree laptop_build
+laptop_build
+|-- centos
+|   |-- hosts
+|   `-- site.yml
+|-- common
+|   |-- guest_account
+|   |   `-- tasks
+|   |       `-- main.yml
+|-- private_vars
+|   `-- common.yml
+`-- vars
+    `-- common.yml
+```
+
+それぞれのディレクトリの位置づけは、[Ansibleチュートリアル](http://yteraoka.github.io/ansible-tutorial/)とかを参照するとわかりやすい。
+
+
+まずは、`centos/hosts` へ管理ノードのIPアドレスを登録する。
+クライアントが複数ある場合は、このエントリーで複数のアドレスを列挙すればよい。
+
+```yaml
+[laptops]
+192.168.11.14
+```
+
+
+次に、メイン処理を `centos/site.yml` に記述する。
+外部ファイルをインクルードして、roleの実行順序を指定するだけ。
+`hosts` のところで、対象を絞れるが、今回は all。うまく使えば、production用とdevelopment用を使い分けたりグループ単位で実行できる。
+
+```yaml
+- hosts: all
+  vars_files:
+    - ../vars/common.yml
+    - ../private_vars/common.yml
+  roles:
+    - ../common/guest_account
+```
+
+`vars/common.yml` には Playbook 共通で使いたい変数を設定している。
+
+`private_vars/common.yml` には公開したくない変数を設定している。ここでは、guestユーザのパスワードを以下のように指定している。
+
+```yaml
+---
+guest_password: "hogehoge"
+```
+
+こういうパスワードみたいな情報をgithubに上げたくないので、.gitignoreには
+private_vars/ を追加しておく。
+
+
+`roles` には、実際のアカウント追加処理を指定している role ディレクトリ`common/guest_account`を指定する。
+
+`common/guest_account/tasks/main.yml` には、userモジュールを使って、以下のようにタスクを記述する。
+
+```yaml
+---
+- name: add the user "guest"
+  user: name=guest shell=/bin/bash password={{ guest_password }}
+  become: yes
+  become_method: sudo
+```
+
+`name` は任意。タスク内容をコメントとして記述する。
+
+`user` がモジュール名、それに続いて各モジュールのオプション。
+
+`become`, `become_method` で管理ノードで sudo を使って実行することを許可している。
+
+
+
+2. ansible 実行
+===============
+
+
+クライアント側で事前にユーザの確認。
+guest ユーザは存在しない。
+
+```
+managed_node$ grep guest /etc/passwd
+```
+
+まずは、`--check` オプションを付けてテスト実行(dry run)。実際の構成変更はせず、
+Playbook のシンタックスチェックなどを実施する。
+
+```sh
+controller$ ansible-playbook -i centos/hosts centos/site.yml -K --check
+SUDO password: 
+
+PLAY ***************************************************************************
+
+TASK [setup] *******************************************************************
+ok: [192.168.11.14]
+
+TASK [../common/guest_account : add the user "guest"] **************************
+changed: [192.168.11.14]
+
+PLAY RECAP *********************************************************************
+192.168.11.14              : ok=1    changed=1    unreachable=0    failed=0   
+
+```
+
+
+問題ないようなので実行してみる。
+
+```sh
+controller$ ansible-playbook -i centos/hosts centos/site.yml -K
+SUDO password: 
+
+PLAY ***************************************************************************
+
+TASK [setup] *******************************************************************
+ok: [192.168.11.14]
+
+TASK [../common/guest_account : add the user "guest"] **************************
+changed: [192.168.11.14]
+
+PLAY RECAP *********************************************************************
+192.168.11.14              : ok=2    changed=2    unreachable=0    failed=0   
+```
+
+
+クライアント側で事後確認してみると、ユーザができている。
+
+```sh
+managed_node$ grep guest /etc/passwd
+guest:x:1001:1001::/home/guest:/bin/bash
+```
+
+
+3. 他にもいろいろとインストールする
+===================================
+
+
+ruby や zsh などもインストールする。
+インストール対象のプロダクト毎に role を作っている。以下のようなディレクトリ構成となった。
+
+```sh
+controller$ tree laptop_build
+laptop_build
+|-- centos
+|   |-- hosts
+|   `-- site.yml
+|-- common
+|   |-- dotfiles
+|   |   |-- meta
+|   |   |   `-- main.yml
+|   |   `-- tasks
+|   |       `-- main.yml
+|   |-- guest_account
+|   |   `-- tasks
+|   |       `-- main.yml
+|   |-- ruby
+|   |   |-- meta
+|   |   |   `-- main.yml
+|   |   `-- tasks
+|   |       `-- main.yml
+|   |-- tmux
+|   |   `-- tasks
+|   |       |-- centos.yml
+|   |       |-- main.yml
+|   |       `-- ubuntu.yml
+|   |-- vim
+|   |   `-- tasks
+|   |       `-- main.yml
+|   `-- zsh
+|       `-- tasks
+|           |-- centos.yml
+|           |-- main.yml
+|           `-- ubuntu.yml
+|-- private_vars
+|   `-- common.yml
+`-- vars
+    `-- common.yml
+```
+
+公式ドキュメントを見つつ、yum や git モジュールを利用した。
+
+詳細は、[momota/laptop-build](https://github.com/momota/laptop-build) を参照。
+
