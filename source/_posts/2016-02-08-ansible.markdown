@@ -9,6 +9,8 @@ categories: ansible centos mac
 [CentOS 7 を USB メモリからインストール](http://momota.github.io/blog/2015/11/15/centos-install/) で書いたが、まっさらなCentOSが手元にあったので
 [ansible](http://www.ansible.com/) を使っていろいろインストールしてみた。
 
+ちょっと前に、[Ansible 2.0 Has Arrived](http://www.ansible.com/blog/ansible-2.0-launch) という記事も話題になってたし。
+
 
 ansible は Chef のような構成管理ツール。
 システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
@@ -40,6 +42,7 @@ Chef と比較すると、エージェントレスのアーキテクチャで、
 管理ノード   (Managed Node)    | managed_node | TOSHIBA laptop | 192.168.11.14/24
 
 
+ansible のバージョンは `2.0.0.2`。
 
 
 
