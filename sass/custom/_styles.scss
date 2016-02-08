@@ -10,7 +10,15 @@ article {
     }
 }
 
-th, td {
+th {
+  font-weight: bold;
+  background-color: $sol_base2;
+  border-bottom: 1px solid $sol_base1;
+  margin: 10px;
+  padding: 10px;
+}
+
+td {
   border-bottom: 1px solid $sol_base1;
   margin: 10px;
   padding: 10px;
