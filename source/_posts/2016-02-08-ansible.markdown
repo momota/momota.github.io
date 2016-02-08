@@ -168,7 +168,7 @@ private_vars/ を追加しておく。
 クライアント側で事前にユーザの確認。
 guest ユーザは存在しない。
 
-```
+```sh
 managed_node$ grep guest /etc/passwd
 ```
 
@@ -225,7 +225,24 @@ guest:x:1001:1001::/home/guest:/bin/bash
 
 
 ruby や zsh などもインストールする。
-インストール対象のプロダクト毎に role を作っている。以下のようなディレクトリ構成となった。
+インストール対象のプロダクト毎に role を作っている。
+
+role の粒度がいまいちどれくらいにしたらよいのかが分からない。
+
+たとえば、ruby role には ruby のインストールだけにとどめておくべきか、
+rbenv のような関連ツールまで 1 セットで記述するのが良いか。
+
+まあ、使いながらやりやすい粒度を模索する、でも良いと思う。
+
+
+また、OS 毎の差異を吸収するため、`common/role/HOGE/tasks/` 以下に `main.yml`を置いて、
+それぞれのOS毎のymlをインクルードした。
+ただ、`centos/`的な大本からディレクトリを分けて、`main.yml`でOS判定と
+条件分岐しないような配置でも良かったかもなとも思っている。
+
+
+
+以下のようなディレクトリ構成となった。
 
 ```sh
 controller$ tree laptop_build
@@ -268,5 +285,6 @@ laptop_build
 
 公式ドキュメントを見つつ、yum や git モジュールを利用した。
 
+中身の説明は、体力が切れたので割愛。
 詳細は、[momota/laptop-build](https://github.com/momota/laptop-build) を参照。
 
