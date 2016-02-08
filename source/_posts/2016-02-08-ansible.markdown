@@ -3,7 +3,7 @@ layout: post
 title: "ansible でノートPCをセットアップ"
 date: 2016-02-08 09:42
 comments: true
-categories: ansible
+categories: ansible centos mac
 ---
 
 [CentOS 7 を USB メモリからインストール](http://momota.github.io/blog/2015/11/15/centos-install/) で書いたが、まっさらなCentOSが手元にあったので
