@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ansible | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ansible/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-08T12:35:48+09:00</updated>
+  <updated>2016-02-08T13:03:06+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -205,7 +205,7 @@ become_method: sudo
 <p>クライアント側で事前にユーザの確認。
 guest ユーザは存在しない。</p>
 
-<p><code>
+<p><code>sh
 managed_node$ grep guest /etc/passwd
 </code></p>
 
@@ -257,7 +257,21 @@ guest:x:1001:1001::/home/guest:/bin/bash
 <h1>3. 他にもいろいろとインストールする</h1>
 
 <p>ruby や zsh などもインストールする。
-インストール対象のプロダクト毎に role を作っている。以下のようなディレクトリ構成となった。</p>
+インストール対象のプロダクト毎に role を作っている。</p>
+
+<p>role の粒度がいまいちどれくらいにしたらよいのかが分からない。</p>
+
+<p>たとえば、ruby role には ruby のインストールだけにとどめておくべきか、
+rbenv のような関連ツールまで 1 セットで記述するのが良いか。</p>
+
+<p>まあ、使いながらやりやすい粒度を模索する、でも良いと思う。</p>
+
+<p>また、OS 毎の差異を吸収するため、<code>common/role/HOGE/tasks/</code> 以下に <code>main.yml</code>を置いて、
+それぞれのOS毎のymlをインクルードした。
+ただ、<code>centos/</code>的な大本からディレクトリを分けて、<code>main.yml</code>でOS判定と
+条件分岐しないような配置でも良かったかもなとも思っている。</p>
+
+<p>以下のようなディレクトリ構成となった。</p>
 
 <p><code>``sh
 controller$ tree laptop_build
@@ -303,7 +317,8 @@ laptop_build
 
 <p>公式ドキュメントを見つつ、yum や git モジュールを利用した。</p>
 
-<p>詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
+<p>中身の説明は、体力が切れたので割愛。
+詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
 ]]></content>
   </entry>
   

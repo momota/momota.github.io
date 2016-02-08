@@ -322,7 +322,7 @@ private_vars/ を追加しておく。</p>
 guest ユーザは存在しない。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">managed_node$ grep guest /etc/passwd</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>managed_node<span class="nv">$ </span>grep guest /etc/passwd
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -401,7 +401,21 @@ Playbook のシンタックスチェックなどを実施する。</p>
 <h1>3. 他にもいろいろとインストールする</h1>
 
 <p>ruby や zsh などもインストールする。
-インストール対象のプロダクト毎に role を作っている。以下のようなディレクトリ構成となった。</p>
+インストール対象のプロダクト毎に role を作っている。</p>
+
+<p>role の粒度がいまいちどれくらいにしたらよいのかが分からない。</p>
+
+<p>たとえば、ruby role には ruby のインストールだけにとどめておくべきか、
+rbenv のような関連ツールまで 1 セットで記述するのが良いか。</p>
+
+<p>まあ、使いながらやりやすい粒度を模索する、でも良いと思う。</p>
+
+<p>また、OS 毎の差異を吸収するため、<code>common/role/HOGE/tasks/</code> 以下に <code>main.yml</code>を置いて、
+それぞれのOS毎のymlをインクルードした。
+ただ、<code>centos/</code>的な大本からディレクトリを分けて、<code>main.yml</code>でOS判定と
+条件分岐しないような配置でも良かったかもなとも思っている。</p>
+
+<p>以下のようなディレクトリ構成となった。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -480,7 +494,8 @@ Playbook のシンタックスチェックなどを実施する。</p>
 
 <p>公式ドキュメントを見つつ、yum や git モジュールを利用した。</p>
 
-<p>詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
+<p>中身の説明は、体力が切れたので割愛。
+詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
 </div>
 
 
