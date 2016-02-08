@@ -1,0 +1,680 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ansible でノートPCをセットアップ - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="CentOS 7 を USB メモリからインストール で書いたが、まっさらなCentOSが手元にあったので
+ansible を使っていろいろインストールしてみた。 ansible は Chef のような構成管理ツール。
+システムの設定や、ソフトウェアのデプロイ、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2016/02/08/ansible/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ansible でノートPCをセットアップ</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-08T09:42:00+09:00" pubdate data-updated="true">2016-02-08</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><a href="http://momota.github.io/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a> で書いたが、まっさらなCentOSが手元にあったので
+<a href="http://www.ansible.com/">ansible</a> を使っていろいろインストールしてみた。</p>
+
+<p>ansible は Chef のような構成管理ツール。
+システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
+管理対象ノードが多いほどメリットが大きい。</p>
+
+<p>Chef と比較すると、エージェントレスのアーキテクチャで、Chefのように特定言語(Ruby)を学ぶ必要はなく、YAMLで構成を表現する。
+これは、Playbookと呼ばれる。Chef でいうレシピ。</p>
+
+<p>マネージャ側は最近は大抵プリインストールされている python とansible さえインストールすればよい。
+クライアント側は、マネージャから SSH アクセスさえできればよい。</p>
+
+<p>これを1回やってファイル群をリポジトリで管理しておけば、環境の複製が楽になるし、Infrastructure as a Code ですね。</p>
+
+<!-- more -->
+
+
+<p>まず、環境の説明。</p>
+
+<p><img src="/images/ansible.png" alt="ansible_diag" /></p>
+
+<p>本稿では、ansible実行サーバをコントローラ (Control Machine)、ansibleによる
+管理対象ノードを管理ノード (Managed Node) と呼ぶことにする。</p>
+
+<table>
+<thead>
+<tr>
+<th>役割                           </th>
+<th> ホスト名     </th>
+<th> 物理マシン     </th>
+<th> IPアドレス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>コントローラ (Control Machine) </td>
+<td> controller   </td>
+<td> mac mini       </td>
+<td> 192.168.11.9/24</td>
+</tr>
+<tr>
+<td>管理ノード   (Managed Node)    </td>
+<td> managed_node </td>
+<td> TOSHIBA laptop </td>
+<td> 192.168.11.14/24</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>0. 準備</h1>
+
+<h2>0-1. コントローラ</h2>
+
+<ol>
+<li>ansible をインストールする</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>controller<span class="nv">$ </span>brew install ansible
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>0-2. 管理ノード</h2>
+
+<p>コントローラ～管理ノード間は、ネットワークを介して管理される。
+コントローラから管理ノードへSSHアクセスできる必要があるので、以下の設定を事前に行っておく。</p>
+
+<ol>
+<li>管理ノードのネットワーク設定</li>
+<li>コントローラのSSH公開鍵の登録</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># コントローラ側no-pass SSH key を生成</span>
+</span><span class='line'>controller<span class="nv">$ </span>ssh-keygen -t rsa
+</span><span class='line'><span class="c"># mac には ssh-copy-id がないので、scpで公開鍵をコピー</span>
+</span><span class='line'>controller<span class="nv">$ </span>scp ~/.ssh/id_dsa.pub 192.168.11.14:/home/momota
+</span><span class='line'>
+</span><span class='line'><span class="c"># 管理ノード側でauthorized_keysの登録</span>
+</span><span class='line'>managed_node<span class="nv">$ </span>mkdir ~/.ssh
+</span><span class='line'>managed_node<span class="nv">$ </span>chmod 700 ~/.ssh
+</span><span class='line'>managed_node<span class="nv">$ </span><span class="nb">echo </span>id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</span><span class='line'>managed_node<span class="nv">$ </span>chmod 600 ~/.ssh/authorized_keys
+</span><span class='line'>
+</span><span class='line'><span class="c"># SSH アクセス確認</span>
+</span><span class='line'>controller<span class="nv">$ </span>ssh 192.168.11.14
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>1. ansible 設定</h1>
+
+<p>まずは、管理ノードへOSアカウント (guestユーザ) を追加作成してみる。</p>
+
+<p>ディレクトリ構成は、<a href="http://qiita.com/yteraoka/items/5ed2bddefff32e1b9faf">Ansible オレオレベストプラクティス</a> を参考にして以下のように作成。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>controller<span class="nv">$ </span>tree laptop_build
+</span><span class='line'>laptop_build
+</span><span class='line'>|-- centos
+</span><span class='line'>|   |-- hosts
+</span><span class='line'>|   <span class="sb">`</span>-- site.yml
+</span><span class='line'>|-- common
+</span><span class='line'>|   |-- guest_account
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       <span class="sb">`</span>-- main.yml
+</span><span class='line'>|-- private_vars
+</span><span class='line'>|   <span class="sb">`</span>-- common.yml
+</span><span class='line'><span class="sb">`</span>-- vars
+</span><span class='line'>    <span class="sb">`</span>-- common.yml
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>それぞれのディレクトリの位置づけは、<a href="http://yteraoka.github.io/ansible-tutorial/">Ansibleチュートリアル</a>とかを参照するとわかりやすい。</p>
+
+<p>まずは、<code>centos/hosts</code> へ管理ノードのIPアドレスを登録する。
+クライアントが複数ある場合は、このエントリーで複数のアドレスを列挙すればよい。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">[</span><span class="nv">laptops</span><span class="p-Indicator">]</span>
+</span><span class='line'><span class="l-Scalar-Plain">192.168.11.14</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>次に、メイン処理を <code>centos/site.yml</code> に記述する。
+外部ファイルをインクルードして、roleの実行順序を指定するだけ。
+<code>hosts</code> のところで、対象を絞れるが、今回は all。うまく使えば、production用とdevelopment用を使い分けたりグループ単位で実行できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hosts</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">all</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">vars_files</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">../vars/common.yml</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">../private_vars/common.yml</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">roles</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">../common/guest_account</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>vars/common.yml</code> には Playbook 共通で使いたい変数を設定している。</p>
+
+<p><code>private_vars/common.yml</code> には公開したくない変数を設定している。ここでは、guestユーザのパスワードを以下のように指定している。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="nn">---</span>
+</span><span class='line'><span class="l-Scalar-Plain">guest_password</span><span class="p-Indicator">:</span> <span class="s">&quot;hogehoge&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>こういうパスワードみたいな情報をgithubに上げたくないので、.gitignoreには
+private_vars/ を追加しておく。</p>
+
+<p><code>roles</code> には、実際のアカウント追加処理を指定している role ディレクトリ<code>common/guest_account</code>を指定する。</p>
+
+<p><code>common/guest_account/tasks/main.yml</code> には、userモジュールを使って、以下のようにタスクを記述する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="nn">---</span>
+</span><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">add the user &quot;guest&quot;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">user</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name=guest shell=/bin/bash password=</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">become</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">yes</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">become_method</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">sudo</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>name</code> は任意。タスク内容をコメントとして記述する。</p>
+
+<p><code>user</code> がモジュール名、それに続いて各モジュールのオプション。</p>
+
+<p><code>become</code>, <code>become_method</code> で管理ノードで sudo を使って実行することを許可している。</p>
+
+<h1>2. ansible 実行</h1>
+
+<p>クライアント側で事前にユーザの確認。
+guest ユーザは存在しない。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">managed_node$ grep guest /etc/passwd</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>まずは、<code>--check</code> オプションを付けてテスト実行(dry run)。実際の構成変更はせず、
+Playbook のシンタックスチェックなどを実施する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>controller<span class="nv">$ </span>ansible-playbook -i centos/hosts centos/site.yml -K --check
+</span><span class='line'>SUDO password:
+</span><span class='line'>
+</span><span class='line'>PLAY ***************************************************************************
+</span><span class='line'>
+</span><span class='line'>TASK <span class="o">[</span>setup<span class="o">]</span> *******************************************************************
+</span><span class='line'>ok: <span class="o">[</span>192.168.11.14<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK <span class="o">[</span>../common/guest_account : add the user <span class="s2">&quot;guest&quot;</span><span class="o">]</span> **************************
+</span><span class='line'>changed: <span class="o">[</span>192.168.11.14<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>PLAY RECAP *********************************************************************
+</span><span class='line'>192.168.11.14              : <span class="nv">ok</span><span class="o">=</span>1    <span class="nv">changed</span><span class="o">=</span>1    <span class="nv">unreachable</span><span class="o">=</span>0    <span class="nv">failed</span><span class="o">=</span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>問題ないようなので実行してみる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>controller<span class="nv">$ </span>ansible-playbook -i centos/hosts centos/site.yml -K
+</span><span class='line'>SUDO password:
+</span><span class='line'>
+</span><span class='line'>PLAY ***************************************************************************
+</span><span class='line'>
+</span><span class='line'>TASK <span class="o">[</span>setup<span class="o">]</span> *******************************************************************
+</span><span class='line'>ok: <span class="o">[</span>192.168.11.14<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK <span class="o">[</span>../common/guest_account : add the user <span class="s2">&quot;guest&quot;</span><span class="o">]</span> **************************
+</span><span class='line'>changed: <span class="o">[</span>192.168.11.14<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>PLAY RECAP *********************************************************************
+</span><span class='line'>192.168.11.14              : <span class="nv">ok</span><span class="o">=</span>2    <span class="nv">changed</span><span class="o">=</span>2    <span class="nv">unreachable</span><span class="o">=</span>0    <span class="nv">failed</span><span class="o">=</span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>クライアント側で事後確認してみると、ユーザができている。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>managed_node<span class="nv">$ </span>grep guest /etc/passwd
+</span><span class='line'>guest:x:1001:1001::/home/guest:/bin/bash
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>3. 他にもいろいろとインストールする</h1>
+
+<p>ruby や zsh などもインストールする。
+インストール対象のプロダクト毎に role を作っている。以下のようなディレクトリ構成となった。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>controller<span class="nv">$ </span>tree laptop_build
+</span><span class='line'>laptop_build
+</span><span class='line'>|-- centos
+</span><span class='line'>|   |-- hosts
+</span><span class='line'>|   <span class="sb">`</span>-- site.yml
+</span><span class='line'>|-- common
+</span><span class='line'>|   |-- dotfiles
+</span><span class='line'>|   |   |-- meta
+</span><span class='line'>|   |   |   <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   |-- guest_account
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   |-- ruby
+</span><span class='line'>|   |   |-- meta
+</span><span class='line'>|   |   |   <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   |-- tmux
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       |-- centos.yml
+</span><span class='line'>|   |       |-- main.yml
+</span><span class='line'>|   |       <span class="sb">`</span>-- ubuntu.yml
+</span><span class='line'>|   |-- vim
+</span><span class='line'>|   |   <span class="sb">`</span>-- tasks
+</span><span class='line'>|   |       <span class="sb">`</span>-- main.yml
+</span><span class='line'>|   <span class="sb">`</span>-- zsh
+</span><span class='line'>|       <span class="sb">`</span>-- tasks
+</span><span class='line'>|           |-- centos.yml
+</span><span class='line'>|           |-- main.yml
+</span><span class='line'>|           <span class="sb">`</span>-- ubuntu.yml
+</span><span class='line'>|-- private_vars
+</span><span class='line'>|   <span class="sb">`</span>-- common.yml
+</span><span class='line'><span class="sb">`</span>-- vars
+</span><span class='line'>    <span class="sb">`</span>-- common.yml
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>公式ドキュメントを見つつ、yum や git モジュールを利用した。</p>
+
+<p>詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-08T09:42:00+09:00" pubdate data-updated="true">2016-02-08</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ansible/'>ansible</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2016/02/08/ansible/" data-via="momota" data-counturl="http://momota.github.io/blog/2016/02/08/ansible/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2016/02/08/ansible/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/29/octopress/" title="Previous Post: octopress: 別の環境でブログを書くための準備">&laquo; octopress: 別の環境でブログを書くための準備</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/02/08/ansible/">ansible でノートPCをセットアップ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/29/octopress/">octopress: 別の環境でブログを書くための準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/lita/">lita で Slack Bot (on heroku) をつくる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm macro</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2016/02/08/ansible/';
+        var disqus_url = 'http://momota.github.io/blog/2016/02/08/ansible/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
