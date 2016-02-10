@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-10T18:58:34+09:00</updated>
+  <updated>2016-02-10T22:06:53+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[octopress: 別の環境でブログを書くための準備]]></title>
+    <title type="html"><![CDATA[複数の環境で octopress を使ってブログを書く]]></title>
     <link href="http://momota.github.io/blog/2016/01/29/octopress/"/>
     <updated>2016-01-29T19:03:00+09:00</updated>
     <id>http://momota.github.io/blog/2016/01/29/octopress</id>
@@ -33,7 +33,7 @@
 
 <h2>1. 新しいマシンで git cloneする</h2>
 
-<p>octopess のレポジトリは、<code>source</code> と <code>master</code> の 2 つのブランチがある。</p>
+<p>octopress のレポジトリは、<code>source</code> と <code>master</code> の 2 つのブランチがある。</p>
 
 <p><code>source</code> はその名の通り、編集する markdown ファイルや scss ファイルなどを管
 理するブランチ。</p>
@@ -63,7 +63,7 @@ $ gem install bundler
 </code></p>
 
 <p>別の環境とシェアするので、 rbenv で ruby バージョンを合わせておく。
-シェアしなければ octopess が動くバージョンで <code>.ruby-version</code> を上書けばよいと思う。</p>
+シェアしなければ octopress が動くバージョンで <code>.ruby-version</code> を上書けばよいと思う。</p>
 
 <p><code>sh
 $ rbenv install X.X.X-pXXX
