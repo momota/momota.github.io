@@ -4,22 +4,24 @@ html {
     background: $page-bg;
 }
 article {
-    h1, h2, h3, h4, h5, h6
-    {
-        color : $sol_yellow;
-    }
+  h1, h2, h3, h4, h5, h6 {
+    color : $sol_yellow;
+    margin: 10px;
+    padding: 10px;
+  }
+
+  th {
+    font-weight: bold;
+    background-color: $sol_base2;
+    border-bottom: 1px solid $sol_base1;
+    margin: 10px;
+    padding: 10px;
+  }
+  
+  td {
+    border-bottom: 1px solid $sol_base1;
+    margin: 10px;
+    padding: 10px;
+  }
 }
 
-th {
-  font-weight: bold;
-  background-color: $sol_base2;
-  border-bottom: 1px solid $sol_base1;
-  margin: 10px;
-  padding: 10px;
-}
-
-td {
-  border-bottom: 1px solid $sol_base1;
-  margin: 10px;
-  padding: 10px;
-}

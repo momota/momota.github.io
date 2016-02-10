@@ -242,7 +242,7 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 
 ### wireshark
 
-![wireshark](http://static.sourceforge.jp/thumb/g/0/62/640x640_0.png)
+![wireshark](https://www.wireshark.org/docs/wsug_html_chunked/wsug_graphics/ws-main.png)
 
 パケット解析用に [wireshark](http://sourceforge.jp/projects/wireshark/) を使っている。
 パケットキャプチャは比較的簡単だけど、パケット解析のほうが断然手間なのであまり簡単に「キャプチャしようぜ！」なんて言うな。 > 各位
