@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "octopress: 別の環境でブログを書くための準備"
+title: "複数の環境で octopress を使ってブログを書く"
 date: 2016-01-29 19:03
 comments: true
 categories: octopress
@@ -20,7 +20,7 @@ categories: octopress
 1. 新しいマシンで git cloneする
 -------------------------------
 
-octopess のレポジトリは、`source` と `master` の 2 つのブランチがある。
+octopress のレポジトリは、`source` と `master` の 2 つのブランチがある。
 
 `source` はその名の通り、編集する markdown ファイルや scss ファイルなどを管
 理するブランチ。
@@ -51,7 +51,7 @@ $ gem install bundler
 ```
 
 別の環境とシェアするので、 rbenv で ruby バージョンを合わせておく。
-シェアしなければ octopess が動くバージョンで `.ruby-version` を上書けばよいと思う。
+シェアしなければ octopress が動くバージョンで `.ruby-version` を上書けばよいと思う。
 
 ```sh
 $ rbenv install X.X.X-pXXX
