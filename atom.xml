@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-08T19:45:53+09:00</updated>
+  <updated>2016-02-10T18:58:34+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -2195,7 +2195,7 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 
 <h3>wireshark</h3>
 
-<p><img src="http://static.sourceforge.jp/thumb/g/0/62/640x640_0.png" alt="wireshark" /></p>
+<p><img src="https://www.wireshark.org/docs/wsug_html_chunked/wsug_graphics/ws-main.png" alt="wireshark" /></p>
 
 <p>パケット解析用に <a href="http://sourceforge.jp/projects/wireshark/">wireshark</a> を使っている。
 パケットキャプチャは比較的簡単だけど、パケット解析のほうが断然手間なのであまり簡単に「キャプチャしようぜ！」なんて言うな。 > 各位</p>
