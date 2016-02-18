@@ -4,7 +4,7 @@
   <title><![CDATA[Category: centos | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/centos/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-10T22:06:53+09:00</updated>
+  <updated>2016-02-18T23:33:49+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -365,7 +365,7 @@ $ md5 CentOS-7-x86_64-DVD-1503-01.iso | grep 99e450fb1b22d2e528757653fcbf5fdc
 <h2>3. USB メモリにインストールイメージを書き込む</h2>
 
 <p>USB メモリにインストールイメージを書き込む
-ターミナルから.iso を .img へ変換する。</p>
+ターミナルから<code>.iso</code> を <code>.img</code> へ変換する。</p>
 
 <p>```
 $ hdiutil convert -format UDRW -o centos7.img DOWNLOADED_ISO.iso</p>
@@ -392,7 +392,7 @@ $ diskutil list
 <p>dd で USB メモリにインストールイメージを書き込む。</p>
 
 <p>```
-$ sudo dd if=hoge.img of=/dev/disk1 bs=1m
+$ sudo dd if=centos.img of=/dev/disk1 bs=1m
 $ echo $?</p>
 
 <h1>=>0</h1>

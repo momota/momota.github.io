@@ -142,7 +142,7 @@ USB メモリを使ってインストールしてみた。</p>
 <h2>3. USB メモリにインストールイメージを書き込む</h2>
 
 <p>USB メモリにインストールイメージを書き込む
-ターミナルから.iso を .img へ変換する。</p>
+ターミナルから<code>.iso</code> を <code>.img</code> へ変換する。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -171,7 +171,7 @@ USB メモリを使ってインストールしてみた。</p>
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo dd if=hoge.img of=/dev/disk1 bs=1m
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo dd if=centos.img of=/dev/disk1 bs=1m
 </span><span class='line'>$ echo $?
 </span><span class='line'>#=&gt;0</span></code></pre></td></tr></table></div></figure>
 
