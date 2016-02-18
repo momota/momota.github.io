@@ -43,7 +43,7 @@ $ md5 CentOS-7-x86_64-DVD-1503-01.iso | grep 99e450fb1b22d2e528757653fcbf5fdc
 ---------------------------------------------
 
 USB メモリにインストールイメージを書き込む
-ターミナルから.iso を .img へ変換する。
+ターミナルから`.iso` を `.img` へ変換する。
 
 ```
 $ hdiutil convert -format UDRW -o centos7.img DOWNLOADED_ISO.iso
@@ -64,7 +64,7 @@ $ diskutil list
 dd で USB メモリにインストールイメージを書き込む。
 
 ```
-$ sudo dd if=hoge.img of=/dev/disk1 bs=1m
+$ sudo dd if=centos.img of=/dev/disk1 bs=1m
 $ echo $?
 #=>0
 ```
