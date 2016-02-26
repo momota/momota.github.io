@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: selenium | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-02-26T19:17:26+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ブラウザ操作の自動化: selenium と ruby]]></title>
+    <link href="http://momota.github.io/blog/2016/02/26/selenium/"/>
+    <updated>2016-02-26T10:41:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/02/26/selenium</id>
+    <content type="html"><![CDATA[<p>selenium と ruby を使ってブラウザ GUI 操作を自動化する。</p>
+
+<p><a href="http://www.seleniumhq.org/">selenium</a> は、Web アプリケーションの自動テストのためのツール。
+レグレッションテストによく使われているようだ。</p>
+
+<p>selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。
+シナリオ設定といっても、Firefoxプラグインの Selenium IDE などを使うと操作を
+記録してくれる機能があるのでそこまで大変ではない。</p>
+
+<p>selenium は、クロスブラウザのツールで、IE を使って IE限定みたいなサイトでも使える。
+IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
+
+<p>テスト用と言いつつ、使いみちはいろいろとある。
+社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるのでその辺で
+使っている。
+また、hp 殿のiLOみたいな web 画面から設定変更するような機器の自動構築なんかもできそう。
+スクリーンショットも撮れるので、エビデンスもついでに取得可能。
+vCenter とかも操作できないかという思惑はある。</p>
+
+<p>この selenium は、Java や Python, Ruby などのプログラミング言語からシナリオ操作が可能で
+ループ処理などするにはめちゃくちゃ便利。</p>
+
+<p>いままでは Firefox プラグインだけで利用していたが、Ruby と絡めると便利すぎて感謝しかなかった。
+ここでは、サンプルとして、はてなブックマークのホットエントリトップ5を一括で開くことを
+やってみたい。</p>
+
+<p>ちなみに似たツールに iMacro がある。</p>
+
+<!-- more -->
+
+
+<p>環境は、以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>モノ         </th>
+<th> バージョン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS           </td>
+<td> Windows 8.1 Pro</td>
+</tr>
+<tr>
+<td>ブラウザ     </td>
+<td> Firefox ESR 38.6.1</td>
+</tr>
+<tr>
+<td>Selenium IDE </td>
+<td> 2.9.0</td>
+</tr>
+<tr>
+<td>Ruby         </td>
+<td> 2.2.4p230 (2015-12-16 revision 53155) [x64-mingw32]</td>
+</tr>
+<tr>
+<td>gem          </td>
+<td> selenium-webdriver (2.52.0)</td>
+</tr>
+</tbody>
+</table>
+
+
+<h1>準備</h1>
+
+<p>Windows に Rubyをインストールする。</p>
+
+<p><a href="http://rubyinstaller.org/downloads/">RubyInstaller</a> の RubyInstallers からインストーラをダウンロードし、実行する。
+インストール時、 PATH を通すチェックボックスにチェックを入れる。</p>
+
+<p>続いてDevelopment Kitをインストールする。<a href="http://www.rubylife.jp/railsinstall/rails/index4.html">この辺を参考に。</a>
+これも RubyInstaller の Development Kit からダウンロードして、解凍する。
+解答したファイルに <code>dk.rb</code> があるのでコマンドプロンプトから以下のように実行する。</p>
+
+<p>```sh</p>
+
+<blockquote><p>cd {DEVELOPMENT KIT の解凍ディレクトリ}
+ruby dk.rb init
+ruby dk.rb install
+```</p></blockquote>
+
+<p>次に、<code>selenium-webdriver</code> をインストールする。
+Ruby をインストールしたことで、一緒に gem も使えるようになっているはずなので、
+コマンドプロンプトから以下を打鍵。</p>
+
+<p>```sh</p>
+
+<blockquote><p>gem install selenium-webdriver
+```</p></blockquote>
+
+<p>インストールの確認。irb (もしくは pry) とかで require できることを確認する。</p>
+
+<p>```sh</p>
+
+<blockquote><p>irb
+irb(main):001:0> require &ldquo;selenium-webdriver&rdquo;
+=> true
+```</p></blockquote>
+
+<h1>はてなブックマークホットエントリのトップ5エントリーを開く</h1>
+
+<p>ここではサンプルとして、はてなブックマークのホットエントリからトップ5 をブラウザで
+次々に開くよう <code>hatena.rb</code> を書く。</p>
+
+<p>ちょっと力尽きた。あとで解説を付け足す。</p>
+
+<p>CSS セレクタのところは、ブラウザ付属の開発ツール(<code>Ctrl + Shift + I</code>とかで開くやつ)
+とかからコピった雑なやつ。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>class Hatena
+  def initialize</p>
+
+<pre><code># ブラウザの起動
+@driver = Selenium::WebDriver.for :firefox
+
+# ベース URL
+@base_url = "http://b.hatena.ne.jp"
+</code></pre>
+
+<p>  end</p>
+
+<p>  def open_top5</p>
+
+<pre><code># ベースURL を開く
+@driver.get(@base_url + "/hotentry")
+
+# CSS セレクタで要素を特定してクリックする
+@driver.find_element(:css, "#main &gt; div.box-wrap.mix.box2.top &gt; div.box3_2.notitle &gt; ul &gt; li &gt; div.entry-contents &gt; h3 &gt; a").click
+for i in 1..4
+  @driver.find_element(:css, "#main &gt; div.box-wrap.mix.box2.top &gt; div.box1_1 &gt; ul &gt; li:nth-child(#{i}) &gt; div.entry-contents &gt; h3 &gt; a").click
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>if <strong>FILE</strong> == $0
+  hatena = Hatena.new
+  hatena.open_top5
+end
+```</p>
+
+<p>コマンドプロンプトから実行するとブラウザが起動してくる。
+```sh</p>
+
+<blockquote><p>ruby hatena.rb
+```</p></blockquote>
+
+<p><img src="/images/20160226_selenium.gif" alt="hatena_screenshot" /></p>
+
+<h1>参考</h1>
+
+<ul>
+<li><a href="http://www.ruby.or.jp/ja/tech/development_tool/reg_test/">Ruby アソシエーション &ndash; selenium</a></li>
+<li><a href="http://qiita.com/kkakizaki/items/5a0e6f753193f2a1514f">Selenium 入門 &ndash; Qiita</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
