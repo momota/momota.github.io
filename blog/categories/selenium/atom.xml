@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-28T14:16:34+09:00</updated>
+  <updated>2016-02-28T16:48:30+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -37,12 +37,13 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
 <ul>
 <li>社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるので
 フォーム入力の省力化として利用している。</li>
-<li>hp さんの iLO や日立さんストレージみたいな web 画面から設定変更するような機器の
+<li>hp さんの iLO や日立さんストレージ、F5 さんのBIG-IP みたいな web 画面から設定変更するような機器の
 自動構築なんかもできそう。
 
 <ul>
 <li>スクリーンショットも撮れるので、エビデンスもついでに取得可能。</li>
 <li>vCenter とかも操作できないかという思惑はある。</li>
+<li>AWS とかも操作できるけど、そもそも API が豊富に備わっているから不要か。</li>
 </ul>
 </li>
 <li>あえて selenium を使わなくてもいいけど、クローリングとかもできる</li>
