@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-02-28T16:48:30+09:00</updated>
+  <updated>2016-02-28T17:58:53+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -173,7 +173,7 @@ end</p>
 end
 ```</p>
 
-<p>コマンドプロンプトからこのスクリプトを実行するとブラウザが起動してくる。
+<p>コマンドプロンプトからこのスクリプトを実行すると次々とブラウザが起動してくる。
 ```sh</p>
 
 <blockquote><p>ruby hatena.rb
@@ -182,6 +182,12 @@ end
 <p>こんな感じ。</p>
 
 <p><img src="/images/20160226_selenium.gif" alt="hatena_screenshot" /></p>
+
+<p>フォームになにか値を突っ込みたいときは、<code>@driver.find_element(~~~~~).send_keys VAL</code> みたいな感じで
+要素を特定したあと、<code>send_keys</code> で値を渡してあげればよい。
+POST は、ボタンを find_element してあげて<code>.click</code> でOK。</p>
+
+<p>スクリーンショットを撮るときは、<code>@driver.save_screenshot "./screenshot.png"</code> みたいな感じ。</p>
 
 <h1>参考</h1>
 

@@ -287,7 +287,7 @@ Ruby をインストールしたことで、一緒に gem も使えるように�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>コマンドプロンプトからこのスクリプトを実行するとブラウザが起動してくる。</p>
+<p>コマンドプロンプトからこのスクリプトを実行すると次々とブラウザが起動してくる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'>&gt; ruby hatena.rb
@@ -297,6 +297,12 @@ Ruby をインストールしたことで、一緒に gem も使えるように�
 <p>こんな感じ。</p>
 
 <p><img src="/images/20160226_selenium.gif" alt="hatena_screenshot" /></p>
+
+<p>フォームになにか値を突っ込みたいときは、<code>@driver.find_element(~~~~~).send_keys VAL</code> みたいな感じで
+要素を特定したあと、<code>send_keys</code> で値を渡してあげればよい。
+POST は、ボタンを find_element してあげて<code>.click</code> でOK。</p>
+
+<p>スクリーンショットを撮るときは、<code>@driver.save_screenshot "./screenshot.png"</code> みたいな感じ。</p>
 
 <h1>参考</h1>
 
