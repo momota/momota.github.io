@@ -14,16 +14,22 @@ selenium と ruby を使ってブラウザ GUI 操作を自動化する。
 selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。
 シナリオ設定といっても、Firefoxプラグインの Selenium IDE などを使うと操作を
 記録してくれる機能があるのでそこまで大変ではない。
+詳細は、[Ruby アソシエーション - selenium](http://www.ruby.or.jp/ja/tech/development_tool/reg_test/) の "1.2 テストの作成"
+あたりを参照してほしい
+
+
 
 selenium は、クロスブラウザのツールで、IE を使って IE限定みたいなサイトでも使える。
 IE や Chrome で使うには各 Selenium WebDriver が必要となる。
 
-テスト用と言いつつ、使いみちはいろいろとある。
-社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるのでその辺で
-使っている。
-また、hp 殿のiLOみたいな web 画面から設定変更するような機器の自動構築なんかもできそう。
-スクリーンショットも撮れるので、エビデンスもついでに取得可能。
-vCenter とかも操作できないかという思惑はある。
+テスト用と言いつつ、使い道はいろいろとある。
+
+- 社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるので
+  フォーム入力の省力化として利用している。
+- hp さんの iLO や日立さんストレージみたいな web 画面から設定変更するような機器の
+  自動構築なんかもできそう。
+  - スクリーンショットも撮れるので、エビデンスもついでに取得可能。
+  - vCenter とかも操作できないかという思惑はある。
 
 
 この selenium は、Java や Python, Ruby などのプログラミング言語からシナリオ操作が可能で
@@ -85,16 +91,12 @@ irb(main):001:0> require "selenium-webdriver"
 => true
 ```
 
-はてなブックマークホットエントリのトップ5エントリーを開く
-=========================================================
+はてなホットエントリのトップ5エントリーを開く
+=============================================
 
 ここではサンプルとして、はてなブックマークのホットエントリからトップ5 をブラウザで
 次々に開くよう `hatena.rb` を書く。
 
-ちょっと力尽きた。あとで解説を付け足す。
-
-CSS セレクタのところは、ブラウザ付属の開発ツール(`Ctrl + Shift + I`とかで開くやつ)
-とかからコピった雑なやつ。
 
 ```ruby
 require "selenium-webdriver"
@@ -113,10 +115,10 @@ class Hatena
     @driver.get(@base_url + "/hotentry")
 
     # CSS セレクタで要素を特定してクリックする
-    @driver.find_element(:css, "#main > div.box-wrap.mix.box2.top > div.box3_2.notitle > ul > li > div.entry-contents > h3 > a").click
-    for i in 1..4
-      @driver.find_element(:css, "#main > div.box-wrap.mix.box2.top > div.box1_1 > ul > li:nth-child(#{i}) > div.entry-contents > h3 > a").click
-    end
+    5.times { |i|
+      @driver.find_element(:css, "a[data-entryrank='#{i + 1}']").click
+      sleep 1
+    }
   end
 end
 
@@ -126,10 +128,12 @@ if __FILE__ == $0
 end
 ```
 
-コマンドプロンプトから実行するとブラウザが起動してくる。
+コマンドプロンプトからこのスクリプトを実行するとブラウザが起動してくる。
 ```sh
 > ruby hatena.rb
 ```
+
+こんな感じ。
 
 ![hatena_screenshot](/images/20160226_selenium.gif)
 
@@ -139,4 +143,3 @@ end
 
 - [Ruby アソシエーション - selenium](http://www.ruby.or.jp/ja/tech/development_tool/reg_test/)
 - [Selenium 入門 - Qiita](http://qiita.com/kkakizaki/items/5a0e6f753193f2a1514f)
-
