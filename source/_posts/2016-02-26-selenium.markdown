@@ -129,7 +129,7 @@ if __FILE__ == $0
 end
 ```
 
-コマンドプロンプトからこのスクリプトを実行するとブラウザが起動してくる。
+コマンドプロンプトからこのスクリプトを実行すると次々とブラウザが起動してくる。
 ```sh
 > ruby hatena.rb
 ```
@@ -137,6 +137,15 @@ end
 こんな感じ。
 
 ![hatena_screenshot](/images/20160226_selenium.gif)
+
+
+
+フォームになにか値を突っ込みたいときは、`@driver.find_element(~~~~~).send_keys VAL` みたいな感じで
+要素を特定したあと、`send_keys` で値を渡してあげればよい。
+POST は、ボタンを find_element してあげて`.click` でOK。
+
+スクリーンショットを撮るときは、`@driver.save_screenshot "./screenshot.png"` みたいな感じ。
+
 
 
 参考
