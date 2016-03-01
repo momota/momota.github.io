@@ -31,7 +31,8 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。
   - スクリーンショットも撮れるので、エビデンスもついでに取得可能。
   - vCenter とかも操作できないかという思惑はある。
   - AWS とかも操作できるけど、そもそも API が豊富に備わっているから不要か。
-- あえて selenium を使わなくてもいいけど、クローリングとかもできる
+- あえて selenium を使わなくてもいいけど、クローリングやスクレイピングとかもできる
+
 
 この selenium は、Java や Python, Ruby などのプログラミング言語からシナリオ操作が可能で
 ループ処理などするにはめちゃくちゃ便利。
@@ -140,9 +141,11 @@ end
 
 
 
-フォームになにか値を突っ込みたいときは、`@driver.find_element(~~~~~).send_keys VAL` みたいな感じで
-要素を特定したあと、`send_keys` で値を渡してあげればよい。
-POST は、ボタンを find_element してあげて`.click` でOK。
+`find_element` メソッドは、CSSセレクタやxpath、タグ名、タグのID、class名などを指定できる。
+
+フォームになにか値を突っ込みたいときは、`@driver.find_element(~~~~~).send_keys "VALUE"` みたいな感じで
+要素を特定したあと、`send_keys` で文字列を渡してあげればよい。
+POST は、ボタンを find_element してあげて`.click` (`.submit` でも良さ気) でOK。
 
 スクリーンショットを撮るときは、`@driver.save_screenshot "./screenshot.png"` みたいな感じ。
 
