@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-28T17:21:24+09:00</updated>
+  <updated>2016-05-28T18:22:38+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -347,6 +347,8 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
 
 <p>ちなみに似たツールに iMacro がある。</p>
 
+<p>関連記事: <a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ</a></p>
+
 <!-- more -->
 
 
@@ -484,6 +486,7 @@ POST は、ボタンを find_element してあげて<code>.click</code> (<code>.
 <ul>
 <li><a href="http://www.ruby.or.jp/ja/tech/development_tool/reg_test/">Ruby アソシエーション &ndash; selenium</a></li>
 <li><a href="http://qiita.com/kkakizaki/items/5a0e6f753193f2a1514f">Selenium 入門 &ndash; Qiita</a></li>
+<li>関連記事: <a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ</a></li>
 </ul>
 
 ]]></content>
