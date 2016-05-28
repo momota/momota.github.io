@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>seleniumノウハウ - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="ブラウザ操作の自動化: Selenium と Ruby でも書いたが、
+selenium が便利すぎて、最近よくスクリプトを書くようになった。 以下のようなノウハウが溜まってきたので、ここらで放出する。 ウィンドウサイズのリサイズ
+ウィンドウ位置の移動
+スクリーンショットの取得 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Seleniumノウハウ</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-28T16:57:00+09:00" pubdate data-updated="true">2016-05-28</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
+selenium が便利すぎて、最近よくスクリプトを書くようになった。</p>
+
+<p>以下のようなノウハウが溜まってきたので、ここらで放出する。</p>
+
+<ul>
+<li>ウィンドウサイズのリサイズ</li>
+<li>ウィンドウ位置の移動</li>
+<li>スクリーンショットの取得</li>
+<li>要素セレクタメソッドの使い分け</li>
+<li>ドロップダウンリストの選択</li>
+<li>マウスオーバ (hover)</li>
+<li>フレーム移動</li>
+<li>コード量を減らすためのモンキーパッチ</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>ウィンドウサイズのリサイズ</h2>
+
+<p><code>driver.manage.window.resize_to</code>の引数にリサイズするサイズ情報(width, height)を渡す。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">width</span>  <span class="o">=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">height</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">resize_to</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>現在のサイズを取得して、相対的にリサイズしたい場合は以下のようにする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">size</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">width</span>  <span class="o">+=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">height</span> <span class="o">+=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ウィンドウ位置の移動</h2>
+
+<p><code>driver.manage.window.move_to</code>の引数に移動したい場所の座標情報(x, y)を渡す。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">x</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">y</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>現在のウィンドウ位置を取得して、相対的にリサイズしたい場合は以下のようにする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pos</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span>
+</span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="mi">100</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">pos</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>スクリーンショットの取得</h2>
+
+<p>開いているページのスクリーンショットを撮りたい場合は、<code>driver.save_screenshot</code> に保存先のファイル名を指定するだけ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.google.co.jp/&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;/path/to/save/screenshot.png&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ページ全体を撮りたいのに、frame 構造が邪魔をして、スクロールしなければ全体が撮れない場合がある。
+ちょっと、調べたところ <code>driver.execute_script("some script")</code> で javascript を利用してスクロールをしている人がいたり、
+<code>Selenium::WebDriver::Element.location_once_scrolled_into_view</code> を使ってスクロールしている人がいたり。
+どちらにしても、コンテンツ表示上の高さを取得して、1スクロール分の長さをデクリメントしていっているような処理。</p>
+
+<p>自分の場合は、めんどくさかったので、上述したリサイズ方法を使ってスクロールがいらないくらいウィンドウサイズを大きくして、
+スクリーンショットを撮るという荒業を繰り広げている。</p>
+
+<h2>要素セレクタメソッドの使い分け</h2>
+
+<p>要素セレクタメソッドは <code>find_element</code> と <code>find_elements</code> の2種類。
+そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある</p>
+
+<ul>
+<li>find_element
+
+<ul>
+<li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
+<li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
+</ul>
+</li>
+<li>find_elements
+
+<ul>
+<li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+<li>マッチする要素がなければ、空の配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
+
+<p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
+<code>find_elements</code> も同じ。</p>
+
+<p>指定できるsymbolの種類は以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>symbol             </th>
+<th> 対象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:class             </td>
+<td> クラス名 (属性名 class)</td>
+</tr>
+<tr>
+<td>:class_name        </td>
+<td> 上記 :class と同じ</td>
+</tr>
+<tr>
+<td>:id                </td>
+<td> ID (属性名 id)</td>
+</tr>
+<tr>
+<td>:link_text         </td>
+<td> <code>&lt;a&gt;</code> タグのテキスト</td>
+</tr>
+<tr>
+<td>:link              </td>
+<td> 上記 :link_text と同じ</td>
+</tr>
+<tr>
+<td>:partial_link_text </td>
+<td> <code>&lt;a&gt;</code> タグのテキストの部分文字列</td>
+</tr>
+<tr>
+<td>:name              </td>
+<td> name (属性名 name)</td>
+</tr>
+<tr>
+<td>:tag_name          </td>
+<td> タグ名</td>
+</tr>
+<tr>
+<td>:xpath             </td>
+<td> xpath で指定</td>
+</tr>
+<tr>
+<td>:css               </td>
+<td> css セレクタ で指定</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method">参考</a></p>
+
+<h2>ドロップダウンリストの選択</h2>
+
+<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
+コメントアウトされることがある。(今のバージョンは大丈夫そう)
+以下のように、書き換えればOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">s</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Support</span><span class="p">:</span><span class="ss">:Select</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;select&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:text</span><span class="p">,</span> <span class="s2">&quot;ほげほげ&quot;</span><span class="p">)</span>  <span class="c1"># 表示テキストで選択</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:value</span><span class="p">,</span> <span class="s2">&quot;value1&quot;</span><span class="p">)</span>   <span class="c1"># valueの値で選択</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:index</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>          <span class="c1"># index(0, 1, 2, ...)で選択</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>マウスオーバ (hover)</h2>
+
+<p>例えば、ナビゲーションメニューなどが、通常時には折りたたまれていて、メニュー上にマウスオーバした場合に、
+子メニューが展開されるようなページがある。
+折りたたまれているときに、子メニューHTMLをロードできていないようなページのときは、ユーザ操作と同じように
+マウスオーバしてあげる必要がある。</p>
+
+<p>以下のようにマウスオーバしたい要素を指定して、<code>driver.mouse.move_to</code> を呼べば良い。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;menu&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span> <span class="n">e</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>フレーム移動</h2>
+
+<p>frame や iframe 要素を使っているサイトで、そのフレーム内の要素に対して操作したい場合、当該フレームへ切り替える操作が必要となる。</p>
+
+<p>以下のようにスイッチしたいフレーム要素を指定して、<code>driver.switch_to.frame</code> を呼べば良い。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>コード量を減らすためのモンキーパッチ</h2>
+
+<p>たとえば、ログインなどの処理の際、フォームへ文字列を送る <code>send_keys</code> 前にいつも <code>.clear</code> しているので
+もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
+
+<p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
+定義してしまおうと思った。</p>
+
+<p>そこで、以下のようなモンキーパッチを書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ElementExtension</span>
+</span><span class='line'>  <span class="n">refine</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="no">Element</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">clear</span>
+</span><span class='line'>      <span class="k">super</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">value</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">using</span> <span class="no">ElementExtension</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>そうすると以下のようにコード量を減らせる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'># たとえば、ログイン処理
+</span><span class='line'>user     = &quot;USER&quot;
+</span><span class='line'>password = &quot;PASSWORD&quot;
+</span><span class='line'>
+</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginuser&quot;).clear</span>
+</span><span class='line'>driver.find_element(:id, &quot;loginuser&quot;).send_keys( user )
+</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginpass&quot;).clear</span>
+</span><span class='line'>driver.find_element(:id, &quot;loginpass&quot;).send_keys( password )
+</span><span class='line'>driver.find_element(:id, &quot;submit&quot;).click
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'># &lt;input&gt;の値を取得する処理
+</span><span class='line'><span class="gd">- hostname = driver.find_element(:id, &quot;hostname&quot;).attribute(&quot;value&quot;)</span>
+</span><span class='line'><span class="gi">+ hostname = driver.find_element(:id, &quot;hostname&quot;).value</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>モンキーパッチの書き方は以下を参考にした。</p>
+
+<ul>
+<li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-28T16:57:00+09:00" pubdate data-updated="true">2016-05-28</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/selenium/'>selenium</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2016/05/28/selenium-know-how/" data-via="momota" data-counturl="http://momota.github.io/blog/2016/05/28/selenium-know-how/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2016/05/28/selenium-know-how/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/02/26/selenium/" title="Previous Post: ブラウザ操作の自動化: selenium と ruby">&laquo; ブラウザ操作の自動化: selenium と ruby</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/05/28/selenium-know-how/">seleniumノウハウ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/02/26/selenium/">ブラウザ操作の自動化: selenium と ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/02/08/ansible/">ansible でノートPCをセットアップ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/29/octopress/">複数の環境で octopress を使ってブログを書く</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2016/05/28/selenium-know-how/';
+        var disqus_url = 'http://momota.github.io/blog/2016/05/28/selenium-know-how/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

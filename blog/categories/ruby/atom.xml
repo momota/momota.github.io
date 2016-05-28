@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-03-01T11:46:23+09:00</updated>
+  <updated>2016-05-28T17:21:24+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,294 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[seleniumノウハウ]]></title>
+    <link href="http://momota.github.io/blog/2016/05/28/selenium-know-how/"/>
+    <updated>2016-05-28T16:57:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/05/28/selenium-know-how</id>
+    <content type="html"><![CDATA[<p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
+selenium が便利すぎて、最近よくスクリプトを書くようになった。</p>
+
+<p>以下のようなノウハウが溜まってきたので、ここらで放出する。</p>
+
+<ul>
+<li>ウィンドウサイズのリサイズ</li>
+<li>ウィンドウ位置の移動</li>
+<li>スクリーンショットの取得</li>
+<li>要素セレクタメソッドの使い分け</li>
+<li>ドロップダウンリストの選択</li>
+<li>マウスオーバ (hover)</li>
+<li>フレーム移動</li>
+<li>コード量を減らすためのモンキーパッチ</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>ウィンドウサイズのリサイズ</h2>
+
+<p><code>driver.manage.window.resize_to</code>の引数にリサイズするサイズ情報(width, height)を渡す。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>width  = 100
+height = 100</p>
+
+<p>driver = Selenium::WebDriver.for :firefox
+driver.manage.window.resize_to(width, height)
+```</p>
+
+<p>現在のサイズを取得して、相対的にリサイズしたい場合は以下のようにする。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>driver = Selenium::WebDriver.for :firefox</p>
+
+<p>size = driver.manage.window.size
+size.width  += 100
+size.height += 100
+driver.manage.window.size = size
+```</p>
+
+<h2>ウィンドウ位置の移動</h2>
+
+<p><code>driver.manage.window.move_to</code>の引数に移動したい場所の座標情報(x, y)を渡す。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>x = 100
+y = 100</p>
+
+<p>driver = Selenium::WebDriver.for :firefox
+driver.manage.window.move_to(x, y)
+```</p>
+
+<p>現在のウィンドウ位置を取得して、相対的にリサイズしたい場合は以下のようにする。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>driver = Selenium::WebDriver.for :firefox</p>
+
+<p>pos = driver.manage.window.position
+pos.x += 100
+pos.y += 100
+driver.manage.window.position = pos
+```</p>
+
+<h2>スクリーンショットの取得</h2>
+
+<p>開いているページのスクリーンショットを撮りたい場合は、<code>driver.save_screenshot</code> に保存先のファイル名を指定するだけ。</p>
+
+<p>```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>driver = Selenium::WebDriver.for :firefox
+driver.get(&ldquo;<a href="https://www.google.co.jp/">https://www.google.co.jp/</a>&rdquo;)
+driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
+```</p>
+
+<p>ページ全体を撮りたいのに、frame 構造が邪魔をして、スクロールしなければ全体が撮れない場合がある。
+ちょっと、調べたところ <code>driver.execute_script("some script")</code> で javascript を利用してスクロールをしている人がいたり、
+<code>Selenium::WebDriver::Element.location_once_scrolled_into_view</code> を使ってスクロールしている人がいたり。
+どちらにしても、コンテンツ表示上の高さを取得して、1スクロール分の長さをデクリメントしていっているような処理。</p>
+
+<p>自分の場合は、めんどくさかったので、上述したリサイズ方法を使ってスクロールがいらないくらいウィンドウサイズを大きくして、
+スクリーンショットを撮るという荒業を繰り広げている。</p>
+
+<h2>要素セレクタメソッドの使い分け</h2>
+
+<p>要素セレクタメソッドは <code>find_element</code> と <code>find_elements</code> の2種類。
+そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある</p>
+
+<ul>
+<li>find_element
+
+<ul>
+<li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
+<li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
+</ul>
+</li>
+<li>find_elements
+
+<ul>
+<li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+<li>マッチする要素がなければ、空の配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
+
+<p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
+<code>find_elements</code> も同じ。</p>
+
+<p>指定できるsymbolの種類は以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>symbol             </th>
+<th> 対象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:class             </td>
+<td> クラス名 (属性名 class)</td>
+</tr>
+<tr>
+<td>:class_name        </td>
+<td> 上記 :class と同じ</td>
+</tr>
+<tr>
+<td>:id                </td>
+<td> ID (属性名 id)</td>
+</tr>
+<tr>
+<td>:link_text         </td>
+<td> <code>&lt;a&gt;</code> タグのテキスト</td>
+</tr>
+<tr>
+<td>:link              </td>
+<td> 上記 :link_text と同じ</td>
+</tr>
+<tr>
+<td>:partial_link_text </td>
+<td> <code>&lt;a&gt;</code> タグのテキストの部分文字列</td>
+</tr>
+<tr>
+<td>:name              </td>
+<td> name (属性名 name)</td>
+</tr>
+<tr>
+<td>:tag_name          </td>
+<td> タグ名</td>
+</tr>
+<tr>
+<td>:xpath             </td>
+<td> xpath で指定</td>
+</tr>
+<tr>
+<td>:css               </td>
+<td> css セレクタ で指定</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method">参考</a></p>
+
+<h2>ドロップダウンリストの選択</h2>
+
+<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
+コメントアウトされることがある。(今のバージョンは大丈夫そう)
+以下のように、書き換えればOK。</p>
+
+<p>```ruby
+s = Selenium::WebDriver::Support::Select.new(driver.find_element(:tag_name, &ldquo;select&rdquo;))
+s.select_by(:text, &ldquo;ほげほげ&rdquo;)  # 表示テキストで選択
+s.select_by(:value, &ldquo;value1&rdquo;)   # valueの値で選択
+s.select_by(:index, 0)          # index(0, 1, 2, &hellip;)で選択</p>
+
+<p>```</p>
+
+<h2>マウスオーバ (hover)</h2>
+
+<p>例えば、ナビゲーションメニューなどが、通常時には折りたたまれていて、メニュー上にマウスオーバした場合に、
+子メニューが展開されるようなページがある。
+折りたたまれているときに、子メニューHTMLをロードできていないようなページのときは、ユーザ操作と同じように
+マウスオーバしてあげる必要がある。</p>
+
+<p>以下のようにマウスオーバしたい要素を指定して、<code>driver.mouse.move_to</code> を呼べば良い。</p>
+
+<p><code>ruby
+e = driver.find_element(:id, "menu")
+driver.mouse.move_to( e )
+</code></p>
+
+<h2>フレーム移動</h2>
+
+<p>frame や iframe 要素を使っているサイトで、そのフレーム内の要素に対して操作したい場合、当該フレームへ切り替える操作が必要となる。</p>
+
+<p>以下のようにスイッチしたいフレーム要素を指定して、<code>driver.switch_to.frame</code> を呼べば良い。</p>
+
+<p><code>ruby
+frame = driver.find_element(:id, "frame")
+driver.switch_to.frame( frame )
+</code></p>
+
+<h2>コード量を減らすためのモンキーパッチ</h2>
+
+<p>たとえば、ログインなどの処理の際、フォームへ文字列を送る <code>send_keys</code> 前にいつも <code>.clear</code> しているので
+もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
+
+<p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
+定義してしまおうと思った。</p>
+
+<p>そこで、以下のようなモンキーパッチを書く。</p>
+
+<p>```ruby
+module ElementExtension
+  refine Selenium::WebDriver::Element do</p>
+
+<pre><code>def send_keys( str )
+  self.clear
+  super( str )
+end
+
+def value
+  self.attribute("value")
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>using ElementExtension
+```</p>
+
+<p>そうすると以下のようにコード量を減らせる。</p>
+
+<p>```diff</p>
+
+<h1>たとえば、ログイン処理</h1>
+
+<p>user     = &ldquo;USER&rdquo;
+password = &ldquo;PASSWORD&rdquo;</p>
+
+<ul>
+<li>driver.find_element(:id, &ldquo;loginuser&rdquo;).clear
+driver.find_element(:id, &ldquo;loginuser&rdquo;).send_keys( user )</li>
+<li>driver.find_element(:id, &ldquo;loginpass&rdquo;).clear
+driver.find_element(:id, &ldquo;loginpass&rdquo;).send_keys( password )
+driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
+</ul>
+
+
+<h1><input>の値を取得する処理</h1>
+
+<ul>
+<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).attribute(&ldquo;value&rdquo;)</li>
+<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).value
+```</li>
+</ul>
+
+
+<p>モンキーパッチの書き方は以下を参考にした。</p>
+
+<ul>
+<li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ブラウザ操作の自動化: selenium と ruby]]></title>
@@ -1373,320 +1661,6 @@ Removing netrc (0.7.7)
 Removing rest-client (1.6.7)
 Removing rubyzip (1.0.0)
 </code></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (2)]]></title>
-    <link href="http://momota.github.io/blog/2013/09/22/sinatra/"/>
-    <updated>2013-09-22T06:15:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/09/22/sinatra</id>
-    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
-
-<p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
-また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
-
-<hr />
-
-<ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
-
-<ul>
-<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
-
-<ul>
-<li>sinatra で MongoDB を使ったデータ永続化</li>
-<li>HTTP POSTへの対応</li>
-<li>Bootstrap でのお化粧</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
-
-<ul>
-<li>sinatra の heroku へのデプロイ</li>
-</ul>
-</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>MongoDB を使うための準備</h2>
-
-<p>データの永続化をするために、ここでは mongodb を使う。別に sqlite3 や MySQL でも良かったがなんとなく NoSQLを選定。</p>
-
-<p>まずは、<a href="http://docs.mongodb.org/manual/installation/">こちらを参考に</a> mongodb をインストールする。</p>
-
-<p>```sh
-$ brew update
-$ brew install mongodb
-$ mongo &mdash;version
-MongoDB shell version: 2.4.6</p>
-
-<h1>mongod を起動する</h1>
-
-<p>$ /usr/local/bin/mongod &mdash;fork
-all output going to: /usr/local/var/log/mongodb/mongo.log
-```</p>
-
-<p>mongodb を ruby から扱うための gem を bundler でインストールする。</p>
-
-<p>Gemfile に <code>mongo</code> と <code>bson_ext</code> を追加する。(以下は Gemfile の diff 結果)</p>
-
-<p><code>diff
-diff --git a/Gemfile b/Gemfile
-index 140fec0..74db599 100644
---- a/Gemfile
-+++ b/Gemfile
-@@ -6,3 +6,6 @@ gem "activerecord", "3.2.13"
- gem "sqlite3", "1.3.7"
- gem "sinatra", "1.4.3"
- gem "sinatra-contrib", "1.4.0"
-+gem "mongo"
-+gem "bson_ext"
-</code></p>
-
-<p>bundler でインストールする。</p>
-
-<p><code>sh
-$ bundle install --path vendor/bundle
-Fetching gem metadata from https://rubygems.org/...........
-Fetching gem metadata from https://rubygems.org/..
-Resolving dependencies...
-Using i18n (0.6.1)
-Using multi_json (1.8.0)
-Using activesupport (3.2.13)
-Using builder (3.0.4)
-Using activemodel (3.2.13)
-Using arel (3.0.2)
-Using tzinfo (0.3.37)
-Using activerecord (3.2.13)
-Using backports (3.3.4)
-Installing bson (1.9.2)
-Installing bson_ext (1.9.2)
-Using eventmachine (1.0.3)
-Installing mongo (1.9.2)
-Using rack (1.5.2)
-Using rack-protection (1.5.0)
-Using rack-test (0.6.2)
-Using tilt (1.4.1)
-Using sinatra (1.4.3)
-Using sinatra-contrib (1.4.0)
-Using sqlite3 (1.3.7)
-Using bundler (1.3.5)
-Your bundle is complete!
-</code></p>
-
-<h2>ルーティング処理を追加する</h2>
-
-<p>まず、mongodb を ruby から扱うために <code>require 'mongo'</code> しておく。</p>
-
-<p>before filter で mongodb とのコネクションを張っておく。</p>
-
-<p>helper には、html エスケープ処理の alias を定義しておく。(のちほど <code>views/index.erb</code> で使う)</p>
-
-<p>ブラウザから投稿"/new"と削除"/delete"の HTTP POST リクエストを受け付けるため、各ルーティング処理を追加している。
-投稿では、mongodb への insert 処理を、削除では、mongodb からの remove 処理を記述している。</p>
-
-<p>```ruby
-require &lsquo;sinatra&rsquo;
-require &lsquo;sinatra/reloader&rsquo;
-require &lsquo;mongo&rsquo;</p>
-
-<h1>filter</h1>
-
-<p>before do
-  db_con = Mongo::Connection.new(&lsquo;localhost&rsquo;, 27017)
-  @db    = db_con.db(&lsquo;sinatra_sample&rsquo;)
-  @comments = @db.collection(&lsquo;comments&rsquo;)
-end</p>
-
-<h1>helper</h1>
-
-<p>helpers do
-  # escape html
-  include Rack::Utils
-  alias_method :h, :escape_html
-end</p>
-
-<p>get &lsquo;/&rsquo; do
-  erb :index
-end</p>
-
-<p>post &lsquo;/new&rsquo; do
-  @comments.insert( :body => params[:body] )
-  redirect &lsquo;/&rsquo;
-end</p>
-
-<p>post &lsquo;/delete&rsquo; do
-  id = BSON::ObjectId( params[:id] )
-  @comments.find(&lsquo;_id&rsquo; => id).each { |d_comment|</p>
-
-<pre><code>@comments.remove( d_comment )
-</code></pre>
-
-<p>  }
-end
-```</p>
-
-<h2>フォームとか</h2>
-
-<p>フォームとかを作るため、<code>views/index.erb</code> を修正する。</p>
-
-<p><code>&lt;ul&gt;</code> ブロックで、mongodb からデータを抜いてきてリスト表示させている。</p>
-
-<p><code>&lt;form&gt;</code> ブロックで新規の投稿をする。<code>/new</code> に POST しているので、上記の <code>post '/new' do ... end</code> 部分の処理にルーティングされる。</p>
-
-<p><code>&lt;script&gt;</code> ブロックで jquery を利用して既存記事を削除する。<a href="https://developers.google.com/speed/libraries/devguide?hl=ja">Google API</a>を利用。
-[x] をクリックしたときに、<code>/delete</code> に POST しているので、上記の <code>post '/delete' do ... end</code> 部分の処理にルーティングされる。</p>
-
-<p>```erb
-  <h1>sinatra sample</h1>
-  <ul></p>
-
-<pre><code>&lt;% @comments.find.each { |comment| %&gt;
-&lt;li data-id="&lt;%= comment["_id"]%&gt;"&gt;
-  &lt;%= h comment["body"] %&gt;
-  &lt;span class="deleteCmd" style="cursor:pointer; color:blue"&gt;[x]&lt;/span&gt;
-  &lt;/li&gt;
-&lt;% } %&gt;
-</code></pre>
-
-<p>  </ul></p>
-
-<p>  <h2>Add new</h2>
-  <form method="post" action="new"></p>
-
-<pre><code>&lt;input type="text" name="body"&gt; &lt;input type="submit" value="post"&gt;
-</code></pre>
-
-<p>  </form></p>
-
-<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-  <script></p>
-
-<pre><code>$('.deleteCmd').click(function() {
-  var el = $( this ).parent();
-  if(confirm('are you sure to delete ?')) {
-    $.post('/delete', {
-      id: el.data('id')
-      }, function() {
-        el.fadeOut( 800 );
-      });
-  }
-  })
-</code></pre>
-
-<p>  </script>
-```</p>
-
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
-
-<p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
-
-<p>ちょっと殺風景なので、twitter bootstrap3 を使ってお化粧する。</p>
-
-<h2>twitter bootstrap3 を使う</h2>
-
-<p>できあがったものがかなりそっけないので、CSS フレームワークである <a href="http://getbootstrap.com/">twitter bootstrap</a> を使って、すこしだけおしゃれにする。
-<a href="https://github.com/twbs/bootstrap/releases/download/v3.0.0/bootstrap-3.0.0-dist.zip">zip ファイル</a> で配布されているので、ダウンロードして解凍する。
-sinatra では静的ファイルを <code>public/</code> 以下につっこむため、解凍したディレクトリを public にリネームして sinatra アプリを作っているワーキングディレクトリへ置いておく。</p>
-
-<h3>layout テンプレートの修正</h3>
-
-<p>bootstrap を使うため、<code>views/layout.erb</code> を以下のように修正する。
-落としてきた css とscript を指定するのと、bootstrap を使う上で必須な jquery を指定している。</p>
-
-<p>```erb
-&lt;!DOCTYPE html>
-<html lang="ja">
-  <head></p>
-
-<pre><code>&lt;meata charset="urf-8"&gt;
-&lt;title&gt;sinatra test&lt;/title&gt;
-&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-&lt;link href="css/bootstrap.min.css" rel="stylesheet" media="screen"&gt;
-</code></pre>
-
-<p>  </head>
-  <body>
-  <div class="container" syle="padding:20px 0"></p>
-
-<pre><code>&lt;h1&gt;Sinatra Sample&lt;/h1&gt;
-&lt;%= yield %&gt;
-</code></pre>
-
-<p>  </div></p>
-
-<p>  <script src="http://code.jquery.com/jquery.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  </body>
-</html>
-```</p>
-
-<p><code>views/indx.erb</code> も以下のように修正する。
-<code>&lt;ul&gt;</code> をやめて、<code>&lt;table&gt;</code> へ。[x]という文字列も、削除アイコンへ修正。</p>
-
-<p>```erb
-  <table class="table table-striped"></p>
-
-<pre><code>&lt;% @comments.find.each { |comment| %&gt;
-&lt;tr data-id="&lt;%= comment["_id"]%&gt;"&gt;
-  &lt;td&gt;
-  &lt;%= h comment["body"] %&gt;
-    &lt;span class="deleteCmd" style="cursor:pointer;"&gt;
-      &lt;i class="glyphicon glyphicon-remove"&gt;&lt;/i&gt;
-    &lt;/span&gt;
-  &lt;/td&gt;
-&lt;/tr&gt;
-&lt;% } %&gt;
-</code></pre>
-
-<p>  </table></p>
-
-<p>  <h2>Add new</h2>
-  <form method="post" action="new"></p>
-
-<pre><code>&lt;div class="form-group"&gt;
-  &lt;label class="control-label" for="comment" &gt;comment&lt;/label&gt;
-  &lt;input type="text" name="body" class="form-control" placeholder="your comment"&gt;
-&lt;/div&gt;
-&lt;div class="form-group"&gt;
-  &lt;input type="submit" value="post" class="btn btn-primary"&gt;
-&lt;/div&gt;
-</code></pre>
-
-<p>  </form></p>
-
-<p>  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-  <script></p>
-
-<pre><code>$('.deleteCmd').click(function() {
-  var el = $( this ).parent().parent();
-  if(confirm('are you sure to delete ?')) {
-    $.post('/delete', {
-      id: el.data('id')
-      }, function() {
-        el.fadeOut( 800 );
-      });
-  }
-  })
-</code></pre>
-
-<p>  </script>
-```</p>
-
-<p>これで、<code>bundle exec ruby main.rb</code> で sinatra を起動して <a href="http://localhost:4567/">http://localhost:4567/</a> にアクセスする。</p>
-
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png" alt="" /></p>
-
-<p>こんな感じでちょっとだけおしゃれになる。</p>
 ]]></content>
   </entry>
   
