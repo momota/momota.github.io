@@ -28,6 +28,13 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 インストール方法などは [ブラウザ操作の自動化: Selenium と Ruby](http://momota.github.io/blog/2016/02/26/selenium/) 
 を参照。
 
+selenium用スクリプト開発のノウハウというべきかコツといういべきかアレな感じだが、結局、
+スクレイピングと同様にHTML構造を理解することが必要なのでブラウザ付属の開発ツールが
+手離せない。
+
+- [Firefox 開発ツール](https://developer.mozilla.org/ja/docs/Tools)
+- [chrome devtools](https://developer.chrome.com/devtools)
+
 <!-- more -->
 
 これ以降のサンプルコードは以下を定義しているものとする。
