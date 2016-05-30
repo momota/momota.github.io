@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T11:06:56+09:00</updated>
+  <updated>2016-05-30T11:40:50+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -139,7 +139,7 @@ driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
 
 <p>```ruby</p>
 
-<h1>リストのリンクをクリックしていくイテレーション</h1>
+<h1>リストのリンクをクリックしていくイテレーションの例</h1>
 
 <p>elements = d.find_elements(:css, &ldquo;#some-list > li&rdquo;)
 elements.each { |e|
@@ -209,9 +209,10 @@ elements.each { |e|
 
 <h2>ドロップダウンリストの選択</h2>
 
-<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
-コメントアウトされることがある。(今のバージョンは大丈夫そう)
-以下のように、書き換えればOK。</p>
+<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの選択をする処理部分がERRORに
+なってコメントアウトされることがある。(今のSelenium IDEバージョンでは大丈夫そう)</p>
+
+<p>ドロップダウンリストの選択は以下のように書けばOK。</p>
 
 <p>```ruby
 s = Selenium::WebDriver::Support::Select.new(driver.find_element(:tag_name, &ldquo;select&rdquo;))
@@ -245,6 +246,15 @@ driver.mouse.move_to( e )
 frame = driver.find_element(:id, "frame")
 driver.switch_to.frame( frame )
 </code></p>
+
+<p>フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。</p>
+
+<p>```ruby
+driver.switch_to.window( driver.window_handle )</p>
+
+<p>frame = driver.find_element(:id, &ldquo;top-frame&rdquo;)
+driver.switch_to.frame( frame )
+```</p>
 
 <h2>コード量を減らすためのモンキーパッチ</h2>
 

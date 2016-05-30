@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T11:06:56+09:00</updated>
+  <updated>2016-05-30T11:40:50+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -178,7 +178,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># リストのリンクをクリックしていくイテレーション</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># リストのリンクをクリックしていくイテレーションの例</span>
 </span><span class='line'><span class="n">elements</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="ss">:css</span><span class="p">,</span> <span class="s2">&quot;#some-list &gt; li&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="n">elements</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span>
 </span><span class='line'>  <span class="n">link</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
@@ -248,9 +248,10 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 
 <h2>ドロップダウンリストの選択</h2>
 
-<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
-コメントアウトされることがある。(今のバージョンは大丈夫そう)
-以下のように、書き換えればOK。</p>
+<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの選択をする処理部分がERRORに
+なってコメントアウトされることがある。(今のSelenium IDEバージョンでは大丈夫そう)</p>
+
+<p>ドロップダウンリストの選択は以下のように書けばOK。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -288,6 +289,19 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">window</span><span class="p">(</span> <span class="n">driver</span><span class="o">.</span><span class="n">window_handle</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;top-frame&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
