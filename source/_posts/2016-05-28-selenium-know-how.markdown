@@ -127,7 +127,7 @@ elements.each { |e|
   link = e.find_element(:tag_name, "a")
   link.click
 }
-  ```
+```
 
 
 要素セレクタメソッドの引数は、`find_element(:how, "what")` のように symbol と文字列を渡す。
