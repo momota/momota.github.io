@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T13:34:54+09:00</updated>
+  <updated>2016-05-30T14:21:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -31,6 +31,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li>ドロップダウンリストの選択</li>
 <li>マウスオーバ (hover)</li>
 <li>フレーム移動</li>
+<li>ポップアップダイアログの扱い</li>
 <li>コード量を減らすためのモンキーパッチ</li>
 </ul>
 
@@ -244,6 +245,23 @@ driver.switch_to.window( driver.window_handle )</p>
 <p>frame = driver.find_element(:id, &ldquo;top-frame&rdquo;)
 driver.switch_to.frame( frame )
 ```</p>
+
+<h2>ポップアップダイアログの扱い</h2>
+
+<p>「マジでこのページから移動する?」的なjavascriptによるポップアップダイアログを表示するページがある。
+このポップアップダイアログを強制的に閉じるには以下のようにする。</p>
+
+<p><code>.accept</code> ではい、<code>.dismiss</code>でいいえを押して閉じる。</p>
+
+<p><code>ruby
+begin
+  alert_box = driver.switch_to.alert
+  alert_box.accept     # 「はい」「OK」ボタンクリック
+  # alert_box.dismiss  # 「いいえ」「cancel」ボタンクリック
+rescue Selenium::WebDriver::Error::NoSuchAlertError =&gt; e
+  # ダイアログがポップアップしない場合、例外を投げるので、何もせずにスルー
+end
+</code></p>
 
 <h2>コード量を減らすためのモンキーパッチ</h2>
 

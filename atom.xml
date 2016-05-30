@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T13:34:54+09:00</updated>
+  <updated>2016-05-30T14:21:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -31,6 +31,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li>ドロップダウンリストの選択</li>
 <li>マウスオーバ (hover)</li>
 <li>フレーム移動</li>
+<li>ポップアップダイアログの扱い</li>
 <li>コード量を減らすためのモンキーパッチ</li>
 </ul>
 
@@ -277,6 +278,30 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>
 </span><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;top-frame&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ポップアップダイアログの扱い</h2>
+
+<p>「マジでこのページから移動する?」的なjavascriptによるポップアップダイアログを表示するページがある。
+このポップアップダイアログを強制的に閉じるには以下のようにする。</p>
+
+<p><code>.accept</code> ではい、<code>.dismiss</code>でいいえを押して閉じる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">alert_box</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">alert</span>
+</span><span class='line'>  <span class="n">alert_box</span><span class="o">.</span><span class="n">accept</span>     <span class="c1"># 「はい」「OK」ボタンクリック</span>
+</span><span class='line'>  <span class="c1"># alert_box.dismiss  # 「いいえ」「cancel」ボタンクリック</span>
+</span><span class='line'><span class="k">rescue</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Error</span><span class="p">:</span><span class="ss">:NoSuchAlertError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># ダイアログがポップアップしない場合、例外を投げるので、何もせずにスルー</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
