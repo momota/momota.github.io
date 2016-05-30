@@ -19,6 +19,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 - ドロップダウンリストの選択
 - マウスオーバ (hover)
 - フレーム移動
+- ポップアップダイアログの扱い
 - コード量を減らすためのモンキーパッチ
 
 
@@ -196,6 +197,25 @@ frame = driver.find_element(:id, "top-frame")
 driver.switch_to.frame( frame )
 ```
 
+
+
+ポップアップダイアログの扱い
+----------------------------
+
+「マジでこのページから移動する?」的なjavascriptによるポップアップダイアログを表示するページがある。
+このポップアップダイアログを強制的に閉じるには以下のようにする。
+
+`.accept` ではい、`.dismiss`でいいえを押して閉じる。
+
+```ruby
+begin
+  alert_box = driver.switch_to.alert
+  alert_box.accept     # 「はい」「OK」ボタンクリック
+  # alert_box.dismiss  # 「いいえ」「cancel」ボタンクリック
+rescue Selenium::WebDriver::Error::NoSuchAlertError => e
+  # ダイアログがポップアップしない場合、例外を投げるので、何もせずにスルー
+end
+```
 
 
 
