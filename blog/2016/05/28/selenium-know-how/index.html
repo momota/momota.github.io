@@ -129,6 +129,17 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <!-- more -->
 
 
+<p>これ以降のサンプルコードは以下を定義しているものとする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h2>ウィンドウサイズのリサイズ</h2>
 
 <p><code>driver.manage.window.resize_to</code>の引数にリサイズするサイズ情報(width, height)を渡す。</p>
@@ -136,16 +147,8 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">width</span>  <span class="o">=</span> <span class="mi">100</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">width</span>  <span class="o">=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">height</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">resize_to</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -156,15 +159,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">size</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">size</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span>
 </span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">width</span>  <span class="o">+=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">height</span> <span class="o">+=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
@@ -178,16 +173,8 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">x</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">x</span> <span class="o">=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">y</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -198,15 +185,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pos</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pos</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span>
 </span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="mi">100</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">pos</span>
@@ -219,13 +198,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.google.co.jp/&quot;</span><span class="p">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.google.co.jp/&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;/path/to/save/screenshot.png&quot;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -247,21 +220,22 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li><code>find_element</code>
 
 <ul>
-<li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
-<li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
+<li>指定した引数にマッチする最初の要素 (<code>WebDriver::Element</code>) を <strong>1つ</strong> 返す。</li>
+<li>マッチする要素がなければ例外 (<code>NoSuchElementError</code>) を投げる。</li>
 </ul>
 </li>
 <li><code>find_elements</code>
 
 <ul>
-<li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
-<li>マッチする要素がなければ、空の配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+<li>指定した引数にマッチする要素を詰めた配列 (<code>Array&lt;WebDriver::Element&gt;</code>) を返す。</li>
+<li>マッチする要素がなければ、空の配列 (<code>Array</code>) を返す。</li>
 </ul>
 </li>
 </ul>
 
 
-<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
+<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。
+以下は、例。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -270,7 +244,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># リストのリンクをクリックしていくイテレーションの例</span>
-</span><span class='line'><span class="n">elements</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="ss">:css</span><span class="p">,</span> <span class="s2">&quot;#some-list &gt; li&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">elements</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="ss">:css</span><span class="p">,</span> <span class="s2">&quot;#some-list &gt; li&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="n">elements</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span>
 </span><span class='line'>  <span class="n">link</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
 </span><span class='line'>  <span class="n">link</span><span class="o">.</span><span class="n">click</span>
@@ -278,8 +252,8 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
-<code>find_elements</code> も同じ。</p>
+<p>要素セレクタメソッドの引数には、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
+渡す引数は、<code>find_elements</code> も同じ。</p>
 
 <p>指定できるsymbolの種類は以下。</p>
 
@@ -335,7 +309,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </table>
 
 
-<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method">参考</a></p>
+<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find">参考 Module: Selenium::WebDriver::Find</a></p>
 
 <h2>ドロップダウンリストの選択</h2>
 

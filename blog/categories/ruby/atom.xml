@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T11:40:50+09:00</updated>
+  <updated>2016-05-30T13:31:03+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -38,71 +38,59 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <!-- more -->
 
 
+<p>これ以降のサンプルコードは以下を定義しているものとする。
+```ruby
+require &ldquo;selenium-webdriver&rdquo;</p>
+
+<p>driver = Selenium::WebDriver.for :firefox
+```</p>
+
 <h2>ウィンドウサイズのリサイズ</h2>
 
 <p><code>driver.manage.window.resize_to</code>の引数にリサイズするサイズ情報(width, height)を渡す。</p>
 
-<p>```ruby
-require &ldquo;selenium-webdriver&rdquo;</p>
-
-<p>width  = 100
-height = 100</p>
-
-<p>driver = Selenium::WebDriver.for :firefox
+<p><code>ruby
+width  = 100
+height = 100
 driver.manage.window.resize_to(width, height)
-```</p>
+</code></p>
 
 <p>現在のサイズを取得して、相対的にリサイズしたい場合は以下のようにする。</p>
 
-<p>```ruby
-require &ldquo;selenium-webdriver&rdquo;</p>
-
-<p>driver = Selenium::WebDriver.for :firefox</p>
-
-<p>size = driver.manage.window.size
+<p><code>ruby
+size = driver.manage.window.size
 size.width  += 100
 size.height += 100
 driver.manage.window.size = size
-```</p>
+</code></p>
 
 <h2>ウィンドウ位置の移動</h2>
 
 <p><code>driver.manage.window.move_to</code>の引数に移動したい場所の座標情報(x, y)を渡す。</p>
 
-<p>```ruby
-require &ldquo;selenium-webdriver&rdquo;</p>
-
-<p>x = 100
-y = 100</p>
-
-<p>driver = Selenium::WebDriver.for :firefox
+<p><code>ruby
+x = 100
+y = 100
 driver.manage.window.move_to(x, y)
-```</p>
+</code></p>
 
 <p>現在のウィンドウ位置を取得して、相対的にリサイズしたい場合は以下のようにする。</p>
 
-<p>```ruby
-require &ldquo;selenium-webdriver&rdquo;</p>
-
-<p>driver = Selenium::WebDriver.for :firefox</p>
-
-<p>pos = driver.manage.window.position
+<p><code>ruby
+pos = driver.manage.window.position
 pos.x += 100
 pos.y += 100
 driver.manage.window.position = pos
-```</p>
+</code></p>
 
 <h2>スクリーンショットの取得</h2>
 
 <p>開いているページのスクリーンショットを撮りたい場合は、<code>driver.save_screenshot</code> に保存先のファイル名を指定するだけ。</p>
 
-<p>```ruby
-require &ldquo;selenium-webdriver&rdquo;</p>
-
-<p>driver = Selenium::WebDriver.for :firefox
-driver.get(&ldquo;<a href="https://www.google.co.jp/">https://www.google.co.jp/</a>&rdquo;)
-driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
-```</p>
+<p><code>ruby
+driver.get("https://www.google.co.jp/")
+driver.save_screenshot("/path/to/save/screenshot.png")
+</code></p>
 
 <p>ページ全体を撮りたいのに、frame 構造が邪魔をして、スクロールしなければ全体が撮れない場合がある。
 ちょっと、調べたところ <code>driver.execute_script("some script")</code> で javascript を利用してスクロールをしている人がいたり、
@@ -121,35 +109,36 @@ driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
 <li><code>find_element</code>
 
 <ul>
-<li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
-<li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
+<li>指定した引数にマッチする最初の要素 (<code>WebDriver::Element</code>) を <strong>1つ</strong> 返す。</li>
+<li>マッチする要素がなければ例外 (<code>NoSuchElementError</code>) を投げる。</li>
 </ul>
 </li>
 <li><code>find_elements</code>
 
 <ul>
-<li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
-<li>マッチする要素がなければ、空の配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
+<li>指定した引数にマッチする要素を詰めた配列 (<code>Array&lt;WebDriver::Element&gt;</code>) を返す。</li>
+<li>マッチする要素がなければ、空の配列 (<code>Array</code>) を返す。</li>
 </ul>
 </li>
 </ul>
 
 
-<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
+<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。
+以下は、例。</p>
 
 <p>```ruby</p>
 
 <h1>リストのリンクをクリックしていくイテレーションの例</h1>
 
-<p>elements = d.find_elements(:css, &ldquo;#some-list > li&rdquo;)
+<p>elements = driver.find_elements(:css, &ldquo;#some-list > li&rdquo;)
 elements.each { |e|
   link = e.find_element(:tag_name, &ldquo;a&rdquo;)
   link.click
 }
 ```</p>
 
-<p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
-<code>find_elements</code> も同じ。</p>
+<p>要素セレクタメソッドの引数には、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
+渡す引数は、<code>find_elements</code> も同じ。</p>
 
 <p>指定できるsymbolの種類は以下。</p>
 
@@ -205,7 +194,7 @@ elements.each { |e|
 </table>
 
 
-<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method">参考</a></p>
+<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find">参考 Module: Selenium::WebDriver::Find</a></p>
 
 <h2>ドロップダウンリストの選択</h2>
 
