@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-28T18:22:38+09:00</updated>
+  <updated>2016-05-30T11:03:10+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -118,14 +118,14 @@ driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
 そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある</p>
 
 <ul>
-<li>find_element
+<li><code>find_element</code>
 
 <ul>
 <li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
 <li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
 </ul>
 </li>
-<li>find_elements
+<li><code>find_elements</code>
 
 <ul>
 <li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
@@ -136,6 +136,17 @@ driver.save_screenshot(&ldquo;/path/to/save/screenshot.png&rdquo;)
 
 
 <p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
+
+<p>```ruby</p>
+
+<h1>リストのリンクをクリックしていくイテレーション</h1>
+
+<p>elements = d.find_elements(:css, &ldquo;#some-list > li&rdquo;)
+elements.each { |e|
+  link = e.find_element(:tag_name, &ldquo;a&rdquo;)
+  link.click
+}
+  ```</p>
 
 <p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
 <code>find_elements</code> も同じ。</p>

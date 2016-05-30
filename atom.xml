@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-28T18:22:38+09:00</updated>
+  <updated>2016-05-30T11:03:10+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -153,14 +153,14 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある</p>
 
 <ul>
-<li>find_element
+<li><code>find_element</code>
 
 <ul>
 <li>指定した引数にマッチする最初の要素を <strong>1つ</strong> 返す。(<code>WebDriver::Element</code>)</li>
 <li>マッチする要素がなければ例外を投げる。(<code>NoSuchElementError</code>)</li>
 </ul>
 </li>
-<li>find_elements
+<li><code>find_elements</code>
 
 <ul>
 <li>指定した引数にマッチする要素を詰めた配列を返す。(<code>Array&lt;WebDriver::Element&gt;</code>)</li>
@@ -172,121 +172,6 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 
 <p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。</p>
 
-<p>要素セレクタメソッドの引数は、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
-<code>find_elements</code> も同じ。</p>
-
-<p>指定できるsymbolの種類は以下。</p>
-
-<table>
-<thead>
-<tr>
-<th>symbol             </th>
-<th> 対象</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>:class             </td>
-<td> クラス名 (属性名 class)</td>
-</tr>
-<tr>
-<td>:class_name        </td>
-<td> 上記 :class と同じ</td>
-</tr>
-<tr>
-<td>:id                </td>
-<td> ID (属性名 id)</td>
-</tr>
-<tr>
-<td>:link_text         </td>
-<td> <code>&lt;a&gt;</code> タグのテキスト</td>
-</tr>
-<tr>
-<td>:link              </td>
-<td> 上記 :link_text と同じ</td>
-</tr>
-<tr>
-<td>:partial_link_text </td>
-<td> <code>&lt;a&gt;</code> タグのテキストの部分文字列</td>
-</tr>
-<tr>
-<td>:name              </td>
-<td> name (属性名 name)</td>
-</tr>
-<tr>
-<td>:tag_name          </td>
-<td> タグ名</td>
-</tr>
-<tr>
-<td>:xpath             </td>
-<td> xpath で指定</td>
-</tr>
-<tr>
-<td>:css               </td>
-<td> css セレクタ で指定</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method">参考</a></p>
-
-<h2>ドロップダウンリストの選択</h2>
-
-<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
-コメントアウトされることがある。(今のバージョンは大丈夫そう)
-以下のように、書き換えればOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">s</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Support</span><span class="p">:</span><span class="ss">:Select</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;select&quot;</span><span class="p">))</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:text</span><span class="p">,</span> <span class="s2">&quot;ほげほげ&quot;</span><span class="p">)</span>  <span class="c1"># 表示テキストで選択</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:value</span><span class="p">,</span> <span class="s2">&quot;value1&quot;</span><span class="p">)</span>   <span class="c1"># valueの値で選択</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:index</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>          <span class="c1"># index(0, 1, 2, ...)で選択</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>マウスオーバ (hover)</h2>
-
-<p>例えば、ナビゲーションメニューなどが、通常時には折りたたまれていて、メニュー上にマウスオーバした場合に、
-子メニューが展開されるようなページがある。
-折りたたまれているときに、子メニューHTMLをロードできていないようなページのときは、ユーザ操作と同じように
-マウスオーバしてあげる必要がある。</p>
-
-<p>以下のようにマウスオーバしたい要素を指定して、<code>driver.mouse.move_to</code> を呼べば良い。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;menu&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span> <span class="n">e</span> <span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>フレーム移動</h2>
-
-<p>frame や iframe 要素を使っているサイトで、そのフレーム内の要素に対して操作したい場合、当該フレームへ切り替える操作が必要となる。</p>
-
-<p>以下のようにスイッチしたいフレーム要素を指定して、<code>driver.switch_to.frame</code> を呼べば良い。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>コード量を減らすためのモンキーパッチ</h2>
-
-<p>たとえば、ログインなどの処理の際、フォームへ文字列を送る <code>send_keys</code> 前にいつも <code>.clear</code> しているので
-もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
-
-<p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
-定義してしまおうと思った。</p>
-
-<p>そこで、以下のようなモンキーパッチを書く。</p>
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -301,24 +186,118 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ElementExtension</span>
-</span><span class='line'>  <span class="n">refine</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="no">Element</span> <span class="k">do</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">clear</span>
-</span><span class='line'>      <span class="k">super</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># リストのリンクをクリックしていくイテレーション</span>
+</span><span class='line'><span class="n">elements</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="ss">:css</span><span class="p">,</span> <span class="s2">&quot;#some-list &gt; li&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">elements</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">link</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">link</span><span class="o">.</span><span class="n">click</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>  <span class="sb">```</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">value</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">using</span> <span class="no">ElementExtension</span>
+</span><span class='line'><span class="sb">要素セレクタメソッドの引数は、`</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:how</span><span class="p">,</span> <span class="s2">&quot;what&quot;</span><span class="p">)</span><span class="sb">` のように symbol と文字列を渡す。</span>
+</span><span class='line'><span class="sb">`</span><span class="n">find_elements</span><span class="sb">` も同じ。</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">指定できるsymbolの種類は以下。</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">symbol             | 対象</span>
+</span><span class='line'><span class="sb">-------------------|---------------------------------</span>
+</span><span class='line'><span class="sb">:class             | クラス名 (属性名 class)</span>
+</span><span class='line'><span class="sb">:class_name        | 上記 :class と同じ</span>
+</span><span class='line'><span class="sb">:id                | ID (属性名 id)</span>
+</span><span class='line'><span class="sb">:link_text         | `</span><span class="o">&lt;</span><span class="n">a</span><span class="o">&gt;</span><span class="sb">` タグのテキスト</span>
+</span><span class='line'><span class="sb">:link              | 上記 :link_text と同じ</span>
+</span><span class='line'><span class="sb">:partial_link_text | `</span><span class="o">&lt;</span><span class="n">a</span><span class="o">&gt;</span><span class="sb">` タグのテキストの部分文字列</span>
+</span><span class='line'><span class="sb">:name              | name (属性名 name)</span>
+</span><span class='line'><span class="sb">:tag_name          | タグ名</span>
+</span><span class='line'><span class="sb">:xpath             | xpath で指定</span>
+</span><span class='line'><span class="sb">:css               | css セレクタ で指定</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sb">[参考](http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="sb">ドロップダウンリストの選択</span>
+</span><span class='line'><span class="sb">--------------------------</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって</span>
+</span><span class='line'><span class="sb">コメントアウトされることがある。(今のバージョンは大丈夫そう)</span>
+</span><span class='line'><span class="sb">以下のように、書き換えればOK。</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>そうすると以下のようにコード量を減らせる。</p>
+<p>ruby
+s = Selenium::WebDriver::Support::Select.new(driver.find_element(:tag_name, &ldquo;select&rdquo;))
+s.select_by(:text, &ldquo;ほげほげ&rdquo;)  # 表示テキストで選択
+s.select_by(:value, &ldquo;value1&rdquo;)   # valueの値で選択
+s.select_by(:index, 0)          # index(0, 1, 2, &hellip;)で選択</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">マウスオーバ</span> <span class="p">(</span><span class="n">hover</span><span class="p">)</span>
+</span><span class='line'><span class="o">--------------------</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">例えば、ナビゲーションメニューなどが、通常時には折りたたまれていて、メニュー上にマウスオーバした場合に、</span>
+</span><span class='line'><span class="err">子メニューが展開されるようなページがある。</span>
+</span><span class='line'><span class="err">折りたたまれているときに、子メニュー</span><span class="no">HTML</span><span class="err">をロードできていないようなページのときは、ユーザ操作と同じように</span>
+</span><span class='line'><span class="err">マウスオーバしてあげる必要がある。</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">以下のようにマウスオーバしたい要素を指定して、</span><span class="sb">`driver.mouse.move_to`</span> <span class="err">を呼べば良い。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+e = driver.find_element(:id, &ldquo;menu&rdquo;)
+driver.mouse.move_to( e )</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">フレーム移動</span>
+</span><span class='line'><span class="o">------------</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">frame</span> <span class="err">や</span> <span class="n">iframe</span> <span class="err">要素を使っているサイトで、そのフレーム内の要素に対して操作したい場合、当該フレームへ切り替える操作が必要となる。</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">以下のようにスイッチしたいフレーム要素を指定して、</span><span class="sb">`driver.switch_to.frame`</span> <span class="err">を呼べば良い。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+frame = driver.find_element(:id, &ldquo;frame&rdquo;)
+driver.switch_to.frame( frame )</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -330,25 +309,66 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># たとえば、ログイン処理
-</span><span class='line'>user     = &quot;USER&quot;
-</span><span class='line'>password = &quot;PASSWORD&quot;
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">コード量を減らすためのモンキーパッチ</span>
+</span><span class='line'><span class="o">------------------------------------</span>
 </span><span class='line'>
-</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginuser&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginuser&quot;).send_keys( user )
-</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginpass&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginpass&quot;).send_keys( password )
-</span><span class='line'>driver.find_element(:id, &quot;submit&quot;).click
+</span><span class='line'><span class="err">たとえば、ログインなどの処理の際、フォームへ文字列を送る</span> <span class="sb">`send_keys`</span> <span class="err">前にいつも</span> <span class="sb">`.clear`</span> <span class="err">しているので</span>
+</span><span class='line'><span class="err">もう</span> <span class="sb">`send_keys`</span> <span class="err">の中に</span> <span class="sb">`.clear`</span> <span class="err">処理を入れ込んでしまえと思った。</span>
 </span><span class='line'>
+</span><span class='line'><span class="err">また、</span><span class="sb">`input`</span> <span class="err">タグの値を取得するときは、</span><span class="sb">`.attribute(&quot;value&quot;)`</span> <span class="err">と長ったらしく書く必要があるので</span> <span class="sb">`.value`</span><span class="err">メソッドを</span>
+</span><span class='line'><span class="err">定義してしまおうと思った。</span>
 </span><span class='line'>
-</span><span class='line'># &lt;input&gt;の値を取得する処理
-</span><span class='line'><span class="gd">- hostname = driver.find_element(:id, &quot;hostname&quot;).attribute(&quot;value&quot;)</span>
-</span><span class='line'><span class="gi">+ hostname = driver.find_element(:id, &quot;hostname&quot;).value</span>
+</span><span class='line'><span class="err">そこで、以下のようなモンキーパッチを書く。</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+module ElementExtension
+  refine Selenium::WebDriver::Element do</p>
+
+<pre><code>def send_keys( str )
+  self.clear
+  super( str )
+end
+
+def value
+  self.attribute("value")
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>using ElementExtension</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">そうすると以下のようにコード量を減らせる。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>diff</p>
+
+<h1>たとえば、ログイン処理</h1>
+
+<p>user     = &ldquo;USER&rdquo;
+password = &ldquo;PASSWORD&rdquo;</p>
+
+<ul>
+<li>driver.find_element(:id, &ldquo;loginuser&rdquo;).clear
+driver.find_element(:id, &ldquo;loginuser&rdquo;).send_keys( user )</li>
+<li>driver.find_element(:id, &ldquo;loginpass&rdquo;).clear
+driver.find_element(:id, &ldquo;loginpass&rdquo;).send_keys( password )
+driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
+</ul>
+
+
+<h1><input>の値を取得する処理</h1>
+
+<ul>
+<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).attribute(&ldquo;value&rdquo;)</li>
+<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).value
+&#8220;`</li>
+</ul>
 
 
 <p>モンキーパッチの書き方は以下を参考にした。</p>
