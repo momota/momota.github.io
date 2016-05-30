@@ -24,28 +24,27 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 
 <!-- more -->
 
+これ以降のサンプルコードは以下を定義しているものとする。
+```ruby
+require "selenium-webdriver"
+
+driver = Selenium::WebDriver.for :firefox
+```
+
 ウィンドウサイズのリサイズ
 --------------------------
 
 `driver.manage.window.resize_to`の引数にリサイズするサイズ情報(width, height)を渡す。
 
 ```ruby
-require "selenium-webdriver"
-
 width  = 100
 height = 100
-
-driver = Selenium::WebDriver.for :firefox
 driver.manage.window.resize_to(width, height)
 ```
 
 現在のサイズを取得して、相対的にリサイズしたい場合は以下のようにする。
 
 ```ruby
-require "selenium-webdriver"
-
-driver = Selenium::WebDriver.for :firefox
-
 size = driver.manage.window.size
 size.width  += 100
 size.height += 100
@@ -59,22 +58,14 @@ driver.manage.window.size = size
 `driver.manage.window.move_to`の引数に移動したい場所の座標情報(x, y)を渡す。
 
 ```ruby
-require "selenium-webdriver"
-
 x = 100
 y = 100
-
-driver = Selenium::WebDriver.for :firefox
 driver.manage.window.move_to(x, y)
 ```
 
 現在のウィンドウ位置を取得して、相対的にリサイズしたい場合は以下のようにする。
 
 ```ruby
-require "selenium-webdriver"
-
-driver = Selenium::WebDriver.for :firefox
-
 pos = driver.manage.window.position
 pos.x += 100
 pos.y += 100
@@ -88,9 +79,6 @@ driver.manage.window.position = pos
 開いているページのスクリーンショットを撮りたい場合は、`driver.save_screenshot` に保存先のファイル名を指定するだけ。
 
 ```ruby
-require "selenium-webdriver"
-
-driver = Selenium::WebDriver.for :firefox
 driver.get("https://www.google.co.jp/")
 driver.save_screenshot("/path/to/save/screenshot.png")
 ```
@@ -111,18 +99,19 @@ driver.save_screenshot("/path/to/save/screenshot.png")
 そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある
 
 - `find_element`
-  - 指定した引数にマッチする最初の要素を **1つ** 返す。(`WebDriver::Element`)
-  - マッチする要素がなければ例外を投げる。(`NoSuchElementError`)
+  - 指定した引数にマッチする最初の要素 (`WebDriver::Element`) を **1つ** 返す。
+  - マッチする要素がなければ例外 (`NoSuchElementError`) を投げる。
 - `find_elements`
-  - 指定した引数にマッチする要素を詰めた配列を返す。(`Array<WebDriver::Element>`)
-  - マッチする要素がなければ、空の配列を返す。(`Array<WebDriver::Element>`)
+  - 指定した引数にマッチする要素を詰めた配列 (`Array<WebDriver::Element>`) を返す。
+  - マッチする要素がなければ、空の配列 (`Array`) を返す。
 
 
 テーブルの `<tr>` 要素やリストの `<li>` 要素に対してイテレーション処理するときには `find_elements` が便利。
+以下は、例。
 
 ```ruby
 # リストのリンクをクリックしていくイテレーションの例
-elements = d.find_elements(:css, "#some-list > li")
+elements = driver.find_elements(:css, "#some-list > li")
 elements.each { |e|
   link = e.find_element(:tag_name, "a")
   link.click
@@ -130,8 +119,8 @@ elements.each { |e|
 ```
 
 
-要素セレクタメソッドの引数は、`find_element(:how, "what")` のように symbol と文字列を渡す。
-`find_elements` も同じ。
+要素セレクタメソッドの引数には、`find_element(:how, "what")` のように symbol と文字列を渡す。
+渡す引数は、`find_elements` も同じ。
 
 指定できるsymbolの種類は以下。
 
@@ -149,7 +138,7 @@ symbol             | 対象
 :css               | css セレクタ で指定
 
 
-[参考](http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find#find_element-instance_method)
+[参考 Module: Selenium::WebDriver::Find](http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find)
 
 
 ドロップダウンリストの選択
