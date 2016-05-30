@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T14:21:46+09:00</updated>
+  <updated>2016-05-30T16:25:58+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,7 +18,9 @@
     <link href="http://momota.github.io/blog/2016/05/28/selenium-know-how/"/>
     <updated>2016-05-28T16:57:00+09:00</updated>
     <id>http://momota.github.io/blog/2016/05/28/selenium-know-how</id>
-    <content type="html"><![CDATA[<p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
+    <content type="html"><![CDATA[<p><img src="/images/selenium.png" alt="selenium" /></p>
+
+<p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
 selenium が便利すぎて、最近よくスクリプトを書くようになった。</p>
 
 <p>以下のようなノウハウが溜まってきたので、ここらで放出する。</p>
@@ -35,6 +37,9 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li>コード量を減らすためのモンキーパッチ</li>
 </ul>
 
+
+<p>インストール方法などは <a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a>
+を参照。</p>
 
 <!-- more -->
 
@@ -324,6 +329,13 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 
 <ul>
 <li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
+</ul>
+
+
+<h2>関連</h2>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a></li>
 </ul>
 
 ]]></content>
