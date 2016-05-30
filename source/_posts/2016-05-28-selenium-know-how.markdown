@@ -110,15 +110,24 @@ driver.save_screenshot("/path/to/save/screenshot.png")
 要素セレクタメソッドは `find_element` と `find_elements` の2種類。
 そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある
 
-- find_element
+- `find_element`
   - 指定した引数にマッチする最初の要素を **1つ** 返す。(`WebDriver::Element`)
   - マッチする要素がなければ例外を投げる。(`NoSuchElementError`)
-- find_elements
+- `find_elements`
   - 指定した引数にマッチする要素を詰めた配列を返す。(`Array<WebDriver::Element>`)
   - マッチする要素がなければ、空の配列を返す。(`Array<WebDriver::Element>`)
 
 
 テーブルの `<tr>` 要素やリストの `<li>` 要素に対してイテレーション処理するときには `find_elements` が便利。
+
+```ruby
+# リストのリンクをクリックしていくイテレーション
+elements = d.find_elements(:css, "#some-list > li")
+elements.each { |e|
+  link = e.find_element(:tag_name, "a")
+  link.click
+}
+  ```
 
 
 要素セレクタメソッドの引数は、`find_element(:how, "what")` のように symbol と文字列を渡す。
