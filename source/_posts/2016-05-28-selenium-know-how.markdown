@@ -121,7 +121,7 @@ driver.save_screenshot("/path/to/save/screenshot.png")
 テーブルの `<tr>` 要素やリストの `<li>` 要素に対してイテレーション処理するときには `find_elements` が便利。
 
 ```ruby
-# リストのリンクをクリックしていくイテレーション
+# リストのリンクをクリックしていくイテレーションの例
 elements = d.find_elements(:css, "#some-list > li")
 elements.each { |e|
   link = e.find_element(:tag_name, "a")
@@ -155,9 +155,10 @@ symbol             | 対象
 ドロップダウンリストの選択
 --------------------------
 
-Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの部分がERRORになって
-コメントアウトされることがある。(今のバージョンは大丈夫そう)
-以下のように、書き換えればOK。
+Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの選択をする処理部分がERRORに
+なってコメントアウトされることがある。(今のSelenium IDEバージョンでは大丈夫そう)
+
+ドロップダウンリストの選択は以下のように書けばOK。
 
 ```ruby
 s = Selenium::WebDriver::Support::Select.new(driver.find_element(:tag_name, "select"))
@@ -196,6 +197,18 @@ frame や iframe 要素を使っているサイトで、そのフレーム内の
 frame = driver.find_element(:id, "frame")
 driver.switch_to.frame( frame )
 ```
+
+フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。
+
+```ruby
+driver.switch_to.window( driver.window_handle )
+
+frame = driver.find_element(:id, "top-frame")
+driver.switch_to.frame( frame )
+```
+
+
+
 
 コード量を減らすためのモンキーパッチ
 ------------------------------------
