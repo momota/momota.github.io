@@ -238,7 +238,7 @@ end
 もう `send_keys` の中に `.clear` 処理を入れ込んでしまえと思った。
 
 また、`input` タグの値を取得するときは、`.attribute("value")` と長ったらしく書く必要があるので `.value`メソッドを
-定義してしまおうと思った。
+定義してしまおうと思った。checkbox のチェック有無も同じく。
 
 そこで、以下のようなモンキーパッチを書く。
 
@@ -252,6 +252,10 @@ module ElementExtension
 
     def value
       self.attribute("value")
+    end
+
+    def checked?
+      self.attribute("checked").nil? ? false :true
     end
   end
 end
@@ -276,6 +280,11 @@ driver.find_element(:id, "submit").click
 # <input>の値を取得する処理
 - hostname = driver.find_element(:id, "hostname").attribute("value")
 + hostname = driver.find_element(:id, "hostname").value
+
+# チェックボックスがチェックされているかどうか
+checkbox = driver.find_element(:id, "some-checkbox")
+- do_something if checkbox.attribute("checked").nil?
++ do_something if checkbox.checked?
 ```
 
 
