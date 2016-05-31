@@ -451,7 +451,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">checked?</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="ss">:true</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="p">:</span> <span class="kp">true</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
