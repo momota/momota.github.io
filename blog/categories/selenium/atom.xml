@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T19:38:23+09:00</updated>
+  <updated>2016-05-31T10:28:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -284,7 +284,7 @@ end
 もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
 
 <p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
-定義してしまおうと思った。</p>
+定義してしまおうと思った。checkbox のチェック有無も同じく。</p>
 
 <p>そこで、以下のようなモンキーパッチを書く。</p>
 
@@ -299,6 +299,10 @@ end
 
 def value
   self.attribute("value")
+end
+
+def checked?
+  self.attribute("checked").nil? ? false :true
 end
 </code></pre>
 
@@ -330,10 +334,16 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 
 <ul>
 <li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).attribute(&ldquo;value&rdquo;)</li>
-<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).value
-```</li>
+<li>hostname = driver.find_element(:id, &ldquo;hostname&rdquo;).value</li>
 </ul>
 
+
+<h1>チェックボックスがチェックされているかどうか</h1>
+
+<p>checkbox = driver.find_element(:id, &ldquo;some-checkbox&rdquo;)
+&ndash; do_something if checkbox.attribute(&ldquo;checked&rdquo;).nil?
++ do_something if checkbox.checked?
+```</p>
 
 <p>モンキーパッチの書き方は以下を参考にした。</p>
 

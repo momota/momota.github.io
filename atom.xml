@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-05-30T19:38:05+09:00</updated>
+  <updated>2016-05-31T10:28:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -326,7 +326,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
 
 <p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
-定義してしまおうと思った。</p>
+定義してしまおうと思った。checkbox のチェック有無も同じく。</p>
 
 <p>そこで、以下のようなモンキーパッチを書く。</p>
 
@@ -344,6 +344,10 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ElementExtension</span>
 </span><span class='line'>  <span class="n">refine</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="no">Element</span> <span class="k">do</span>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
@@ -353,6 +357,10 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">value</span>
 </span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">checked?</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="ss">:true</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
@@ -377,6 +385,11 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
 </pre></td><td class='code'><pre><code class='diff'><span class='line'># たとえば、ログイン処理
 </span><span class='line'>user     = &quot;USER&quot;
 </span><span class='line'>password = &quot;PASSWORD&quot;
@@ -391,6 +404,11 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'># &lt;input&gt;の値を取得する処理
 </span><span class='line'><span class="gd">- hostname = driver.find_element(:id, &quot;hostname&quot;).attribute(&quot;value&quot;)</span>
 </span><span class='line'><span class="gi">+ hostname = driver.find_element(:id, &quot;hostname&quot;).value</span>
+</span><span class='line'>
+</span><span class='line'># チェックボックスがチェックされているかどうか
+</span><span class='line'>checkbox = driver.find_element(:id, &quot;some-checkbox&quot;)
+</span><span class='line'><span class="gd">- do_something if checkbox.attribute(&quot;checked&quot;).nil?</span>
+</span><span class='line'><span class="gi">+ do_something if checkbox.checked?</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
