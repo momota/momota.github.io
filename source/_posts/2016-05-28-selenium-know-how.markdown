@@ -255,7 +255,7 @@ module ElementExtension
     end
 
     def checked?
-      self.attribute("checked").nil? ? false :true
+      self.attribute("checked").nil? ? false : true
     end
   end
 end
