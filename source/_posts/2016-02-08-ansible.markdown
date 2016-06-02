@@ -75,7 +75,7 @@ controller$ scp ~/.ssh/id_dsa.pub 192.168.11.14:/home/momota
 # 管理ノード側でauthorized_keysの登録
 managed_node$ mkdir ~/.ssh
 managed_node$ chmod 700 ~/.ssh
-managed_node$ echo id_dsa.pub >> ~/.ssh/authorized_keys
+managed_node$ cat id_dsa.pub >> ~/.ssh/authorized_keys
 managed_node$ chmod 600 ~/.ssh/authorized_keys
 
 # SSH アクセス確認
