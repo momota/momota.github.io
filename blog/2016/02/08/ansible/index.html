@@ -208,7 +208,7 @@ ansible を使っていろいろインストールしてみた。 ちょっと�
 </span><span class='line'><span class="c"># 管理ノード側でauthorized_keysの登録</span>
 </span><span class='line'>managed_node<span class="nv">$ </span>mkdir ~/.ssh
 </span><span class='line'>managed_node<span class="nv">$ </span>chmod 700 ~/.ssh
-</span><span class='line'>managed_node<span class="nv">$ </span><span class="nb">echo </span>id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</span><span class='line'>managed_node<span class="nv">$ </span>cat id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
 </span><span class='line'>managed_node<span class="nv">$ </span>chmod 600 ~/.ssh/authorized_keys
 </span><span class='line'>
 </span><span class='line'><span class="c"># SSH アクセス確認</span>
