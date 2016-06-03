@@ -23,6 +23,8 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 - フレーム移動
 - ポップアップダイアログの扱い
 - コード量を減らすためのモンキーパッチ
+- よく採るプログラム構造
+
 
 
 インストール方法などは [ブラウザ操作の自動化: Selenium と Ruby](http://momota.github.io/blog/2016/02/26/selenium/) 
@@ -291,6 +293,84 @@ checkbox = driver.find_element(:id, "some-checkbox")
 モンキーパッチの書き方は以下を参考にした。
 
 - [分別のあるRubyモンキーパッチャーになるために](http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/)
+
+
+
+プログラム構造
+--------------
+
+よく採るプログラム構造は以下。
+
+- 操作ターゲットとなるサイト単位にクラスを作る
+- 処理の内容にしたがって、メソッドを作る。以下の様な粒度。
+  - サインイン
+  - リスト表示
+  - 自動入力と申請
+- アカウント情報や入力データはYAMLファイルなどに書き出しておく
+
+
+```ruby
+# conding: utf-8
+require "selenium-webdriver"
+# その他必要に応じてrequire
+
+
+module Elementextension
+  # 上記モンキーパッチの章を参照
+end
+using Elementextension
+
+
+class SomeSite
+  def initialize
+    # 初期化処理
+    # 定数をセットしたり、webdriverを生成してアクセスしたり。
+    @ss_dir  = "./screenshot/"
+    FileUtils.mkdir_p( @ss_dir ) 
+
+    @driver  = Selenium::WebDriver.for :firefox
+    base_url = "http://somesite.com"
+    @driver.get(base_url + "/index.html")
+  end
+
+  def sign_in(user, password)
+    # サインイン処理
+  end
+
+  def do_something
+    # やりたいことを書く
+  end
+
+  def close
+    # 終了時に実行する処理を書く
+  end
+
+  private
+
+  def get_screenshot( str )
+    now = DateTime.now.strftime("%Y%m%d%H%M%S")
+    @driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")
+  end
+end
+
+
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+if __FILE__ == $0
+  # サインインに必要なアカウント情報はYAMLなどに書いておいて、それを読む
+  y        = YAML.load_file("/path/to/yaml.yml")
+  user     =  y["account"]["user"]
+  password =  y["account"]["password"]
+
+  hoge = SomeSite.new
+  hoge.sign_in(user, password)
+  hoge.do_something
+  hoge.close
+end
+```
+
+
 
 関連
 ----
