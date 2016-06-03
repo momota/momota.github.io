@@ -242,7 +242,7 @@ end
 また、`input` タグの値を取得するときは、`.attribute("value")` と長ったらしく書く必要があるので `.value`メソッドを
 定義してしまおうと思った。checkbox のチェック有無も同じく。
 
-そこで、以下のようなモンキーパッチを書く。
+そこで、`Selenium::WebDriver::Element` を拡張するため、以下のようなモンキーパッチを書く。
 
 ```ruby
 module ElementExtension
@@ -296,8 +296,8 @@ checkbox = driver.find_element(:id, "some-checkbox")
 
 
 
-プログラム構造
---------------
+よく採るプログラム構造
+----------------------
 
 よく採るプログラム構造は以下。
 
@@ -315,12 +315,14 @@ require "selenium-webdriver"
 # その他必要に応じてrequire
 
 
+# Selenium::WebDriver::Element の拡張
 module Elementextension
   # 上記モンキーパッチの章を参照
 end
 using Elementextension
 
 
+# 本体
 class SomeSite
   def initialize
     # 初期化処理
@@ -346,7 +348,7 @@ class SomeSite
   end
 
   private
-
+  # privat method を定義する
   def get_screenshot( str )
     now = DateTime.now.strftime("%Y%m%d%H%M%S")
     @driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")
