@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-03T12:49:59+09:00</updated>
+  <updated>2016-06-03T14:39:40+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -287,7 +287,7 @@ end
 <p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
 定義してしまおうと思った。checkbox のチェック有無も同じく。</p>
 
-<p>そこで、以下のようなモンキーパッチを書く。</p>
+<p>そこで、<code>Selenium::WebDriver::Element</code> を拡張するため、以下のようなモンキーパッチを書く。</p>
 
 <p>```ruby
 module ElementExtension
@@ -353,7 +353,7 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 </ul>
 
 
-<h2>プログラム構造</h2>
+<h2>よく採るプログラム構造</h2>
 
 <p>よく採るプログラム構造は以下。</p>
 
@@ -379,10 +379,14 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 
 <h1>その他必要に応じてrequire</h1>
 
+<h1>Selenium::WebDriver::Element の拡張</h1>
+
 <p>module Elementextension
   # 上記モンキーパッチの章を参照
 end
 using Elementextension</p>
+
+<h1>本体</h1>
 
 <p>class SomeSite
   def initialize</p>
@@ -420,9 +424,9 @@ base_url = "http://somesite.com"
 
 <p>  end</p>
 
-<p>  private</p>
-
-<p>  def get_screenshot( str )</p>
+<p>  private
+  # privat method を定義する
+  def get_screenshot( str )</p>
 
 <pre><code>now = DateTime.now.strftime("%Y%m%d%H%M%S")
 @driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")
