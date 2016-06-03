@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-02T19:51:04+09:00</updated>
+  <updated>2016-06-03T12:49:59+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -35,6 +35,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li>フレーム移動</li>
 <li>ポップアップダイアログの扱い</li>
 <li>コード量を減らすためのモンキーパッチ</li>
+<li>よく採るプログラム構造</li>
 </ul>
 
 
@@ -351,6 +352,103 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 <li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
 </ul>
 
+
+<h2>プログラム構造</h2>
+
+<p>よく採るプログラム構造は以下。</p>
+
+<ul>
+<li>操作ターゲットとなるサイト単位にクラスを作る</li>
+<li>処理の内容にしたがって、メソッドを作る。以下の様な粒度。
+
+<ul>
+<li>サインイン</li>
+<li>リスト表示</li>
+<li>自動入力と申請</li>
+</ul>
+</li>
+<li>アカウント情報や入力データはYAMLファイルなどに書き出しておく</li>
+</ul>
+
+
+<p>```ruby</p>
+
+<h1>conding: utf-8</h1>
+
+<p>require &ldquo;selenium-webdriver&rdquo;</p>
+
+<h1>その他必要に応じてrequire</h1>
+
+<p>module Elementextension
+  # 上記モンキーパッチの章を参照
+end
+using Elementextension</p>
+
+<p>class SomeSite
+  def initialize</p>
+
+<pre><code># 初期化処理
+# 定数をセットしたり、webdriverを生成してアクセスしたり。
+@ss_dir  = "./screenshot/"
+FileUtils.mkdir_p( @ss_dir ) 
+
+@driver  = Selenium::WebDriver.for :firefox
+base_url = "http://somesite.com"
+@driver.get(base_url + "/index.html")
+</code></pre>
+
+<p>  end</p>
+
+<p>  def sign_in(user, password)</p>
+
+<pre><code># サインイン処理
+</code></pre>
+
+<p>  end</p>
+
+<p>  def do_something</p>
+
+<pre><code># やりたいことを書く
+</code></pre>
+
+<p>  end</p>
+
+<p>  def close</p>
+
+<pre><code># 終了時に実行する処理を書く
+</code></pre>
+
+<p>  end</p>
+
+<p>  private</p>
+
+<p>  def get_screenshot( str )</p>
+
+<pre><code>now = DateTime.now.strftime("%Y%m%d%H%M%S")
+@driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")
+</code></pre>
+
+<p>  end
+end</p>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<h1>main</h1>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<p>if <strong>FILE</strong> == $0
+  # サインインに必要なアカウント情報はYAMLなどに書いておいて、それを読む
+  y        = YAML.load_file(&ldquo;/path/to/yaml.yml&rdquo;)
+  user     =  y[&ldquo;account&rdquo;][&ldquo;user&rdquo;]
+  password =  y[&ldquo;account&rdquo;][&ldquo;password&rdquo;]</p>
+
+<p>  hoge = SomeSite.new
+  hoge.sign_in(user, password)
+  hoge.do_something
+  hoge.close
+end
+```</p>
 
 <h2>関連</h2>
 

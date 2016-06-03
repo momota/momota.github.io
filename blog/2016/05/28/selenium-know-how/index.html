@@ -126,6 +126,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <li>フレーム移動</li>
 <li>ポップアップダイアログの扱い</li>
 <li>コード量を減らすためのモンキーパッチ</li>
+<li>よく採るプログラム構造</li>
 </ul>
 
 
@@ -508,6 +509,143 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <ul>
 <li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
 </ul>
+
+
+<h2>プログラム構造</h2>
+
+<p>よく採るプログラム構造は以下。</p>
+
+<ul>
+<li>操作ターゲットとなるサイト単位にクラスを作る</li>
+<li>処理の内容にしたがって、メソッドを作る。以下の様な粒度。
+
+<ul>
+<li>サインイン</li>
+<li>リスト表示</li>
+<li>自動入力と申請</li>
+</ul>
+</li>
+<li>アカウント情報や入力データはYAMLファイルなどに書き出しておく</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># conding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
+</span><span class='line'><span class="c1"># その他必要に応じてrequire</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Elementextension</span>
+</span><span class='line'>  <span class="c1"># 上記モンキーパッチの章を参照</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">using</span> <span class="no">Elementextension</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">SomeSite</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
+</span><span class='line'>    <span class="c1"># 初期化処理</span>
+</span><span class='line'>    <span class="c1"># 定数をセットしたり、webdriverを生成してアクセスしたり。</span>
+</span><span class='line'>    <span class="vi">@ss_dir</span>  <span class="o">=</span> <span class="s2">&quot;./screenshot/&quot;</span>
+</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span> <span class="vi">@ss_dir</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vi">@driver</span>  <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
+</span><span class='line'>    <span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;http://somesite.com&quot;</span>
+</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_url</span> <span class="o">+</span> <span class="s2">&quot;/index.html&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># サインイン処理</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">do_something</span>
+</span><span class='line'>    <span class="c1"># やりたいことを書く</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">close</span>
+</span><span class='line'>    <span class="c1"># 終了時に実行する処理を書く</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">get_screenshot</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
+</span><span class='line'>    <span class="n">now</span> <span class="o">=</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m%d%H%M%S&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="vi">@ss_dir</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">str</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">now</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
+</span><span class='line'><span class="c1"># main</span>
+</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
+</span><span class='line'><span class="k">if</span> <span class="bp">__FILE__</span> <span class="o">==</span> <span class="vg">$0</span>
+</span><span class='line'>  <span class="c1"># サインインに必要なアカウント情報はYAMLなどに書いておいて、それを読む</span>
+</span><span class='line'>  <span class="n">y</span>        <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s2">&quot;/path/to/yaml.yml&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">user</span>     <span class="o">=</span>  <span class="n">y</span><span class="o">[</span><span class="s2">&quot;account&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">password</span> <span class="o">=</span>  <span class="n">y</span><span class="o">[</span><span class="s2">&quot;account&quot;</span><span class="o">][</span><span class="s2">&quot;password&quot;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">hoge</span> <span class="o">=</span> <span class="no">SomeSite</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">do_something</span>
+</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h2>関連</h2>
