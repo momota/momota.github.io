@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-03T14:39:40+09:00</updated>
+  <updated>2016-06-17T18:20:12+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,178 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RuboCop でコーディングスタイルを矯正する]]></title>
+    <link href="http://momota.github.io/blog/2016/06/17/rubocop/"/>
+    <updated>2016-06-17T17:30:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/06/17/rubocop</id>
+    <content type="html"><![CDATA[<p><img src="https://raw.githubusercontent.com/bbatsov/rubocop/master/logo/rubo-logo-horizontal.png" alt="RuboCop Logo" /></p>
+
+<p><a href="http://note103.hateblo.jp/entry/2016/06/13/074744">textlintで日本語テキストの文字校正を試してみた</a> とかで、lint 系の記事を目にしたので
+そろそろ導入してみるか、と思い立った。</p>
+
+<p>RuboCop はRuby の静的コードアナライザ。
+<a href="https://github.com/bbatsov/rubocop">bbatsov/rubocop</a></p>
+
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> に沿ったコーディングスタイルに矯正(注意)してくれる。
+無駄なスペースが入力されている、とか、無駄な改行が入っている、とか、
+この変数1度も使われてないよ?とかクラスの中の行数が多すぎる、とか、
+1行の文字数が長すぎる、とか。</p>
+
+<p>大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
+こういうツールによって人間が矯正されると良い。</p>
+
+<!-- more -->
+
+
+<h2>RuboCop インストール</h2>
+
+<p>gem でインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install rubocop
+</span><span class='line'><span class="nv">$ </span>rubocop -v
+</span><span class='line'>0.40.0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>実行は<code>rubocop</code> コマンドにチェックしたいスクリプトを渡す。
+例えば、以下のようなスクリプトを</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># conding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;date&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">SampleRubocop</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span> <span class="n">key</span> <span class="p">)</span>
+</span><span class='line'>    <span class="vi">@key</span> <span class="o">=</span> <span class="n">key</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hey</span>
+</span><span class='line'>    <span class="vi">@key</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="bp">__FILE__</span> <span class="o">==</span> <span class="vg">$0</span>
+</span><span class='line'>  <span class="n">hoge</span> <span class="o">=</span> <span class="no">SampleRubocop</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;hoge&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">p</span> <span class="n">hoge</span><span class="o">.</span><span class="n">hey</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>チェックすると以下の様な感じで注意を受ける。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rubocop sample_rubocop.rb
+</span><span class='line'>Inspecting 1 file
+</span><span class='line'>C
+</span><span class='line'>
+</span><span class='line'>Offenses:
+</span><span class='line'>
+</span><span class='line'>sample_rubocop.rb:2:9: C: Prefer single-quoted strings when you don<span class="s1">&#39;t need string interpolation or special symbols.</span>
+</span><span class='line'><span class="s1">require &quot;date&quot;</span>
+</span><span class='line'><span class="s1">        ^^^^^^</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:4:1: C: Extra blank line detected.</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:5:1: C: Missing top-level class documentation comment.</span>
+</span><span class='line'><span class="s1">class SampleRubocop</span>
+</span><span class='line'><span class="s1">^^^^^</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:6:18: C: Space inside parentheses detected.</span>
+</span><span class='line'><span class="s1">  def initialize( key )</span>
+</span><span class='line'><span class="s1">                 ^</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:6:22: C: Space inside parentheses detected.</span>
+</span><span class='line'><span class="s1">  def initialize( key )</span>
+</span><span class='line'><span class="s1">                     ^</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:15:1: C: Extra blank line detected.</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:16:16: C: Prefer $PROGRAM_NAME over $0.</span>
+</span><span class='line'><span class="s1">if __FILE__ == $0</span>
+</span><span class='line'><span class="s1">               ^^</span>
+</span><span class='line'><span class="s1">sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don&#39;</span>t need string interpolation or special symbols.
+</span><span class='line'>  <span class="nv">hoge</span> <span class="o">=</span> SampleRubocop.new<span class="o">(</span><span class="s2">&quot;hoge&quot;</span><span class="o">)</span>
+</span><span class='line'>                           ^^^^^^
+</span><span class='line'>sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
+
+<h2>vim と RuboCop を連携する</h2>
+
+<p>コーディングしながら RuboCop に注意されたいので、vim と連携する。</p>
+
+<p>vim プラグインの <a href="https://github.com/scrooloose/syntastic">scrooloose/syntastic</a> を入れる。</p>
+
+<p>NeoBundle を使っているので、手持ちの <code>vimrc</code> を以下のように修正し、<code>:NeoBundleInstall</code> してインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gi">+ NeoBundle &#39;scrooloose/syntastic&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="gi">+ &quot; ----------------------------------------------------------------------</span>
+</span><span class='line'><span class="gi">+ &quot; syntastic</span>
+</span><span class='line'><span class="gi">+ let g:syntastic_mode_map = { &#39;mode&#39;: &#39;active&#39; }</span>
+</span><span class='line'><span class="gi">+ let g:syntastic_ruby_checkers = [&#39;rubocop&#39;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>そうすると、<code>:SyntaxCheck</code> を実行するか、保存<code>:w</code> のタイミングで RuboCop が動いてくれる。
+以下のように指摘してくれる。</p>
+
+<p><img src="http://momota.github.io/images/syntastic_ss.png" alt="syntastic_ss" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[seleniumノウハウ]]></title>
@@ -5845,165 +6017,6 @@ oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマ�
 </tr>
 </tbody>
 </table>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rbenv でrubyバージョンにはもう泣かされない]]></title>
-    <link href="http://momota.github.io/blog/2013/08/25/rbenv/"/>
-    <updated>2013-08-25T22:06:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/08/25/rbenv</id>
-    <content type="html"><![CDATA[<p>ソフトウェアバージョンの差異に悩まされる人は多いと思う。</p>
-
-<p>同じOS上で違うバージョンのrubyを動かしたいことはまあある。
-<code>/home/you/foo</code>以下は既存コードがあるから1.8系のままでで動かしたいし、<code>/home/you/bar</code>以下は新しい試みとして2.0系を動かしたいとか。
-そこでrbenvという便利なrubyバージョン管理ツールがある。
-rbenvにより、あるディレクトリ以下のrubyバージョンを任意に指定できる。</p>
-
-<!-- more -->
-
-
-<h2>rbenv をインストールする</h2>
-
-<p>詳細はgithubの<code>README.md</code>参照。<a href="https://github.com/sstephenson/rbenv">https://github.com/sstephenson/rbenv</a></p>
-
-<h3>1. 最新コードをローカルにチェックアウトする</h3>
-
-<p>githubから最新版を <code>~/.rbenv</code> にチェックアウトする</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2. pathを通すため、shellの設定を変更する</h3>
-
-<ul>
-<li><code>~/.rbenv/bin</code> を <code>$PATH</code> に追加する</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.zshrc
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>shim と 自動補完を有効にする</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="s1">&#39;eval &quot;$(rbenv init -)&quot;&#39;</span> &gt;&gt; ~/.zshrc
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>bash ユーザは <code>~/.zshrc</code> の代わりに <code>~/.bash_profile</code> へ。
-ubuntu ユーザは <code>~/.zshrc</code> の代わりに <code>~/.profile</code> へ。</p>
-
-<h3>3. 設定変更内容を反映するため、shell を再起動する</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">exec</span> <span class="nv">$SHELL</span> -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>(番外編) rbenv を最新版にアップグレードする</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/.rbenv
-</span><span class='line'><span class="nv">$ </span>git pull
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ruby-build をインストールして、任意の ruby バージョンをインストールできるようにする</h2>
-
-<p><code>ruby-build</code> は rbenv のプラグインで、いろいろなバージョンの ruby のインストールを <code>rbenv install</code> コマンドでできるようになる。
-インストールは、<a href="https://github.com/sstephenson/ruby-build">公式に書いてあるように以下。</a></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>MAC使いだと homebrew でいける。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew install ruby-build
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>インストール可能な ruby バージョンを一覧表示する</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>任意のバージョンの ruby をインストールする</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-pxx
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ruby-build を upgrade する</h3>
-
-<p>新しいバージョンの ruby が公開されたりすると、ruby-build を upgrade する必要がある。
-<code>git pull</code> してあげれば良い。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/.rbenv/plugins/ruby-build/
-</span><span class='line'><span class="nv">$ </span>git pull origin master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>rbenv で任意バージョンの ruby へ切り替えたり</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># List all Ruby versions known by rbenv</span>
-</span><span class='line'><span class="nv">$ </span>rbenv versions
-</span><span class='line'>
-</span><span class='line'><span class="c"># switch version</span>
-</span><span class='line'><span class="nv">$ </span>rbenv global 1.9.3-pxx
-</span><span class='line'>
-</span><span class='line'><span class="c"># back to system default</span>
-</span><span class='line'><span class="nv">$ </span>rbenv global system
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c"># 特定のディレクトリ以下のRubyバージョンを切り替え</span>
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-p327
-</span><span class='line'>
-</span><span class='line'><span class="c"># ローカル設定を解除</span>
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local</span> --unset
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c"># path to installed ruby or gem</span>
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span></code></pre></td></tr></table></div></figure>
-
-
 
 ]]></content>
   </entry>

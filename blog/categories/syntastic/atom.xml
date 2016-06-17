@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: syntastic | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/syntastic/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-06-17T18:20:12+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[RuboCop でコーディングスタイルを矯正する]]></title>
+    <link href="http://momota.github.io/blog/2016/06/17/rubocop/"/>
+    <updated>2016-06-17T17:30:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/06/17/rubocop</id>
+    <content type="html"><![CDATA[<p><img src="https://raw.githubusercontent.com/bbatsov/rubocop/master/logo/rubo-logo-horizontal.png" alt="RuboCop Logo" /></p>
+
+<p><a href="http://note103.hateblo.jp/entry/2016/06/13/074744">textlintで日本語テキストの文字校正を試してみた</a> とかで、lint 系の記事を目にしたので
+そろそろ導入してみるか、と思い立った。</p>
+
+<p>RuboCop はRuby の静的コードアナライザ。
+<a href="https://github.com/bbatsov/rubocop">bbatsov/rubocop</a></p>
+
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> に沿ったコーディングスタイルに矯正(注意)してくれる。
+無駄なスペースが入力されている、とか、無駄な改行が入っている、とか、
+この変数1度も使われてないよ?とかクラスの中の行数が多すぎる、とか、
+1行の文字数が長すぎる、とか。</p>
+
+<p>大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
+こういうツールによって人間が矯正されると良い。</p>
+
+<!-- more -->
+
+
+<h2>RuboCop インストール</h2>
+
+<p>gem でインストールする。</p>
+
+<p><code>sh
+$ gem install rubocop
+$ rubocop -v
+0.40.0
+</code></p>
+
+<p>実行は<code>rubocop</code> コマンドにチェックしたいスクリプトを渡す。
+例えば、以下のようなスクリプトを</p>
+
+<p>```ruby</p>
+
+<h1>conding: utf-8</h1>
+
+<p>require &ldquo;date&rdquo;</p>
+
+<p>class SampleRubocop
+  def initialize( key )</p>
+
+<pre><code>@key = key
+</code></pre>
+
+<p>  end</p>
+
+<p>  def hey</p>
+
+<pre><code>@key
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>if <strong>FILE</strong> == $0
+  hoge = SampleRubocop.new(&ldquo;hoge&rdquo;)
+  p hoge.hey
+end</p>
+
+<p>```</p>
+
+<p>チェックすると以下の様な感じで注意を受ける。</p>
+
+<p>```sh
+$ rubocop sample_rubocop.rb
+Inspecting 1 file
+C</p>
+
+<p>Offenses:</p>
+
+<p>sample_rubocop.rb:2:9: C: Prefer single-quoted strings when you don&rsquo;t need string interpolation or special symbols.
+require &ldquo;date&rdquo;</p>
+
+<pre><code>    ^^^^^^
+</code></pre>
+
+<p>sample_rubocop.rb:4:1: C: Extra blank line detected.
+sample_rubocop.rb:5:1: C: Missing top-level class documentation comment.
+class SampleRubocop
+^^^^^
+sample_rubocop.rb:6:18: C: Space inside parentheses detected.
+  def initialize( key )</p>
+
+<pre><code>             ^
+</code></pre>
+
+<p>sample_rubocop.rb:6:22: C: Space inside parentheses detected.
+  def initialize( key )</p>
+
+<pre><code>                 ^
+</code></pre>
+
+<p>sample_rubocop.rb:15:1: C: Extra blank line detected.
+sample_rubocop.rb:16:16: C: Prefer $PROGRAM_NAME over $0.
+if <strong>FILE</strong> == $0</p>
+
+<pre><code>           ^^
+</code></pre>
+
+<p>sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don&rsquo;t need string interpolation or special symbols.
+  hoge = SampleRubocop.new(&ldquo;hoge&rdquo;)</p>
+
+<pre><code>                       ^^^^^^
+</code></pre>
+
+<p>sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
+```</p>
+
+<p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
+
+<h2>vim と RuboCop を連携する</h2>
+
+<p>コーディングしながら RuboCop に注意されたいので、vim と連携する。</p>
+
+<p>vim プラグインの <a href="https://github.com/scrooloose/syntastic">scrooloose/syntastic</a> を入れる。</p>
+
+<p>NeoBundle を使っているので、手持ちの <code>vimrc</code> を以下のように修正し、<code>:NeoBundleInstall</code> してインストールする。</p>
+
+<p>```diff
++ NeoBundle &lsquo;scrooloose/syntastic&rsquo;</p>
+
+<ul>
+<li>&ldquo; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</li>
+<li>&ldquo; syntastic</li>
+<li>let g:syntastic_mode_map = { &lsquo;mode&rsquo;: &lsquo;active&rsquo; }</li>
+<li>let g:syntastic_ruby_checkers = [&lsquo;rubocop&rsquo;]
+```</li>
+</ul>
+
+
+<p>そうすると、<code>:SyntaxCheck</code> を実行するか、保存<code>:w</code> のタイミングで RuboCop が動いてくれる。
+以下のように指摘してくれる。</p>
+
+<p><img src="/images/syntastic_ss.png" alt="syntastic_ss" /></p>
+]]></content>
+  </entry>
+  
+</feed>

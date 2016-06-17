@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-03T14:39:40+09:00</updated>
+  <updated>2016-06-17T18:20:12+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,148 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RuboCop でコーディングスタイルを矯正する]]></title>
+    <link href="http://momota.github.io/blog/2016/06/17/rubocop/"/>
+    <updated>2016-06-17T17:30:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/06/17/rubocop</id>
+    <content type="html"><![CDATA[<p><img src="https://raw.githubusercontent.com/bbatsov/rubocop/master/logo/rubo-logo-horizontal.png" alt="RuboCop Logo" /></p>
+
+<p><a href="http://note103.hateblo.jp/entry/2016/06/13/074744">textlintで日本語テキストの文字校正を試してみた</a> とかで、lint 系の記事を目にしたので
+そろそろ導入してみるか、と思い立った。</p>
+
+<p>RuboCop はRuby の静的コードアナライザ。
+<a href="https://github.com/bbatsov/rubocop">bbatsov/rubocop</a></p>
+
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> に沿ったコーディングスタイルに矯正(注意)してくれる。
+無駄なスペースが入力されている、とか、無駄な改行が入っている、とか、
+この変数1度も使われてないよ?とかクラスの中の行数が多すぎる、とか、
+1行の文字数が長すぎる、とか。</p>
+
+<p>大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
+こういうツールによって人間が矯正されると良い。</p>
+
+<!-- more -->
+
+
+<h2>RuboCop インストール</h2>
+
+<p>gem でインストールする。</p>
+
+<p><code>sh
+$ gem install rubocop
+$ rubocop -v
+0.40.0
+</code></p>
+
+<p>実行は<code>rubocop</code> コマンドにチェックしたいスクリプトを渡す。
+例えば、以下のようなスクリプトを</p>
+
+<p>```ruby</p>
+
+<h1>conding: utf-8</h1>
+
+<p>require &ldquo;date&rdquo;</p>
+
+<p>class SampleRubocop
+  def initialize( key )</p>
+
+<pre><code>@key = key
+</code></pre>
+
+<p>  end</p>
+
+<p>  def hey</p>
+
+<pre><code>@key
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>if <strong>FILE</strong> == $0
+  hoge = SampleRubocop.new(&ldquo;hoge&rdquo;)
+  p hoge.hey
+end</p>
+
+<p>```</p>
+
+<p>チェックすると以下の様な感じで注意を受ける。</p>
+
+<p>```sh
+$ rubocop sample_rubocop.rb
+Inspecting 1 file
+C</p>
+
+<p>Offenses:</p>
+
+<p>sample_rubocop.rb:2:9: C: Prefer single-quoted strings when you don&rsquo;t need string interpolation or special symbols.
+require &ldquo;date&rdquo;</p>
+
+<pre><code>    ^^^^^^
+</code></pre>
+
+<p>sample_rubocop.rb:4:1: C: Extra blank line detected.
+sample_rubocop.rb:5:1: C: Missing top-level class documentation comment.
+class SampleRubocop
+^^^^^
+sample_rubocop.rb:6:18: C: Space inside parentheses detected.
+  def initialize( key )</p>
+
+<pre><code>             ^
+</code></pre>
+
+<p>sample_rubocop.rb:6:22: C: Space inside parentheses detected.
+  def initialize( key )</p>
+
+<pre><code>                 ^
+</code></pre>
+
+<p>sample_rubocop.rb:15:1: C: Extra blank line detected.
+sample_rubocop.rb:16:16: C: Prefer $PROGRAM_NAME over $0.
+if <strong>FILE</strong> == $0</p>
+
+<pre><code>           ^^
+</code></pre>
+
+<p>sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don&rsquo;t need string interpolation or special symbols.
+  hoge = SampleRubocop.new(&ldquo;hoge&rdquo;)</p>
+
+<pre><code>                       ^^^^^^
+</code></pre>
+
+<p>sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
+```</p>
+
+<p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
+
+<h2>vim と RuboCop を連携する</h2>
+
+<p>コーディングしながら RuboCop に注意されたいので、vim と連携する。</p>
+
+<p>vim プラグインの <a href="https://github.com/scrooloose/syntastic">scrooloose/syntastic</a> を入れる。</p>
+
+<p>NeoBundle を使っているので、手持ちの <code>vimrc</code> を以下のように修正し、<code>:NeoBundleInstall</code> してインストールする。</p>
+
+<p>```diff
++ NeoBundle &lsquo;scrooloose/syntastic&rsquo;</p>
+
+<ul>
+<li>&ldquo; &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</li>
+<li>&ldquo; syntastic</li>
+<li>let g:syntastic_mode_map = { &lsquo;mode&rsquo;: &lsquo;active&rsquo; }</li>
+<li>let g:syntastic_ruby_checkers = [&lsquo;rubocop&rsquo;]
+```</li>
+</ul>
+
+
+<p>そうすると、<code>:SyntaxCheck</code> を実行するか、保存<code>:w</code> のタイミングで RuboCop が動いてくれる。
+以下のように指摘してくれる。</p>
+
+<p><img src="/images/syntastic_ss.png" alt="syntastic_ss" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[seleniumノウハウ]]></title>
@@ -1448,384 +1590,6 @@ mysql> select * from hoges;
 Empty set (0.00 sec)</p>
 
 <p>```</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (3)]]></title>
-    <link href="http://momota.github.io/blog/2013/09/23/sinatra/"/>
-    <updated>2013-09-23T20:39:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/09/23/sinatra</id>
-    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
-事前に heroku には sign up しておこう。</p>
-
-<p>最初にできあがりを示す。</p>
-
-<p>heroku: <a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
-
-<p>github: <a href="https://github.com/momota/heroku_sinatra_sample">https://github.com/momota/heroku_sinatra_sample</a></p>
-
-<hr />
-
-<ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
-
-<ul>
-<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
-
-<ul>
-<li>sinatra で MongoDB を使ったデータ永続化</li>
-<li>HTTP POSTへの対応</li>
-<li>Bootstrap でのお化粧</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
-
-<ul>
-<li>sinatra の heroku へのデプロイ</li>
-</ul>
-</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>heroku toolbelt をインストールする</h2>
-
-<p>heroku へデプロイするために heroku toolbelt をインストールする。
-heroku toolbelt は  <a href="https://toolbelt.heroku.com/">https://toolbelt.heroku.com/</a> から環境にあったやり方を選んでインストールする。mac ではインストーラが <code>.pkg</code> 形式で配布されているので、それをぽちぽちクリックして進めればよい。</p>
-
-<p>なお、heroku toolbelt には、以下が含まれている。</p>
-
-<ul>
-<li>heroku client: heroku アプリケーションを作成したり、管理したりする CLI ツール</li>
-<li>foreman: procfile ベースでアプリケーションの管理をする</li>
-<li>git</li>
-</ul>
-
-
-<p>shell でバージョン確認してインストールできたかを確認する。</p>
-
-<p><code>sh
-$ heroku --version
-heroku-toolbelt/2.41.0 (x86_64-darwin10.8.0) ruby/1.9.3
-</code></p>
-
-<p>インストールできているようだ。</p>
-
-<h2>heroku login</h2>
-
-<p><code>heroku login</code> で heroku への認証を通したり、ssh キーを登録したりする。</p>
-
-<p><code>sh
-$ heroku login
-Enter your Heroku credentials.
-Email: makoto.momota@gmail.com
-Password (typing will be hidden): ENTER_YOUR_HEROKU_PASSWORD
-Authentication successful.
-</code></p>
-
-<p>私の場合は、すでにキー登録していたので、なにもキー登録操作がなかったが、初回実行の際は、以下のような感じになるらしい。</p>
-
-<p><code>sh
-Could not find an existing public key.
-Would you like to generate one? [Yn]
-Generating new SSH public key.
-Uploading ssh public key /Users/adam/.ssh/id_rsa.pub
-</code></p>
-
-<h2>foreman で sinatra が起動できるか確認する</h2>
-
-<p>foreman で複数の sinatra アプリケーション を管理したり、アプリケーションごとに異なる起動方法を単一に wrapping できる。
-heroku では、アプリケーションを起動するために foreman が必須のようだ。
-foreman でのアプリケーション起動には、 <code>Procfile</code> を書く必要がある。書式は <code>アプリケーション名: コマンド</code> を改行区切りで列挙していく。</p>
-
-<p>ここでは、<code>mongo_app.rb</code> を起動するので、以下のように記述する。</p>
-
-<p><code>
-web: bundle exec ruby mongo_app.rb -p $PORT
-</code></p>
-
-<p>お試しに、ローカルで <code>foreman start</code> により sinatra アプリケーションを起動する。</p>
-
-<p><code>sh
-$ foreman start
-17:25:31 web.1  | started with pid 10879
-17:25:33 web.1  | [2013-09-23 17:25:33] INFO  WEBrick 1.3.1
-17:25:33 web.1  | [2013-09-23 17:25:33] INFO  ruby 2.0.0 (2013-06-27) [x86_64-darwin12.4.0]
-17:25:33 web.1  | == Sinatra/1.4.3 has taken the stage on 5000 for development with backup from WEBrick
-17:25:33 web.1  | [2013-09-23 17:25:33] INFO  WEBrick::HTTPServer#start: pid=10879 port=5000
-</code></p>
-
-<p>5000 番ポートで起動したので、<a href="http://localhost:5000/">http://localhost:5000/</a> にアクセスしてみる。問題なさそう。</p>
-
-<h2>git リポジトリを作成して push する</h2>
-
-<p>heroku デプロイには git が必須。
-git でバージョン管理していなければ、<code>git init</code> して始めよう。</p>
-
-<p><code>sh
-$ git init
-$ git add .
-$ git commit -m 'your commit message'
-</code></p>
-
-<h2>heroku へデプロイする</h2>
-
-<p>いよいよ heroku 上にアプリケーションを登録する。アプリケーション名はなしでも任意の名前が付けられるが、ここでは<code>sample-mongo-app</code>にした。(のちほど変えることも可能)</p>
-
-<p><code>sh
-$ heroku apps:create sample-mongo-app
-Creating sample-mongo-app... done, stack is cedar
-http://sample-mongo-app.herokuapp.com/ | git@heroku.com:sample-mongo-app.git
-Git remote heroku added
-</code></p>
-
-<p>このコマンドにより以下のように git リモートリポジトリに heroku リポジトリが登録される。</p>
-
-<p><code>sh
-$ git remote
-heroku
-$ git remote show heroku
-* remote heroku
-Fetch URL: git@heroku.com:sample-mongo-app.git
-Push  URL: git@heroku.com:sample-mongo-app.git
-HEAD branch: (unknown)
-</code></p>
-
-<p>heroku リポジトリに push することで、デプロイできる。なんとシンプルな仕組み。
-ちなみに、Gemfile.lock も git で管理してないとデプロイ時にエラーとなる。</p>
-
-<p>```sh
-$ git push heroku master
-Counting objects: 90, done.
-Delta compression using up to 2 threads.
-Compressing objects: 100% (85/85), done.
-Writing objects: 100% (90/90), 126.44 KiB, done.
-Total 90 (delta 27), reused 0 (delta 0)</p>
-
-<p>&mdash;&mdash;&ndash;> Ruby/Rack app detected
-&mdash;&mdash;&ndash;> Using Ruby version: ruby-2.0.0
-&mdash;&mdash;&ndash;> Installing dependencies using Bundler version 1.3.2</p>
-
-<pre><code>   Running: bundle install --without development:test --path vendor/bundle --binstubs vendor/bundle/bin --deployment
-   Fetching gem metadata from https://rubygems.org/..........
-   Fetching gem metadata from https://rubygems.org/..
-   Installing backports (3.3.4)
-   Installing bson (1.9.2)
-   Installing bson_ext (1.9.2)
-   Installing eventmachine (1.0.3)
-   Installing mongo (1.9.2)
-   Installing rack (1.5.2)
-   Installing rack-protection (1.5.0)
-   Installing rack-test (0.6.2)
-   Installing tilt (1.4.1)
-   Installing sinatra (1.4.3)
-   Installing sinatra-contrib (1.4.0)
-   Using bundler (1.3.2)
-   Your bundle is complete! It was installed into ./vendor/bundle
-   Cleaning up the bundler cache.
-</code></pre>
-
-<p>&mdash;&mdash;&ndash;> WARNINGS:</p>
-
-<pre><code>   You have not declared a Ruby version in your Gemfile.
-   To set your Ruby version add this line to your Gemfile:
-   ruby '2.0.0'
-   # See https://devcenter.heroku.com/articles/ruby-versions for more information."
-</code></pre>
-
-<p>&mdash;&mdash;&ndash;> Discovering process types</p>
-
-<pre><code>   Procfile declares types     -&gt; web
-   Default types for Ruby/Rack -&gt; console, rake
-</code></pre>
-
-<p>&mdash;&mdash;&ndash;> Compiled slug size: 26.4MB
-&mdash;&mdash;&ndash;> Launching&hellip; done, v3</p>
-
-<pre><code>   http://sample-mongo-app.herokuapp.com deployed to Heroku
-</code></pre>
-
-<p>To git@heroku.com:sample-mongo-app.git
- * [new branch]      master &ndash;> master
-```</p>
-
-<h2>mongodb を heroku で使う</h2>
-
-<p>heroku ではさまざまな add-on が提供されており、その中から mongodb のホスティングである <a href="https://addons.heroku.com/mongohq">MongoHQ</a> を利用する。</p>
-
-<p>add-on を利用するにはクレジットカード情報の登録が必要となるので、済ませておく。<a href="https://heroku.com/verify">https://heroku.com/verify</a></p>
-
-<p>以下で、add-on の設定をする。ここでは、無料プランの ”sandbox” を選ぶ。</p>
-
-<p><code>sh
-$ heroku addons:add mongohq:sandbox
-Adding mongohq:sandbox on sample-mongo-app... done, v4 (free)
-Use `heroku addons:docs mongohq` to view documentation.
-$ heroku config
-=== sample-mongo-app Config Vars
-MONGOHQ_URL: mongodb://ID:パスワード@paulo.mongohq.com:10014/データベース名
-</code></p>
-
-<p>sinatraの DB 接続部分を mongohq 用に書き換える。</p>
-
-<p><a href="https://devcenter.heroku.com/articles/mongohq">公式サイト</a>通り、 DB コネクションをメソッド化する。</p>
-
-<p>```ruby
-require &lsquo;sinatra&rsquo;
-require &lsquo;sinatra/reloader&rsquo;
-require &lsquo;mongo&rsquo;
-require &lsquo;uri&rsquo;</p>
-
-<p>def get_connection
-  return @db_connection if @db_connection
-  db = URI.parse(ENV[&lsquo;MONGOHQ_URL&rsquo;])
-  db_name = db.path.gsub(/^\//, &lsquo;&rsquo;)
-  @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
-  @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
-  @db_connection
-end</p>
-
-<p>before do
-  db_con = get_connection
-  @comments = db_con.collection(&lsquo;comments&rsquo;)
-end</p>
-
-<p>helpers do
-  # escape html
-  include Rack::Utils
-  alias_method :h, :escape_html
-end</p>
-
-<p>get &lsquo;/&rsquo; do
-  erb :index
-end</p>
-
-<p>post &lsquo;/new&rsquo; do
-  @comments.insert( :body => params[:body] )
-  redirect &lsquo;/&rsquo;
-end</p>
-
-<p>post &lsquo;/delete&rsquo; do
-  id = BSON::ObjectId( params[:id] )
-  @comments.find(&lsquo;_id&rsquo; => id).each { |d_comment|</p>
-
-<pre><code>@comments.remove( d_comment )
-</code></pre>
-
-<p>  }
-end
-```</p>
-
-<p>これを前述したとおり、<code>git commit/push</code>してあげれば、heroku 上で sinatra アプリケーション 〜 mongodb 間の接続が確認できる。</p>
-
-<p>私がデプロイした sinatra サンプルアプリケーションは、以下からアクセス可能。</p>
-
-<p><a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
-
-<h3>heroku でのデバッグ</h3>
-
-<p>以下でアプリケーションログを <code>tail -f</code> しているように参照できる。</p>
-
-<p><code>sh
-$ heroku logs --tail
-</code></p>
-
-<hr />
-
-<h1>番外編</h1>
-
-<p>heroku gem は将来的に廃止されるようで、heroku toolbelt をインストールすることを推奨する。</p>
-
-<h2>(失敗,というか古い情報編) heroku gem をインストールする</h2>
-
-<p>Gemfile に <code>gem "heroku"</code> を追記して bundler でインストールする。</p>
-
-<p><code>diff
-diff --git a/Gemfile b/Gemfile
-index 74db599..734c191 100644
---- a/Gemfile
-+++ b/Gemfile
-@@ -8,4 +8,5 @@ gem "sinatra", "1.4.3"
- gem "sinatra-contrib", "1.4.0"
- gem "mongo"
- gem "bson_ext"
-+gem "heroku"
-</code></p>
-
-<p><code>bundle install</code> する。</p>
-
-<p><code>sh
-$ bundle install --path vendor/bundle
-Fetching gem metadata from https://rubygems.org/...........
-Fetching gem metadata from https://rubygems.org/..
-Resolving dependencies...
-Using i18n (0.6.1)
-Using multi_json (1.8.0)
-Using activesupport (3.2.13)
-Using builder (3.0.4)
-Using activemodel (3.2.13)
-Using arel (3.0.2)
-Using tzinfo (0.3.37)
-Using activerecord (3.2.13)
-Installing addressable (2.3.5)
-Using backports (3.3.4)
-Using bson (1.9.2)
-Using bson_ext (1.9.2)
-Using eventmachine (1.0.3)
-Installing excon (0.25.3)
-Installing heroku-api (0.3.15)
-Installing launchy (2.3.0)
-Installing netrc (0.7.7)
-Installing mime-types (1.25)
-Installing rest-client (1.6.7)
-Installing rubyzip (1.0.0)
-Installing heroku (2.41.0)
-Using mongo (1.9.2)
-Using rack (1.5.2)
-Using rack-protection (1.5.0)
-Using rack-test (0.6.2)
-Using tilt (1.4.1)
-Using sinatra (1.4.3)
-Using sinatra-contrib (1.4.0)
-Using sqlite3 (1.3.7)
-Using bundler (1.3.5)
-Your bundle is complete!
-It was installed into ./vendor/bundle
-Post-install message from heroku:
- !    The `heroku` gem has been deprecated and replaced with the Heroku Toolbelt.
- !    Download and install from: https://toolbelt.heroku.com
- !    For API access, see: https://github.com/heroku/heroku.rb
-</code></p>
-
-<p>なんか heroku gem は、もう廃止されるみたいなメッセージが出た。
-アンインストールすることにしよう。</p>
-
-<h3>heroku gem アンインストール</h3>
-
-<p>Gemfile から先ほど追加した <code>gem "heroku"</code> 行を消す。
-そのあとに <code>bundle clean</code> でアンインストールする。</p>
-
-<p><code>sh
-$ bundle clean
-Resolving dependencies...
-Removing addressable (2.3.5)
-Removing excon (0.25.3)
-Removing heroku (2.41.0)
-Removing heroku-api (0.3.15)
-Removing launchy (2.3.0)
-Removing mime-types (1.25)
-Removing netrc (0.7.7)
-Removing rest-client (1.6.7)
-Removing rubyzip (1.0.0)
-</code></p>
 ]]></content>
   </entry>
   
