@@ -1,0 +1,143 @@
+---
+layout: post
+title: "RuboCop でコーディングスタイルを矯正する"
+date: 2016-06-17 17:30
+comments: true
+categories: ruby rubocop vim syntastic
+---
+
+![RuboCop Logo](https://raw.githubusercontent.com/bbatsov/rubocop/master/logo/rubo-logo-horizontal.png)
+
+
+[textlintで日本語テキストの文字校正を試してみた](http://note103.hateblo.jp/entry/2016/06/13/074744) とかで、lint 系の記事を目にしたので
+そろそろ導入してみるか、と思い立った。
+
+
+RuboCop はRuby の静的コードアナライザ。
+[bbatsov/rubocop](https://github.com/bbatsov/rubocop)
+
+[The Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide) に沿ったコーディングスタイルに矯正(注意)してくれる。
+無駄なスペースが入力されている、とか、無駄な改行が入っている、とか、
+この変数1度も使われてないよ?とかクラスの中の行数が多すぎる、とか、
+1行の文字数が長すぎる、とか。
+
+
+大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
+こういうツールによって人間が矯正されると AI 時代に思いを馳せることができて良い感じですね。
+
+
+<!-- more -->
+
+RuboCop インストール
+--------------------
+
+gem でインストールする。
+
+```sh
+$ gem install rubocop
+$ rubocop -v
+0.40.0
+```
+
+実行は`rubocop` コマンドにチェックしたいスクリプトを渡す。
+例えば、以下のような Ruby スクリプトを
+
+
+```ruby
+# conding: utf-8
+require "date"
+
+
+class SampleRubocop
+  def initialize( key )
+    @key = key
+  end
+
+  def hey
+    @key
+  end
+end
+
+
+if __FILE__ == $0
+  hoge = SampleRubocop.new("hoge")
+  p hoge.hey
+end
+
+```
+
+RuboCop でチェックすると以下のような感じで注意を受ける。
+
+```sh
+$ rubocop sample_rubocop.rb
+Inspecting 1 file
+C
+
+Offenses:
+
+sample_rubocop.rb:2:9: C: Prefer single-quoted strings when you don't need string interpolation or special symbols.
+require "date"
+        ^^^^^^
+sample_rubocop.rb:4:1: C: Extra blank line detected.
+sample_rubocop.rb:5:1: C: Missing top-level class documentation comment.
+class SampleRubocop
+^^^^^
+sample_rubocop.rb:6:18: C: Space inside parentheses detected.
+  def initialize( key )
+                 ^
+sample_rubocop.rb:6:22: C: Space inside parentheses detected.
+  def initialize( key )
+                     ^
+sample_rubocop.rb:15:1: C: Extra blank line detected.
+sample_rubocop.rb:16:16: C: Prefer $PROGRAM_NAME over $0.
+if __FILE__ == $0
+               ^^
+sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don't need string interpolation or special symbols.
+  hoge = SampleRubocop.new("hoge")
+                           ^^^^^^
+sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
+```
+
+無駄な改行とかスペースを注意されていますね。修正しましょう。
+
+
+[The Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide) が自分(たち) のコーディングスタイルに合わない場合は、カスタマイズが可能。
+`.rubocop.yml` を編集する。以下のように true とか false とかを自分に会うように編集する。
+
+```yml
+# This file overrides https://github.com/bbatsov/rubocop/blob/master/config/default.yml
+
+# Use UTF-8 as the source file encoding.
+Encoding:
+  Enabled: false
+
+# Limit lines to 80 characters.
+LineLength:
+  Enabled: false
+```
+
+
+vim と RuboCop を連携する
+-------------------------
+
+コーディングしながら RuboCop に注意されたいので、vim と連携する。
+
+vim プラグインの [scrooloose/syntastic](https://github.com/scrooloose/syntastic) を入れる。
+
+NeoBundle を使っているので、手持ちの `vimrc` を以下のように修正し、`:NeoBundleInstall` してインストールする。
+
+```diff
++ NeoBundle 'scrooloose/syntastic'
+
++ " ----------------------------------------------------------------------
++ " syntastic
++ let g:syntastic_mode_map = { 'mode': 'active' }
++ let g:syntastic_ruby_checkers = ['rubocop']
+```
+
+そうすると、`:SyntaxCheck` を実行するか、保存`:w` のタイミングで RuboCop が動いてくれる。
+以下のように指摘してくれる。
+
+![syntastic_ss](/images/syntastic_ss.png)
+
+
