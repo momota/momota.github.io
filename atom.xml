@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-17T18:20:12+09:00</updated>
+  <updated>2016-06-17T18:37:01+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -32,7 +32,7 @@
 1行の文字数が長すぎる、とか。</p>
 
 <p>大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
-こういうツールによって人間が矯正されると良い。</p>
+こういうツールによって人間が矯正されると AI 時代に思いを馳せることができて良い感じですね。</p>
 
 <!-- more -->
 
@@ -51,7 +51,7 @@
 
 
 <p>実行は<code>rubocop</code> コマンドにチェックしたいスクリプトを渡す。
-例えば、以下のようなスクリプトを</p>
+例えば、以下のような Ruby スクリプトを</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -94,7 +94,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>チェックすると以下の様な感じで注意を受ける。</p>
+<p>RuboCop でチェックすると以下のような感じで注意を受ける。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -154,6 +154,30 @@
 
 
 <p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
+
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> が自分(たち) のコーディングスタイルに合わない場合は、カスタマイズが可能。
+<code>.rubocop.yml</code> を編集する。以下のように true とか false とかを自分に会うように編集する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># This file overrides https://github.com/bbatsov/rubocop/blob/master/config/default.yml</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Use UTF-8 as the source file encoding.</span>
+</span><span class='line'><span class="l-Scalar-Plain">Encoding</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">Enabled</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Limit lines to 80 characters.</span>
+</span><span class='line'><span class="l-Scalar-Plain">LineLength</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">Enabled</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h2>vim と RuboCop を連携する</h2>
 

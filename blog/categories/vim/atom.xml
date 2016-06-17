@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vim | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/vim/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-17T18:20:12+09:00</updated>
+  <updated>2016-06-17T18:37:01+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -32,7 +32,7 @@
 1行の文字数が長すぎる、とか。</p>
 
 <p>大人数で開発していると細かなコーディングスタイルを合わせるだけでも面倒なので
-こういうツールによって人間が矯正されると良い。</p>
+こういうツールによって人間が矯正されると AI 時代に思いを馳せることができて良い感じですね。</p>
 
 <!-- more -->
 
@@ -48,7 +48,7 @@ $ rubocop -v
 </code></p>
 
 <p>実行は<code>rubocop</code> コマンドにチェックしたいスクリプトを渡す。
-例えば、以下のようなスクリプトを</p>
+例えば、以下のような Ruby スクリプトを</p>
 
 <p>```ruby</p>
 
@@ -79,7 +79,7 @@ end</p>
 
 <p>```</p>
 
-<p>チェックすると以下の様な感じで注意を受ける。</p>
+<p>RuboCop でチェックすると以下のような感じで注意を受ける。</p>
 
 <p>```sh
 $ rubocop sample_rubocop.rb
@@ -127,6 +127,24 @@ if <strong>FILE</strong> == $0</p>
 ```</p>
 
 <p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
+
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> が自分(たち) のコーディングスタイルに合わない場合は、カスタマイズが可能。
+<code>.rubocop.yml</code> を編集する。以下のように true とか false とかを自分に会うように編集する。</p>
+
+<p>```yml</p>
+
+<h1>This file overrides <a href="https://github.com/bbatsov/rubocop/blob/master/config/default.yml">https://github.com/bbatsov/rubocop/blob/master/config/default.yml</a></h1>
+
+<h1>Use UTF-8 as the source file encoding.</h1>
+
+<p>Encoding:
+  Enabled: false</p>
+
+<h1>Limit lines to 80 characters.</h1>
+
+<p>LineLength:
+  Enabled: false
+```</p>
 
 <h2>vim と RuboCop を連携する</h2>
 
