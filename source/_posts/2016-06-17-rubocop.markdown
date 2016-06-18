@@ -68,7 +68,7 @@ end
 
 RuboCop でチェックすると以下のような感じで注意を受ける。
 
-```sh
+```
 $ rubocop sample_rubocop.rb
 Inspecting 1 file
 C
@@ -101,20 +101,70 @@ sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
 無駄な改行とかスペースを注意されていますね。修正しましょう。
 
 
-[The Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide) が自分(たち) のコーディングスタイルに合わない場合は、カスタマイズが可能。
-`.rubocop.yml` を編集する。以下のように true とか false とかを自分に会うように編集する。
+[The Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide) が自分(たち) の
+コーディングスタイルに合わない場合は、カスタマイズが可能。
+`.rubocop.yml` を編集する。
+
+
+いったん、今書いているものを正しいコーディングスタイルとみなした `.rubocop.yml` を生成するには
+`--auto-gen-config` オプションをつけて rubocop を実行する。
+
+```sh
+$ cd /path/to/project
+$ rubocop --auto-gen-config
+# => /path/to/project/.rubocp_todo.yml が出力される
+```
+
+上記コマンドにより、プロジェクトディレクトリ(/path/to/project)配下のコードが解析されて、cop と
+呼ばれるルール群が `.rubocp_todo.yml` というファイルで出力される。
+`.rubocp_todo.yml` の中身は、以下のように cop 単位にそのプロジェクトに沿った設定が入ったものが
+出力されている。
+
+以下は、出力された `.rubocp_todo.yml` の一部を抜粋。
 
 ```yml
-# This file overrides https://github.com/bbatsov/rubocop/blob/master/config/default.yml
-
-# Use UTF-8 as the source file encoding.
-Encoding:
-  Enabled: false
-
-# Limit lines to 80 characters.
-LineLength:
-  Enabled: false
+#
+# -- snip --
+#
+# Offense count: 113
+# Configuration parameters: AllowHeredoc, AllowURI, URISchemes.
+# URISchemes: http, https
+Metrics/LineLength:
+  Max: 137
+#
+# -- snip --
+#
 ```
+
+上記は、以下を示している。
+
+- デフォルト 1 行 80 文字までがコーディング規約となっているが最大 137 文字の行がある
+  - 1 行あたり最大 137 文字まで許容する、という設定
+- 1 行 80 文字以上 (違反: offense) に該当する箇所が 113 件
+
+
+`.rubocp_todo.yml` の修正不可能・修正困難部分のみを残したりチューニングして、`.rubocop.yml` に
+リネームしたら自分たちのコーディングスタイルに沿った現実的なルールを適用できる。
+
+
+標準のコーディング規約に沿ってコードを修正していく場合は、`.rubocop.yml` に以下の行を追加するか
+
+```yml
+inherit_from: .rubocop-todo.yml
+```
+
+`rubocop --config .rubocop_todo.yml` を実行して、違反をつぶしていく。
+
+
+コードの自動修正機能もある。
+`.rubocop_todo.yml` に `# Cop supports --auto-correct.` と記述されている cop については、以下の
+コマンドにより自動修正が可能。
+
+```sh
+$ rubocop -a
+# $ rubocop --auto-correct でもOK
+```
+
 
 
 vim と RuboCop を連携する
