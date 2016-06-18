@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-17T18:37:01+09:00</updated>
+  <updated>2016-06-18T11:56:05+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -123,13 +123,13 @@
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rubocop sample_rubocop.rb
-</span><span class='line'>Inspecting 1 file
-</span><span class='line'>C
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">$</span> <span class="n">rubocop</span> <span class="n">sample_rubocop</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'><span class="no">Inspecting</span> <span class="mi">1</span> <span class="n">file</span>
+</span><span class='line'><span class="n">C</span>
 </span><span class='line'>
-</span><span class='line'>Offenses:
+</span><span class='line'><span class="ss">Offenses</span><span class="p">:</span>
 </span><span class='line'>
-</span><span class='line'>sample_rubocop.rb:2:9: C: Prefer single-quoted strings when you don<span class="s1">&#39;t need string interpolation or special symbols.</span>
+</span><span class='line'><span class="n">sample_rubocop</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">2</span><span class="p">:</span><span class="mi">9</span><span class="p">:</span> <span class="ss">C</span><span class="p">:</span> <span class="no">Prefer</span> <span class="n">single</span><span class="o">-</span><span class="n">quoted</span> <span class="n">strings</span> <span class="k">when</span> <span class="n">you</span> <span class="n">don</span><span class="s1">&#39;t need string interpolation or special symbols.</span>
 </span><span class='line'><span class="s1">require &quot;date&quot;</span>
 </span><span class='line'><span class="s1">        ^^^^^^</span>
 </span><span class='line'><span class="s1">sample_rubocop.rb:4:1: C: Extra blank line detected.</span>
@@ -146,17 +146,37 @@
 </span><span class='line'><span class="s1">sample_rubocop.rb:16:16: C: Prefer $PROGRAM_NAME over $0.</span>
 </span><span class='line'><span class="s1">if __FILE__ == $0</span>
 </span><span class='line'><span class="s1">               ^^</span>
-</span><span class='line'><span class="s1">sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don&#39;</span>t need string interpolation or special symbols.
-</span><span class='line'>  <span class="nv">hoge</span> <span class="o">=</span> SampleRubocop.new<span class="o">(</span><span class="s2">&quot;hoge&quot;</span><span class="o">)</span>
-</span><span class='line'>                           ^^^^^^
-</span><span class='line'>sample_rubocop.rb:20:1: C: 1 trailing blank lines detected.
+</span><span class='line'><span class="s1">sample_rubocop.rb:17:28: C: Prefer single-quoted strings when you don&#39;</span><span class="n">t</span> <span class="n">need</span> <span class="n">string</span> <span class="n">interpolation</span> <span class="ow">or</span> <span class="n">special</span> <span class="n">symbols</span><span class="o">.</span>
+</span><span class='line'>  <span class="n">hoge</span> <span class="o">=</span> <span class="no">SampleRubocop</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;hoge&quot;</span><span class="p">)</span>
+</span><span class='line'>                           <span class="o">^^^^^^</span>
+</span><span class='line'><span class="n">sample_rubocop</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span> <span class="ss">C</span><span class="p">:</span> <span class="mi">1</span> <span class="n">trailing</span> <span class="n">blank</span> <span class="n">lines</span> <span class="n">detected</span><span class="o">.</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>無駄な改行とかスペースを注意されていますね。修正しましょう。</p>
 
-<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> が自分(たち) のコーディングスタイルに合わない場合は、カスタマイズが可能。
-<code>.rubocop.yml</code> を編集する。以下のように true とか false とかを自分に会うように編集する。</p>
+<p><a href="https://github.com/bbatsov/ruby-style-guide">The Ruby Style Guide</a> が自分(たち) の
+コーディングスタイルに合わない場合は、カスタマイズが可能。
+<code>.rubocop.yml</code> を編集する。</p>
+
+<p>いったん、今書いているものを正しいコーディングスタイルとみなした <code>.rubocop.yml</code> を生成するには
+<code>--auto-gen-config</code> オプションをつけて rubocop を実行する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> /path/to/project
+</span><span class='line'><span class="nv">$ </span>rubocop --auto-gen-config
+</span><span class='line'><span class="c"># =&gt; /path/to/project/.rubocp_todo.yml が出力される</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記コマンドにより、プロジェクトディレクトリ(/path/to/project)配下のコードが解析されて、cop と
+呼ばれるルール群が <code>.rubocp_todo.yml</code> というファイルで出力される。
+<code>.rubocp_todo.yml</code> の中身は、以下のように cop 単位にそのプロジェクトに沿った設定が入ったものが
+出力されている。</p>
+
+<p>以下は、出力された <code>.rubocp_todo.yml</code> の一部を抜粋。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -167,15 +187,55 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># This file overrides https://github.com/bbatsov/rubocop/blob/master/config/default.yml</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Use UTF-8 as the source file encoding.</span>
-</span><span class='line'><span class="l-Scalar-Plain">Encoding</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">Enabled</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Limit lines to 80 characters.</span>
-</span><span class='line'><span class="l-Scalar-Plain">LineLength</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">Enabled</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="c1"># -- snip --</span>
+</span><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="c1"># Offense count: 113</span>
+</span><span class='line'><span class="c1"># Configuration parameters: AllowHeredoc, AllowURI, URISchemes.</span>
+</span><span class='line'><span class="c1"># URISchemes: http, https</span>
+</span><span class='line'><span class="l-Scalar-Plain">Metrics/LineLength</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">Max</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">137</span>
+</span><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="c1"># -- snip --</span>
+</span><span class='line'><span class="c1">#</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記は、以下を示している。</p>
+
+<ul>
+<li>デフォルト 1 行 80 文字までがコーディング規約となっているが最大 137 文字の行がある
+
+<ul>
+<li>1 行あたり最大 137 文字まで許容する、という設定</li>
+</ul>
+</li>
+<li>1 行 80 文字以上 (違反: offense) に該当する箇所が 113 件</li>
+</ul>
+
+
+<p><code>.rubocp_todo.yml</code> の修正不可能・修正困難部分のみを残したりチューニングして、<code>.rubocop.yml</code> に
+リネームしたら自分たちのコーディングスタイルに沿った現実的なルールを適用できる。</p>
+
+<p>標準のコーディング規約に沿ってコードを修正していく場合は、<code>.rubocop.yml</code> に以下の行を追加するか</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">inherit_from</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.rubocop-todo.yml</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>rubocop --config .rubocop_todo.yml</code> を実行して、違反をつぶしていく。</p>
+
+<p>コードの自動修正機能もある。
+<code>.rubocop_todo.yml</code> に <code># Cop supports --auto-correct.</code> と記述されている cop については、以下の
+コマンドにより自動修正が可能。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rubocop -a
+</span><span class='line'><span class="c"># $ rubocop --auto-correct でもOK</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
