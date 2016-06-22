@@ -1,0 +1,54 @@
+---
+layout: post
+title: "ネットワークエンジニアのためのvim syntax: junos.vim"
+date: 2016-06-22 10:57
+comments: true
+categories: juniper junos vim
+---
+
+
+ネットワークエンジニアのみなさん、こんにちは。
+Juniper の configuration をカラーリングする vim プラグインを作ったのでご活用下さい。
+
+以下のようにカラーリングします。 (colorscheme は molokai)
+
+before
+------
+
+![display_before](/images/20160622_junos-confg_before.png)
+
+after
+-----
+
+![display_after](/images/20160622_junos-confg_after.png)
+
+before: `display set` モード
+----------------------------
+
+![display-set_before](/images/20160622_junos-confg-set_before.png)
+
+after: `display set` モード
+---------------------------
+
+![display-set_after](/images/20160622_junos-confg-set_after.png)
+
+<!-- more -->
+
+インストール
+------------
+
+NeoBundle で vim プラグインを管理している人は以下の行を`.vimrc` に追加して
+
+```vim
+NeoBundle 'momota/junos.vim'
+```
+
+`:NeoBundleInstall` でインストールしましょう。
+
+
+使い方
+------
+
+juniper config ファイルを `*.junos` という拡張子で保存して vim で開くか、
+juniper config ファイルを開いている時に `:set ft=junos` を実行すると色付けしてくれる。
+
