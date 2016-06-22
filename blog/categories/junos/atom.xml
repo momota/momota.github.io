@@ -4,7 +4,7 @@
   <title><![CDATA[Category: junos | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/junos/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-22T11:13:27+09:00</updated>
+  <updated>2016-06-22T11:33:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,12 +14,13 @@
 
   
   <entry>
-    <title type="html"><![CDATA[ネットワークエンジニアのためのvim syntax: junos.vim]]></title>
+    <title type="html"><![CDATA[ネットワークエンジニアのための junos.vim]]></title>
     <link href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/"/>
     <updated>2016-06-22T10:57:00+09:00</updated>
     <id>http://momota.github.io/blog/2016/06/22/junos-dot-vim</id>
     <content type="html"><![CDATA[<p>ネットワークエンジニアのみなさん、こんにちは。
-Juniper の configuration をカラーリングする vim プラグインを作ったのでご活用下さい。</p>
+Juniper の configuration をカラーリングする vim プラグイン
+<a href="https://github.com/momota/junos.vim">momota/junos.vim</a> を作ったのでご活用下さい。</p>
 
 <p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
 
@@ -54,7 +55,7 @@ NeoBundle 'momota/junos.vim'
 
 <h2>使い方</h2>
 
-<p>juniper config ファイルを <code>*.junos</code> という拡張子で保存して vim で開くか、
+<p>juniper config ファイルを <code>.junos</code> という拡張子で保存して vim で開くか、
 juniper config ファイルを開いている時に <code>:set ft=junos</code> を実行すると色付けしてくれる。</p>
 ]]></content>
   </entry>
