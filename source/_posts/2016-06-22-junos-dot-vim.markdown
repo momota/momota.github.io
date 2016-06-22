@@ -8,8 +8,10 @@ categories: juniper junos vim
 
 
 ネットワークエンジニアのみなさん、こんにちは。
+
 Juniper の configuration をカラーリングする vim プラグイン
 [momota/junos.vim](https://github.com/momota/junos.vim) を作ったのでご活用下さい。
+
 
 以下のようにカラーリングします。 (colorscheme は molokai)
 
@@ -46,12 +48,18 @@ NeoBundle 'momota/junos.vim'
 
 `:NeoBundleInstall` でインストールする。
 
-その他は、[README.md](https://github.com/momota/junos.vim#installation) を参照。
+その他は、[README/Installation](https://github.com/momota/junos.vim#installation) を参照。
 
 
 使い方
 ------
 
 juniper config ファイルを `.junos` という拡張子で保存して vim で開くか、
-juniper config ファイルを開いている時に `:set ft=junos` を実行すると色付けしてくれる。
+juniper config ファイルの先頭に以下行を追加して保存し vim で開くと色付けしてくれる。
+
+```sh
+# vim: set ft=junos:
+```
+
+もしくは、juniper config ファイルを vim 開いている時に `:set ft=junos` を実行する。
 
