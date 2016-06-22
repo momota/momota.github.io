@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-20T17:01:05+09:00</updated>
+  <updated>2016-06-22T11:13:27+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,53 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ネットワークエンジニアのためのvim syntax: junos.vim]]></title>
+    <link href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/"/>
+    <updated>2016-06-22T10:57:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/06/22/junos-dot-vim</id>
+    <content type="html"><![CDATA[<p>ネットワークエンジニアのみなさん、こんにちは。
+Juniper の configuration をカラーリングする vim プラグインを作ったのでご活用下さい。</p>
+
+<p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
+
+<h2>before</h2>
+
+<p><img src="http://momota.github.io/images/20160622_junos-confg_before.png" alt="display_before" /></p>
+
+<h2>after</h2>
+
+<p><img src="http://momota.github.io/images/20160622_junos-confg_after.png" alt="display_after" /></p>
+
+<h2>before: <code>display set</code> モード</h2>
+
+<p><img src="http://momota.github.io/images/20160622_junos-confg-set_before.png" alt="display-set_before" /></p>
+
+<h2>after: <code>display set</code> モード</h2>
+
+<p><img src="http://momota.github.io/images/20160622_junos-confg-set_after.png" alt="display-set_after" /></p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>NeoBundle で vim プラグインを管理している人は以下の行を<code>.vimrc</code> に追加して</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'>NeoBundle <span class="s1">&#39;momota/junos.vim&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>:NeoBundleInstall</code> でインストールしましょう。</p>
+
+<h2>使い方</h2>
+
+<p>juniper config ファイルを <code>*.junos</code> という拡張子で保存して vim で開くか、
+juniper config ファイルを開いている時に <code>:set ft=junos</code> を実行すると色付けしてくれる。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RuboCop でコーディングスタイルを矯正する]]></title>
@@ -5798,310 +5845,6 @@ oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマ�
 
 
 <p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_after.png" alt="after_man" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[vim プラグインで幸せな生活を送る]]></title>
-    <link href="http://momota.github.io/blog/2013/08/29/vim-plugins/"/>
-    <updated>2013-08-29T00:38:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/08/29/vim-plugins</id>
-    <content type="html"><![CDATA[<p>vimはhjklな変態的キーバインドから敬遠されがちだと思うけど強力なプラグインがあってこそ、やめられないとまらないわけであって、ここではプラグインの導入方法や管理方法を記載します。</p>
-
-<!-- more -->
-
-
-<h2>ノーマルなプラグイン導入</h2>
-
-<ol>
-<li><p>プラグインファイルをダウンロードしてくる</p></li>
-<li><p>ダウンロードしたプラグインファイル一式を runtimepathで指定されたディレクトリ以下に放り込む</p>
-
-<ul>
-<li>通常は <code>$HOME/.vim</code> 。runtimepathは以下のviコマンドで確認できる。</li>
-</ul>
-</li>
-</ol>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="p">:</span><span class="k">set</span> <span class="nb">runtimepath</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>helpを見てみると、以下ディレクトリ(優先順)がデフォルト設定されている。(vim74-kaoriya-win64で確認)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'> :help <span class="nb">runtimepath</span>
-</span><span class='line'> # <span class="p">=&gt;</span> 以下抜粋
-</span><span class='line'> <span class="s1">&#39;runtimepath&#39;</span> <span class="s1">&#39;rtp&#39;</span> 文字列  <span class="p">(</span>既定値:
-</span><span class='line'>                 Unix: <span class="c">&quot;$HOME/.vim,</span>
-</span><span class='line'>                 $VIM/vimfiles<span class="p">,</span>
-</span><span class='line'>                 $VIMRUNTIME<span class="p">,</span>
-</span><span class='line'>                 $VIM<span class="sr">/vimfiles/</span>after<span class="p">,</span>
-</span><span class='line'>                 $HOME<span class="sr">/.vim/</span>after&quot;
-</span><span class='line'>                 DOS<span class="p">,</span> MS<span class="p">-</span>Win系<span class="p">,</span> OS<span class="sr">/2: &quot;$HOME/</span>vimfiles<span class="p">,</span>
-</span><span class='line'>                 $VIM/vimfiles<span class="p">,</span>
-</span><span class='line'>                 $VIMRUNTIME<span class="p">,</span>
-</span><span class='line'>                 $VIM<span class="sr">/vimfiles/</span>after<span class="p">,</span>
-</span><span class='line'>                 $HOME<span class="sr">/vimfiles/</span>after&quot;
-</span><span class='line'>                 Macintosh: <span class="c">&quot;$VIM:vimfiles,</span>
-</span><span class='line'>                 $VIMRUNTIME<span class="p">,</span>
-</span><span class='line'>                 $VIM:vimfiles:after&quot;
-</span><span class='line'>                 <span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>プラグインによるプラグインパッケージ管理</h2>
-
-<p>上述したプラグイン導入を続けていくと、<code>$HOME/.vim/</code> 以下が散らかっていくことが容易に想像できるでしょう。散らかるだけで実害がなければ良いのですが、あるプラグインだけ削除したいときなどに難易度高くて困ります。
-そこで、プラグインの相互独立性を担保しながら管理できるプラグインを導入します。</p>
-
-<p>代表的なプラグインパッケージ管理プラグインは、以下です。</p>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th>プラグイン名 </th>
-<th>概要       </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td><a href="https://github.com/tpope/vim-pathogen">pathogen</a>      </td>
-<td> <code>~/.vim/bundle/&lt;プラグイン名&gt;/</code> 以下の各ディレクトリも <code>~/.vim/</code> 直下と同じように読み込むようにするプラグイン。これにより、<code>~/.vim/bundle/</code> 以下にプラグインごとに別のディレクトリを切って管理をすることができるようになる。</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/gmarik/vundle">vundle</a>             </td>
-<td>Vundle は Rails 3 で採用されている、Gem 管理システム Bundler に影響を受けたプラグイン管理システム。自分で <code>~/.vim/bundle</code> git cloneなどで放り込まなくても、vimコマンドでプラグイン追加が可能。</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/Shougo/neobundle.vim">neobundle</a>   </td>
-<td>Vundleにインスパイアされたプラグイン管理システム。Vundleの改良版。</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>上記よりNeoBundleを選びたいと思います。</p>
-
-<h2>NeoBundleインストールと設定</h2>
-
-<h3>1. NeoBundleをセットアップする</h3>
-
-<ul>
-<li>githubから最新NeoBundleのソースを clone する。ここでは、runtimepathを<code>~./.vim/</code>とします。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mkdir -p ~/.vim/bundle
-</span><span class='line'><span class="nv">$ </span>git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2. NeoBundleを設定する</h3>
-
-<ul>
-<li><code>~/.vimrc</code> にNeoBundleの設定を加える。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="c">&quot; ----------------------------------------------------------------------------------------</span>
-</span><span class='line'><span class="c">&quot;   neobundle</span>
-</span><span class='line'><span class="c">&quot; ----------------------------------------------------------------------------------------</span>
-</span><span class='line'><span class="k">set</span> <span class="nb">nocompatible</span>               <span class="c">&quot; Be iMproved</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> has<span class="p">(</span><span class="s1">&#39;vim_starting&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">set</span> <span class="nb">runtimepath</span><span class="p">+=~</span><span class="sr">/.vim/</span>bundle<span class="sr">/neobundle.vim/</span>
-</span><span class='line'><span class="k">endif</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">call</span> neobundle#rc<span class="p">(</span>expand<span class="p">(</span><span class="s1">&#39;~/.vim/bundle/&#39;</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot; Let NeoBundle manage NeoBundle</span>
-</span><span class='line'>NeoBundleFetch <span class="s1">&#39;Shougo/neobundle.vim&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot; Recommended to install</span>
-</span><span class='line'><span class="c">&quot; After install, turn shell ~/.vim/bundle/vimproc, (n,g)make -f your_machines_makefile</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;Shougo/vimproc&#39;</span><span class="p">,</span> {
-</span><span class='line'>        \ <span class="s1">&#39;build&#39;</span> : {
-</span><span class='line'>                \ <span class="s1">&#39;windows&#39;</span> : <span class="s1">&#39;make -f make_mingw32.mak&#39;</span><span class="p">,</span>
-</span><span class='line'>                \ <span class="s1">&#39;cygwin&#39;</span> : <span class="s1">&#39;make -f make_cygwin.mak&#39;</span><span class="p">,</span>
-</span><span class='line'>                \ <span class="s1">&#39;mac&#39;</span> : <span class="s1">&#39;make -f make_mac.mak&#39;</span><span class="p">,</span>
-</span><span class='line'>                \ <span class="s1">&#39;unix&#39;</span> : <span class="s1">&#39;make -f make_unix.mak&#39;</span><span class="p">,</span>
-</span><span class='line'>        \ }<span class="p">,</span>
-</span><span class='line'>\ }
-</span><span class='line'>
-</span><span class='line'><span class="k">filetype</span> plugin indent <span class="k">on</span>     <span class="c">&quot; Required!</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot; Brief help</span>
-</span><span class='line'><span class="c">&quot; :NeoBundleList          - list configured bundles</span>
-</span><span class='line'><span class="c">&quot; :NeoBundleInstall(!)    - install(update) bundles</span>
-</span><span class='line'><span class="c">&quot; :NeoBundleClean(!)      - confirm(or auto-approve) removal of unused bundles</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot; Installation check.</span>
-</span><span class='line'>NeoBundleCheck
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3. プラグインの取得</h3>
-
-<ul>
-<li><code>~/.vimrc</code>にインストールするプラグインを列挙する。(以下は例)</li>
-<li>保存したあと、vim を起動し<code>:NeoBundleInstall</code> を実行するとプラグインがインストールされる。プラグインファイルは、<code>.vim/bundle/</code>以下にプラグイン別に保存される。もちろん各プラグインの設定は個別に <code>.vimrc</code> へ記述する必要がある。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="c">&quot; GitHubリポジトリにあるプラグインを利用する</span>
-</span><span class='line'><span class="c">&quot; --&gt; NeoBundle &#39;USER/REPOSITORY-NAME&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;Shougo/neocomplcache&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;Shougo/neosnippet&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;Shougo/unite.vim&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;thinca/vim-quickrun&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;davidoc/taskpaper.vim&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;itchyny/lightline.vim&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;altercation/vim-colors-solarized&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot;GitHub以外のGitリポジトリにあるプラグインを利用する</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;git://git.wincent.com/command-t.git&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot; vim-scripts リポジトリにあるプラグインを利用する</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;surround.vim&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&quot;Git以外のリポジトリにあるプラグインを利用する</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;http://svn.macports.org/repository/macports/contrib/mpvim/&#39;</span>
-</span><span class='line'>NeoBundle <span class="s1">&#39;https://bitbucket.org/ns9tks/vim-fuzzyfinder&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>プラグインをアンインストールしたい場合は、<code>.vimrc</code>から当該プラグインの記述を消し、<code>:NeoBundleClean</code>を実行する。</li>
-</ul>
-
-
-<h2>おすすめプラグイン</h2>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th>プラグイン名  </th>
-<th>概要                                        </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td><a href="https://github.com/Shougo/neocomplcache.vim">neocomplcache</a> </td>
-<td>入力補完機能を提供する</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/Shougo/neosnippet.vim">neosnippet</a>    </td>
-<td>スニペット入力サポート</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/itchyny/lightline.vim">lightline.vim</a> </td>
-<td>ステータスライン表示をおしゃれに</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/davidoc/taskpaper.vim">taskpaper.vim</a> </td>
-<td>タスク・TODOリストを管理</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/Shougo/unite.vim">unite.vim</a>     </td>
-<td>ファイラとして利用</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="https://github.com/altercation/vim-colors-solarized">solarized</a>     </td>
-<td>カラースキーム</td>
-</tr>
-<tr>
-<td></td>
-<td><a href="http://www.vim.org/scripts/script.php?script_id=1697">surround</a>      </td>
-<td>HTMLタグなど&#8221;囲まれているもの&#8221;の編集補助</td>
-</tr>
-</tbody>
-</table>
-
 ]]></content>
   </entry>
   
