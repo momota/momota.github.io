@@ -9,8 +9,7 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="ネットワークエンジニアのみなさん、こんにちは。
-Juniper の configuration をカラーリングする vim プラグイン
+  <meta name="description" content="ネットワークエンジニアのみなさん、こんにちは。 Juniper の configuration をカラーリングする vim プラグイン
 momota/junos.vim を作ったのでご活用下さい。 以下のようにカラーリングします。 (colorscheme は molokai) before &hellip;">
   
 
@@ -108,8 +107,9 @@ momota/junos.vim を作ったのでご活用下さい。 以下のようにカ�
   </header>
 
 
-<div class="entry-content"><p>ネットワークエンジニアのみなさん、こんにちは。
-Juniper の configuration をカラーリングする vim プラグイン
+<div class="entry-content"><p>ネットワークエンジニアのみなさん、こんにちは。</p>
+
+<p>Juniper の configuration をカラーリングする vim プラグイン
 <a href="https://github.com/momota/junos.vim">momota/junos.vim</a> を作ったのでご活用下さい。</p>
 
 <p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
@@ -142,12 +142,21 @@ Juniper の configuration をカラーリングする vim プラグイン
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>:NeoBundleInstall</code> でインストールしましょう。</p>
+<p><code>:NeoBundleInstall</code> でインストールする。</p>
+
+<p>その他は、<a href="https://github.com/momota/junos.vim#installation">README/Installation</a> を参照。</p>
 
 <h2>使い方</h2>
 
 <p>juniper config ファイルを <code>.junos</code> という拡張子で保存して vim で開くか、
-juniper config ファイルを開いている時に <code>:set ft=junos</code> を実行すると色付けしてくれる。</p>
+juniper config ファイルの先頭に以下行を追加して保存し vim で開くと色付けしてくれる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'># <span class="k">vim</span>: <span class="k">set</span> <span class="nb">ft</span><span class="p">=</span>junos:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>もしくは、juniper config ファイルを vim 開いている時に <code>:set ft=junos</code> を実行する。</p>
 </div>
 
 
