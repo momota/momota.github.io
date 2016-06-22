@@ -12,6 +12,10 @@ categories: juniper junos vim
 Juniper の configuration をカラーリングする vim プラグイン
 [momota/junos.vim](https://github.com/momota/junos.vim) を作ったのでご活用下さい。
 
+色を付けることによって、junos configuration の解釈を手助けしたり、
+configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
+(誤ったタームを入力すると色が付かないので)
+
 
 以下のようにカラーリングします。 (colorscheme は molokai)
 
