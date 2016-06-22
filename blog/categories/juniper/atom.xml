@@ -4,7 +4,7 @@
   <title><![CDATA[Category: juniper | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/juniper/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-22T18:10:11+09:00</updated>
+  <updated>2016-06-22T18:27:38+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -22,6 +22,10 @@
 
 <p>Juniper の configuration をカラーリングする vim プラグイン
 <a href="https://github.com/momota/junos.vim">momota/junos.vim</a> を作ったのでご活用下さい。</p>
+
+<p>色を付けることによって、junos configuration の解釈を手助けしたり、
+configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
+(誤ったタームを入力すると色が付かないので)</p>
 
 <p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
 
