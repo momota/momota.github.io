@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ios | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/ios/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2016-06-24T16:58:27+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ネットワークエンジニアのための cisco.vim]]></title>
+    <link href="http://momota.github.io/blog/2016/06/24/cisco-dot-vim/"/>
+    <updated>2016-06-24T16:42:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/06/24/cisco-dot-vim</id>
+    <content type="html"><![CDATA[<p>ネットワークエンジニアのみなさん、こんにちは。</p>
+
+<p><a href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a> の cisco バージョンです。</p>
+
+<p>cisco の configuration をカラーリングする vim プラグイン
+<a href="https://github.com/momota/cisco.vim">momota/cisco.vim</a> を作ったのでご活用下さい。</p>
+
+<p>対象は、cisco ルータと Catalyst スイッチ、Nexus スイッチです。</p>
+
+<p>色を付けることによって、configuration の解釈を手助けしたり、
+configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
+(誤ったタームを入力すると色が付かないので)</p>
+
+<p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
+
+<h2>before</h2>
+
+<p><img src="/images/20160624_cisco-config_before.png" alt="display_before" /></p>
+
+<h2>after</h2>
+
+<p><img src="/images/20160624_cisco-config_after.png" alt="display_after" /></p>
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>NeoBundle で vim プラグインを管理している人は以下の行を<code>.vimrc</code> に追加して</p>
+
+<p><code>vim
+NeoBundle 'momota/cisco.vim'
+</code></p>
+
+<p><code>:NeoBundleInstall</code> でインストールする。</p>
+
+<p>その他は、<a href="https://github.com/momota/cisco.vim#installation">README/Installation</a> を参照。</p>
+
+<h2>使い方</h2>
+
+<p>cisco config ファイルを <code>.cisco</code> という拡張子で保存して vim で開くか、
+cisco config ファイルの先頭に以下行を追加して保存し vim で開くと色付けしてくれる。</p>
+
+<p><code>
+! vim: set ft=cisco:
+</code></p>
+
+<p>もしくは、cisco config ファイルを vim 開いている時に <code>:set ft=cisco</code> を実行する。</p>
+
+<h1>関連</h1>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

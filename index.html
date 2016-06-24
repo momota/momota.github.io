@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="ネットワークエンジニアのみなさん、こんにちは。 Juniper の configuration をカラーリングする vim プラグイン
-momota/junos.vim を作ったのでご活用下さい。 対象は、Juniper EX シリーズとSRX シリーズです。 色を付けることによって、junos &hellip;">
+  <meta name="description" content="ネットワークエンジニアのみなさん、こんにちは。 ネットワークエンジニアのための junos.vim の cisco バージョンです。 cisco の configuration をカラーリングする vim プラグイン
+momota/cisco.vim を作ったのでご活用下さい。 対象は、cisco &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -87,6 +87,68 @@ momota/junos.vim を作ったのでご活用下さい。 対象は、Juniper EX 
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-06-24T16:42:00+09:00" pubdate data-updated="true">2016-06-24</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>ネットワークエンジニアのみなさん、こんにちは。</p>
+
+<p><a href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a> の cisco バージョンです。</p>
+
+<p>cisco の configuration をカラーリングする vim プラグイン
+<a href="https://github.com/momota/cisco.vim">momota/cisco.vim</a> を作ったのでご活用下さい。</p>
+
+<p>対象は、cisco ルータと Catalyst スイッチ、Nexus スイッチです。</p>
+
+<p>色を付けることによって、configuration の解釈を手助けしたり、
+configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
+(誤ったタームを入力すると色が付かないので)</p>
+
+<p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
+
+<h2>before</h2>
+
+<p><img src="/images/20160624_cisco-config_before.png" alt="display_before" /></p>
+
+<h2>after</h2>
+
+<p><img src="/images/20160624_cisco-config_after.png" alt="display_after" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/06/24/cisco-dot-vim/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a></h1>
     
     
@@ -138,6 +200,8 @@ configuration 作成時のミスに気づきやすくしたりする効果が期
 <h2>after: <code>display set</code> モード</h2>
 
 <p><img src="/images/20160622_junos-confg-set_after.png" alt="display-set_after" /></p>
+
+<p>cisco 版はこちら <a href="http://momota.github.io/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a></p>
 
 </div>
   
@@ -602,109 +666,6 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/10/activerecord/">Rails じゃなくても ActiveRecord を使う</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-10T14:54:00+09:00" pubdate data-updated="true">2014-05-10</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
-
-<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
-Ruby on Rails 標準で、モデル層で使われる。</p>
-
-<p>環境は以下。</p>
-
-<ul>
-<li>Mac OSX</li>
-<li>ruby 2.1.1p76</li>
-<li>MySQL mysqld5.6.17</li>
-</ul>
-
-
-<p>最終的なディレクトリ構成は以下のようになる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>.
-</span><span class='line'>├── Gemfile
-</span><span class='line'>├── Gemfile.lock
-</span><span class='line'>├── README.md
-</span><span class='line'>├── Rakefile
-</span><span class='line'>├── app
-</span><span class='line'>│   └── models
-</span><span class='line'>│       └── hoges.rb
-</span><span class='line'>├── app.rb
-</span><span class='line'>├── config
-</span><span class='line'>│   └── database.yml
-</span><span class='line'>├── db
-</span><span class='line'>│   └── migrate
-</span><span class='line'>│       └── 20140510_create_hoges.rb
-</span><span class='line'>├── log
-</span><span class='line'>│   ├── database.log
-</span><span class='line'>│   └── trace.log
-</span><span class='line'>└── vendor
-</span><span class='line'>    └── bundle
-</span><span class='line'>            └── <span class="o">(</span>略<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="https://github.com/momota/activerecord_sample">https://github.com/momota/activerecord_sample</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/05/10/activerecord/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -720,6 +681,10 @@ Ruby on Rails 標準で、モデル層で使われる。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a>
       </li>
     
@@ -733,10 +698,6 @@ Ruby on Rails 標準で、モデル層で使われる。</p>
     
       <li class="post">
         <a href="/blog/2016/02/26/selenium/">ブラウザ操作の自動化: selenium と ruby</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/02/08/ansible/">ansible でノートPCをセットアップ</a>
       </li>
     
   </ul>
