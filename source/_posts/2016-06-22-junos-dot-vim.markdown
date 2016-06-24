@@ -3,7 +3,7 @@ layout: post
 title: "ネットワークエンジニアのための junos.vim"
 date: 2016-06-22 10:57
 comments: true
-categories: juniper junos vim
+categories: juniper junos vim network
 ---
 
 
@@ -42,6 +42,9 @@ after: `display set` モード
 
 ![display-set_after](/images/20160622_junos-confg-set_after.png)
 
+
+cisco 版はこちら [ネットワークエンジニアのための cisco.vim](http://momota.github.io/blog/2016/06/24/cisco-dot-vim/)
+
 <!-- more -->
 
 インストール
@@ -69,4 +72,10 @@ juniper config ファイルの先頭に以下行を追加して保存し vim で
 ```
 
 もしくは、juniper config ファイルを vim 開いている時に `:set ft=junos` を実行する。
+
+
+関連
+====
+
+- [ネットワークエンジニアのための cisco.vim](http://momota.github.io/blog/2016/06/24/cisco-dot-vim/)
 
