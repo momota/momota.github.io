@@ -153,6 +153,7 @@ symbol             | 対象
 :css               | css セレクタ で指定
 
 
+
 [参考 Module: Selenium::WebDriver::Find](http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find)
 
 
@@ -186,7 +187,7 @@ s.select_by(:index, 0)          # index(0, 1, 2, ...)で選択
 
 ```ruby
 e = driver.find_element(:id, "menu")
-driver.mouse.move_to( e )
+driver.mouse.move_to(e)
 ```
 
 
@@ -199,16 +200,16 @@ frame や iframe 要素を使っているサイトで、そのフレーム内の
 
 ```ruby
 frame = driver.find_element(:id, "frame")
-driver.switch_to.frame( frame )
+driver.switch_to.frame(frame)
 ```
 
 フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。
 
 ```ruby
-driver.switch_to.window( driver.window_handle )
+driver.switch_to.window(driver.window_handle)
 
 frame = driver.find_element(:id, "top-frame")
-driver.switch_to.frame( frame )
+driver.switch_to.frame(frame)
 ```
 
 
@@ -247,17 +248,21 @@ end
 ```ruby
 module ElementExtension
   refine Selenium::WebDriver::Element do
-    def send_keys( str )
-      self.clear
-      super( str )
+    def send_keys(str)
+      clear
+      super(str)
     end
 
     def value
-      self.attribute("value")
+      attribute("value")
     end
 
     def checked?
-      self.attribute("checked").nil? ? false : true
+      attribute("checked").nil? ? false : true
+    end
+
+    def url
+      attribute("href")
     end
   end
 end
@@ -273,9 +278,9 @@ user     = "USER"
 password = "PASSWORD"
 
 - driver.find_element(:id, "loginuser").clear
-driver.find_element(:id, "loginuser").send_keys( user )
+driver.find_element(:id, "loginuser").send_keys(user)
 - driver.find_element(:id, "loginpass").clear
-driver.find_element(:id, "loginpass").send_keys( password )
+driver.find_element(:id, "loginpass").send_keys(password)
 driver.find_element(:id, "submit").click
 
 
@@ -287,6 +292,10 @@ driver.find_element(:id, "submit").click
 checkbox = driver.find_element(:id, "some-checkbox")
 - do_something if checkbox.attribute("checked").nil?
 + do_something if checkbox.checked?
+
+# URLの取得
+- url = driver.find_element(:tag_namem "a").attribute("href")
++ url = driver.find_element(:tag_namem "a").url
 ```
 
 
@@ -328,7 +337,7 @@ class SomeSite
     # 初期化処理
     # 定数をセットしたり、webdriverを生成してアクセスしたり。
     @ss_dir  = "./screenshot/"
-    FileUtils.mkdir_p( @ss_dir ) 
+    FileUtils.mkdir_p(@ss_dir) 
 
     @driver  = Selenium::WebDriver.for :firefox
     base_url = "http://somesite.com"
@@ -349,7 +358,7 @@ class SomeSite
 
   private
   # privat method を定義する
-  def get_screenshot( str )
+  def get_screenshot(str)
     now = DateTime.now.strftime("%Y%m%d%H%M%S")
     @driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")
   end
