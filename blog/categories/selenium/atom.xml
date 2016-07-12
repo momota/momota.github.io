@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-06-24T16:58:27+09:00</updated>
+  <updated>2016-07-12T10:47:08+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -239,7 +239,7 @@ s.select_by(:index, 0)          # index(0, 1, 2, &hellip;)で選択</p>
 
 <p><code>ruby
 e = driver.find_element(:id, "menu")
-driver.mouse.move_to( e )
+driver.mouse.move_to(e)
 </code></p>
 
 <h2>フレーム移動</h2>
@@ -250,16 +250,16 @@ driver.mouse.move_to( e )
 
 <p><code>ruby
 frame = driver.find_element(:id, "frame")
-driver.switch_to.frame( frame )
+driver.switch_to.frame(frame)
 </code></p>
 
 <p>フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。</p>
 
 <p>```ruby
-driver.switch_to.window( driver.window_handle )</p>
+driver.switch_to.window(driver.window_handle)</p>
 
 <p>frame = driver.find_element(:id, &ldquo;top-frame&rdquo;)
-driver.switch_to.frame( frame )
+driver.switch_to.frame(frame)
 ```</p>
 
 <h2>ポップアップダイアログの扱い</h2>
@@ -293,17 +293,21 @@ end
 module ElementExtension
   refine Selenium::WebDriver::Element do</p>
 
-<pre><code>def send_keys( str )
-  self.clear
-  super( str )
+<pre><code>def send_keys(str)
+  clear
+  super(str)
 end
 
 def value
-  self.attribute("value")
+  attribute("value")
 end
 
 def checked?
-  self.attribute("checked").nil? ? false : true
+  attribute("checked").nil? ? false : true
+end
+
+def url
+  attribute("href")
 end
 </code></pre>
 
@@ -324,9 +328,9 @@ password = &ldquo;PASSWORD&rdquo;</p>
 
 <ul>
 <li>driver.find_element(:id, &ldquo;loginuser&rdquo;).clear
-driver.find_element(:id, &ldquo;loginuser&rdquo;).send_keys( user )</li>
+driver.find_element(:id, &ldquo;loginuser&rdquo;).send_keys(user)</li>
 <li>driver.find_element(:id, &ldquo;loginpass&rdquo;).clear
-driver.find_element(:id, &ldquo;loginpass&rdquo;).send_keys( password )
+driver.find_element(:id, &ldquo;loginpass&rdquo;).send_keys(password)
 driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 </ul>
 
@@ -343,8 +347,16 @@ driver.find_element(:id, &ldquo;submit&rdquo;).click</li>
 
 <p>checkbox = driver.find_element(:id, &ldquo;some-checkbox&rdquo;)
 &ndash; do_something if checkbox.attribute(&ldquo;checked&rdquo;).nil?
-+ do_something if checkbox.checked?
-```</p>
++ do_something if checkbox.checked?</p>
+
+<h1>URLの取得</h1>
+
+<ul>
+<li>url = driver.find_element(:tag_namem &ldquo;a&rdquo;).attribute(&ldquo;href&rdquo;)</li>
+<li>url = driver.find_element(:tag_namem &ldquo;a&rdquo;).url
+```</li>
+</ul>
+
 
 <p>モンキーパッチの書き方は以下を参考にした。</p>
 
@@ -394,7 +406,7 @@ using Elementextension</p>
 <pre><code># 初期化処理
 # 定数をセットしたり、webdriverを生成してアクセスしたり。
 @ss_dir  = "./screenshot/"
-FileUtils.mkdir_p( @ss_dir ) 
+FileUtils.mkdir_p(@ss_dir) 
 
 @driver  = Selenium::WebDriver.for :firefox
 base_url = "http://somesite.com"
@@ -426,7 +438,7 @@ base_url = "http://somesite.com"
 
 <p>  private
   # privat method を定義する
-  def get_screenshot( str )</p>
+  def get_screenshot(str)</p>
 
 <pre><code>now = DateTime.now.strftime("%Y%m%d%H%M%S")
 @driver.save_screenshot(@ss_dir + "_" + str + "_" + now + ".png")

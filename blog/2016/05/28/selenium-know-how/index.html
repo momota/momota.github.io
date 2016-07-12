@@ -358,7 +358,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;menu&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span> <span class="n">e</span> <span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -371,7 +371,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -381,10 +381,10 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">window</span><span class="p">(</span> <span class="n">driver</span><span class="o">.</span><span class="n">window_handle</span> <span class="p">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">window_handle</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;top-frame&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
+</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -440,19 +440,27 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ElementExtension</span>
 </span><span class='line'>  <span class="n">refine</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="no">Element</span> <span class="k">do</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">clear</span>
-</span><span class='line'>      <span class="k">super</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">clear</span>
+</span><span class='line'>      <span class="k">super</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">value</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">checked?</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">url</span>
+</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
@@ -482,14 +490,18 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
 </pre></td><td class='code'><pre><code class='diff'><span class='line'># たとえば、ログイン処理
 </span><span class='line'>user     = &quot;USER&quot;
 </span><span class='line'>password = &quot;PASSWORD&quot;
 </span><span class='line'>
 </span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginuser&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginuser&quot;).send_keys( user )
+</span><span class='line'>driver.find_element(:id, &quot;loginuser&quot;).send_keys(user)
 </span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginpass&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginpass&quot;).send_keys( password )
+</span><span class='line'>driver.find_element(:id, &quot;loginpass&quot;).send_keys(password)
 </span><span class='line'>driver.find_element(:id, &quot;submit&quot;).click
 </span><span class='line'>
 </span><span class='line'>
@@ -501,6 +513,10 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>checkbox = driver.find_element(:id, &quot;some-checkbox&quot;)
 </span><span class='line'><span class="gd">- do_something if checkbox.attribute(&quot;checked&quot;).nil?</span>
 </span><span class='line'><span class="gi">+ do_something if checkbox.checked?</span>
+</span><span class='line'>
+</span><span class='line'># URLの取得
+</span><span class='line'><span class="gd">- url = driver.find_element(:tag_namem &quot;a&quot;).attribute(&quot;href&quot;)</span>
+</span><span class='line'><span class="gi">+ url = driver.find_element(:tag_namem &quot;a&quot;).url</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -607,7 +623,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>    <span class="c1"># 初期化処理</span>
 </span><span class='line'>    <span class="c1"># 定数をセットしたり、webdriverを生成してアクセスしたり。</span>
 </span><span class='line'>    <span class="vi">@ss_dir</span>  <span class="o">=</span> <span class="s2">&quot;./screenshot/&quot;</span>
-</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span> <span class="vi">@ss_dir</span> <span class="p">)</span>
+</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="vi">@ss_dir</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="vi">@driver</span>  <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
 </span><span class='line'>    <span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;http://somesite.com&quot;</span>
@@ -628,7 +644,7 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
 </span><span class='line'>
 </span><span class='line'>  <span class="kp">private</span>
 </span><span class='line'>  <span class="c1"># privat method を定義する</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">get_screenshot</span><span class="p">(</span> <span class="n">str</span> <span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">get_screenshot</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">now</span> <span class="o">=</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m%d%H%M%S&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="vi">@ss_dir</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">str</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">now</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">end</span>
