@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-07-12T10:47:08+09:00</updated>
+  <updated>2016-08-10T18:59:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,235 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ansible で MacBook Pro をセットアップ]]></title>
+    <link href="http://momota.github.io/blog/2016/08/10/ansible-mac/"/>
+    <updated>2016-08-10T15:15:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/08/10/ansible-mac</id>
+    <content type="html"><![CDATA[<p>MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理ツール ansible を使ってセットアップした。</p>
+
+<p><img src="http://momota.github.io/images/20160810_macbookpro.jpg" alt="macbook pro" /></p>
+
+<p>t-wada さんのエントリ <a href="http://t-wada.hatenablog.jp/entry/mac-provisioning-by-ansible">Mac の開発環境構築を自動化する (2015 年初旬編) &ndash; t-wadaのブログ変更する</a>
+を見れば事足りると思われるので、本稿は自分用のメモ(t-wada さんのを少しだけカスタマイズ &amp; 補足)。</p>
+
+<!-- more -->
+
+
+<h1>1. 事前準備</h1>
+
+<h2>1.1. SSH</h2>
+
+<p>ansible では、コントローラ (Control Machine) から SSH 越しで管理対象ノード (Managed Node) を操作する。
+今回は Control Machine も Managed Node も同一マシン (Macbook) なので、localhost に SSH できるようにする。</p>
+
+<p>まず SSH の許可設定。
+Mac で「システム環境設定」 > 「共有」 > 「リモートログイン」にチェック。</p>
+
+<p>次にパスなしログインするために公開鍵を設定する。
+<a href="http://momota.github.io/blog/2016/02/08/ansible/">こちらでも紹介したとおり</a>、以下のようにする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># no-pass SSH key を生成</span>
+</span><span class='line'><span class="nv">$ </span>ssh-keygen -t rsa
+</span><span class='line'>
+</span><span class='line'><span class="c"># authorized_keysの登録</span>
+</span><span class='line'><span class="nv">$ </span>cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</span><span class='line'><span class="nv">$ </span>chmod 600 ~/.ssh/authorized_keys
+</span><span class='line'>
+</span><span class='line'><span class="c"># SSH アクセス確認</span>
+</span><span class='line'><span class="nv">$ </span>ssh 127.0.0.1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>1.2. Xcode</h2>
+
+<p>Homebrew をインストールするために必要なので、App Store から XCode をインストールする。
+XCode インストール後、ライセンス同意する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo xcode build -license
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ライセンス規約みたいな文章がつらつらと出てくるので、最後に「agree」と入力する。</p>
+
+<p>XCode のコマンドラインツールもインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>xcode-select --install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>1.3. Homebrew</h2>
+
+<p>Homebrew は Mac 用のパッケージマネージャ (yum とか apt 的なやつ。
+Homebrew って、ホームブリューと読んでいるけどホームブルーのほうが正しい発音ぽい)。</p>
+
+<p><a href="http://brew.sh/index_ja.html">公式サイト</a>の案内に従い、以下のワンライナーで Homebrew をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>/usr/bin/ruby -e <span class="s2">&quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上記ワンライナーでインストールするとたぶん最新版がインストールされるが、インストール後 <code>brew doctor</code> で古いと出力されたらアップデートする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew doctor
+</span><span class='line'><span class="nv">$ </span>brew update
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>1.4. Ansible</h2>
+
+<p>Ansible に必要な python はすでに 2.7 系がプリインストールされていたので、
+そのまま Homebrew で Ansible をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew install ansible
+</span><span class='line'><span class="nv">$ </span>ansible --version
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>2. Ansible Playbook を開発する</h1>
+
+<p>前回の <a href="http://momota.github.io/blog/2016/02/08/ansible/">Ansible でノート PC をセットアップ</a> で作った仕組みにのせる。</p>
+
+<p>t-wada さんの場合、1 枚の Playbook に変数やタスクを記述していたが、ありものは活用したいという思いがあり。</p>
+
+<p>今回は以下のようなアレンジをした。</p>
+
+<ul>
+<li>インストールするパッケージを列挙した変数を <code>vars/common.yml</code> に切り出す</li>
+<li>CentOS などへもインストールするような共通のパッケージは <code>common/</code> 以下の role を利用する
+
+<ul>
+<li>今回は tmux とzsh のみ</li>
+</ul>
+</li>
+<li>Mac 固有のタスクは、<code>mac/</code> 以下に切り出す
+
+<ul>
+<li>brew (cask も) 用のrole を作る</li>
+<li>ricty フォントインストールは個別の処理が多かったため別の role で切り出す</li>
+</ul>
+</li>
+<li>インベントリファイル <code>hosts</code> に mac 用グループ <code>[mac]</code> を作る</li>
+</ul>
+
+
+<p>できあがった Playbook は Github にあげた。 <a href="https://github.com/momota/laptop-build">momota/laptop-build</a></p>
+
+<h1>3. Ansible を実行する</h1>
+
+<h2>3.1. ansible のログ出力設定</h2>
+
+<p><code>tee</code> とかを使って Playbook の実行出力結果をファイルに保存しようと思ったが、ansible のログ機能を使った。
+<code>ansible.cfg</code> に以下を記述。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="k">[defaults]</span>
+</span><span class='line'><span class="na">log_path</span><span class="o">=</span><span class="s">/var/log/ansible.log</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>mac の場合、<code>/etc/ansible/ansible.cfg</code> がなかった (ディレクトリごとない) ので、<code>~/.ansible.cfg</code> を作成した。</p>
+
+<h2>3.2. ansible の実行</h2>
+
+<p>absible-playbook コマンドで実行する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># git clone</span>
+</span><span class='line'><span class="nv">$ </span>git clone https://github.com/momota/laptop-build
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>laptop-build
+</span><span class='line'>
+</span><span class='line'><span class="c"># execute playbook</span>
+</span><span class='line'><span class="nv">$ HOMEBREW_CASK_OPTS</span><span class="o">=</span><span class="s2">&quot;--appdir=/Applications&quot;</span> ansible-playbook -i hosts mac/site.yml -vv -K
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>HOMEBREW_CASK_OPTS="--appdir=/Applications"</code> をつけないと、アプリケーションによって <code>/Applications</code> だったり、 <code>~/Applications</code> だったりにシンボリックリンクリンクが作られてしまうとのこと。</p>
+
+<p>ログインシェルを zsh に変更するタスクで <code>sudo</code> するので、<code>-K</code> オプション付き。</p>
+
+<h1>4. Playbook のトラブルフォロー</h1>
+
+<h2>4.1. shell モジュールでcommand not found</h2>
+
+<p>Playbook をコピペして実行したら、shell モジュールで <code>brew</code> を呼んでいるタスクから
+<code>command not found</code> エラーが返ってきた。
+フルパスで指定し直す。</p>
+
+<h2>4.2. cask パッケージ名の誤り</h2>
+
+<p><code>/vars/common.yml</code> にインストールしたい cask パッケージ名を定義するが、パッケージ名を謝って途中で処理がこけた。
+もちろんググっても良いと思うが、事前に以下のコマンドなどで調べるとよさそう。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew cask search <span class="o">[</span>探したいパッケージ<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>4.3. cask インストールの処理停止</h2>
+
+<p>Homebrew cask でパッケージインストール途中で処理が止まることがあった。(2, 3回)
+どんなに待っても止まったままなので、 <code>Ctrl-c</code> で中断する。</p>
+
+<p>ansible-playbook コマンドに <code>-vvv</code> オプションなどを付けるも、原因はよく分からず。
+たぶん、ansible ではなく brew 側に原因がありそう。</p>
+
+<p>インストール処理で止まっているパッケージは、ansible で表示されているパッケージの、<code>vars/common.yml</code> での変数定義上の次のパッケージ。
+途中で止まっているパッケージもインストール一覧に出力される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew cask list
+</span><span class='line'><span class="c">#=&gt; インストール処理中のパッケージも出力される</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>リストには表示されるものの、中途半端にインストールされていそうなので、
+<code>brew</code> コマンドでインストールし直して Playbook を再実行する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>brew cask install --force <span class="o">[</span>途中で止まったパッケージ<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># アンインストールして、再インストールしても良いかも</span>
+</span><span class='line'><span class="c">#   $ brew cask uninstall [途中で止まったパッケージ]</span>
+</span><span class='line'><span class="c">#   $ brew cask install [途中で止まったパッケージ]</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ HOMEBREW_CASK_OPTS</span><span class="o">=</span><span class="s2">&quot;--appdir=/Applications&quot;</span> ansible-playbook -i hosts mac/site.yml -vv -K
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>なにも考えずに re-run できるのはうれしい。 (これが冪等性のパワーか)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ネットワークエンジニアのための cisco.vim]]></title>
@@ -5683,212 +5912,6 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 </span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 then accept</span>
 </span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
 </span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then discard
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh)]]></title>
-    <link href="http://momota.github.io/blog/2013/09/07/oh-my-zsh/"/>
-    <updated>2013-09-07T00:04:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/09/07/oh-my-zsh</id>
-    <content type="html"><![CDATA[<p>bash や tcsh でいいよ、って人もだまされたと思って zsh 試してほしい。もう元に戻れないくらい便利だと感じてもらえるだろう。本番環境のサーバにも入れたいくらい。</p>
-
-<p>zsh そのままでも十分便利だけど、<em>oh-my-zsh</em> を入れるとさらに便利になるよ。
-oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。</p>
-
-<p>以下では、zsh インストールと oh-my-zsh の導入について記載するよ。</p>
-
-<!-- more -->
-
-
-<h2>0. zsh の特徴, つまり導入メリット</h2>
-
-<p><a href="http://ja.wikipedia.org/wiki/Z_Shell">wikipedia に zsh の特徴がまとめられている</a>が、その中でも特に以下が個人的に便利だと思う。</p>
-
-<ul>
-<li>プログラム可能な補完機能に拠って、多くのユーザーコマンドのオプションや引数を打つのを支援する
-
-<ul>
-<li>インストールの時点で数百のコマンドをサポートしている</li>
-</ul>
-</li>
-<li>スペル修正機能
-
-<ul>
-<li>間違いを正すのはもちろん、大文字を小文字に変換してくれたり</li>
-</ul>
-</li>
-<li>ユーザーの起動している全てのzshでコマンド履歴を共有することができる
-
-<ul>
-<li>screen や tmux 使いにはうれしい</li>
-</ul>
-</li>
-</ul>
-
-
-<p>その他、Wikipediaには以下の特徴が列挙されている。</p>
-
-<ul>
-<li>拡張ファイル名生成（ワイルドカード展開）に拠って &ldquo;find&rdquo; のような外部コマンドを呼び出さないで、ファイル名を展開する。</li>
-<li>変数や配列の処理が改善されている。</li>
-<li>複数行コマンドがバッファーで編集できる。</li>
-<li>様々な互換モードが在る。例えば、zshをshとして実行したとき、bashの振りをするようにできる。</li>
-<li>プロンプトテーマ</li>
-<li>端末の右端に情報を表示し長いコマンドを打っているときは自動的に隠れる右プロンプトを表示できる。</li>
-<li>殆ど全部のカスタマイズが可能。</li>
-</ul>
-
-
-<h2>1. zsh をインストールする</h2>
-
-<p>失うものが何もなくなったところで zsh をインストールしよう。</p>
-
-<p>centos だと yum でインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo yum -y install zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>macだと homebrew でインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo brew install zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ubuntu だと apt でインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>インストールできたかどうかを確認する。(上述したすべてのOSで共通、たぶん)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>zsh --version
-</span><span class='line'>zsh 4.3.17 <span class="o">(</span>x86_64-unknown-linux-gnu<span class="o">)</span>
-</span><span class='line'><span class="nv">$ </span>which zsh
-</span><span class='line'>/usr/bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2. ログインシェルを zsh にする</h2>
-
-<p>ログイン直後にデフォルトで起動する shell を zsh にするよ。
-ここでは ubuntu 12.04 でのコマンド例ですが、たぶん mac や centos とかでも一緒でOKだと思う。</p>
-
-<p>現在利用可能なシェルの一覧は以下で確認できる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat /etc/shells
-</span><span class='line'><span class="c"># /etc/shells: valid login shells</span>
-</span><span class='line'>/bin/sh
-</span><span class='line'>/bin/dash
-</span><span class='line'>/bin/bash
-</span><span class='line'>/bin/rbash
-</span><span class='line'>/bin/zsh
-</span><span class='line'>/usr/bin/zsh
-</span><span class='line'>/usr/bin/tmux
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>それではログインシェルを zsh に変えよう。
-インタラクティブにパスワードと zsh への path を入力しよう。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>chsh
-</span><span class='line'>Password:
-</span><span class='line'>Changing the login shell <span class="k">for </span>momota
-</span><span class='line'>Enter the new value, or press ENTER <span class="k">for </span>the default
-</span><span class='line'>        Login Shell <span class="o">[</span>/bin/bash<span class="o">]</span>: /usr/bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>再度ログインして、ログインシェルが zsh へ変わったことを確認しよう。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$SHELL</span>
-</span><span class='line'>/usr/bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ここで、<code>‾/.zshrc</code> を作りたい衝動を抑えて、次に進もう。</p>
-
-<h2>3. <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a> を導入する</h2>
-
-<p>繰り返しになりますが、oh-my-zsh はオープンソースで zsh の便利設定やカラーテーマなどがまとまっているもの。<code>.zshrc</code>もテンプレがあるのでコピれば楽ちん。
-カスタマイズしたければ oh-my-zsh を導入してからにしよう。
-導入方法は github に書いてあるとおり <code>curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh</code> でいいと思うけど、シェルスクリプトの中身をチェックするのがめんどかったのでわたしはマニュアルで入れました。</p>
-
-<h3>3.1. リポジトリから 最新版を clone する</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/robbyrussell/oh-my-zsh.git ‾/.oh-my-zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3.2. すでに <code>‾/.zshrc</code> を作っているひとはバックアップしよう</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>cp ‾/.zshrc ‾/.zshrc.orig
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3.3. <code>.zshrc</code> テンプレートをコピる</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>cp ‾/.oh-my-zsh/templates/zshrc.zsh-template ‾/.zshrc
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3.4. 新しい <code>.zshrc</code> を読み込もう</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">source</span> ‾/.zshrc
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>source</code> の代わりに再ログインしてもいいけど。
-こんな感じで git のステータスも見やすくなる。</p>
-
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130907_oh-my-zsh/zsh.png" alt="zsh" /></p>
-
-<h3>3.5. テーマを変更する</h3>
-
-<p><a href="https://github.com/robbyrussell/oh-my-zsh/wiki/themes">ここにいろいろなテーマがある</a> ので好きなテーマ名を <code>‾/.zshrc</code> 中の <code>ZSH_THEME</code> にセットしてあげればOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">ZSH_THEME</span><span class="o">=</span><span class="s2">&quot;wedisagree&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>変更したら、以下で <code>‾/.zshrc</code> を再読み込み。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">source</span> ‾/.zshrc
 </span></code></pre></td></tr></table></div></figure>
 
 

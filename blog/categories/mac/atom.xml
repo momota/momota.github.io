@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-07-12T10:47:08+09:00</updated>
+  <updated>2016-08-10T18:59:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ansible で MacBook Pro をセットアップ]]></title>
+    <link href="http://momota.github.io/blog/2016/08/10/ansible-mac/"/>
+    <updated>2016-08-10T15:15:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/08/10/ansible-mac</id>
+    <content type="html"><![CDATA[<p>MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理ツール ansible を使ってセットアップした。</p>
+
+<p><img src="/images/20160810_macbookpro.jpg" alt="macbook pro" /></p>
+
+<p>t-wada さんのエントリ <a href="http://t-wada.hatenablog.jp/entry/mac-provisioning-by-ansible">Mac の開発環境構築を自動化する (2015 年初旬編) &ndash; t-wadaのブログ変更する</a>
+を見れば事足りると思われるので、本稿は自分用のメモ(t-wada さんのを少しだけカスタマイズ &amp; 補足)。</p>
+
+<!-- more -->
+
+
+<h1>1. 事前準備</h1>
+
+<h2>1.1. SSH</h2>
+
+<p>ansible では、コントローラ (Control Machine) から SSH 越しで管理対象ノード (Managed Node) を操作する。
+今回は Control Machine も Managed Node も同一マシン (Macbook) なので、localhost に SSH できるようにする。</p>
+
+<p>まず SSH の許可設定。
+Mac で「システム環境設定」 > 「共有」 > 「リモートログイン」にチェック。</p>
+
+<p>次にパスなしログインするために公開鍵を設定する。
+<a href="http://momota.github.io/blog/2016/02/08/ansible/">こちらでも紹介したとおり</a>、以下のようにする。</p>
+
+<p>```sh</p>
+
+<h1>no-pass SSH key を生成</h1>
+
+<p>$ ssh-keygen -t rsa</p>
+
+<h1>authorized_keysの登録</h1>
+
+<p>$ cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys
+$ chmod 600 ~/.ssh/authorized_keys</p>
+
+<h1>SSH アクセス確認</h1>
+
+<p>$ ssh 127.0.0.1
+```</p>
+
+<h2>1.2. Xcode</h2>
+
+<p>Homebrew をインストールするために必要なので、App Store から XCode をインストールする。
+XCode インストール後、ライセンス同意する。</p>
+
+<p><code>sh
+$ sudo xcode build -license
+</code></p>
+
+<p>ライセンス規約みたいな文章がつらつらと出てくるので、最後に「agree」と入力する。</p>
+
+<p>XCode のコマンドラインツールもインストールする。</p>
+
+<p><code>sh
+$ xcode-select --install
+</code></p>
+
+<h2>1.3. Homebrew</h2>
+
+<p>Homebrew は Mac 用のパッケージマネージャ (yum とか apt 的なやつ。
+Homebrew って、ホームブリューと読んでいるけどホームブルーのほうが正しい発音ぽい)。</p>
+
+<p><a href="http://brew.sh/index_ja.html">公式サイト</a>の案内に従い、以下のワンライナーで Homebrew をインストールする。</p>
+
+<p><code>sh
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+</code></p>
+
+<p>上記ワンライナーでインストールするとたぶん最新版がインストールされるが、インストール後 <code>brew doctor</code> で古いと出力されたらアップデートする。</p>
+
+<p><code>sh
+$ brew doctor
+$ brew update
+</code></p>
+
+<h2>1.4. Ansible</h2>
+
+<p>Ansible に必要な python はすでに 2.7 系がプリインストールされていたので、
+そのまま Homebrew で Ansible をインストールする。</p>
+
+<p><code>
+$ brew install ansible
+$ ansible --version
+</code></p>
+
+<h1>2. Ansible Playbook を開発する</h1>
+
+<p>前回の <a href="http://momota.github.io/blog/2016/02/08/ansible/">Ansible でノート PC をセットアップ</a> で作った仕組みにのせる。</p>
+
+<p>t-wada さんの場合、1 枚の Playbook に変数やタスクを記述していたが、ありものは活用したいという思いがあり。</p>
+
+<p>今回は以下のようなアレンジをした。</p>
+
+<ul>
+<li>インストールするパッケージを列挙した変数を <code>vars/common.yml</code> に切り出す</li>
+<li>CentOS などへもインストールするような共通のパッケージは <code>common/</code> 以下の role を利用する
+
+<ul>
+<li>今回は tmux とzsh のみ</li>
+</ul>
+</li>
+<li>Mac 固有のタスクは、<code>mac/</code> 以下に切り出す
+
+<ul>
+<li>brew (cask も) 用のrole を作る</li>
+<li>ricty フォントインストールは個別の処理が多かったため別の role で切り出す</li>
+</ul>
+</li>
+<li>インベントリファイル <code>hosts</code> に mac 用グループ <code>[mac]</code> を作る</li>
+</ul>
+
+
+<p>できあがった Playbook は Github にあげた。 <a href="https://github.com/momota/laptop-build">momota/laptop-build</a></p>
+
+<h1>3. Ansible を実行する</h1>
+
+<h2>3.1. ansible のログ出力設定</h2>
+
+<p><code>tee</code> とかを使って Playbook の実行出力結果をファイルに保存しようと思ったが、ansible のログ機能を使った。
+<code>ansible.cfg</code> に以下を記述。</p>
+
+<p><code>ini
+[defaults]
+log_path=/var/log/ansible.log
+</code></p>
+
+<p>mac の場合、<code>/etc/ansible/ansible.cfg</code> がなかった (ディレクトリごとない) ので、<code>~/.ansible.cfg</code> を作成した。</p>
+
+<h2>3.2. ansible の実行</h2>
+
+<p>absible-playbook コマンドで実行する。</p>
+
+<p>```sh</p>
+
+<h1>git clone</h1>
+
+<p>$ git clone <a href="https://github.com/momota/laptop-build">https://github.com/momota/laptop-build</a>
+$ cd laptop-build</p>
+
+<h1>execute playbook</h1>
+
+<p>$ HOMEBREW_CASK_OPTS=&ldquo;&mdash;appdir=/Applications&rdquo; ansible-playbook -i hosts mac/site.yml -vv -K
+```</p>
+
+<p><code>HOMEBREW_CASK_OPTS="--appdir=/Applications"</code> をつけないと、アプリケーションによって <code>/Applications</code> だったり、 <code>~/Applications</code> だったりにシンボリックリンクリンクが作られてしまうとのこと。</p>
+
+<p>ログインシェルを zsh に変更するタスクで <code>sudo</code> するので、<code>-K</code> オプション付き。</p>
+
+<h1>4. Playbook のトラブルフォロー</h1>
+
+<h2>4.1. shell モジュールでcommand not found</h2>
+
+<p>Playbook をコピペして実行したら、shell モジュールで <code>brew</code> を呼んでいるタスクから
+<code>command not found</code> エラーが返ってきた。
+フルパスで指定し直す。</p>
+
+<h2>4.2. cask パッケージ名の誤り</h2>
+
+<p><code>/vars/common.yml</code> にインストールしたい cask パッケージ名を定義するが、パッケージ名を謝って途中で処理がこけた。
+もちろんググっても良いと思うが、事前に以下のコマンドなどで調べるとよさそう。</p>
+
+<p><code>sh
+$ brew cask search [探したいパッケージ]
+</code></p>
+
+<h2>4.3. cask インストールの処理停止</h2>
+
+<p>Homebrew cask でパッケージインストール途中で処理が止まることがあった。(2, 3回)
+どんなに待っても止まったままなので、 <code>Ctrl-c</code> で中断する。</p>
+
+<p>ansible-playbook コマンドに <code>-vvv</code> オプションなどを付けるも、原因はよく分からず。
+たぶん、ansible ではなく brew 側に原因がありそう。</p>
+
+<p>インストール処理で止まっているパッケージは、ansible で表示されているパッケージの、<code>vars/common.yml</code> での変数定義上の次のパッケージ。
+途中で止まっているパッケージもインストール一覧に出力される。</p>
+
+<p>```sh
+$ brew cask list</p>
+
+<h1>=> インストール処理中のパッケージも出力される</h1>
+
+<p>```</p>
+
+<p>リストには表示されるものの、中途半端にインストールされていそうなので、
+<code>brew</code> コマンドでインストールし直して Playbook を再実行する。</p>
+
+<p>```sh
+$ brew cask install &mdash;force [途中で止まったパッケージ]</p>
+
+<h1>アンインストールして、再インストールしても良いかも</h1>
+
+<h1>$ brew cask uninstall [途中で止まったパッケージ]</h1>
+
+<h1>$ brew cask install [途中で止まったパッケージ]</h1>
+
+<p>$ HOMEBREW_CASK_OPTS=&ldquo;&mdash;appdir=/Applications&rdquo; ansible-playbook -i hosts mac/site.yml -vv -K
+```</p>
+
+<p>なにも考えずに re-run できるのはうれしい。 (これが冪等性のパワーか)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ansible でノートPCをセットアップ]]></title>
@@ -729,93 +935,6 @@ $ git pull origin master
 
 <p>$ rbenv rehash
 ```</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[vim7.4 を mac (osx) にインストール]]></title>
-    <link href="http://momota.github.io/blog/2013/08/24/vim-osx/"/>
-    <updated>2013-08-24T12:56:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/08/24/vim-osx</id>
-    <content type="html"><![CDATA[<p><a href="http://vim-jp.org/blog/2013/08/10/vim_7.4_released.html">vim 7.4がリリースされた</a>ので、macのvimをupdateする。</p>
-
-<!-- more -->
-
-
-<h2>install mercurial</h2>
-
-<p>最新のvimをリポジトリから引っ張ってくる(後述の<code>hg clone http://...</code>)ため、分散型バージョン管理システムであるmercurialをインストールする。mercurialはgitの親戚かな。</p>
-
-<ol>
-<li><p>インストーラをダウンロードする</p>
-
-<p> mercurial インストーラをダウンロードする from <a href="http://mercurial.selenic.com/">http://mercurial.selenic.com/</a></p></li>
-<li><p>install</p>
-
-<p> ダウンロードしたファイルを unzip する。
- 解凍した <code>*.mpkg</code> をダブルクリックし、インストーラを起動する。そのあとはポチポチと次へ的なボタンを押す簡単なお仕事。</p></li>
-</ol>
-
-
-<h2>install vim</h2>
-
-<p><a href="http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x">http://stackoverflow.com/questions/7211820/update-built-in-vim-on-mac-os-x</a> を参考にした。</p>
-
-<h3>(1) 事前確認</h3>
-
-<p>現状のバイナリへのpathやバージョンを確認する。</p>
-
-<p>```sh</p>
-
-<pre><code>$ which vim
-/usr/bin/vim
-$ vim --version | head -n 2
-VIM - Vi IMproved 7.3 (2010 Aug 15, compiled Jun 20 2012 13:16:02)
-Compiled by root@apple.com
-</code></pre>
-
-<p>```</p>
-
-<h3>(2) インストールと設定</h3>
-
-<p>```sh</p>
-
-<pre><code>$ cd /opt/local/bin
-
-# download, compile, and install the latest vim
-$ sudo hg clone https://code.google.com/p/vim/
-$ mv vim vim_
-$ cd vim_
-$ sudo ./configure --prefix=/opt/local
-$ sudo make
-$ sudo make install
-
-
-# add the binary to your path, ahead of /usr/bin
-$ echo 'export PATH="/opt/local/bin:$PATH"' &gt;&gt; ~/.zshrc
-
-# reload zshrc so the changes take effect in this window
-$ source ~/.zshrc
-</code></pre>
-
-<p>```</p>
-
-<p>リポジトリからクローンしたときにディレクトリ名が<code>vim</code>のままだと<code>make install</code>時にエラーになるので、<code>vim_</code>など適当なディレクトリ名に変更しました。</p>
-
-<h3>(3) 事後確認</h3>
-
-<p>7.4になりました。enjoy your vim life.</p>
-
-<p>```sh</p>
-
-<pre><code>$ which vim
-/opt/local/bin/vim
-$ vim --version | head -n 2
-IM - Vi IMproved 7.4 (2013 Aug 10, compiled Aug 24 2013 12:28:42)
-MacOS X (unix) version
-</code></pre>
-
-<p>```</p>
 ]]></content>
   </entry>
   
