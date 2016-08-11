@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ansible | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ansible/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-10T18:59:45+09:00</updated>
+  <updated>2016-08-11T19:49:12+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -111,7 +111,36 @@ $ ansible --version
 <p>今回は以下のようなアレンジをした。</p>
 
 <ul>
-<li>インストールするパッケージを列挙した変数を <code>vars/common.yml</code> に切り出す</li>
+<li>インストールするパッケージを列挙した変数を <code>vars/common.yml</code> に切り出す
+```yaml
+
+<h1>for MacOSX</h1>
+
+homebrew_taps:
+
+<ul>
+<li>homebrew/versions</li>
+<li>homebrew/binary</li>
+<li>homebrew/dupes</li>
+<li>caskroom/cask</li>
+<li>sanemat/font
+homebrew_packages:</li>
+<li>{ name: readline }</li>
+<li>{ name: openssl }
+
+<h1>(略)</h1>
+
+<p>homebrew_cask_packages:</p></li>
+<li>{ name: iterm2 }</li>
+<li>{ name: firefox }</li>
+<li>{ name: google-chrome }</li>
+<li>{ name: google-japanese-ime }
+
+<h1>(略)</h1>
+
+<p>```</p></li>
+</ul>
+</li>
 <li>CentOS などへもインストールするような共通のパッケージは <code>common/</code> 以下の role を利用する
 
 <ul>
@@ -125,9 +154,52 @@ $ ansible --version
 <li>ricty フォントインストールは個別の処理が多かったため別の role で切り出す</li>
 </ul>
 </li>
-<li>インベントリファイル <code>hosts</code> に mac 用グループ <code>[mac]</code> を作る</li>
+<li>インベントリファイル <code>hosts</code> に mac 用グループ <code>[mac]</code> を作る
+<code>ini
+[mac]
+127.0.0.1
+</code></li>
 </ul>
 
+
+<p>ディレクトリ構造は以下のようになった。</p>
+
+<p>```
+└── laptop-build</p>
+
+<pre><code>├── centos
+│   ├── docker
+│   │   ├── files
+│   │   └── tasks
+│   └── yum
+│       └── tasks
+├── common
+│   ├── dotfiles
+│   │   ├── meta
+│   │   └── tasks
+│   ├── dstat
+│   │   └── tasks
+│   ├── guest_account
+│   │   └── tasks
+│   ├── ruby
+│   │   ├── meta
+│   │   └── tasks
+│   ├── tmux
+│   │   └── tasks
+│   ├── vim
+│   │   └── tasks
+│   └── zsh
+│       └── tasks
+├── mac
+│   ├── brew
+│   │   └── tasks
+│   └── ricty
+│       ├── handlers
+│       └── tasks
+└── vars
+</code></pre>
+
+<p>```</p>
 
 <p>できあがった Playbook は Github にあげた。 <a href="https://github.com/momota/laptop-build">momota/laptop-build</a></p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-10T18:59:45+09:00</updated>
+  <updated>2016-08-11T19:49:12+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -75,7 +75,7 @@ $ rbenv rehash
 
 <p><code>sh
 $ bundle install
-$ rake setup_githubpages
+$ rake setup_github_pages
 Enter the read/write url for your repository
 (For example, 'git@github.com:your_username/your_username.github.com):
 </code></p>

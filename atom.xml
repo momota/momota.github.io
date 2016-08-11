@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-10T18:59:45+09:00</updated>
+  <updated>2016-08-11T19:49:12+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -124,6 +124,47 @@ Homebrew って、ホームブリューと読んでいるけどホームブル�
 
 <ul>
 <li>インストールするパッケージを列挙した変数を <code>vars/common.yml</code> に切り出す</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># for MacOSX</span>
+</span><span class='line'><span class="l-Scalar-Plain">homebrew_taps</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">homebrew/versions</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">homebrew/binary</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">homebrew/dupes</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">caskroom/cask</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">sanemat/font</span>
+</span><span class='line'><span class="l-Scalar-Plain">homebrew_packages</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">readline</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">openssl</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="c1"># (略)</span>
+</span><span class='line'><span class="l-Scalar-Plain">homebrew_cask_packages</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">iterm2</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">firefox</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">google-chrome</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="p-Indicator">{</span> <span class="nv">name</span><span class="p-Indicator">:</span> <span class="nv">google-japanese-ime</span> <span class="p-Indicator">}</span>
+</span><span class='line'>  <span class="c1"># (略)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
 <li>CentOS などへもインストールするような共通のパッケージは <code>common/</code> 以下の role を利用する
 
 <ul>
@@ -139,6 +180,80 @@ Homebrew って、ホームブリューと読んでいるけどホームブル�
 </li>
 <li>インベントリファイル <code>hosts</code> に mac 用グループ <code>[mac]</code> を作る</li>
 </ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="k">[mac]</span>
+</span><span class='line'><span class="err">127.0.0.1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ディレクトリ構造は以下のようになった。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="err">└──</span> <span class="err">laptop-build</span>
+</span><span class='line'>    <span class="err">├──</span> <span class="err">centos</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">docker</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">├──</span> <span class="err">files</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">└──</span> <span class="err">yum</span>
+</span><span class='line'>    <span class="err">│  </span>     <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">├──</span> <span class="err">common</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">dotfiles</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">├──</span> <span class="err">meta</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">dstat</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">guest_account</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">ruby</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">├──</span> <span class="err">meta</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">tmux</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">vim</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">└──</span> <span class="err">zsh</span>
+</span><span class='line'>    <span class="err">│  </span>     <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">├──</span> <span class="err">mac</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">├──</span> <span class="err">brew</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">│  </span> <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">│  </span> <span class="err">└──</span> <span class="err">ricty</span>
+</span><span class='line'>    <span class="err">│  </span>     <span class="err">├──</span> <span class="err">handlers</span>
+</span><span class='line'>    <span class="err">│  </span>     <span class="err">└──</span> <span class="err">tasks</span>
+</span><span class='line'>    <span class="err">└──</span> <span class="err">vars</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>できあがった Playbook は Github にあげた。 <a href="https://github.com/momota/laptop-build">momota/laptop-build</a></p>
@@ -1898,7 +2013,7 @@ rbenv のような関連ツールまで 1 セットで記述するのが良い�
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install
-</span><span class='line'><span class="nv">$ </span>rake setup_githubpages
+</span><span class='line'><span class="nv">$ </span>rake setup_github_pages
 </span><span class='line'>Enter the <span class="nb">read</span>/write url <span class="k">for </span>your repository
 </span><span class='line'><span class="o">(</span>For example, <span class="err">&#39;</span>git@github.com:your_username/your_username.github.com<span class="o">)</span>:
 </span></code></pre></td></tr></table></div></figure>
