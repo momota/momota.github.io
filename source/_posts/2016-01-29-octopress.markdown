@@ -63,7 +63,7 @@ $ rbenv rehash
 
 ```sh
 $ bundle install
-$ rake setup_githubpages
+$ rake setup_github_pages
 Enter the read/write url for your repository
 (For example, 'git@github.com:your_username/your_username.github.com):
 ```
