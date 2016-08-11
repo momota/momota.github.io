@@ -111,16 +111,73 @@ t-wada さんの場合、1 枚の Playbook に変数やタスクを記述して�
 今回は以下のようなアレンジをした。
 
 - インストールするパッケージを列挙した変数を `vars/common.yml` に切り出す
+```yaml
+# for MacOSX
+homebrew_taps:
+  - homebrew/versions
+  - homebrew/binary
+  - homebrew/dupes
+  - caskroom/cask
+  - sanemat/font
+homebrew_packages:
+  - { name: readline }
+  - { name: openssl }
+  # (略)
+homebrew_cask_packages:
+  - { name: iterm2 }
+  - { name: firefox }
+  - { name: google-chrome }
+  - { name: google-japanese-ime }
+  # (略)
+```
 - CentOS などへもインストールするような共通のパッケージは `common/` 以下の role を利用する
   - 今回は tmux とzsh のみ
 - Mac 固有のタスクは、`mac/` 以下に切り出す
   - brew (cask も) 用のrole を作る
   - ricty フォントインストールは個別の処理が多かったため別の role で切り出す
 - インベントリファイル `hosts` に mac 用グループ `[mac]` を作る
+```ini
+[mac]
+127.0.0.1
+```
+
+ディレクトリ構造は以下のようになった。
+
+```
+└── laptop-build
+    ├── centos
+    │   ├── docker
+    │   │   ├── files
+    │   │   └── tasks
+    │   └── yum
+    │       └── tasks
+    ├── common
+    │   ├── dotfiles
+    │   │   ├── meta
+    │   │   └── tasks
+    │   ├── dstat
+    │   │   └── tasks
+    │   ├── guest_account
+    │   │   └── tasks
+    │   ├── ruby
+    │   │   ├── meta
+    │   │   └── tasks
+    │   ├── tmux
+    │   │   └── tasks
+    │   ├── vim
+    │   │   └── tasks
+    │   └── zsh
+    │       └── tasks
+    ├── mac
+    │   ├── brew
+    │   │   └── tasks
+    │   └── ricty
+    │       ├── handlers
+    │       └── tasks
+    └── vars
+```
 
 できあがった Playbook は Github にあげた。 [momota/laptop-build](https://github.com/momota/laptop-build)
-
-
 
 3. Ansible を実行する
 =====================
