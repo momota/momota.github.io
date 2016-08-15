@@ -13,6 +13,15 @@ MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理
 t-wada さんのエントリ [Mac の開発環境構築を自動化する (2015 年初旬編) - t-wadaのブログ変更する](http://t-wada.hatenablog.jp/entry/mac-provisioning-by-ansible)
 を見れば事足りると思われるので、本稿は自分用のメモ(t-wada さんのを少しだけカスタマイズ & 補足)。
 
+実行環境は以下。
+
+what    | version
+--------|-----------------------------------------
+laptop  | MacBook Pro (Retina 13-inch, Early 2015)
+OS      | OS X El Capitan 10.11.6
+ansible | 2.1.1.0
+
+
 
 <!-- more -->
 
