@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ansible | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ansible/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-16T00:12:10+09:00</updated>
+  <updated>2016-08-19T08:29:01+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,1108 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ansible ABC]]></title>
+    <link href="http://momota.github.io/blog/2016/08/19/ansible-abc/"/>
+    <updated>2016-08-19T08:22:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/08/19/ansible-abc</id>
+    <content type="html"><![CDATA[<p>チーム内での Ansible 勉強会の資料を公開。</p>
+
+<p><img src="/images/20160818_ansible-logo.png" alt="ansible logo" /></p>
+
+<p>公式サイトは以下。</p>
+
+<ul>
+<li><a href="http://www.ansible.com">http://www.ansible.com</a></li>
+<li><a href="http://docs.ansible.com">http://docs.ansible.com</a></li>
+</ul>
+
+
+<p>前提知識としては、以下。知っていたほうが理解が早い。</p>
+
+<ul>
+<li>unix コマンド</li>
+<li>YAML
+
+<ul>
+<li><a href="http://blog.n-z.jp/blog/2014-06-21-ansible-yaml.html">ansible使いのためのYAML入門 &ndash; @znz blog</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>公式から引用すると、Ansible は <strong>simple IT automation engine</strong>。</p>
+
+<blockquote><p>Ansible is a radically <strong>simple IT automation engine</strong> that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs.</p>
+
+<p>&mdash;&ndash;    <a href="https://www.ansible.com/how-ansible-works">How Ansible Works</a> より</p></blockquote>
+
+<!-- more -->
+
+
+<h2>Ansible の概要</h2>
+
+<ul>
+<li>Ansible は、サーバの構成管理ツールと言われている。
+
+<ul>
+<li>サーバ構成管理とは? Ansible が主に対象としているのは以下。
+
+<ul>
+<li>サーバのソフトウェアインストール/アップデート</li>
+<li>設定ファイルの作成/修正/削除</li>
+<li>サービス停止/起動</li>
+<li>ファイル (アプリケーション) の配布</li>
+</ul>
+</li>
+<li>類似ツールに、Chef や Puppet がある。</li>
+<li>Infrastructure as Code の流れや世の中のクラウド化に伴い、評価されている</li>
+<li>Infrastructure as Code: インフラの状態をコード化できる
+
+<ul>
+<li>ソフトウェア開発でのナレッジが活かせる
+
+<ul>
+<li>バージョン管理: git, subversion, &hellip;</li>
+<li>コードレビュー: pull request, other tools, &hellip;</li>
+<li>テスト: test framework like serverspec, infrataster, &hellip;</li>
+<li>デプロイ、CI &hellip; : jenkins, &hellip;</li>
+</ul>
+</li>
+<li>設計ドキュメントと実装との差分がある程度埋まる</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>もともとはAnsible, Inc により開発されていたが、2015年10月に Redhat により買収された</li>
+</ul>
+
+
+<p>以下は、Ansible の動作イメージ。(<a href="https://sysadmincasts.com/episodes/46-configuration-management-with-ansible-part-3-4">https://sysadmincasts.com/episodes/46-configuration-management-with-ansible-part-3-4</a> より引用)</p>
+
+<p><img src="/images/20160818_ansible_overview.gif" alt="diagram" /></p>
+
+<h1>Ansible の特徴・利点</h1>
+
+<ul>
+<li>冪等性
+
+<ul>
+<li>何回やっても同じ結果になること。
+
+<ul>
+<li>モジュール側でチェック処理などを吸収してくれる。</li>
+<li>shell モジュールや rawモジュールなど、一部、冪等性が担保されないものもある。</li>
+</ul>
+</li>
+<li>単純 re-run が可能。</li>
+<li>Immutable Infrastructure との相性の良さ。</li>
+</ul>
+</li>
+<li>Python の &ldquo;バッテリー同梱 (Battery Included)&rdquo; という考え方を引き継いでいる。
+
+<ul>
+<li>標準モジュール/機能の豊富さ。</li>
+</ul>
+</li>
+<li>Push 型アーキテクチャ
+
+<ul>
+<li>管理対象ノード (Managed Node) に SSH さえできれば良い。</li>
+<li>エージェントレス。</li>
+<li>マルチプロセスで並列実行が可能。</li>
+<li>Ansible 実行サーバを Control Machine, 管理対象ノードを Managed Nodeと呼ぶ。</li>
+</ul>
+</li>
+<li>シンプル
+
+<ul>
+<li>独自 DSL ではなく、YAML。
+
+<ul>
+<li>データ志向の自動化言語である YAML</li>
+<li>学習コストが低い。chef や puppet のように Ruby などの独自 DSL を覚える必要がない。</li>
+</ul>
+</li>
+<li>ファイル・ディレクトリ構造の自由度の高さ。決まり事が少ない。</li>
+<li>Ansible 自体は Python で書かれているが、プラグインなどの開発が不要であれば、Python を使う必要なし。</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Ansible の用途</h1>
+
+<ul>
+<li>複数サーバへの……
+
+<ul>
+<li>バッチ処理
+
+<ul>
+<li>システム全体の設定 (<code>/etc</code> 以下の設定)
+
+<ul>
+<li>hosts へのエントリ</li>
+</ul>
+</li>
+<li>ネットワーク設定
+
+<ul>
+<li>ルーティングテーブルエントリの追加</li>
+<li>SOCKS プロキシ</li>
+<li>proxy.pac</li>
+</ul>
+</li>
+<li>ファイル配布
+
+<ul>
+<li>SSHキーの配布</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ミドルウェアのインストール/アップデート
+
+<ul>
+<li>yum</li>
+<li>apt</li>
+<li>homebrew</li>
+<li>gem</li>
+</ul>
+</li>
+<li>アプリケーションデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<p>公式サイトの Use case を直訳すると、以下。</p>
+
+<blockquote><ul>
+<li>provisioning (Bootstrapping と呼ぶほうが正しいかも)
+
+<ul>
+<li>ベアメタルサーバやVMに対する、PXEブート (遠隔電源操作), キックスタート (linux の自動インストール)</li>
+<li>VM (クラウドインスタンス) に対する、テンプレートからの作成</li>
+</ul>
+</li>
+<li>configuration management
+
+<ul>
+<li>コンフィグファイルの中央管理</li>
+</ul>
+</li>
+<li>application deployment
+
+<ul>
+<li>Ansible でアプリケーションを定義しデプロイすることで、開発環境から本番環境までのアプリケーション全体のライフサイクルを効果的に管理できる</li>
+</ul>
+</li>
+<li>continuous delivery
+
+<ul>
+<li>CI/CD のパイプラインはたくさんのチームから依頼を引き受けることになる。だれもが使えるシンプルなAnsible を使うことで適切にアプリケーションのデプロイ管理ができる</li>
+</ul>
+</li>
+<li>security &amp; compliance
+
+<ul>
+<li>Ansible でセキュリティポリシを定義することで、サイト全体のセキュリティポリシのスキャンと修復が可能になる。</li>
+</ul>
+</li>
+<li>orchestration
+
+<ul>
+<li>管理対象のコンフィグは多種多様に存在し、かつ、それぞれが相互に作用している。Ansible は、この複雑で混沌とした中に秩序をもたらす。</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+
+<p>仕事ではあまり OS を扱うことは少なく、以下のようなレイヤの低いやつを raw モジュールを
+駆使して構成変更したり情報取得したりしている。</p>
+
+<ul>
+<li>ESXi</li>
+<li>iLO</li>
+<li>BIOS</li>
+<li>その他 SSH 可能なノード</li>
+</ul>
+
+
+<h1>Ansible を動かしてみよう</h1>
+
+<h2>Ansible のインストール</h2>
+
+<p><a href="http://docs.ansible.com/ansible/intro_installation.html#getting-ansible">Installation &ndash; Ansible Documentation</a> を参照</p>
+
+<ol>
+<li>Control Machine : Ansible 実行サーバ
+
+<ul>
+<li>Python 2.6 or 2.7 が必要</li>
+<li>yum や rpm, apt などのパッケージ管理システムでインストール可能</li>
+</ul>
+</li>
+<li>Managed Node : 管理対象ノード
+
+<ul>
+<li>Control Machine から SSH できればOK</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>Ansible 実行してみる</h2>
+
+<p>ansile を単体実行するコマンド書式は以下。</p>
+
+<p><code>
+$ ansible &lt;host-pattern&gt; [-f forks] [-m module_name] [-a args]
+</code></p>
+
+<table>
+<thead>
+<tr>
+<th>オプション </th>
+<th> 意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-f         </td>
+<td> 実行多重度。デフォルトは5 (ansible.cfg で規定)</td>
+</tr>
+<tr>
+<td>-m         </td>
+<td> モジュール名</td>
+</tr>
+<tr>
+<td>-a         </td>
+<td> モジュール引数</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><a href="http://docs.ansible.com/ansible/modules_by_category.html">モジュールはこちらを参照。</a></p>
+
+<p>以下はローカルで動くモジュールの一部を紹介。</p>
+
+<table>
+<thead>
+<tr>
+<th>モジュール </th>
+<th> 機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ping       </td>
+<td> その名の通り ping</td>
+</tr>
+<tr>
+<td>shell      </td>
+<td> コマンドを引数に渡して shell 実行可能</td>
+</tr>
+<tr>
+<td>file       </td>
+<td> ファイルのパーミション設定とか、ディレクトリ作成とか</td>
+</tr>
+<tr>
+<td>template   </td>
+<td> Control Machine のテンプレートファイル (テンプレートエンジンは jinja2 ) を Managed Node に配布</td>
+</tr>
+<tr>
+<td>service    </td>
+<td> init system のサービスを制御</td>
+</tr>
+<tr>
+<td>sysctrl    </td>
+<td> カーネルパラメータの操作</td>
+</tr>
+<tr>
+<td>raw        </td>
+<td> ssh でナマの文字列をそのまま流し込む</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>インターネットに接続していれば、以下も有用。</p>
+
+<table>
+<thead>
+<tr>
+<th>モジュール </th>
+<th> 機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>yum        </td>
+<td> yum によるソフトウェアパッケージ管理</td>
+</tr>
+<tr>
+<td>get_url    </td>
+<td> HTTP でのダウンロード (curl, wget 的な)</td>
+</tr>
+<tr>
+<td>git        </td>
+<td> git リポジトリからの clone</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>バージョンが 2 系からJunos とか Cisco, ESXi 用のモジュールもある。</p>
+
+<p><code>&lt;host-pattern&gt;</code> でホストを指定する。
+all とすると、<code>/etc/ansible/hosts</code> で定義しているすべてのホストが対象となる。</p>
+
+<p>以下は <code>ping</code> モジュールを利用したコマンド。
+localhost に ping する ansible コマンド。
+<code>-m</code> オプションのあとに <code>ping</code> モジュールを指定する。</p>
+
+<p>```sh
+$ ansible localhost -m ping
+localhost | success >> {</p>
+
+<pre><code>"changed": false,
+"ping": "pong"
+</code></pre>
+
+<p>}
+```</p>
+
+<p>以下は、<code>shell</code> モジュールを利用したコマンド。
+<code>-a</code> オプションのあとにモジュール引数を渡す。</p>
+
+<p>```sh
+$ ansible localhost -m shell -a &ldquo;uname -a; date; id; ifconfig&rdquo;
+localhost | success | rc=0 >>
+Linux m 3.13.0-32-generic #57-Ubuntu SMP Tue Jul 15 03:51:12 UTC 2014 i686 i686 i686 GNU/Linux
+Thu Aug  4 17:37:49 JST 2016
+uid=1000(momota) gid=1000(momota) groups=1000(momota),4(adm),24(cdrom),27(sudo),30(dip),33(www-data),46(plugdev),108(lpadmin),124(sambashare)
+docker0   Link encap:Ethernet  HWaddr 56:84:7a:fe:97:99</p>
+
+<pre><code>      inet addr:172.*.*.*  Bcast:0.0.0.0  Mask:255.255.0.0
+      UP BROADCAST MULTICAST  MTU:1500  Metric:1
+      RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+      TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:0
+      RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+</code></pre>
+
+<p>eth0      Link encap:Ethernet  HWaddr 00:1e:c9:80:66:c6</p>
+
+<pre><code>      inet addr:172.*.*.*  Bcast:172.104.43.255  Mask:255.255.254.0
+      UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+      RX packets:40670341 errors:0 dropped:0 overruns:0 frame:0
+      TX packets:1099217 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:1000
+      RX bytes:4490922632 (4.4 GB)  TX bytes:329019625 (329.0 MB)
+      Interrupt:21 Memory:febe0000-fec00000
+</code></pre>
+
+<p>lo        Link encap:Local Loopback</p>
+
+<pre><code>      inet addr:127.0.0.1  Mask:255.0.0.0
+      UP LOOPBACK RUNNING  MTU:65536  Metric:1
+      RX packets:47797 errors:0 dropped:0 overruns:0 frame:0
+      TX packets:47797 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:0
+      RX bytes:5233688 (5.2 MB)  TX bytes:5233688 (5.2 MB)
+</code></pre>
+
+<p>```</p>
+
+<p>ただし、実際には <code>ansible</code> コマンドを使うことはめったにない。</p>
+
+<p>複数のノードに対してタスクを実行したり、複雑なタスクを実行する場合は、
+Inventory ファイルや Playbook ファイルを利用する。</p>
+
+<p>Ansible の主なファイルは以下。</p>
+
+<ul>
+<li>ansible.cfg
+
+<ul>
+<li>ansible に関するデフォルト設定ファイル。<code>/etc/ansible/ansible.cfg</code></li>
+</ul>
+</li>
+<li>Inventory
+
+<ul>
+<li>ansible で管理対象ノードを定義するファイル</li>
+</ul>
+</li>
+<li>Playbook
+
+<ul>
+<li>タスク (実行手順) を定義するファイル</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Inventory</h1>
+
+<p>Inventory ファイルは、ansible 用の hosts ファイル。
+ホストやグルーピングの設定、変数などの定義が可能。
+ホストや IP アドレスはレンジでの指定も可能。</p>
+
+<ul>
+<li>ホストとグループの定義</li>
+<li>ホスト変数とグループ変数</li>
+<li>グループのグループ</li>
+</ul>
+
+
+<p>以下は、デフォルト設定 <code>/etc/ansible/hosts</code>。</p>
+
+<p>```ini</p>
+
+<h1>&ndash; Comments begin with the &lsquo;#&rsquo; character</h1>
+
+<h1>&ndash; Blank lines are ignored</h1>
+
+<h1>&ndash; Groups of hosts are delimited by [header] elements</h1>
+
+<h1>&ndash; You can enter hostnames or ip addresses</h1>
+
+<h1>&ndash; A hostname/ip can be a member of multiple groups</h1>
+
+<h1>Ex 1: Ungrouped hosts, specify before any group headers.</h1>
+
+<p>green.example.com
+blue.example.com
+192.168.100.1
+192.168.100.10</p>
+
+<h1>Ex 2: A collection of hosts belonging to the &lsquo;webservers&rsquo; group</h1>
+
+<p>[webservers]
+alpha.example.org
+beta.example.org
+192.168.1.100
+192.168.1.110</p>
+
+<h1>If you have multiple hosts following a pattern you can specify</h1>
+
+<h1>them like this:</h1>
+
+<p>www[001:006].example.com</p>
+
+<h1>Ex 3: A collection of database servers in the &lsquo;dbservers&rsquo; group</h1>
+
+<p>[dbservers]</p>
+
+<p>db01.intranet.mydomain.net
+db02.intranet.mydomain.net
+10.25.1.56
+10.25.1.57</p>
+
+<h1>Here&rsquo;s another example of host ranges, this time there are no</h1>
+
+<h1>leading 0s:</h1>
+
+<p>db-[99:101]-node.example.com
+```</p>
+
+<h1>Playbook</h1>
+
+<p>Playbook はタスクをまとめて、1つのファイルに記述したもの。
+実行順序や依存関係、変数を利用した処理、ループ処理などが表現できる。</p>
+
+<p>Playbookの基本的なフォーマットは以下。</p>
+
+<p>```yaml
+&ndash; hosts: &lt;対象とするホスト/グループ>
+  var:</p>
+
+<pre><code>&lt;変数名1&gt;: &lt;値&gt;
+&lt;変数名2&gt;: &lt;値&gt;
+  :
+  :
+</code></pre>
+
+<p>  remote_user: &lt;処理を実行するユーザー名>
+  become: yes   # sudo するか
+  tasks:</p>
+
+<pre><code>&lt;タスク1&gt;
+&lt;タスク2&gt;
+  :
+  :
+</code></pre>
+
+<p>  handlers:</p>
+
+<pre><code>&lt;ハンドラ1&gt;
+&lt;ハンドラ2&gt;
+  :
+  :
+</code></pre>
+
+<p>```</p>
+
+<h2>タスク</h2>
+
+<p>ansible ではホストに対する処理をタスクという単位で管理する。
+通常、1つのタスクには1つのモジュールを指定する。</p>
+
+<p>```yaml
+  &ndash; name: &lt;タスクの説明></p>
+
+<pre><code>&lt;モジュール名&gt;: &lt;実行時に与えるパラメータ&gt;
+</code></pre>
+
+<p>```</p>
+
+<p>name は description なので省略可能だが、メンテナンス性や playbook 実行時にわかりやすいので絶対書いたほうが良い。</p>
+
+<p>name は日本語でも記載可能。 (文字コードは注意)</p>
+
+<h2>ハンドラ</h2>
+
+<p>ハンドラは、特定のタスクの実行後に、予め指定した処理を実行するための仕組み。
+以下のように記述する。</p>
+
+<p>```yaml
+tasks:
+  &ndash; name: be sure httpd is installed</p>
+
+<pre><code>yum: name=httpd state=installed
+notify:
+  - restart httpd
+</code></pre>
+
+<p>handlers:
+  &ndash; name: restart httpd</p>
+
+<pre><code>service: name=httpd state=restarted
+</code></pre>
+
+<p>```</p>
+
+<p>この場合、「be sure httpd is installed」というタスクが実行されると、続いて「notify」で指定された「restart httpd」というハンドラが実行される。</p>
+
+<h2>ループ</h2>
+
+<p><code>with_items</code> で列挙した項目に対してループ処理が可能。</p>
+
+<p><a href="http://docs.ansible.com/ansible/playbooks_loops.html">Loops &ndash; Ansible Documentation</a></p>
+
+<p>リモートのコマンド結果 (標準出力)に対して、一行ずつ処理するタスクが以下。</p>
+
+<p>
+```yaml
+&ndash; name: &ldquo;リモートのコマンド結果を使ったループの例&rdquo;
+  shell: /usr/bin/something
+  register: command_result</p>
+
+<ul>
+<li>name: &ldquo;結果を受け取って何かするタスク&rdquo;
+shell: /usr/bin/something_else &mdash;param {{ item }}
+with_items: &ldquo;{{ command_result.stdout_lines }}&rdquo;
+```
+</li>
+</ul>
+
+
+<p>こんな感じで直接リストを書いてもOK。</p>
+
+<p>
+```yaml
+&ndash; name: &ldquo;リストからパッケージをインストールしていく&rdquo;
+  yum: name={{ item }} state=latest
+  with_items:</p>
+
+<pre><code>- httpd
+- zsh
+- tmux
+- vim
+</code></pre>
+
+<p>```
+</p>
+
+<h1>playbook のサンプル</h1>
+
+<p>まずはインベントリファイル <code>sample_hosts</code> を作成する</p>
+
+<p>&ldquo;fujiko&rdquo; グループに所属しているホストのリスト (計3台分) を記述している。</p>
+
+<p><code>ini
+[fujiko]
+doraemon
+nobita
+shizuka
+</code></p>
+
+<p>次にplaybook ファイル <code>sample_playbook.yml</code> を作成する。</p>
+
+<p>計 3 つのタスクを記述している。</p>
+
+<p><code>register: &lt;変数名1&gt;</code> という書式でタスク実行結果を変数に保存する。 この変数を Registered Variable と呼ぶ。</p>
+
+<p><code>debug: var=&lt;変数名1&gt;/stdout_lines</code> により、変数に保存したタスク実行結果 (の標準出力) を表示している。</p>
+
+<h2>```yaml</h2>
+
+<ul>
+<li>hosts: fujiko
+tasks:
+
+<ul>
+<li><p>name: &ldquo;死活&rdquo;
+ping:</p></li>
+<li><p>name: &ldquo;ホスト名&rdquo;
+shell:    hostname
+register: host</p></li>
+<li><p>debug: var=host.stdout_lines
+when: host | success</p></li>
+<li><p>name: &ldquo;ユーザ名&rdquo;
+shell:    whoami
+register: user</p></li>
+<li><p>debug: var=user.stdout_lines
+when: user | success
+```</p></li>
+</ul>
+</li>
+</ul>
+
+
+<p>playbook の実行前に syntax check (構文の確認)をする。</p>
+
+<p>```sh
+$ ansible-playbook -i sample_hosts sample_playbook.yml &mdash;syntax-check</p>
+
+<p>playbook: sample-playbook.yml</p>
+
+<p>```</p>
+
+<p>次に playbook を dry-run。
+実行する前に何が変更されるか、特に、実行時に消えてしまうリソースや入れ替わるリソースを知りたい場合に有効。</p>
+
+<p><code>sh
+$ ansible-playbook -i sample_hosts sample_playbook.yml --check
+--- snip ---
+</code></p>
+
+<p>Playbook を実行する。<code>--step</code> オプションを付けると、タスク単位にステップ実行もできる。</p>
+
+<p>```sh
+$ ansible-playbook -i sample_hosts sample_playbook.yml</p>
+
+<p>PLAY [fujiko] ********************************************************************</p>
+
+<p>GATHERING FACTS ***************************************************************
+ok: [doraemon]
+ok: [nobita]
+ok: [shizuka]</p>
+
+<p>TASK: [死活確認] **********************************************************
+ok: [nobita]
+ok: [doraemon]
+ok: [shizuka]</p>
+
+<p>TASK: [ホスト名] **********************************************************
+changed: [nobita]
+changed: [doraemon]
+changed: [shizuka]</p>
+
+<p>TASK: [debug var=host.stdout_lines] *******************************************
+ok: [nobita] => {</p>
+
+<pre><code>"var": {
+    "host.stdout_lines": [
+        "nobita"
+    ]
+}
+</code></pre>
+
+<p>}
+ok: [doraemon] => {</p>
+
+<pre><code>"var": {
+    "host.stdout_lines": [
+        "doraemon"
+    ]
+}
+</code></pre>
+
+<p>}
+ok: [shizuka] => {</p>
+
+<pre><code>"var": {
+    "host.stdout_lines": [
+        "shizuka"
+    ]
+}
+</code></pre>
+
+<p>}</p>
+
+<p>TASK: [ユーザ名] **********************************************************
+changed: [nobita]
+changed: [doraemon]
+changed: [shizuka]</p>
+
+<p>TASK: [debug var=user.stdout_lines] *******************************************
+ok: [nobita] => {</p>
+
+<pre><code>"var": {
+    "user.stdout_lines": [
+        "momota"
+    ]
+}
+</code></pre>
+
+<p>}
+ok: [doraemon] => {</p>
+
+<pre><code>"var": {
+    "user.stdout_lines": [
+        "momota"
+    ]
+}
+</code></pre>
+
+<p>}
+ok: [shizuka] => {</p>
+
+<pre><code>"var": {
+    "user.stdout_lines": [
+        "momota"
+    ]
+}
+</code></pre>
+
+<p>}</p>
+
+<p>PLAY RECAP ********************************************************************
+doraemon                   : ok=6    changed=2    unreachable=0    failed=0
+nobita                     : ok=6    changed=2    unreachable=0    failed=0
+shizuka                    : ok=6    changed=2    unreachable=0    failed=0</p>
+
+<p>```</p>
+
+<p>playbook は role という単位で分割可能。再利用性が高くなり、1 つ 1 つの playbook の
+見通しも良くなるなるので、相互に関係のないタスクは分離していくほうが望ましい。</p>
+
+<p>大規模な環境用に、<a href="http://docs.ansible.com/ansible/playbooks_best_practices.html">Best practices</a> が示されているので、ご参考に。</p>
+
+<h1>システム情報を利用する: Facts</h1>
+
+<p>Playbook 実行結果に「GATHERING FACTS」と出力されている。
+これは対象サーバから情報を収集する処理。たとえば、リモートサーバのIPアドレスや
+OS名などのシステム情報を、Playbook 中で変数として扱うことができる。</p>
+
+<p>次のように <code>setup</code> モジュールにより、どんな変数が利用可能かを確認することができる。</p>
+
+<p>```json
+$ ansible some-host -m setup
+&ldquo;ansible_all_ipv4_addresses&rdquo;: [</p>
+
+<pre><code>"REDACTED IP ADDRESS"
+</code></pre>
+
+<p>],
+&ldquo;ansible_all_ipv6_addresses&rdquo;: [</p>
+
+<pre><code>"REDACTED IPV6 ADDRESS"
+</code></pre>
+
+<p>],
+&ldquo;ansible_architecture&rdquo;: &ldquo;x86_64&rdquo;,
+&ldquo;ansible_bios_date&rdquo;: &ldquo;09/20/2012&rdquo;,
+&ldquo;ansible_bios_version&rdquo;: &ldquo;6.00&rdquo;,
+&ldquo;ansible_cmdline&rdquo;: {</p>
+
+<pre><code>"BOOT_IMAGE": "/boot/vmlinuz-3.5.0-23-generic",
+"quiet": true,
+"ro": true,
+"root": "UUID=4195bff4-e157-4e41-8701-e93f0aec9e22",
+"splash": true
+</code></pre>
+
+<p>},
+&ldquo;ansible_date_time&rdquo;: {</p>
+
+<pre><code>"date": "2013-10-02",
+"day": "02",
+"epoch": "1380756810",
+"hour": "19",
+"iso8601": "2013-10-02T23:33:30Z",
+"iso8601_micro": "2013-10-02T23:33:30.036070Z",
+"minute": "33",
+"month": "10",
+"second": "30",
+"time": "19:33:30",
+"tz": "EDT",
+"year": "2013"
+</code></pre>
+
+<p>},
+&ldquo;ansible_default_ipv4&rdquo;: {</p>
+
+<pre><code>"address": "REDACTED",
+"alias": "eth0",
+"gateway": "REDACTED",
+"interface": "eth0",
+"macaddress": "REDACTED",
+"mtu": 1500,
+"netmask": "255.255.255.0",
+"network": "REDACTED",
+"type": "ether"
+</code></pre>
+
+<p>},
+&ldquo;ansible_default_ipv6&rdquo;: {},
+&ldquo;ansible_devices&rdquo;: {</p>
+
+<pre><code>"fd0": {
+    "holders": [],
+    "host": "",
+    "model": null,
+    "partitions": {},
+    "removable": "1",
+    "rotational": "1",
+    "scheduler_mode": "deadline",
+    "sectors": "0",
+    "sectorsize": "512",
+    "size": "0.00 Bytes",
+    "support_discard": "0",
+    "vendor": null
+},
+"sda": {
+    "holders": [],
+    "host": "SCSI storage controller: LSI Logic / Symbios Logic 53c1030 PCI-X Fusion-MPT Dual Ultra320 SCSI (rev 01)",
+    "model": "VMware Virtual S",
+    "partitions": {
+        "sda1": {
+            "sectors": "39843840",
+            "sectorsize": 512,
+            "size": "19.00 GB",
+            "start": "2048"
+        },
+        "sda2": {
+            "sectors": "2",
+            "sectorsize": 512,
+            "size": "1.00 KB",
+            "start": "39847934"
+        },
+        "sda5": {
+            "sectors": "2093056",
+            "sectorsize": 512,
+            "size": "1022.00 MB",
+            "start": "39847936"
+        }
+    },
+    "removable": "0",
+    "rotational": "1",
+    "scheduler_mode": "deadline",
+    "sectors": "41943040",
+    "sectorsize": "512",
+    "size": "20.00 GB",
+    "support_discard": "0",
+    "vendor": "VMware,"
+},
+"sr0": {
+    "holders": [],
+    "host": "IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)",
+    "model": "VMware IDE CDR10",
+    "partitions": {},
+    "removable": "1",
+    "rotational": "1",
+    "scheduler_mode": "deadline",
+    "sectors": "2097151",
+    "sectorsize": "512",
+    "size": "1024.00 MB",
+    "support_discard": "0",
+    "vendor": "NECVMWar"
+}
+</code></pre>
+
+<p>},
+&ldquo;ansible_distribution&rdquo;: &ldquo;Ubuntu&rdquo;,
+&ldquo;ansible_distribution_release&rdquo;: &ldquo;precise&rdquo;,
+&ldquo;ansible_distribution_version&rdquo;: &ldquo;12.04&rdquo;,
+&ldquo;ansible_domain&rdquo;: &ldquo;&rdquo;,
+&ldquo;ansible_env&rdquo;: {</p>
+
+<pre><code>"COLORTERM": "gnome-terminal",
+"DISPLAY": ":0",
+"HOME": "/home/mdehaan",
+"LANG": "C",
+"LESSCLOSE": "/usr/bin/lesspipe %s %s",
+"LESSOPEN": "| /usr/bin/lesspipe %s",
+"LOGNAME": "root",
+"LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:",
+"MAIL": "/var/mail/root",
+"OLDPWD": "/root/ansible/docsite",
+"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+"PWD": "/root/ansible",
+"SHELL": "/bin/bash",
+"SHLVL": "1",
+"SUDO_COMMAND": "/bin/bash",
+"SUDO_GID": "1000",
+"SUDO_UID": "1000",
+"SUDO_USER": "mdehaan",
+"TERM": "xterm",
+"USER": "root",
+"USERNAME": "root",
+"XAUTHORITY": "/home/mdehaan/.Xauthority",
+"_": "/usr/local/bin/ansible"
+</code></pre>
+
+<p>},
+&ldquo;ansible_eth0&rdquo;: {</p>
+
+<pre><code>"active": true,
+"device": "eth0",
+"ipv4": {
+    "address": "REDACTED",
+    "netmask": "255.255.255.0",
+    "network": "REDACTED"
+},
+"ipv6": [
+    {
+        "address": "REDACTED",
+        "prefix": "64",
+        "scope": "link"
+    }
+],
+"macaddress": "REDACTED",
+"module": "e1000",
+"mtu": 1500,
+"type": "ether"
+</code></pre>
+
+<p>},
+&ldquo;ansible_form_factor&rdquo;: &ldquo;Other&rdquo;,
+&ldquo;ansible_fqdn&rdquo;: &ldquo;ubuntu2.example.com&rdquo;,
+&ldquo;ansible_hostname&rdquo;: &ldquo;ubuntu2&rdquo;,
+&ldquo;ansible_interfaces&rdquo;: [</p>
+
+<pre><code>"lo",
+"eth0"
+</code></pre>
+
+<p>],
+&ldquo;ansible_kernel&rdquo;: &ldquo;3.5.0-23-generic&rdquo;,
+&ldquo;ansible_lo&rdquo;: {</p>
+
+<pre><code>"active": true,
+"device": "lo",
+"ipv4": {
+    "address": "127.0.0.1",
+    "netmask": "255.0.0.0",
+    "network": "127.0.0.0"
+},
+"ipv6": [
+    {
+        "address": "::1",
+        "prefix": "128",
+        "scope": "host"
+    }
+],
+"mtu": 16436,
+"type": "loopback"
+</code></pre>
+
+<p>},
+&ldquo;ansible_lsb&rdquo;: {</p>
+
+<pre><code>"codename": "precise",
+"description": "Ubuntu 12.04.2 LTS",
+"id": "Ubuntu",
+"major_release": "12",
+"release": "12.04"
+</code></pre>
+
+<p>},
+&ldquo;ansible_machine&rdquo;: &ldquo;x86_64&rdquo;,
+&ldquo;ansible_memfree_mb&rdquo;: 74,
+&ldquo;ansible_memtotal_mb&rdquo;: 991,
+&ldquo;ansible_mounts&rdquo;: [</p>
+
+<pre><code>{
+    "device": "/dev/sda1",
+    "fstype": "ext4",
+    "mount": "/",
+    "options": "rw,errors=remount-ro",
+    "size_available": 15032406016,
+    "size_total": 20079898624
+}
+</code></pre>
+
+<p>],
+&ldquo;ansible_nodename&rdquo;: &ldquo;ubuntu2.example.com&rdquo;,
+&ldquo;ansible_os_family&rdquo;: &ldquo;Debian&rdquo;,
+&ldquo;ansible_pkg_mgr&rdquo;: &ldquo;apt&rdquo;,
+&ldquo;ansible_processor&rdquo;: [</p>
+
+<pre><code>"Intel(R) Core(TM) i7 CPU         860  @ 2.80GHz"
+</code></pre>
+
+<p>],
+&ldquo;ansible_processor_cores&rdquo;: 1,
+&ldquo;ansible_processor_count&rdquo;: 1,
+&ldquo;ansible_processor_threads_per_core&rdquo;: 1,
+&ldquo;ansible_processor_vcpus&rdquo;: 1,
+&ldquo;ansible_product_name&rdquo;: &ldquo;VMware Virtual Platform&rdquo;,
+&ldquo;ansible_product_serial&rdquo;: &ldquo;REDACTED&rdquo;,
+&ldquo;ansible_product_uuid&rdquo;: &ldquo;REDACTED&rdquo;,
+&ldquo;ansible_product_version&rdquo;: &ldquo;None&rdquo;,
+&ldquo;ansible_python_version&rdquo;: &ldquo;2.7.3&rdquo;,
+&ldquo;ansible_selinux&rdquo;: false,
+&ldquo;ansible_ssh_host_key_dsa_public&rdquo;: &ldquo;REDACTED KEY VALUE&rdquo;
+&ldquo;ansible_ssh_host_key_ecdsa_public&rdquo;: &ldquo;REDACTED KEY VALUE&rdquo;
+&ldquo;ansible_ssh_host_key_rsa_public&rdquo;: &ldquo;REDACTED KEY VALUE&rdquo;
+&ldquo;ansible_swapfree_mb&rdquo;: 665,
+&ldquo;ansible_swaptotal_mb&rdquo;: 1021,
+&ldquo;ansible_system&rdquo;: &ldquo;Linux&rdquo;,
+&ldquo;ansible_system_vendor&rdquo;: &ldquo;VMware, Inc.&rdquo;,
+&ldquo;ansible_user_id&rdquo;: &ldquo;root&rdquo;,
+&ldquo;ansible_userspace_architecture&rdquo;: &ldquo;x86_64&rdquo;,
+&ldquo;ansible_userspace_bits&rdquo;: &ldquo;64&rdquo;,
+&ldquo;ansible_virtualization_role&rdquo;: &ldquo;guest&rdquo;,
+&ldquo;ansible_virtualization_type&rdquo;: &ldquo;VMware&rdquo;
+```</p>
+
+<p>たとえば、IPアドレスは <code>{{ ansible_eth0["ipv4"]["address"] }}</code> のように、Playbook の中で変数として
+扱うことができる。</p>
+
+<p>その他、<code>facter</code> や <code>ohai</code> がリモートホストにインストールされていればそれらも利用可能。
+facts よりも詳細な情報が取得できる。</p>
+
+<p>この facts は、いまのところリモートホストが Linux でのみ動作する。
+リモートホストが windows やネットワーク機器の場合は以下のように無効化できる。</p>
+
+<p><code>yaml
+- hosts: whatever
+  gather_facts: no
+</code></p>
+
+<p>また、システム情報を利用しない場合も無効化することで実行時間短縮が図れる。</p>
+
+<h1>links</h1>
+
+<ul>
+<li><a href="http(//yteraoka.github.io/ansible-tutorial/">Ansible Tutorial</a></li>
+<li><a href="https(//github.com/yteraoka/ansible-tutorial/wiki/ansible-playbook%20%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89">ansible playbook コマンド オプション</a></li>
+<li><a href="https(//www.ansible.com/blog/ansible-performance-tuning">Ansible Performance Tuning (for Fun and Profit)</a></li>
+<li><a href="http(//tdoc.info/blog/2014/01/20/ansible_beyond_configuration.html">Ansibleのアーキテクチャー( 構成管理を超えて</a></li>
+<li><a href="http(//qiita.com/yteraoka/items/5ed2bddefff32e1b9faf">Ansible オレオレベストプラクティス</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ansible で MacBook Pro をセットアップ]]></title>

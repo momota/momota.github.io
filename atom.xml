@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-16T00:12:10+09:00</updated>
+  <updated>2016-08-19T08:29:01+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,1449 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ansible ABC]]></title>
+    <link href="http://momota.github.io/blog/2016/08/19/ansible-abc/"/>
+    <updated>2016-08-19T08:22:00+09:00</updated>
+    <id>http://momota.github.io/blog/2016/08/19/ansible-abc</id>
+    <content type="html"><![CDATA[<p>チーム内での Ansible 勉強会の資料を公開。</p>
+
+<p><img src="http://momota.github.io/images/20160818_ansible-logo.png" alt="ansible logo" /></p>
+
+<p>公式サイトは以下。</p>
+
+<ul>
+<li><a href="http://www.ansible.com">http://www.ansible.com</a></li>
+<li><a href="http://docs.ansible.com">http://docs.ansible.com</a></li>
+</ul>
+
+
+<p>前提知識としては、以下。知っていたほうが理解が早い。</p>
+
+<ul>
+<li>unix コマンド</li>
+<li>YAML
+
+<ul>
+<li><a href="http://blog.n-z.jp/blog/2014-06-21-ansible-yaml.html">ansible使いのためのYAML入門 &ndash; @znz blog</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>公式から引用すると、Ansible は <strong>simple IT automation engine</strong>。</p>
+
+<blockquote><p>Ansible is a radically <strong>simple IT automation engine</strong> that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs.</p>
+
+<p>&mdash;&ndash;    <a href="https://www.ansible.com/how-ansible-works">How Ansible Works</a> より</p></blockquote>
+
+<!-- more -->
+
+
+<h2>Ansible の概要</h2>
+
+<ul>
+<li>Ansible は、サーバの構成管理ツールと言われている。
+
+<ul>
+<li>サーバ構成管理とは? Ansible が主に対象としているのは以下。
+
+<ul>
+<li>サーバのソフトウェアインストール/アップデート</li>
+<li>設定ファイルの作成/修正/削除</li>
+<li>サービス停止/起動</li>
+<li>ファイル (アプリケーション) の配布</li>
+</ul>
+</li>
+<li>類似ツールに、Chef や Puppet がある。</li>
+<li>Infrastructure as Code の流れや世の中のクラウド化に伴い、評価されている</li>
+<li>Infrastructure as Code: インフラの状態をコード化できる
+
+<ul>
+<li>ソフトウェア開発でのナレッジが活かせる
+
+<ul>
+<li>バージョン管理: git, subversion, &hellip;</li>
+<li>コードレビュー: pull request, other tools, &hellip;</li>
+<li>テスト: test framework like serverspec, infrataster, &hellip;</li>
+<li>デプロイ、CI &hellip; : jenkins, &hellip;</li>
+</ul>
+</li>
+<li>設計ドキュメントと実装との差分がある程度埋まる</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>もともとはAnsible, Inc により開発されていたが、2015年10月に Redhat により買収された</li>
+</ul>
+
+
+<p>以下は、Ansible の動作イメージ。(<a href="https://sysadmincasts.com/episodes/46-configuration-management-with-ansible-part-3-4">https://sysadmincasts.com/episodes/46-configuration-management-with-ansible-part-3-4</a> より引用)</p>
+
+<p><img src="http://momota.github.io/images/20160818_ansible_overview.gif" alt="diagram" /></p>
+
+<h1>Ansible の特徴・利点</h1>
+
+<ul>
+<li>冪等性
+
+<ul>
+<li>何回やっても同じ結果になること。
+
+<ul>
+<li>モジュール側でチェック処理などを吸収してくれる。</li>
+<li>shell モジュールや rawモジュールなど、一部、冪等性が担保されないものもある。</li>
+</ul>
+</li>
+<li>単純 re-run が可能。</li>
+<li>Immutable Infrastructure との相性の良さ。</li>
+</ul>
+</li>
+<li>Python の &ldquo;バッテリー同梱 (Battery Included)&rdquo; という考え方を引き継いでいる。
+
+<ul>
+<li>標準モジュール/機能の豊富さ。</li>
+</ul>
+</li>
+<li>Push 型アーキテクチャ
+
+<ul>
+<li>管理対象ノード (Managed Node) に SSH さえできれば良い。</li>
+<li>エージェントレス。</li>
+<li>マルチプロセスで並列実行が可能。</li>
+<li>Ansible 実行サーバを Control Machine, 管理対象ノードを Managed Nodeと呼ぶ。</li>
+</ul>
+</li>
+<li>シンプル
+
+<ul>
+<li>独自 DSL ではなく、YAML。
+
+<ul>
+<li>データ志向の自動化言語である YAML</li>
+<li>学習コストが低い。chef や puppet のように Ruby などの独自 DSL を覚える必要がない。</li>
+</ul>
+</li>
+<li>ファイル・ディレクトリ構造の自由度の高さ。決まり事が少ない。</li>
+<li>Ansible 自体は Python で書かれているが、プラグインなどの開発が不要であれば、Python を使う必要なし。</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Ansible の用途</h1>
+
+<ul>
+<li>複数サーバへの……
+
+<ul>
+<li>バッチ処理
+
+<ul>
+<li>システム全体の設定 (<code>/etc</code> 以下の設定)
+
+<ul>
+<li>hosts へのエントリ</li>
+</ul>
+</li>
+<li>ネットワーク設定
+
+<ul>
+<li>ルーティングテーブルエントリの追加</li>
+<li>SOCKS プロキシ</li>
+<li>proxy.pac</li>
+</ul>
+</li>
+<li>ファイル配布
+
+<ul>
+<li>SSHキーの配布</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ミドルウェアのインストール/アップデート
+
+<ul>
+<li>yum</li>
+<li>apt</li>
+<li>homebrew</li>
+<li>gem</li>
+</ul>
+</li>
+<li>アプリケーションデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+<p>公式サイトの Use case を直訳すると、以下。</p>
+
+<blockquote><ul>
+<li>provisioning (Bootstrapping と呼ぶほうが正しいかも)
+
+<ul>
+<li>ベアメタルサーバやVMに対する、PXEブート (遠隔電源操作), キックスタート (linux の自動インストール)</li>
+<li>VM (クラウドインスタンス) に対する、テンプレートからの作成</li>
+</ul>
+</li>
+<li>configuration management
+
+<ul>
+<li>コンフィグファイルの中央管理</li>
+</ul>
+</li>
+<li>application deployment
+
+<ul>
+<li>Ansible でアプリケーションを定義しデプロイすることで、開発環境から本番環境までのアプリケーション全体のライフサイクルを効果的に管理できる</li>
+</ul>
+</li>
+<li>continuous delivery
+
+<ul>
+<li>CI/CD のパイプラインはたくさんのチームから依頼を引き受けることになる。だれもが使えるシンプルなAnsible を使うことで適切にアプリケーションのデプロイ管理ができる</li>
+</ul>
+</li>
+<li>security &amp; compliance
+
+<ul>
+<li>Ansible でセキュリティポリシを定義することで、サイト全体のセキュリティポリシのスキャンと修復が可能になる。</li>
+</ul>
+</li>
+<li>orchestration
+
+<ul>
+<li>管理対象のコンフィグは多種多様に存在し、かつ、それぞれが相互に作用している。Ansible は、この複雑で混沌とした中に秩序をもたらす。</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+
+<p>仕事ではあまり OS を扱うことは少なく、以下のようなレイヤの低いやつを raw モジュールを
+駆使して構成変更したり情報取得したりしている。</p>
+
+<ul>
+<li>ESXi</li>
+<li>iLO</li>
+<li>BIOS</li>
+<li>その他 SSH 可能なノード</li>
+</ul>
+
+
+<h1>Ansible を動かしてみよう</h1>
+
+<h2>Ansible のインストール</h2>
+
+<p><a href="http://docs.ansible.com/ansible/intro_installation.html#getting-ansible">Installation &ndash; Ansible Documentation</a> を参照</p>
+
+<ol>
+<li>Control Machine : Ansible 実行サーバ
+
+<ul>
+<li>Python 2.6 or 2.7 が必要</li>
+<li>yum や rpm, apt などのパッケージ管理システムでインストール可能</li>
+</ul>
+</li>
+<li>Managed Node : 管理対象ノード
+
+<ul>
+<li>Control Machine から SSH できればOK</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>Ansible 実行してみる</h2>
+
+<p>ansile を単体実行するコマンド書式は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ ansible &lt;host-pattern&gt; [-f forks] [-m module_name] [-a args]</span></code></pre></td></tr></table></div></figure>
+
+
+<table>
+<thead>
+<tr>
+<th>オプション </th>
+<th> 意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-f         </td>
+<td> 実行多重度。デフォルトは5 (ansible.cfg で規定)</td>
+</tr>
+<tr>
+<td>-m         </td>
+<td> モジュール名</td>
+</tr>
+<tr>
+<td>-a         </td>
+<td> モジュール引数</td>
+</tr>
+</tbody>
+</table>
+
+
+<p><a href="http://docs.ansible.com/ansible/modules_by_category.html">モジュールはこちらを参照。</a></p>
+
+<p>以下はローカルで動くモジュールの一部を紹介。</p>
+
+<table>
+<thead>
+<tr>
+<th>モジュール </th>
+<th> 機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ping       </td>
+<td> その名の通り ping</td>
+</tr>
+<tr>
+<td>shell      </td>
+<td> コマンドを引数に渡して shell 実行可能</td>
+</tr>
+<tr>
+<td>file       </td>
+<td> ファイルのパーミション設定とか、ディレクトリ作成とか</td>
+</tr>
+<tr>
+<td>template   </td>
+<td> Control Machine のテンプレートファイル (テンプレートエンジンは jinja2 ) を Managed Node に配布</td>
+</tr>
+<tr>
+<td>service    </td>
+<td> init system のサービスを制御</td>
+</tr>
+<tr>
+<td>sysctrl    </td>
+<td> カーネルパラメータの操作</td>
+</tr>
+<tr>
+<td>raw        </td>
+<td> ssh でナマの文字列をそのまま流し込む</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>インターネットに接続していれば、以下も有用。</p>
+
+<table>
+<thead>
+<tr>
+<th>モジュール </th>
+<th> 機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>yum        </td>
+<td> yum によるソフトウェアパッケージ管理</td>
+</tr>
+<tr>
+<td>get_url    </td>
+<td> HTTP でのダウンロード (curl, wget 的な)</td>
+</tr>
+<tr>
+<td>git        </td>
+<td> git リポジトリからの clone</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>バージョンが 2 系からJunos とか Cisco, ESXi 用のモジュールもある。</p>
+
+<p><code>&lt;host-pattern&gt;</code> でホストを指定する。
+all とすると、<code>/etc/ansible/hosts</code> で定義しているすべてのホストが対象となる。</p>
+
+<p>以下は <code>ping</code> モジュールを利用したコマンド。
+localhost に ping する ansible コマンド。
+<code>-m</code> オプションのあとに <code>ping</code> モジュールを指定する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ansible localhost -m ping
+</span><span class='line'>localhost | success &gt;&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;changed&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;ping&quot;</span>: <span class="s2">&quot;pong&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下は、<code>shell</code> モジュールを利用したコマンド。
+<code>-a</code> オプションのあとにモジュール引数を渡す。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ansible localhost -m shell -a <span class="s2">&quot;uname -a; date; id; ifconfig&quot;</span>
+</span><span class='line'>localhost | success | <span class="nv">rc</span><span class="o">=</span>0 &gt;&gt;
+</span><span class='line'>Linux m 3.13.0-32-generic <span class="c">#57-Ubuntu SMP Tue Jul 15 03:51:12 UTC 2014 i686 i686 i686 GNU/Linux</span>
+</span><span class='line'>Thu Aug  4 17:37:49 JST 2016
+</span><span class='line'><span class="nv">uid</span><span class="o">=</span>1000<span class="o">(</span>momota<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1000<span class="o">(</span>momota<span class="o">)</span> <span class="nv">groups</span><span class="o">=</span>1000<span class="o">(</span>momota<span class="o">)</span>,4<span class="o">(</span>adm<span class="o">)</span>,24<span class="o">(</span>cdrom<span class="o">)</span>,27<span class="o">(</span>sudo<span class="o">)</span>,30<span class="o">(</span>dip<span class="o">)</span>,33<span class="o">(</span>www-data<span class="o">)</span>,46<span class="o">(</span>plugdev<span class="o">)</span>,108<span class="o">(</span>lpadmin<span class="o">)</span>,124<span class="o">(</span>sambashare<span class="o">)</span>
+</span><span class='line'>docker0   Link encap:Ethernet  HWaddr 56:84:7a:fe:97:99
+</span><span class='line'>          inet addr:172.*.*.*  Bcast:0.0.0.0  Mask:255.255.0.0
+</span><span class='line'>          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+</span><span class='line'>          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+</span><span class='line'>          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+</span><span class='line'>          collisions:0 txqueuelen:0
+</span><span class='line'>          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>eth0      Link encap:Ethernet  HWaddr 00:1e:c9:80:66:c6
+</span><span class='line'>          inet addr:172.*.*.*  Bcast:172.104.43.255  Mask:255.255.254.0
+</span><span class='line'>          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+</span><span class='line'>          RX packets:40670341 errors:0 dropped:0 overruns:0 frame:0
+</span><span class='line'>          TX packets:1099217 errors:0 dropped:0 overruns:0 carrier:0
+</span><span class='line'>          collisions:0 txqueuelen:1000
+</span><span class='line'>          RX bytes:4490922632 <span class="o">(</span>4.4 GB<span class="o">)</span>  TX bytes:329019625 <span class="o">(</span>329.0 MB<span class="o">)</span>
+</span><span class='line'>          Interrupt:21 Memory:febe0000-fec00000
+</span><span class='line'>
+</span><span class='line'>lo        Link encap:Local Loopback
+</span><span class='line'>          inet addr:127.0.0.1  Mask:255.0.0.0
+</span><span class='line'>          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+</span><span class='line'>          RX packets:47797 errors:0 dropped:0 overruns:0 frame:0
+</span><span class='line'>          TX packets:47797 errors:0 dropped:0 overruns:0 carrier:0
+</span><span class='line'>          collisions:0 txqueuelen:0
+</span><span class='line'>          RX bytes:5233688 <span class="o">(</span>5.2 MB<span class="o">)</span>  TX bytes:5233688 <span class="o">(</span>5.2 MB<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ただし、実際には <code>ansible</code> コマンドを使うことはめったにない。</p>
+
+<p>複数のノードに対してタスクを実行したり、複雑なタスクを実行する場合は、
+Inventory ファイルや Playbook ファイルを利用する。</p>
+
+<p>Ansible の主なファイルは以下。</p>
+
+<ul>
+<li>ansible.cfg
+
+<ul>
+<li>ansible に関するデフォルト設定ファイル。<code>/etc/ansible/ansible.cfg</code></li>
+</ul>
+</li>
+<li>Inventory
+
+<ul>
+<li>ansible で管理対象ノードを定義するファイル</li>
+</ul>
+</li>
+<li>Playbook
+
+<ul>
+<li>タスク (実行手順) を定義するファイル</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Inventory</h1>
+
+<p>Inventory ファイルは、ansible 用の hosts ファイル。
+ホストやグルーピングの設定、変数などの定義が可能。
+ホストや IP アドレスはレンジでの指定も可能。</p>
+
+<ul>
+<li>ホストとグループの定義</li>
+<li>ホスト変数とグループ変数</li>
+<li>グループのグループ</li>
+</ul>
+
+
+<p>以下は、デフォルト設定 <code>/etc/ansible/hosts</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="c1">#   - Comments begin with the &#39;#&#39; character</span>
+</span><span class='line'><span class="c1">#   - Blank lines are ignored</span>
+</span><span class='line'><span class="c1">#   - Groups of hosts are delimited by [header] elements</span>
+</span><span class='line'><span class="c1">#   - You can enter hostnames or ip addresses</span>
+</span><span class='line'><span class="c1">#   - A hostname/ip can be a member of multiple groups</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Ex 1: Ungrouped hosts, specify before any group headers.</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">green.example.com</span>
+</span><span class='line'><span class="err">blue.example.com</span>
+</span><span class='line'><span class="err">192.168.100.1</span>
+</span><span class='line'><span class="err">192.168.100.10</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Ex 2: A collection of hosts belonging to the &#39;webservers&#39; group</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">[webservers]</span>
+</span><span class='line'><span class="err">alpha.example.org</span>
+</span><span class='line'><span class="err">beta.example.org</span>
+</span><span class='line'><span class="err">192.168.1.100</span>
+</span><span class='line'><span class="err">192.168.1.110</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># If you have multiple hosts following a pattern you can specify</span>
+</span><span class='line'><span class="c1"># them like this:</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">www[001:006].example.com</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Ex 3: A collection of database servers in the &#39;dbservers&#39; group</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">[dbservers]</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">db01.intranet.mydomain.net</span>
+</span><span class='line'><span class="err">db02.intranet.mydomain.net</span>
+</span><span class='line'><span class="err">10.25.1.56</span>
+</span><span class='line'><span class="err">10.25.1.57</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Here&#39;s another example of host ranges, this time there are no</span>
+</span><span class='line'><span class="c1"># leading 0s:</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">db-[99:101]-node.example.com</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Playbook</h1>
+
+<p>Playbook はタスクをまとめて、1つのファイルに記述したもの。
+実行順序や依存関係、変数を利用した処理、ループ処理などが表現できる。</p>
+
+<p>Playbookの基本的なフォーマットは以下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hosts</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;対象とするホスト/グループ&gt;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">var</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;変数名1&gt;</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;値&gt;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;変数名2&gt;</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;値&gt;</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">remote_user</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;処理を実行するユーザー名&gt;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">become</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">yes</span>   <span class="c1"># sudo するか</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">tasks</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;タスク1&gt;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;タスク2&gt;</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">handlers</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;ハンドラ1&gt;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;ハンドラ2&gt;</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">:</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>タスク</h2>
+
+<p>ansible ではホストに対する処理をタスクという単位で管理する。
+通常、1つのタスクには1つのモジュールを指定する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;タスクの説明&gt;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">&lt;モジュール名&gt;</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">&lt;実行時に与えるパラメータ&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>name は description なので省略可能だが、メンテナンス性や playbook 実行時にわかりやすいので絶対書いたほうが良い。</p>
+
+<p>name は日本語でも記載可能。 (文字コードは注意)</p>
+
+<h2>ハンドラ</h2>
+
+<p>ハンドラは、特定のタスクの実行後に、予め指定した処理を実行するための仕組み。
+以下のように記述する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">tasks</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">be sure httpd is installed</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">yum</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name=httpd state=installed</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">notify</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">restart httpd</span>
+</span><span class='line'><span class="l-Scalar-Plain">handlers</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">restart httpd</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">service</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name=httpd state=restarted</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この場合、「be sure httpd is installed」というタスクが実行されると、続いて「notify」で指定された「restart httpd」というハンドラが実行される。</p>
+
+<h2>ループ</h2>
+
+<p><code>with_items</code> で列挙した項目に対してループ処理が可能。</p>
+
+<p><a href="http://docs.ansible.com/ansible/playbooks_loops.html">Loops &ndash; Ansible Documentation</a></p>
+
+<p>リモートのコマンド結果 (標準出力)に対して、一行ずつ処理するタスクが以下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;リモートのコマンド結果を使ったループの例&quot;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">shell</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/usr/bin/something</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">register</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">command_result</span>
+</span><span class='line'>
+</span><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;結果を受け取って何かするタスク&quot;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">shell</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/usr/bin/something_else --param {{ item }}</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">with_items</span><span class="p-Indicator">:</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">command_result.stdout_lines</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>こんな感じで直接リストを書いてもOK。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;リストからパッケージをインストールしていく&quot;</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">yum</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name={{ item }} state=latest</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">with_items</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">httpd</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">zsh</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">tmux</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">vim</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>playbook のサンプル</h1>
+
+<p>まずはインベントリファイル <code>sample_hosts</code> を作成する</p>
+
+<p>&ldquo;fujiko&rdquo; グループに所属しているホストのリスト (計3台分) を記述している。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="k">[fujiko]</span>
+</span><span class='line'><span class="err">doraemon</span>
+</span><span class='line'><span class="err">nobita</span>
+</span><span class='line'><span class="err">shizuka</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>次にplaybook ファイル <code>sample_playbook.yml</code> を作成する。</p>
+
+<p>計 3 つのタスクを記述している。</p>
+
+<p><code>register: &lt;変数名1&gt;</code> という書式でタスク実行結果を変数に保存する。 この変数を Registered Variable と呼ぶ。</p>
+
+<p><code>debug: var=&lt;変数名1&gt;/stdout_lines</code> により、変数に保存したタスク実行結果 (の標準出力) を表示している。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="nn">---</span>
+</span><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hosts</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">fujiko</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">tasks</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;死活&quot;</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">ping</span><span class="p-Indicator">:</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;ホスト名&quot;</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">shell</span><span class="p-Indicator">:</span>    <span class="l-Scalar-Plain">hostname</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">register</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">host</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">debug</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">var=host.stdout_lines</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">host | success</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&quot;ユーザ名&quot;</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">shell</span><span class="p-Indicator">:</span>    <span class="l-Scalar-Plain">whoami</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">register</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">user</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">debug</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">var=user.stdout_lines</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">user | success</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>playbook の実行前に syntax check (構文の確認)をする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ansible-playbook -i sample_hosts sample_playbook.yml --syntax-check
+</span><span class='line'>
+</span><span class='line'>playbook: sample-playbook.yml
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>次に playbook を dry-run。
+実行する前に何が変更されるか、特に、実行時に消えてしまうリソースや入れ替わるリソースを知りたい場合に有効。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ansible-playbook -i sample_hosts sample_playbook.yml --check
+</span><span class='line'>--- snip ---
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Playbook を実行する。<code>--step</code> オプションを付けると、タスク単位にステップ実行もできる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ansible-playbook -i sample_hosts sample_playbook.yml
+</span><span class='line'>
+</span><span class='line'>PLAY <span class="o">[</span>fujiko<span class="o">]</span> ********************************************************************
+</span><span class='line'>
+</span><span class='line'>GATHERING FACTS ***************************************************************
+</span><span class='line'>ok: <span class="o">[</span>doraemon<span class="o">]</span>
+</span><span class='line'>ok: <span class="o">[</span>nobita<span class="o">]</span>
+</span><span class='line'>ok: <span class="o">[</span>shizuka<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK: <span class="o">[</span>死活確認<span class="o">]</span> **********************************************************
+</span><span class='line'>ok: <span class="o">[</span>nobita<span class="o">]</span>
+</span><span class='line'>ok: <span class="o">[</span>doraemon<span class="o">]</span>
+</span><span class='line'>ok: <span class="o">[</span>shizuka<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK: <span class="o">[</span>ホスト名<span class="o">]</span> **********************************************************
+</span><span class='line'>changed: <span class="o">[</span>nobita<span class="o">]</span>
+</span><span class='line'>changed: <span class="o">[</span>doraemon<span class="o">]</span>
+</span><span class='line'>changed: <span class="o">[</span>shizuka<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK: <span class="o">[</span>debug <span class="nv">var</span><span class="o">=</span>host.stdout_lines<span class="o">]</span> *******************************************
+</span><span class='line'>ok: <span class="o">[</span>nobita<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;host.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;nobita&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>ok: <span class="o">[</span>doraemon<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;host.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;doraemon&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>ok: <span class="o">[</span>shizuka<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;host.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;shizuka&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>TASK: <span class="o">[</span>ユーザ名<span class="o">]</span> **********************************************************
+</span><span class='line'>changed: <span class="o">[</span>nobita<span class="o">]</span>
+</span><span class='line'>changed: <span class="o">[</span>doraemon<span class="o">]</span>
+</span><span class='line'>changed: <span class="o">[</span>shizuka<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>TASK: <span class="o">[</span>debug <span class="nv">var</span><span class="o">=</span>user.stdout_lines<span class="o">]</span> *******************************************
+</span><span class='line'>ok: <span class="o">[</span>nobita<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;user.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;momota&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>ok: <span class="o">[</span>doraemon<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;user.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;momota&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>ok: <span class="o">[</span>shizuka<span class="o">]</span> <span class="o">=</span>&gt; <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;var&quot;</span>: <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;user.stdout_lines&quot;</span>: <span class="o">[</span>
+</span><span class='line'>            <span class="s2">&quot;momota&quot;</span>
+</span><span class='line'>        <span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>PLAY RECAP ********************************************************************
+</span><span class='line'>doraemon                   : <span class="nv">ok</span><span class="o">=</span>6    <span class="nv">changed</span><span class="o">=</span>2    <span class="nv">unreachable</span><span class="o">=</span>0    <span class="nv">failed</span><span class="o">=</span>0
+</span><span class='line'>nobita                     : <span class="nv">ok</span><span class="o">=</span>6    <span class="nv">changed</span><span class="o">=</span>2    <span class="nv">unreachable</span><span class="o">=</span>0    <span class="nv">failed</span><span class="o">=</span>0
+</span><span class='line'>shizuka                    : <span class="nv">ok</span><span class="o">=</span>6    <span class="nv">changed</span><span class="o">=</span>2    <span class="nv">unreachable</span><span class="o">=</span>0    <span class="nv">failed</span><span class="o">=</span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>playbook は role という単位で分割可能。再利用性が高くなり、1 つ 1 つの playbook の
+見通しも良くなるなるので、相互に関係のないタスクは分離していくほうが望ましい。</p>
+
+<p>大規模な環境用に、<a href="http://docs.ansible.com/ansible/playbooks_best_practices.html">Best practices</a> が示されているので、ご参考に。</p>
+
+<h1>システム情報を利用する: Facts</h1>
+
+<p>Playbook 実行結果に「GATHERING FACTS」と出力されている。
+これは対象サーバから情報を収集する処理。たとえば、リモートサーバのIPアドレスや
+OS名などのシステム情報を、Playbook 中で変数として扱うことができる。</p>
+
+<p>次のように <code>setup</code> モジュールにより、どんな変数が利用可能かを確認することができる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+<span class='line-number'>192</span>
+<span class='line-number'>193</span>
+<span class='line-number'>194</span>
+<span class='line-number'>195</span>
+<span class='line-number'>196</span>
+<span class='line-number'>197</span>
+<span class='line-number'>198</span>
+<span class='line-number'>199</span>
+<span class='line-number'>200</span>
+<span class='line-number'>201</span>
+<span class='line-number'>202</span>
+<span class='line-number'>203</span>
+<span class='line-number'>204</span>
+<span class='line-number'>205</span>
+<span class='line-number'>206</span>
+<span class='line-number'>207</span>
+<span class='line-number'>208</span>
+<span class='line-number'>209</span>
+<span class='line-number'>210</span>
+<span class='line-number'>211</span>
+<span class='line-number'>212</span>
+<span class='line-number'>213</span>
+<span class='line-number'>214</span>
+<span class='line-number'>215</span>
+<span class='line-number'>216</span>
+<span class='line-number'>217</span>
+<span class='line-number'>218</span>
+<span class='line-number'>219</span>
+<span class='line-number'>220</span>
+<span class='line-number'>221</span>
+<span class='line-number'>222</span>
+<span class='line-number'>223</span>
+<span class='line-number'>224</span>
+<span class='line-number'>225</span>
+<span class='line-number'>226</span>
+<span class='line-number'>227</span>
+<span class='line-number'>228</span>
+<span class='line-number'>229</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="err">$</span> <span class="err">ansible</span> <span class="err">some-host</span> <span class="err">-m</span> <span class="err">setup</span>
+</span><span class='line'><span class="s2">&quot;ansible_all_ipv4_addresses&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;REDACTED IP ADDRESS&quot;</span>
+</span><span class='line'><span class="p">]</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_all_ipv6_addresses&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;REDACTED IPV6 ADDRESS&quot;</span>
+</span><span class='line'><span class="p">]</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_architecture&quot;</span><span class="err">:</span> <span class="s2">&quot;x86_64&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_bios_date&quot;</span><span class="err">:</span> <span class="s2">&quot;09/20/2012&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_bios_version&quot;</span><span class="err">:</span> <span class="s2">&quot;6.00&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_cmdline&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;BOOT_IMAGE&quot;</span><span class="p">:</span> <span class="s2">&quot;/boot/vmlinuz-3.5.0-23-generic&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;quiet&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;ro&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;root&quot;</span><span class="p">:</span> <span class="s2">&quot;UUID=4195bff4-e157-4e41-8701-e93f0aec9e22&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;splash&quot;</span><span class="p">:</span> <span class="kc">true</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_date_time&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2013-10-02&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;day&quot;</span><span class="p">:</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;epoch&quot;</span><span class="p">:</span> <span class="s2">&quot;1380756810&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;hour&quot;</span><span class="p">:</span> <span class="s2">&quot;19&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;iso8601&quot;</span><span class="p">:</span> <span class="s2">&quot;2013-10-02T23:33:30Z&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;iso8601_micro&quot;</span><span class="p">:</span> <span class="s2">&quot;2013-10-02T23:33:30.036070Z&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;minute&quot;</span><span class="p">:</span> <span class="s2">&quot;33&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;month&quot;</span><span class="p">:</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;second&quot;</span><span class="p">:</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;19:33:30&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;tz&quot;</span><span class="p">:</span> <span class="s2">&quot;EDT&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;year&quot;</span><span class="p">:</span> <span class="s2">&quot;2013&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_default_ipv4&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;alias&quot;</span><span class="p">:</span> <span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;gateway&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;macaddress&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;mtu&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;netmask&quot;</span><span class="p">:</span> <span class="s2">&quot;255.255.255.0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;ether&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_default_ipv6&quot;</span><span class="err">:</span> <span class="p">{}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_devices&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;fd0&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;holders&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span class='line'>        <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;model&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;partitions&quot;</span><span class="p">:</span> <span class="p">{},</span>
+</span><span class='line'>        <span class="nt">&quot;removable&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;rotational&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;scheduler_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;deadline&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="s2">&quot;512&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;0.00 Bytes&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;support_discard&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;vendor&quot;</span><span class="p">:</span> <span class="kc">null</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nt">&quot;sda&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;holders&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span class='line'>        <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;SCSI storage controller: LSI Logic / Symbios Logic 53c1030 PCI-X Fusion-MPT Dual Ultra320 SCSI (rev 01)&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;VMware Virtual S&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;partitions&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nt">&quot;sda1&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;39843840&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;19.00 GB&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2048&quot;</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="nt">&quot;sda2&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;1.00 KB&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;39847934&quot;</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="nt">&quot;sda5&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;2093056&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;1022.00 MB&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nt">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;39847936&quot;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nt">&quot;removable&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;rotational&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;scheduler_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;deadline&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;41943040&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="s2">&quot;512&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;20.00 GB&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;support_discard&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;vendor&quot;</span><span class="p">:</span> <span class="s2">&quot;VMware,&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nt">&quot;sr0&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;holders&quot;</span><span class="p">:</span> <span class="p">[],</span>
+</span><span class='line'>        <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;VMware IDE CDR10&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;partitions&quot;</span><span class="p">:</span> <span class="p">{},</span>
+</span><span class='line'>        <span class="nt">&quot;removable&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;rotational&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;scheduler_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;deadline&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectors&quot;</span><span class="p">:</span> <span class="s2">&quot;2097151&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;sectorsize&quot;</span><span class="p">:</span> <span class="s2">&quot;512&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;1024.00 MB&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;support_discard&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;vendor&quot;</span><span class="p">:</span> <span class="s2">&quot;NECVMWar&quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_distribution&quot;</span><span class="err">:</span> <span class="s2">&quot;Ubuntu&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_distribution_release&quot;</span><span class="err">:</span> <span class="s2">&quot;precise&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_distribution_version&quot;</span><span class="err">:</span> <span class="s2">&quot;12.04&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_domain&quot;</span><span class="err">:</span> <span class="s2">&quot;&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_env&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;COLORTERM&quot;</span><span class="p">:</span> <span class="s2">&quot;gnome-terminal&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;DISPLAY&quot;</span><span class="p">:</span> <span class="s2">&quot;:0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;HOME&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/mdehaan&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;LANG&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;LESSCLOSE&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/bin/lesspipe %s %s&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;LESSOPEN&quot;</span><span class="p">:</span> <span class="s2">&quot;| /usr/bin/lesspipe %s&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;LOGNAME&quot;</span><span class="p">:</span> <span class="s2">&quot;root&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;LS_COLORS&quot;</span><span class="p">:</span> <span class="s2">&quot;rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;MAIL&quot;</span><span class="p">:</span> <span class="s2">&quot;/var/mail/root&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;OLDPWD&quot;</span><span class="p">:</span> <span class="s2">&quot;/root/ansible/docsite&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;PATH&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;PWD&quot;</span><span class="p">:</span> <span class="s2">&quot;/root/ansible&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SHELL&quot;</span><span class="p">:</span> <span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SHLVL&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SUDO_COMMAND&quot;</span><span class="p">:</span> <span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SUDO_GID&quot;</span><span class="p">:</span> <span class="s2">&quot;1000&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SUDO_UID&quot;</span><span class="p">:</span> <span class="s2">&quot;1000&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SUDO_USER&quot;</span><span class="p">:</span> <span class="s2">&quot;mdehaan&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;TERM&quot;</span><span class="p">:</span> <span class="s2">&quot;xterm&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;USER&quot;</span><span class="p">:</span> <span class="s2">&quot;root&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;USERNAME&quot;</span><span class="p">:</span> <span class="s2">&quot;root&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;XAUTHORITY&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/mdehaan/.Xauthority&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;_&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/local/bin/ansible&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_eth0&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;ipv4&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;netmask&quot;</span><span class="p">:</span> <span class="s2">&quot;255.255.255.0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nt">&quot;ipv6&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nt">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;64&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nt">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;link&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">],</span>
+</span><span class='line'>    <span class="nt">&quot;macaddress&quot;</span><span class="p">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;e1000&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;mtu&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;ether&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_form_factor&quot;</span><span class="err">:</span> <span class="s2">&quot;Other&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_fqdn&quot;</span><span class="err">:</span> <span class="s2">&quot;ubuntu2.example.com&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_hostname&quot;</span><span class="err">:</span> <span class="s2">&quot;ubuntu2&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_interfaces&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;lo&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;eth0&quot;</span>
+</span><span class='line'><span class="p">]</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_kernel&quot;</span><span class="err">:</span> <span class="s2">&quot;3.5.0-23-generic&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_lo&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;lo&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;ipv4&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;netmask&quot;</span><span class="p">:</span> <span class="s2">&quot;255.0.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.0&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nt">&quot;ipv6&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="nt">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;::1&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nt">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;128&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nt">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;host&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">],</span>
+</span><span class='line'>    <span class="nt">&quot;mtu&quot;</span><span class="p">:</span> <span class="mi">16436</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;loopback&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_lsb&quot;</span><span class="err">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;codename&quot;</span><span class="p">:</span> <span class="s2">&quot;precise&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Ubuntu 12.04.2 LTS&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;Ubuntu&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;major_release&quot;</span><span class="p">:</span> <span class="s2">&quot;12&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;12.04&quot;</span>
+</span><span class='line'><span class="p">}</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_machine&quot;</span><span class="err">:</span> <span class="s2">&quot;x86_64&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_memfree_mb&quot;</span><span class="err">:</span> <span class="mi">74</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_memtotal_mb&quot;</span><span class="err">:</span> <span class="mi">991</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_mounts&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="nt">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;/dev/sda1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;fstype&quot;</span><span class="p">:</span> <span class="s2">&quot;ext4&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;mount&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;options&quot;</span><span class="p">:</span> <span class="s2">&quot;rw,errors=remount-ro&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;size_available&quot;</span><span class="p">:</span> <span class="mi">15032406016</span><span class="p">,</span>
+</span><span class='line'>        <span class="nt">&quot;size_total&quot;</span><span class="p">:</span> <span class="mi">20079898624</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">]</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_nodename&quot;</span><span class="err">:</span> <span class="s2">&quot;ubuntu2.example.com&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_os_family&quot;</span><span class="err">:</span> <span class="s2">&quot;Debian&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_pkg_mgr&quot;</span><span class="err">:</span> <span class="s2">&quot;apt&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_processor&quot;</span><span class="err">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;Intel(R) Core(TM) i7 CPU         860  @ 2.80GHz&quot;</span>
+</span><span class='line'><span class="p">]</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_processor_cores&quot;</span><span class="err">:</span> <span class="mi">1</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_processor_count&quot;</span><span class="err">:</span> <span class="mi">1</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_processor_threads_per_core&quot;</span><span class="err">:</span> <span class="mi">1</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_processor_vcpus&quot;</span><span class="err">:</span> <span class="mi">1</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_product_name&quot;</span><span class="err">:</span> <span class="s2">&quot;VMware Virtual Platform&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_product_serial&quot;</span><span class="err">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_product_uuid&quot;</span><span class="err">:</span> <span class="s2">&quot;REDACTED&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_product_version&quot;</span><span class="err">:</span> <span class="s2">&quot;None&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_python_version&quot;</span><span class="err">:</span> <span class="s2">&quot;2.7.3&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_selinux&quot;</span><span class="err">:</span> <span class="kc">false</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_ssh_host_key_dsa_public&quot;</span><span class="err">:</span> <span class="s2">&quot;REDACTED KEY VALUE&quot;</span>
+</span><span class='line'><span class="s2">&quot;ansible_ssh_host_key_ecdsa_public&quot;</span><span class="err">:</span> <span class="s2">&quot;REDACTED KEY VALUE&quot;</span>
+</span><span class='line'><span class="s2">&quot;ansible_ssh_host_key_rsa_public&quot;</span><span class="err">:</span> <span class="s2">&quot;REDACTED KEY VALUE&quot;</span>
+</span><span class='line'><span class="s2">&quot;ansible_swapfree_mb&quot;</span><span class="err">:</span> <span class="mi">665</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_swaptotal_mb&quot;</span><span class="err">:</span> <span class="mi">1021</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_system&quot;</span><span class="err">:</span> <span class="s2">&quot;Linux&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_system_vendor&quot;</span><span class="err">:</span> <span class="s2">&quot;VMware, Inc.&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_user_id&quot;</span><span class="err">:</span> <span class="s2">&quot;root&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_userspace_architecture&quot;</span><span class="err">:</span> <span class="s2">&quot;x86_64&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_userspace_bits&quot;</span><span class="err">:</span> <span class="s2">&quot;64&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_virtualization_role&quot;</span><span class="err">:</span> <span class="s2">&quot;guest&quot;</span><span class="err">,</span>
+</span><span class='line'><span class="s2">&quot;ansible_virtualization_type&quot;</span><span class="err">:</span> <span class="s2">&quot;VMware&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>たとえば、IPアドレスは <code>{{ ansible_eth0["ipv4"]["address"] }}</code> のように、Playbook の中で変数として
+扱うことができる。</p>
+
+<p>その他、<code>facter</code> や <code>ohai</code> がリモートホストにインストールされていればそれらも利用可能。
+facts よりも詳細な情報が取得できる。</p>
+
+<p>この facts は、いまのところリモートホストが Linux でのみ動作する。
+リモートホストが windows やネットワーク機器の場合は以下のように無効化できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hosts</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">whatever</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">gather_facts</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">no</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>また、システム情報を利用しない場合も無効化することで実行時間短縮が図れる。</p>
+
+<h1>links</h1>
+
+<ul>
+<li><a href="http(//yteraoka.github.io/ansible-tutorial/">Ansible Tutorial</a></li>
+<li><a href="https(//github.com/yteraoka/ansible-tutorial/wiki/ansible-playbook%20%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89">ansible playbook コマンド オプション</a></li>
+<li><a href="https(//www.ansible.com/blog/ansible-performance-tuning">Ansible Performance Tuning (for Fun and Profit)</a></li>
+<li><a href="http(//tdoc.info/blog/2014/01/20/ansible_beyond_configuration.html">Ansibleのアーキテクチャー( 構成管理を超えて</a></li>
+<li><a href="http(//qiita.com/yteraoka/items/5ed2bddefff32e1b9faf">Ansible オレオレベストプラクティス</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ansible で MacBook Pro をセットアップ]]></title>
@@ -5880,179 +7323,6 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 </span><span class='line'>  &lt;h2&gt;hanako&lt;/h2&gt;
 </span><span class='line'>
 </span><span class='line'>&lt;/body&gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[junos firewall filter term 定義を挿入する方法]]></title>
-    <link href="http://momota.github.io/blog/2013/09/14/junos-filter/"/>
-    <updated>2013-09-14T12:36:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/09/14/junos-filter</id>
-    <content type="html"><![CDATA[<p><img src="http://upload.wikimedia.org/wikipedia/en/8/86/Junos_sw_logo.jpg" alt="junos" /></p>
-
-<p>junos の firewall filter の設定で定義の順序について。(EXシリーズを想定)</p>
-
-<p>以下、すべてconfiguration mode での操作。</p>
-
-<p>下記のようなフィルタがすでに設定されている場合に、<code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入したいことがある。フィルタは上から順に評価されるし。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># show | display set 
-</span><span class='line'>...
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 from tcp-established
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM10 then accept
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
-</span><span class='line'>set firewall family inet filter FILTER01 term TERM20 then discard
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!-- more -->
-
-
-<p>単純に以下のターム定義 <code>TERM15</code> を追加で設定すると</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from protocol tcp
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 then accept</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下のように、意図した箇所に設定が反映されない。
-つまり、10.0.0.2/32 から 192.168.1.0/24 への FTP 通信は許可されない。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># show | display set
-</span><span class='line'>...
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from tcp-established
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 then accept
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then discard
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from protocol tcp</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 then accept</span>
-</span><span class='line'>...
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>TERM10</code> と <code>TERM20</code> の間に <code>TERM15</code> を挿入する場合は、以下のように既存定義をすべて <code>delete</code> してから新しい定義追加済みの定義を設定し直す必要があるが、ターム定義が1000くらいあるケースを想定するとそれは避けたい。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># delete firewall family inet filter FILTER01 term TERM10
-</span><span class='line'># delete firewall family inet filter FILTER01 term TERM20
-</span><span class='line'>#
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM10 from tcp-established
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM10 then accept
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from protocol tcp
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 then accept
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM20 then discard
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>このようなときには <code>insert</code> を使う。以下のようにターム設定後に <code>insert</code> してあげればOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from protocol tcp
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21
-</span><span class='line'># set firewall family inet filter FILTER01 term TERM15 then accept
-</span><span class='line'>#
-</span><span class='line'># insert firewall family inet filter FILTER01 term TERM15 after term TERM_10
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>そうすると、以下のように意図したとおり定義できる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># show | display set
-</span><span class='line'>...
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from source-address 10.0.0.1/32
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from destination-address 192.168.1.0/24
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 from tcp-established
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM10 then accept
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from source-address 10.0.0.2/32</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from destination-address 192.168.1.0/24</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from protocol tcp</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 from destination-port 20-21</span>
-</span><span class='line'><span class="gi">+ set firewall family inet filter FILTER01 term TERM15 then accept</span>
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then count COUNTER20
-</span><span class='line'>  set firewall family inet filter FILTER01 term TERM20 then discard
 </span></code></pre></td></tr></table></div></figure>
 
 
