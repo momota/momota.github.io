@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-19T08:29:01+09:00</updated>
+  <updated>2017-04-08T15:41:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -3685,7 +3685,7 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 <!-- more  -->
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/lita.png" alt="network" /></p>
+<p><img src="http://momota.github.io/images/20150111_lita/lita.png" alt="network" /></p>
 
 <p>今回の構成図を上記に示す。</p>
 
@@ -3993,7 +3993,7 @@ Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">
 
 <p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png" alt="lita java" /></p>
+<p><img src="http://momota.github.io/images/20150111_lita/slack_lita.png" alt="lita java" /></p>
 ]]></content>
   </entry>
   
@@ -4959,14 +4959,14 @@ windows で文字を書くことが仕事の大部分を占めるのでフォン
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_before.png" alt="mactype_before" /></p>
+<p><img src="http://momota.github.io/images/20140202_windows_app/mactype_before.png" alt="mactype_before" /></p>
 
 <ul>
 <li>after</li>
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_after.png" alt="mactype_after" /></p>
+<p><img src="http://momota.github.io/images/20140202_windows_app/mactype_after.png" alt="mactype_after" /></p>
 
 <h2>ランチャ</h2>
 
@@ -5306,7 +5306,7 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 
 <p>チケットリストの幅ってのはこれ。</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20131122_redmine/gant_redmine.png" alt="subject_width" /></p>
+<p><img src="http://momota.github.io/images/20131122_redmine/gant_redmine.png" alt="subject_width" /></p>
 ]]></content>
   </entry>
   
@@ -6548,7 +6548,7 @@ git でバージョン管理していなければ、<code>git init</code> して
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
+<p><img src="http://momota.github.io/images/20130921_sinatra/bs_before.png" alt="" /></p>
 
 <p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
 
@@ -6686,7 +6686,7 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 
 <p>これで、<code>bundle exec ruby main.rb</code> で sinatra を起動して <a href="http://localhost:4567/">http://localhost:4567/</a> にアクセスする。</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png" alt="" /></p>
+<p><img src="http://momota.github.io/images/20130921_sinatra/bs_after.png" alt="" /></p>
 
 <p>こんな感じでちょっとだけおしゃれになる。</p>
 ]]></content>

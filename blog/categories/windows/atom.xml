@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windows | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/windows/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-19T08:29:01+09:00</updated>
+  <updated>2017-04-08T15:41:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -84,14 +84,14 @@ windows で文字を書くことが仕事の大部分を占めるのでフォン
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_before.png" alt="mactype_before" /></p>
+<p><img src="/images/20140202_windows_app/mactype_before.png" alt="mactype_before" /></p>
 
 <ul>
 <li>after</li>
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_after.png" alt="mactype_after" /></p>
+<p><img src="/images/20140202_windows_app/mactype_after.png" alt="mactype_after" /></p>
 
 <h2>ランチャ</h2>
 
@@ -375,14 +375,14 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
+<p><img src="/images/20130822_putty_solarized/01_before_putty.png" alt="putty before" /></p>
 
 <ul>
 <li>after</li>
 </ul>
 
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
+<p><img src="/images/20130822_putty_solarized/02_after_putty.png" alt="putty after" /></p>
 
 <!-- more -->
 
@@ -408,7 +408,7 @@ vagrant プラグインの sahara をインストールして OS のスナップ
 
 <p>solarized_dark.regをテキストエディタで開き、ファイル中の <code>Solarized%20Dark(Solarized%20Light)</code> 部分をputtyのセッション名に修正する。下の例では セッション名は <code>_vagrant_ubuntu</code>。</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png" alt="putty session name" /></p>
+<p><img src="/images/20130822_putty_solarized/putty_session_name.png" alt="putty session name" /></p>
 
 <h1>putty設定をインポートする</h1>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: bootstrap | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/bootstrap/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2016-08-19T08:29:01+09:00</updated>
+  <updated>2017-04-08T15:41:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -223,7 +223,7 @@ end
 <p>  </script>
 ```</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png" alt="" /></p>
+<p><img src="/images/20130921_sinatra/bs_before.png" alt="" /></p>
 
 <p>これで、mongodb を使った sinatra web アプリケーションができた。</p>
 
@@ -321,7 +321,7 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 
 <p>これで、<code>bundle exec ruby main.rb</code> で sinatra を起動して <a href="http://localhost:4567/">http://localhost:4567/</a> にアクセスする。</p>
 
-<p><img src="https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png" alt="" /></p>
+<p><img src="/images/20130921_sinatra/bs_after.png" alt="" /></p>
 
 <p>こんな感じでちょっとだけおしゃれになる。</p>
 ]]></content>
