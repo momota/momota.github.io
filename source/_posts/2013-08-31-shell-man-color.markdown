@@ -33,9 +33,9 @@ man() {
 
 - before
 
-![before_man](https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_before.png)
+![before_man](/images/20130831_sh/sh_before.png)
 
 - after
 
-![after_man](https://dl.dropboxusercontent.com/u/28495046/octopress/20130831_sh/sh_after.png)
+![after_man](/images/20130831_sh/sh_after.png)
 

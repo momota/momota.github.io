@@ -58,5 +58,5 @@ redmine ではチケットに期限を入れてあげるとガントチャート
 
 チケットリストの幅ってのはこれ。
 
-![subject_width](https://dl.dropboxusercontent.com/u/28495046/octopress/20131122_redmine/gant_redmine.png)
+![subject_width](/images/20131122_redmine/gant_redmine.png)
 

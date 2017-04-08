@@ -148,7 +148,7 @@ $ source ‾/.zshrc
 `source` の代わりに再ログインしてもいいけど。
 こんな感じで git のステータスも見やすくなる。
 
-![zsh](https://dl.dropboxusercontent.com/u/28495046/octopress/20130907_oh-my-zsh/zsh.png)
+![zsh](/images/20130907_oh-my-zsh/zsh.png)
 
 
 ### 3.5. テーマを変更する

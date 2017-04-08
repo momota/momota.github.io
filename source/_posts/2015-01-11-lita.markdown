@@ -19,7 +19,7 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 
 <!-- more  -->
 
-![network](https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/lita.png)
+![network](/images/20150111_lita/lita.png)
 
 今回の構成図を上記に示す。
 
@@ -262,7 +262,7 @@ $ git push heroku master
 
 slack 上で `@lita java あなた` とかつぶやくとサイコーにジャバな気分になる。
 
-![lita java](https://dl.dropboxusercontent.com/u/28495046/octopress/20150111_lita/slack_lita.png)
+![lita java](/images/20150111_lita/slack_lita.png)
 
 
 

@@ -14,12 +14,12 @@ categories: solarized iterm2 mac
 
 * before
 
-![iterm before](https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/before_iterm.png)
+![iterm before](/images/20130823_iterm_solarized/before_iterm.png)
 
 
 * after
 
-![iterm after](https://dl.dropboxusercontent.com/u/28495046/octopress/20130823_iterm_solarized/after_iterm.png)
+![iterm after](/images/20130823_iterm_solarized/after_iterm.png)
 
 
 <!-- more -->

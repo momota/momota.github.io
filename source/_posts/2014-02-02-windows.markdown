@@ -69,11 +69,11 @@ Mac OS 標準の [Osaka](http://osaka.is.land.to/) の等幅フォントを使�
 
 - before
 
-![mactype_before](https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_before.png)
+![mactype_before](/images/20140202_windows_app/mactype_before.png)
 
 - after
 
-![mactype_after](https://dl.dropboxusercontent.com/u/28495046/octopress/20140202_windows_app/mactype_after.png)
+![mactype_after](/images/20140202_windows_app/mactype_after.png)
 
 
 ## ランチャ

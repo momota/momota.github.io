@@ -185,7 +185,7 @@ end
   </script>
 ```
 
-![](https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_before.png)
+![](/images/20130921_sinatra/bs_before.png)
 
 これで、mongodb を使った sinatra web アプリケーションができた。
 
@@ -271,7 +271,7 @@ bootstrap を使うため、`views/layout.erb` を以下のように修正する
 
 これで、`bundle exec ruby main.rb` で sinatra を起動して http://localhost:4567/ にアクセスする。
 
-![](https://dl.dropboxusercontent.com/u/28495046/octopress/20130921_sinatra/bs_after.png)
+![](/images/20130921_sinatra/bs_after.png)
 
 こんな感じでちょっとだけおしゃれになる。
 

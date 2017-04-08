@@ -14,11 +14,11 @@ categories: windows putty solarized
 
 * before
 
-![putty before](https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/01_before_putty.png)
+![putty before](/images/20130822_putty_solarized/01_before_putty.png)
 
 * after
 
-![putty after](https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/02_after_putty.png)
+![putty after](/images/20130822_putty_solarized/02_after_putty.png)
 
 
 <!-- more -->
@@ -42,7 +42,7 @@ http://27213143.at.webry.info/201304/article_1.html
     
 solarized_dark.regをテキストエディタで開き、ファイル中の `Solarized%20Dark(Solarized%20Light)` 部分をputtyのセッション名に修正する。下の例では セッション名は `_vagrant_ubuntu`。
 
-![putty session name](https://dl.dropboxusercontent.com/u/28495046/octopress/20130822_putty_solarized/putty_session_name.png)
+![putty session name](/images/20130822_putty_solarized/putty_session_name.png)
 
 
 # putty設定をインポートする
