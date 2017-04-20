@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: performance | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/performance/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2017-04-20T23:00:05+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[MySQL パフォーマンスチューニング]]></title>
+    <link href="http://momota.github.io/blog/2017/04/20/mysql/"/>
+    <updated>2017-04-20T22:41:00+09:00</updated>
+    <id>http://momota.github.io/blog/2017/04/20/mysql</id>
+    <content type="html"><![CDATA[<p>MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
+大きく、2つのアプローチがある。</p>
+
+<ol>
+<li>DBチューニング
+
+<ul>
+<li>システム変数 (my.cnf) のチューニング</li>
+<li>全体最適</li>
+</ul>
+</li>
+<li>アプリ (SQL) チューニング
+
+<ul>
+<li>個別最適</li>
+</ul>
+</li>
+</ol>
+
+
+<p>まあ、計測→問題点の特定→修正→計測… のサイクルを回すしかない。</p>
+
+<!-- more -->
+
+
+<h1>1. DBチューニング</h1>
+
+<h2>ディスク構成関連</h2>
+
+<ul>
+<li>ログファイルとデータファイル (たとえば、システム表領域データファイル) を別の物理ディスクに配置することでI/O性能が向上する</li>
+<li>InnoDBデータファイルをRawデバイスに置くことで、I/O性能が向上する</li>
+<li>OSマウントオプション noatime を無効化する
+
+<ul>
+<li>Linuxのファイルシステムには、ファイル読み込み時刻が「atime」として保存される。1ファイルアクセス当たりのオーバーヘッドはささやかだが、大量のファイルに対して頻繁にアクセスするシステムでは、atimeの更新にかかる時間も無視できなくなる。atimeが不要なシステムであれば、atimeの更新を無効化することでディスクのパフォーマンスが向上する可能性がある。</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ストレージエンジン関連</h2>
+
+<ul>
+<li><p>バッファプールサイズ <code>innodb_buffer_pool_size</code></p>
+
+<ul>
+<li>バッファプールサイズ <code>innodb_buffer_pool_size</code> は InnoDB のデータとインデックスをキャッシュするメモリ上の領域。可能な限り大きくすることが基本方針。</li>
+<li>MySQL (InnoDB) のみを利用していれば、バッファプールサイズ <code>innodb_buffer_pool_size</code> はメインメモリの80%程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)</li>
+<li>ログファイル全体をOSがキャッシュできる程度の余裕を持たせると更新系の性能に利点が大きい。</li>
+</ul>
+</li>
+<li><p>バッファプールインスタンス <code>innodb_buffer_pool_instances</code></p>
+
+<ul>
+<li>バッファプールをいくつのインスタンスに分けるか指定する。デフォルト1</li>
+<li>十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。</li>
+<li><code>innodb_buffer_pool_size</code> が大きく、mutex競合がオーバヘッドとなっている場合は、2以上に設定</li>
+<li><code>innodb_buffer_pool_size</code> は <code>N * innodb_buffer_pool_chunk_size * innodb_buffer_pool_instances</code>に等しいサイズにする必要あり。</li>
+<li>オンラインでもサイズ変更可能。</li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-init-startup-configuration.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.1 InnoDB Startup Configuration</a>
+
+<ul>
+<li>mutex 競合確認方法の例は以下。
+<code>
+mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_ms
+-&gt; from performance_schema.events_waits_summary_global_by_event_name
+-&gt; where event_name like '%buf_pool_mutex%';
++----------------------------------------+------------+-------------------+
+| event_name                             | count_star | sum_timer_wait_ms |
++----------------------------------------+------------+-------------------+
+| wait/synch/mutex/innodb/buf_pool_mutex | 0          | 0.0000            |
++----------------------------------------+------------+-------------------+
+1 row in set (0.00 sec)
+</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code>innoDB_page_size</code></p>
+
+<ul>
+<li>デフォルト16k。16KBは、幅広いワークロードに適しているサイズ。特にテーブルスキャンを含むクエリだったり、バルクアップデートを含むDML操作など。</li>
+<li>環境によって調整する。
+<img src="/images/20170420_mysql/mysql_file.png" alt="innodb file structure" /></li>
+</ul>
+</li>
+<li><p>データファイルアクセスに OSキャッシュを無駄に消費しないよう <code>innodb_flush_method</code> を <code>O_DIRECT</code> にする。</p>
+
+<ul>
+<li><code>O_DIRECT</code> にすると、OSのDirect I/O機能を利用し、OSのキャッシュをバイパスする。MySQL は自前のキャッシュ機構があるので、OSキャッシュは冗長なので、バイパスしたほうがよい。</li>
+<li>Linuxでは、多くの場合 <code>O_DIRECT</code> にしたほうがオーバヘッドが下がる</li>
+</ul>
+</li>
+<li><p><code>innodb_log_file_size</code></p>
+
+<ul>
+<li>ログファイル(WAL: Write Ahead Log)はトランザクション更新ログ。ログファイルがどの程度頻繁に切り替わっているかをチェックしておく。</li>
+<li>大きくしすぎるとOSキャッシュに載らず、性能劣化する場合あり。また、クラッシュ後のリカバリ時間が長くなる。</li>
+<li><code>innodb_buffer_pool_size</code> の25%～100%。デフォルト45MB。最大リカバリ時間に影響するので考慮しつつ大きく設定する。</li>
+</ul>
+</li>
+<li><p><code>innodb_file_per_table</code></p>
+
+<ul>
+<li>テーブル単位でOS上のデータファイルを分ける設定</li>
+<li>ディスクI/O分散やibdata ファイルの肥大化を防ぐためONを推奨</li>
+<li>pros / cons: <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-multiple-tablespaces.html">MySQL :: MySQL 5.7 Reference Manual :: 15.7.4 InnoDB File-Per-Table Tablespaces</a></li>
+<li>ibdataファイル肥大化時の運用を検討する必要あり: <a href="http://nippondanji.blogspot.jp/2009/01/innodb_16.html">漢(オトコ)のコンピュータ道: InnoDBのファイルサイズ管理</a></li>
+</ul>
+</li>
+<li><p>Double Write Buffer</p>
+
+<ul>
+<li>クラッシュ時のpartial write (書き込み途中状態での終了) によるデータページ破壊への対策機能で、InnoDBで使われているファイルFlush技術。
+
+<ul>
+<li>InnoDBデータファイルにページを書き出す前に、隣接領域 (これをdoublewrite bufferと呼ぶ)にまず書き出す。double write bufferへの書き込みおよびFlushが完了したら、InnoDBはデータをデータファイルの適切な位置に書き込む。これによりページファイルへの書き込み途中にクラッシュしても (OSやストレージサブシステム、mysqldプロセス)、doublewrite buffer からクラッシュリカバリできる。ただし、これはI/Oオーバヘッドが2倍以上かかるため、性能とのトレードオフ。</li>
+</ul>
+</li>
+<li>障害復旧可能性を高めるため、<code>innodb_doublewrite = ON</code> (デフォルト設定) が推奨</li>
+</ul>
+</li>
+<li><p><code>innodb_thread_concurrency</code> で同時実行スレッド数を調整する。</p>
+
+<ul>
+<li>処理を並列に行うとスループットの向上が期待出来るが、同時に実行中のスレッドがあまりに多すぎるとロックの競合が多発してしまって返って性能を落とす原因になってしまう。</li>
+<li>5.5 以上であればリミットをかける必要はない。現代的なOSであれば、マルチコア・プロセッサのコンテキストスイッチを効果的に実施してくれる。0は上限なし。デフォルトでOK</li>
+</ul>
+</li>
+<li><p>InnoDB compression (圧縮機能)</p>
+
+<ul>
+<li>以下のメリットがある
+
+<ul>
+<li>DBデータファイルサイズを縮小化</li>
+<li>I/O削減</li>
+<li>スループットの改善</li>
+<li>データ量削減</li>
+</ul>
+</li>
+<li>条件
+
+<ul>
+<li><code>innodb_file_per_table</code> を有効化すること</li>
+<li><code>innodb_file_format</code> が Barracuda であること</li>
+</ul>
+</li>
+<li><code>CREATE TABLE</code> もしくは <code>ALTER TABLE</code> で <code>ROW_FORMAT=COMPRESSED</code> か <code>KEY_BLOCK_SIZE</code> を指定する</li>
+</ul>
+</li>
+<li><p><code>innodb_io_capacity</code></p>
+
+<ul>
+<li>InnoDB のバックグラウンドタスクに使用するI/Oキャパシティ(IOPS)の上限を設定する。デフォルト200。</li>
+<li>高速なストレージを使用している場合は拡大する。</li>
+<li>デフォルト値 (200) は、ストライプされた2本のディスクを目安にした値</li>
+</ul>
+</li>
+<li><code>innodb_read_io_threads</code>, <code>innodb_write_io_threads</code>
+
+<ul>
+<li>高速なストレージを使用している場合は拡大する。</li>
+<li>デフォルト値 (4) は、一般的には十分な値</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>コネクションスレッドプール関連</h2>
+
+<ul>
+<li><code>max_connections</code>
+
+<ul>
+<li>サーバが許容可能なコネクション数。デフォルト151。</li>
+<li>多すぎるとメモリを消費し切る可能性あり</li>
+</ul>
+</li>
+<li><code>thread_cache_size</code>
+
+<ul>
+<li>スレッドをコネクションの切断後にもキャッシュしておく数。</li>
+<li>一般的には <code>max_connections / 3</code></li>
+<li>計算式 <code>8 + (max_connections / 100)</code> により自動計算。</li>
+</ul>
+</li>
+<li><code>sort_buffer_size</code>
+
+<ul>
+<li>ソート用のメモリサイズ。このサイズを超えるとディスクを利用する。OLTPでは256KB〜1MBを割り当てる。</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>クエリキャッシュ関連</h2>
+
+<ul>
+<li><code>query_cache_size</code>
+
+<ul>
+<li>クエリキャッシュに割り当てるメモリサイズ</li>
+<li>一般的には32MでOK。デフォルト1MB。</li>
+</ul>
+</li>
+<li><code>query_cache_type</code>
+
+<ul>
+<li>最悪のケースでは、パフォーマンスのオーバヘッドが約15%</li>
+<li>select 比率が高いサーバで有効</li>
+<li>DEMAND に設定すると、クエリ実行時にSQL_CACHE句をつけたクエリだけキャッシュ可能</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>その他</h2>
+
+<ul>
+<li><p><code>autocommit</code> は高負荷なのでOFFが推奨。</p>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-best-practices.html">MySQL :: MySQL 5.7 Reference Manual :: 15.1.2 Best Practices for InnoDB Tables</a></li>
+<li>トランザクション文で明確にコミットすること</li>
+</ul>
+</li>
+<li><p>Read-Ahead</p>
+
+<ul>
+<li>read-aheadリクエストは、バッファプールへ近い将来必要になりそうな複数のページを先読みするI/Oリクエスト。1エクステントの全ページに対してリクエストする。I/O性能の改善効果がある。Linear read-head(デフォルト)とRandom read-headの2つのアルゴリズムがある</li>
+<li>この関連パラメータはチューニングする余地あり</li>
+</ul>
+</li>
+<li><p>再起動時のウォームアップ運用。再起動後、データをキャッシュに載せる。</p>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-preload-buffer-pool.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.8 Saving and Restoring the Buffer Pool State</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1>2. アプリ (SQL) チューニング</h1>
+
+<ul>
+<li><p>適切なSQLを使う (クエリ最適化)</p>
+
+<ul>
+<li>まずはスロークエリの分析</li>
+<li><code>SHOW FULL PROCESSLIST</code> で現在実行中の時間がかかっているクエリを特定する</li>
+<li>EXPLAIN で実行計画の評価
+
+<ul>
+<li>たとえば、全件フェッチしてからアプリケーション側で行を絞り込むというようなロジックはNG</li>
+</ul>
+</li>
+<li>フェッチする行数を減らすようなクエリを組み立てる。
+
+<ul>
+<li>サブクエリをJOINに書き換えたり、インデックスを適切に貼ったり。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>テーブルの最適化</p>
+
+<ul>
+<li>適切なデータタイプを選択する
+
+<ul>
+<li>数値をVARCHAR(桁数)はNG。INT (もしくはBIGINT) にすることで高速かつデータサイズが小さい</li>
+</ul>
+</li>
+<li>インデックスを適切に作成する
+
+<ul>
+<li>付けすぎると更新時のオーバヘッドが増える</li>
+<li>無駄に付けない。たとえば、性別などの二値にインデックスを張っても意味がない。</li>
+</ul>
+</li>
+<li>適切に正規化する
+
+<ul>
+<li>JOIN処理により性能が出ない場合は非正規化も検討する</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>適切な粒度でcommitする</p>
+
+<ul>
+<li>グループコミットの利用</li>
+</ul>
+</li>
+<li><p>レプリケーションを利用した負荷分散</p>
+
+<ul>
+<li>参照処理はSlave側を向ける、など</li>
+</ul>
+</li>
+<li><p>コネクションプーリングする</p></li>
+<li><p>Innodb compression</p>
+
+<ul>
+<li>テーブル単位に圧縮オプションを選択可能</li>
+<li>DML操作の実行時に compresson failure を引き起こす可能性あり。パラメータをチューニングする。</li>
+<li>繰り返しの値や一般的に文字列 (CHAR, VARCHAR, TEXT or BLOB列) は圧縮効果が大きい</li>
+<li>ほとんどバイナリデータ (integer or floating point number) や事前に圧縮されているデータ (たとえば JPEG た PNG) は圧縮効果が少ない
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-compression-tuning.html">MySQL :: MySQL 5.7 Reference Manual :: 15.9.1.3 Tuning Compression for InnoDB Tables</a></li>
+</ul>
+</li>
+<li>画像データが入っていないテーブルに適用すると効果あり</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>性能測定</h1>
+
+<h2>MySQL のステータス</h2>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-buffer-pool-monitoring.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.9 Monitoring the Buffer Pool Using the InnoDB Standard Monitor</a></li>
+<li><code>INFORMATION_SCHEMA</code>
+
+<ul>
+<li><code>INNODB_CMP*</code> : 圧縮の状況</li>
+<li><code>INNODB_TRX</code>, <code>INNODB_LOCKS*</code> : ロック状況</li>
+<li><code>INNODB_SYS_*</code> : システムテーブル (メタデータ)</li>
+<li><code>INNODB_BUFFER_*</code> : バッファプール</li>
+</ul>
+</li>
+<li>PERFORMANCE_SCHEMA, sys スキーマ</li>
+<li>InnoDB 監視
+
+<ul>
+<li>Pending file IOリクエスト</li>
+<li>バッファプール統計</li>
+<li>ロック、mutex</li>
+<li><code>SHOW ENGINE INNODB STATUS</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h2>性能測定ツール</h2>
+
+<ul>
+<li>innotop
+
+<ul>
+<li><code>top</code> 風に MySQL のステータスを表示するツール</li>
+<li><a href="https://github.com/innotop/innotop">innotop/innotop</a></li>
+</ul>
+</li>
+<li>dstat, sar
+
+<ul>
+<li>OSレイヤの性能値を取得する</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ベンチマークツール</h2>
+
+<ul>
+<li>DBT2
+
+<ul>
+<li><a href="https://dev.mysql.com/downloads/benchmarks.html">MySQL :: MySQL Benchmark Tool</a></li>
+</ul>
+</li>
+<li>SysBench
+
+<ul>
+<li><a href="https://dev.mysql.com/downloads/benchmarks.html">MySQL :: MySQL Benchmark Tool</a></li>
+</ul>
+</li>
+<li>mysqlslap
+
+<ul>
+<li>標準の負荷エミュレーションクライアントプログラム</li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/mysqlslap.html">MySQL :: MySQL 5.7 Reference Manual :: 5.5.9 mysqlslap — Load Emulation Client</a></li>
+</ul>
+</li>
+<li>flexAsynch
+
+<ul>
+<li>MySQL Cluster用のテストツール</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

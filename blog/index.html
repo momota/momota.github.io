@@ -9,9 +9,9 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="チーム内での Ansible 勉強会の資料を公開。 公式サイトは以下。 http://www.ansible.com
-http://docs.ansible.com 前提知識としては、以下。知っていたほうが理解が早い。 unix コマンド
-YAML ansible使いのためのYAML入門 & &hellip;">
+  <meta name="description" content="MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
+大きく、2つのアプローチがある。 DBチューニング システム変数 (my.cnf) のチューニング
+全体最適 アプリ (SQL) チューニング 個別最適 まあ、計測→問題点の特定→修正→計測… &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,65 @@ YAML ansible使いのためのYAML入門 & &hellip;">
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/04/20/mysql/">MySQL パフォーマンスチューニング</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-04-20T22:41:00+09:00" pubdate data-updated="true">2017-04-20</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
+大きく、2つのアプローチがある。</p>
+
+<ol>
+<li>DBチューニング
+
+<ul>
+<li>システム変数 (my.cnf) のチューニング</li>
+<li>全体最適</li>
+</ul>
+</li>
+<li>アプリ (SQL) チューニング
+
+<ul>
+<li>個別最適</li>
+</ul>
+</li>
+</ol>
+
+
+<p>まあ、計測→問題点の特定→修正→計測… のサイクルを回すしかない。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/04/20/mysql/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -648,47 +707,6 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
   
     <footer>
       <a rel="full-article" href="/blog/2016/01/29/octopress/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-15T21:15:00+09:00" pubdate data-updated="true">2015-11-15</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>新しい PC が来たので、もともと使ってた東芝 Dynabook R731/B (windows 7)に CentOS7 をインストールした。
-今までは DVD-R に ISO を焼いていたけど、自前の PC の DVD ドライブが壊れていたので
-USB メモリを使ってインストールしてみた。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/11/15/centos-install/">続きを読む &rarr;</a>
     </footer>
   
 

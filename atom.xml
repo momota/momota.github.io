@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2017-04-08T15:52:50+09:00</updated>
+  <updated>2017-04-20T23:00:05+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,425 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[MySQL パフォーマンスチューニング]]></title>
+    <link href="http://momota.github.io/blog/2017/04/20/mysql/"/>
+    <updated>2017-04-20T22:41:00+09:00</updated>
+    <id>http://momota.github.io/blog/2017/04/20/mysql</id>
+    <content type="html"><![CDATA[<p>MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
+大きく、2つのアプローチがある。</p>
+
+<ol>
+<li>DBチューニング
+
+<ul>
+<li>システム変数 (my.cnf) のチューニング</li>
+<li>全体最適</li>
+</ul>
+</li>
+<li>アプリ (SQL) チューニング
+
+<ul>
+<li>個別最適</li>
+</ul>
+</li>
+</ol>
+
+
+<p>まあ、計測→問題点の特定→修正→計測… のサイクルを回すしかない。</p>
+
+<!-- more -->
+
+
+<h1>1. DBチューニング</h1>
+
+<h2>ディスク構成関連</h2>
+
+<ul>
+<li>ログファイルとデータファイル (たとえば、システム表領域データファイル) を別の物理ディスクに配置することでI/O性能が向上する</li>
+<li>InnoDBデータファイルをRawデバイスに置くことで、I/O性能が向上する</li>
+<li>OSマウントオプション noatime を無効化する
+
+<ul>
+<li>Linuxのファイルシステムには、ファイル読み込み時刻が「atime」として保存される。1ファイルアクセス当たりのオーバーヘッドはささやかだが、大量のファイルに対して頻繁にアクセスするシステムでは、atimeの更新にかかる時間も無視できなくなる。atimeが不要なシステムであれば、atimeの更新を無効化することでディスクのパフォーマンスが向上する可能性がある。</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ストレージエンジン関連</h2>
+
+<ul>
+<li><p>バッファプールサイズ <code>innodb_buffer_pool_size</code></p>
+
+<ul>
+<li>バッファプールサイズ <code>innodb_buffer_pool_size</code> は InnoDB のデータとインデックスをキャッシュするメモリ上の領域。可能な限り大きくすることが基本方針。</li>
+<li>MySQL (InnoDB) のみを利用していれば、バッファプールサイズ <code>innodb_buffer_pool_size</code> はメインメモリの80%程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)</li>
+<li>ログファイル全体をOSがキャッシュできる程度の余裕を持たせると更新系の性能に利点が大きい。</li>
+</ul>
+</li>
+<li><p>バッファプールインスタンス <code>innodb_buffer_pool_instances</code></p>
+
+<ul>
+<li>バッファプールをいくつのインスタンスに分けるか指定する。デフォルト1</li>
+<li>十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。</li>
+<li><code>innodb_buffer_pool_size</code> が大きく、mutex競合がオーバヘッドとなっている場合は、2以上に設定</li>
+<li><code>innodb_buffer_pool_size</code> は <code>N * innodb_buffer_pool_chunk_size * innodb_buffer_pool_instances</code>に等しいサイズにする必要あり。</li>
+<li>オンラインでもサイズ変更可能。</li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-init-startup-configuration.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.1 InnoDB Startup Configuration</a>
+
+<ul>
+<li>mutex 競合確認方法の例は以下。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_ms
+</span><span class='line'>-&gt; from performance_schema.events_waits_summary_global_by_event_name
+</span><span class='line'>-&gt; where event_name like '%buf_pool_mutex%';
+</span><span class='line'>+----------------------------------------+------------+-------------------+
+</span><span class='line'>| event_name                             | count_star | sum_timer_wait_ms |
+</span><span class='line'>+----------------------------------------+------------+-------------------+
+</span><span class='line'>| wait/synch/mutex/innodb/buf_pool_mutex | 0          | 0.0000            |
+</span><span class='line'>+----------------------------------------+------------+-------------------+
+</span><span class='line'>1 row in set (0.00 sec)</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p><code>innoDB_page_size</code></p>
+
+<ul>
+<li>デフォルト16k。16KBは、幅広いワークロードに適しているサイズ。特にテーブルスキャンを含むクエリだったり、バルクアップデートを含むDML操作など。</li>
+<li>環境によって調整する。
+<img src="http://momota.github.io/images/20170420_mysql/mysql_file.png" alt="innodb file structure" /></li>
+</ul>
+</li>
+<li><p>データファイルアクセスに OSキャッシュを無駄に消費しないよう <code>innodb_flush_method</code> を <code>O_DIRECT</code> にする。</p>
+
+<ul>
+<li><code>O_DIRECT</code> にすると、OSのDirect I/O機能を利用し、OSのキャッシュをバイパスする。MySQL は自前のキャッシュ機構があるので、OSキャッシュは冗長なので、バイパスしたほうがよい。</li>
+<li>Linuxでは、多くの場合 <code>O_DIRECT</code> にしたほうがオーバヘッドが下がる</li>
+</ul>
+</li>
+<li><p><code>innodb_log_file_size</code></p>
+
+<ul>
+<li>ログファイル(WAL: Write Ahead Log)はトランザクション更新ログ。ログファイルがどの程度頻繁に切り替わっているかをチェックしておく。</li>
+<li>大きくしすぎるとOSキャッシュに載らず、性能劣化する場合あり。また、クラッシュ後のリカバリ時間が長くなる。</li>
+<li><code>innodb_buffer_pool_size</code> の25%～100%。デフォルト45MB。最大リカバリ時間に影響するので考慮しつつ大きく設定する。</li>
+</ul>
+</li>
+<li><p><code>innodb_file_per_table</code></p>
+
+<ul>
+<li>テーブル単位でOS上のデータファイルを分ける設定</li>
+<li>ディスクI/O分散やibdata ファイルの肥大化を防ぐためONを推奨</li>
+<li>pros / cons: <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-multiple-tablespaces.html">MySQL :: MySQL 5.7 Reference Manual :: 15.7.4 InnoDB File-Per-Table Tablespaces</a></li>
+<li>ibdataファイル肥大化時の運用を検討する必要あり: <a href="http://nippondanji.blogspot.jp/2009/01/innodb_16.html">漢(オトコ)のコンピュータ道: InnoDBのファイルサイズ管理</a></li>
+</ul>
+</li>
+<li><p>Double Write Buffer</p>
+
+<ul>
+<li>クラッシュ時のpartial write (書き込み途中状態での終了) によるデータページ破壊への対策機能で、InnoDBで使われているファイルFlush技術。
+
+<ul>
+<li>InnoDBデータファイルにページを書き出す前に、隣接領域 (これをdoublewrite bufferと呼ぶ)にまず書き出す。double write bufferへの書き込みおよびFlushが完了したら、InnoDBはデータをデータファイルの適切な位置に書き込む。これによりページファイルへの書き込み途中にクラッシュしても (OSやストレージサブシステム、mysqldプロセス)、doublewrite buffer からクラッシュリカバリできる。ただし、これはI/Oオーバヘッドが2倍以上かかるため、性能とのトレードオフ。</li>
+</ul>
+</li>
+<li>障害復旧可能性を高めるため、<code>innodb_doublewrite = ON</code> (デフォルト設定) が推奨</li>
+</ul>
+</li>
+<li><p><code>innodb_thread_concurrency</code> で同時実行スレッド数を調整する。</p>
+
+<ul>
+<li>処理を並列に行うとスループットの向上が期待出来るが、同時に実行中のスレッドがあまりに多すぎるとロックの競合が多発してしまって返って性能を落とす原因になってしまう。</li>
+<li>5.5 以上であればリミットをかける必要はない。現代的なOSであれば、マルチコア・プロセッサのコンテキストスイッチを効果的に実施してくれる。0は上限なし。デフォルトでOK</li>
+</ul>
+</li>
+<li><p>InnoDB compression (圧縮機能)</p>
+
+<ul>
+<li>以下のメリットがある
+
+<ul>
+<li>DBデータファイルサイズを縮小化</li>
+<li>I/O削減</li>
+<li>スループットの改善</li>
+<li>データ量削減</li>
+</ul>
+</li>
+<li>条件
+
+<ul>
+<li><code>innodb_file_per_table</code> を有効化すること</li>
+<li><code>innodb_file_format</code> が Barracuda であること</li>
+</ul>
+</li>
+<li><code>CREATE TABLE</code> もしくは <code>ALTER TABLE</code> で <code>ROW_FORMAT=COMPRESSED</code> か <code>KEY_BLOCK_SIZE</code> を指定する</li>
+</ul>
+</li>
+<li><p><code>innodb_io_capacity</code></p>
+
+<ul>
+<li>InnoDB のバックグラウンドタスクに使用するI/Oキャパシティ(IOPS)の上限を設定する。デフォルト200。</li>
+<li>高速なストレージを使用している場合は拡大する。</li>
+<li>デフォルト値 (200) は、ストライプされた2本のディスクを目安にした値</li>
+</ul>
+</li>
+<li><code>innodb_read_io_threads</code>, <code>innodb_write_io_threads</code>
+
+<ul>
+<li>高速なストレージを使用している場合は拡大する。</li>
+<li>デフォルト値 (4) は、一般的には十分な値</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>コネクションスレッドプール関連</h2>
+
+<ul>
+<li><code>max_connections</code>
+
+<ul>
+<li>サーバが許容可能なコネクション数。デフォルト151。</li>
+<li>多すぎるとメモリを消費し切る可能性あり</li>
+</ul>
+</li>
+<li><code>thread_cache_size</code>
+
+<ul>
+<li>スレッドをコネクションの切断後にもキャッシュしておく数。</li>
+<li>一般的には <code>max_connections / 3</code></li>
+<li>計算式 <code>8 + (max_connections / 100)</code> により自動計算。</li>
+</ul>
+</li>
+<li><code>sort_buffer_size</code>
+
+<ul>
+<li>ソート用のメモリサイズ。このサイズを超えるとディスクを利用する。OLTPでは256KB〜1MBを割り当てる。</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>クエリキャッシュ関連</h2>
+
+<ul>
+<li><code>query_cache_size</code>
+
+<ul>
+<li>クエリキャッシュに割り当てるメモリサイズ</li>
+<li>一般的には32MでOK。デフォルト1MB。</li>
+</ul>
+</li>
+<li><code>query_cache_type</code>
+
+<ul>
+<li>最悪のケースでは、パフォーマンスのオーバヘッドが約15%</li>
+<li>select 比率が高いサーバで有効</li>
+<li>DEMAND に設定すると、クエリ実行時にSQL_CACHE句をつけたクエリだけキャッシュ可能</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>その他</h2>
+
+<ul>
+<li><p><code>autocommit</code> は高負荷なのでOFFが推奨。</p>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-best-practices.html">MySQL :: MySQL 5.7 Reference Manual :: 15.1.2 Best Practices for InnoDB Tables</a></li>
+<li>トランザクション文で明確にコミットすること</li>
+</ul>
+</li>
+<li><p>Read-Ahead</p>
+
+<ul>
+<li>read-aheadリクエストは、バッファプールへ近い将来必要になりそうな複数のページを先読みするI/Oリクエスト。1エクステントの全ページに対してリクエストする。I/O性能の改善効果がある。Linear read-head(デフォルト)とRandom read-headの2つのアルゴリズムがある</li>
+<li>この関連パラメータはチューニングする余地あり</li>
+</ul>
+</li>
+<li><p>再起動時のウォームアップ運用。再起動後、データをキャッシュに載せる。</p>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-preload-buffer-pool.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.8 Saving and Restoring the Buffer Pool State</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1>2. アプリ (SQL) チューニング</h1>
+
+<ul>
+<li><p>適切なSQLを使う (クエリ最適化)</p>
+
+<ul>
+<li>まずはスロークエリの分析</li>
+<li><code>SHOW FULL PROCESSLIST</code> で現在実行中の時間がかかっているクエリを特定する</li>
+<li>EXPLAIN で実行計画の評価
+
+<ul>
+<li>たとえば、全件フェッチしてからアプリケーション側で行を絞り込むというようなロジックはNG</li>
+</ul>
+</li>
+<li>フェッチする行数を減らすようなクエリを組み立てる。
+
+<ul>
+<li>サブクエリをJOINに書き換えたり、インデックスを適切に貼ったり。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>テーブルの最適化</p>
+
+<ul>
+<li>適切なデータタイプを選択する
+
+<ul>
+<li>数値をVARCHAR(桁数)はNG。INT (もしくはBIGINT) にすることで高速かつデータサイズが小さい</li>
+</ul>
+</li>
+<li>インデックスを適切に作成する
+
+<ul>
+<li>付けすぎると更新時のオーバヘッドが増える</li>
+<li>無駄に付けない。たとえば、性別などの二値にインデックスを張っても意味がない。</li>
+</ul>
+</li>
+<li>適切に正規化する
+
+<ul>
+<li>JOIN処理により性能が出ない場合は非正規化も検討する</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>適切な粒度でcommitする</p>
+
+<ul>
+<li>グループコミットの利用</li>
+</ul>
+</li>
+<li><p>レプリケーションを利用した負荷分散</p>
+
+<ul>
+<li>参照処理はSlave側を向ける、など</li>
+</ul>
+</li>
+<li><p>コネクションプーリングする</p></li>
+<li><p>Innodb compression</p>
+
+<ul>
+<li>テーブル単位に圧縮オプションを選択可能</li>
+<li>DML操作の実行時に compresson failure を引き起こす可能性あり。パラメータをチューニングする。</li>
+<li>繰り返しの値や一般的に文字列 (CHAR, VARCHAR, TEXT or BLOB列) は圧縮効果が大きい</li>
+<li>ほとんどバイナリデータ (integer or floating point number) や事前に圧縮されているデータ (たとえば JPEG た PNG) は圧縮効果が少ない
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-compression-tuning.html">MySQL :: MySQL 5.7 Reference Manual :: 15.9.1.3 Tuning Compression for InnoDB Tables</a></li>
+</ul>
+</li>
+<li>画像データが入っていないテーブルに適用すると効果あり</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>性能測定</h1>
+
+<h2>MySQL のステータス</h2>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-buffer-pool-monitoring.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.9 Monitoring the Buffer Pool Using the InnoDB Standard Monitor</a></li>
+<li><code>INFORMATION_SCHEMA</code>
+
+<ul>
+<li><code>INNODB_CMP*</code> : 圧縮の状況</li>
+<li><code>INNODB_TRX</code>, <code>INNODB_LOCKS*</code> : ロック状況</li>
+<li><code>INNODB_SYS_*</code> : システムテーブル (メタデータ)</li>
+<li><code>INNODB_BUFFER_*</code> : バッファプール</li>
+</ul>
+</li>
+<li>PERFORMANCE_SCHEMA, sys スキーマ</li>
+<li>InnoDB 監視
+
+<ul>
+<li>Pending file IOリクエスト</li>
+<li>バッファプール統計</li>
+<li>ロック、mutex</li>
+<li><code>SHOW ENGINE INNODB STATUS</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h2>性能測定ツール</h2>
+
+<ul>
+<li>innotop
+
+<ul>
+<li><code>top</code> 風に MySQL のステータスを表示するツール</li>
+<li><a href="https://github.com/innotop/innotop">innotop/innotop</a></li>
+</ul>
+</li>
+<li>dstat, sar
+
+<ul>
+<li>OSレイヤの性能値を取得する</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ベンチマークツール</h2>
+
+<ul>
+<li>DBT2
+
+<ul>
+<li><a href="https://dev.mysql.com/downloads/benchmarks.html">MySQL :: MySQL Benchmark Tool</a></li>
+</ul>
+</li>
+<li>SysBench
+
+<ul>
+<li><a href="https://dev.mysql.com/downloads/benchmarks.html">MySQL :: MySQL Benchmark Tool</a></li>
+</ul>
+</li>
+<li>mysqlslap
+
+<ul>
+<li>標準の負荷エミュレーションクライアントプログラム</li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/mysqlslap.html">MySQL :: MySQL 5.7 Reference Manual :: 5.5.9 mysqlslap — Load Emulation Client</a></li>
+</ul>
+</li>
+<li>flexAsynch
+
+<ul>
+<li>MySQL Cluster用のテストツール</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ansible ABC]]></title>
@@ -6689,644 +7108,6 @@ sinatra では静的ファイルを <code>public/</code> 以下につっこむ�
 <p><img src="http://momota.github.io/images/20130921_sinatra/bs_after.png" alt="" /></p>
 
 <p>こんな感じでちょっとだけおしゃれになる。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rails から外れた僕らは sinatra で i did it my way (1)]]></title>
-    <link href="http://momota.github.io/blog/2013/09/16/sinatra/"/>
-    <updated>2013-09-16T17:37:00+09:00</updated>
-    <id>http://momota.github.io/blog/2013/09/16/sinatra</id>
-    <content type="html"><![CDATA[<p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p><a href="http://www.sinatrarb.com/">sinatra</a> は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
-本稿では以下について書く。</p>
-
-<ol>
-<li>sinatra インストール</li>
-<li>hello world アプリケーション</li>
-<li>ルーティング</li>
-<li>フィルタ</li>
-<li>ヘルパー</li>
-<li>テンプレートの呼び出し</li>
-</ol>
-
-
-<hr />
-
-<ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
-
-<ul>
-<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
-
-<ul>
-<li>sinatra で MongoDB を使ったデータ永続化</li>
-<li>HTTP POSTへの対応</li>
-<li>Bootstrap でのお化粧</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
-
-<ul>
-<li>sinatra の heroku へのデプロイ</li>
-</ul>
-</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>前準備: インストール</h2>
-
-<p>ruby 2.0 を rbenv でインストールする。
-以下、作業は <code>/Users/momota/dev/sinatra/</code> で行う。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 2.0.0-p247
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>2.0.0-p247
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span><span class='line'><span class="nv">$ </span>rbenv version
-</span><span class='line'>2.0.0-p247 <span class="o">(</span><span class="nb">set </span>by /Users/momota/dev/sinatra/.ruby-version<span class="o">)</span>
-</span><span class='line'><span class="nv">$ </span>ruby -v
-</span><span class='line'>ruby 2.0.0p247 <span class="o">(</span>2013-06-27 revision 41674<span class="o">)</span> <span class="o">[</span>x86_64-darwin12.4.0<span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>bundler で sinatra と関連 gem をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundler
-</span><span class='line'><span class="nv">$ </span>bundle -v
-</span><span class='line'>Bundler version 1.3.5
-</span><span class='line'><span class="nv">$ </span>bundle init
-</span><span class='line'>Writing new Gemfile to /Users/momota/dev/sinatra/Gemfile
-</span><span class='line'><span class="nv">$ </span>cat <span class="s">&lt;&lt; EOF &gt;&gt; ./Gemfile</span>
-</span><span class='line'><span class="s">heredoc&gt; gem &quot;activerecord&quot;, &quot;3.2.13&quot;</span>
-</span><span class='line'><span class="s">heredoc&gt; gem &quot;sqlite3&quot;, &quot;1.3.7&quot;</span>
-</span><span class='line'><span class="s">heredoc&gt; gem &quot;sinatra&quot;, &quot;1.4.3&quot;</span>
-</span><span class='line'><span class="s">heredoc&gt; gem &quot;sinatra-contrib&quot;, &quot;1.4.0&quot;</span>
-</span><span class='line'><span class="s">heredoc&gt; EOF</span>
-</span><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
-</span><span class='line'>Fetching gem metadata from https://rubygems.org/...........
-</span><span class='line'>Fetching gem metadata from https://rubygems.org/..
-</span><span class='line'>Resolving dependencies...
-</span><span class='line'>Installing i18n <span class="o">(</span>0.6.1<span class="o">)</span>
-</span><span class='line'>Installing multi_json <span class="o">(</span>1.8.0<span class="o">)</span>
-</span><span class='line'>Installing activesupport <span class="o">(</span>3.2.13<span class="o">)</span>
-</span><span class='line'>Installing builder <span class="o">(</span>3.0.4<span class="o">)</span>
-</span><span class='line'>Installing activemodel <span class="o">(</span>3.2.13<span class="o">)</span>
-</span><span class='line'>Installing arel <span class="o">(</span>3.0.2<span class="o">)</span>
-</span><span class='line'>Installing tzinfo <span class="o">(</span>0.3.37<span class="o">)</span>
-</span><span class='line'>Installing activerecord <span class="o">(</span>3.2.13<span class="o">)</span>
-</span><span class='line'>Installing backports <span class="o">(</span>3.3.4<span class="o">)</span>
-</span><span class='line'>Installing eventmachine <span class="o">(</span>1.0.3<span class="o">)</span>
-</span><span class='line'>Installing rack <span class="o">(</span>1.5.2<span class="o">)</span>
-</span><span class='line'>Installing rack-protection <span class="o">(</span>1.5.0<span class="o">)</span>
-</span><span class='line'>Installing rack-test <span class="o">(</span>0.6.2<span class="o">)</span>
-</span><span class='line'>Installing tilt <span class="o">(</span>1.4.1<span class="o">)</span>
-</span><span class='line'>Installing sinatra <span class="o">(</span>1.4.3<span class="o">)</span>
-</span><span class='line'>Installing sinatra-contrib <span class="o">(</span>1.4.0<span class="o">)</span>
-</span><span class='line'>Installing sqlite3 <span class="o">(</span>1.3.7<span class="o">)</span>
-</span><span class='line'>Using bundler <span class="o">(</span>1.3.5<span class="o">)</span>
-</span><span class='line'>Your bundle is <span class="nb">complete</span>!
-</span><span class='line'>It was installed into ./vendor/bundle
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>hello world を返す sinatra アプリケーションを書く</h2>
-
-<p>サイトのルートへアクセスが遇ったときに &ldquo;hello world&rdquo; を返す <code>main.rb</code> を作成する。適当なエディタで以下を書いて保存する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="s2">&quot;hello world&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>アプリケーションを実行する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby main.rb
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>動作確認をする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/
-</span><span class='line'>hello world%
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ちゃんと返ってきている。簡単。
-ここでは、 <code>curl</code> で確認したが、もちろん web ブラウザで <a href="http://localhost:4567/">http://localhost:4567/</a> へアクセスして確認してもOK。
-アプリケーションの終了は <code>Ctrl-c</code> でOK。</p>
-
-<h2>ルーティング: 複数のリクエストをさばく</h2>
-
-<p>sinatra では、以下のように HTTP メソッド (GET, POST, &hellip;)とURLがペアでルーティングされる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># show something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># create something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">put</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># replace something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">patch</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># modify something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">delete</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># annihilate something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">options</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># appease something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">link</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># affiliate something</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">unlink</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># separate something</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>先ほど書いた <code>main.rb</code> を修正していろいろな HTTP GET リクエストに対応する。
-ここでは <a href="http://localhost:4567/about">http://localhost:4567/about</a> にアクセスが有った場合、 &ldquo;about this site&rdquo; 文字列を返すように追記する。
-以下は、<code>git diff</code> の結果を示す。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gh">diff --git a/main.rb b/main.rb</span>
-</span><span class='line'><span class="gh">index 713861d..9423680 100644</span>
-</span><span class='line'><span class="gd">--- a/main.rb</span>
-</span><span class='line'><span class="gi">+++ b/main.rb</span>
-</span><span class='line'><span class="gu">@@ -1,5 +1,11 @@</span>
-</span><span class='line'> require &#39;sinatra&#39;
-</span><span class='line'><span class="gi">+require &#39;sinatra/reloader&#39;</span>
-</span><span class='line'>
-</span><span class='line'> get &#39;/&#39; do
-</span><span class='line'>   &quot;hello world&quot;
-</span><span class='line'> end
-</span><span class='line'><span class="gi">+</span>
-</span><span class='line'><span class="gi">+get &#39;/about&#39; do</span>
-</span><span class='line'><span class="gi">+  &quot;about this site&quot;</span>
-</span><span class='line'><span class="gi">+end</span>
-</span><span class='line'><span class="gi">+</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>通常、スクリプトの修正をアプリケーションへ反映するためには、アプリケーションの再起動が必要となる。<code>require 'sinatra/reloader'</code> により、その必要がなくなる。</p>
-
-<h2>URL からのパラメータを扱う</h2>
-
-<p>以下のメソッドを書くことにより、<a href="http://localhost:4567/hello/SOME_NAME">http://localhost:4567/hello/SOME_NAME</a> へアクセスすると SOME_NAME 部分を扱うことができる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/hello/:name&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="s2">&quot;hello </span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これは以下のようにも書ける。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/hello/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;hello </span><span class="si">#{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>複数のパラメータを扱うときは以下のように書く。
-<a href="http://localhost:4567/hello/FAMILY_NAME/LAST_NAME">http://localhost:4567/hello/FAMILY_NAME/LAST_NAME</a> へアクセスすると、FAMILY_NAME と LAST_NAME を扱える。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/hello/:fname/?:lname?&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="p">,</span> <span class="n">l</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;hello </span><span class="si">#{</span><span class="n">f</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">l</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>パラメータは、ワイルドカードや正規表現で扱うことができる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/from/*/to/*&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="p">,</span> <span class="n">t</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;from </span><span class="si">#{</span><span class="n">f</span><span class="si">}</span><span class="s2"> to </span><span class="si">#{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果は以下のとおり。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/from/fukuoka/to/tokyo
-</span><span class='line'>from fukuoka to tokyo%
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>正規表現で扱う場合は、以下。ここでは、<code>/users/</code> 以下がすべて数字であるアクセスの場合にマッチングさせている。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="sr">%r{/users/([0-9]+)}</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;user id = </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>結果は以下のとおり。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/users/12345
-</span><span class='line'>user <span class="nv">id</span> <span class="o">=</span> 12345%
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>before/after filter</h2>
-
-<p>sinatra のフィルタは、ルーティングされたコンテキストを実行する前後(before / after)で、リクエストとレスポンスを変更することができる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="k">do</span>
-</span><span class='line'>  <span class="vi">@before_value</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="s2">&quot;before_value has been set to </span><span class="si">#{</span><span class="vi">@before_value</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">after</span> <span class="k">do</span>
-</span><span class='line'> <span class="nb">puts</span> <span class="s2">&quot;After filter called to perform some task.&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下のように記述することで、フィルタは特定パスのリクエストにのみ評価される。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="s1">&#39;/path/you/want/*&#39;</span>
-</span><span class='line'>  <span class="c1"># execute only before the &#39;/path/you/want/*&#39; route</span>
-</span><span class='line'>  <span class="n">authenticate</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>helper</h2>
-
-<p>ヘルパーメソッドを定義して、ルートハンドラーやテンプレートとして使える。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">helpers</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># 共通関数を書ける</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hello</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span>
-</span><span class='line'>    <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">say_hello</span><span class="p">(</span> <span class="n">n</span> <span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記は、モジュールとしても記述できる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Hello</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hello</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span> <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">module</span> <span class="nn">Goodbye</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span> <span class="nb">name</span> <span class="p">)</span> <span class="s2">&quot;goodbye, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">helpers</span> <span class="no">Hello</span><span class="p">,</span> <span class="no">Goodbye</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>テンプレートエンジンを扱う</h2>
-
-<p>sinatra では様々なテンプレートエンジンを扱うことができる。
-例えば、haml, erb, sass, markdown, slim, coffescript など。詳細は <a href="http://www.sinatrarb.com/intro.html#Available%20Template%20Languages">http://www.sinatrarb.com/intro.html#Available%20Template%20Languages</a> このあたりを参照。</p>
-
-<p>ここでは、erb の例を示す。</p>
-
-<p><code>views/index.erb</code> を作成する。スクリプトからは以下のように呼び出せばOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>テンプレートエンジンにパラメータを渡す</h3>
-
-<p>インスタンス変数に渡して、テンプレート側からコールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="vi">@name</span>  <span class="o">=</span> <span class="n">n</span>
-</span><span class='line'>  <span class="vi">@title</span> <span class="o">=</span> <span class="s1">&#39;sinatra sample&#39;</span>
-</span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>views/index.erb</code> は以下。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
-</span><span class='line'><span class="x">&lt;html lang=&quot;ja&quot;&gt;</span>
-</span><span class='line'><span class="x">&lt;head&gt;</span>
-</span><span class='line'><span class="x">  &lt;meta charset=&quot;urf-8&quot;&gt;</span>
-</span><span class='line'><span class="x">  &lt;title&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@title</span> <span class="cp">%&gt;</span><span class="x">&lt;/title&gt;</span>
-</span><span class='line'><span class="x">&lt;/head&gt;</span>
-</span><span class='line'><span class="x">&lt;body&gt;</span>
-</span><span class='line'><span class="x">&lt;h1&gt;hello </span><span class="cp">&lt;%=</span> <span class="vi">@name</span> <span class="cp">%&gt;</span><span class="x">&lt;/h1&gt;</span>
-</span><span class='line'><span class="x">&lt;/body&gt;</span>
-</span><span class='line'><span class="x">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実行結果は以下のとおり。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/taro
-</span><span class='line'>&lt;!DOCTYPE html&gt;
-</span><span class='line'>&lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span>&gt;
-</span><span class='line'>&lt;head&gt;
-</span><span class='line'>  &lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;urf-8&quot;</span>&gt;
-</span><span class='line'>  &lt;title&gt;sinatra sample&lt;/title&gt;
-</span><span class='line'>&lt;/head&gt;
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>&lt;h1&gt;hello taro&lt;/h1&gt;
-</span><span class='line'>&lt;/body&gt;
-</span><span class='line'>&lt;/html&gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>layout テンプレート</h3>
-
-<p>テンプレートが複数存在するときに、ヘッダーやフッターなど、共通部分が出てくる。
-そのような共通部分を <code>views/layout.erb</code> 切り出すことができる。(erb以外のときはファイル拡張子を変えればよい。)
-<code>views/layout.erb</code> は優先的に読み込まれる。</p>
-
-<p>共通部分を <code>layout.erb</code> に記述し、個別記述部分を <code>yield</code> で呼び出す。以下に <code>layout.erb</code> の例を示す。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
-</span><span class='line'><span class="x">&lt;html lang=&quot;ja&quot;&gt;</span>
-</span><span class='line'><span class="x">&lt;head&gt;</span>
-</span><span class='line'><span class="x">  &lt;meta charset=&quot;urf-8&quot;&gt;</span>
-</span><span class='line'><span class="x">  &lt;title&gt;test&lt;/title&gt;</span>
-</span><span class='line'><span class="x">&lt;/head&gt;</span>
-</span><span class='line'><span class="x">&lt;body&gt;</span>
-</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">&lt;/body&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この時、以下のような <code>index.erb</code> テンプレートと</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">  &lt;h1&gt;test&lt;/h1&gt;</span>
-</span><span class='line'><span class="x">  &lt;h2&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@name</span><span class="cp">%&gt;</span><span class="x">&lt;/h2&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下のルーティングにより</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra/reloader&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/:name&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="vi">@name</span> <span class="o">=</span> <span class="n">n</span>
-</span><span class='line'>  <span class="n">erb</span> <span class="ss">:index</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下の様な結果になる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:4567/hanako
-</span><span class='line'>&lt;!DOCTYPE html&gt;
-</span><span class='line'>&lt;html <span class="nv">lang</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span>&gt;
-</span><span class='line'>&lt;head&gt;
-</span><span class='line'>  &lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;urf-8&quot;</span>&gt;
-</span><span class='line'>  &lt;title&gt;test&lt;/title&gt;
-</span><span class='line'>&lt;/head&gt;
-</span><span class='line'>&lt;body&gt;
-</span><span class='line'>    &lt;h1&gt;test&lt;/h1&gt;
-</span><span class='line'>  &lt;h2&gt;hanako&lt;/h2&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;/body&gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   
