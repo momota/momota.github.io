@@ -7,6 +7,10 @@ categories: mysql performance
 ---
 
 MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
+
+// 結構な文量になってしまった…
+
+
 大きく、2つのアプローチがある。
 
 1. DBチューニング
@@ -15,7 +19,7 @@ MySQL 5.7 のパフォーマンスチューニングについて、調べてた�
 2. アプリ (SQL) チューニング
     - 個別最適
 
-まあ、計測→問題点の特定→修正→計測… のサイクルを回すしかない。
+まあ、地道に、計測→問題点の特定→修正→計測… のサイクルを回すしかない。
 
 <!-- more -->
 
@@ -35,12 +39,12 @@ MySQL 5.7 のパフォーマンスチューニングについて、調べてた�
 
 - バッファプールサイズ `innodb_buffer_pool_size`
   - バッファプールサイズ `innodb_buffer_pool_size` は InnoDB のデータとインデックスをキャッシュするメモリ上の領域。可能な限り大きくすることが基本方針。
-  - MySQL (InnoDB) のみを利用していれば、バッファプールサイズ `innodb_buffer_pool_size` はメインメモリの80%程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)
+  - MySQL (InnoDB) のみを利用していれば、バッファプールサイズ `innodb_buffer_pool_size` はメインメモリの 70-80% 程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)
   - ログファイル全体をOSがキャッシュできる程度の余裕を持たせると更新系の性能に利点が大きい。
 
 - バッファプールインスタンス `innodb_buffer_pool_instances`
-  - バッファプールをいくつのインスタンスに分けるか指定する。デフォルト1
-  - 十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。
+  - バッファプールをいくつのインスタンスに分けるか指定する。デフォルト8
+  - 十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、グローバル Mutex の衝突を減らすことができ同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。
   - `innodb_buffer_pool_size` が大きく、mutex競合がオーバヘッドとなっている場合は、2以上に設定
   - `innodb_buffer_pool_size` は `N * innodb_buffer_pool_chunk_size * innodb_buffer_pool_instances`に等しいサイズにする必要あり。
   - オンラインでもサイズ変更可能。
@@ -73,6 +77,15 @@ mysql> select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_m
   - 大きくしすぎるとOSキャッシュに載らず、性能劣化する場合あり。また、クラッシュ後のリカバリ時間が長くなる。
   - `innodb_buffer_pool_size` の25%～100%。デフォルト45MB。最大リカバリ時間に影響するので考慮しつつ大きく設定する。
 
+- `innodb_log_buffer_size`
+  - InnoDB は、変更されたデータのレコードを、メモリ上のバッファに書き込み、トランザクションがコミットする前にログがディスクに書き込まれないようにすることで、大きなトランザクション
+のI/Oを節約する。
+  - 大量・巨大な blob を書き込む必要がなければ、4MB-8MBが適切。
+
+- `innodb_flush_log_at_trx_commit`
+  - `innodb_flush_log_log_at_trx_commit` が 1 の時、ログバッファはトランザクションがコミットされるたびにディスク上のログファイルに書き出され、データの整合性を最大限保つ。しかし、これはパフォーマンスへの影響がある。この値を2にすると、ログバッファはトランザクションのコミットごとにOSのファイルキャッシュへ書き出される。これにより、ACIDを意識しないのであればパフ
+ォーマンスを最適化・高速化できるが、OSのクラッシュ時には数秒分のトランザクションが消えてしまう可能
+
 - `innodb_file_per_table`
   - テーブル単位でOS上のデータファイルを分ける設定
   - ディスクI/O分散やibdata ファイルの肥大化を防ぐためONを推奨
@@ -88,6 +101,7 @@ mysql> select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_m
 - `innodb_thread_concurrency` で同時実行スレッド数を調整する。
   - 処理を並列に行うとスループットの向上が期待出来るが、同時に実行中のスレッドがあまりに多すぎるとロックの競合が多発してしまって返って性能を落とす原因になってしまう。
   - 5.5 以上であればリミットをかける必要はない。現代的なOSであれば、マルチコア・プロセッサのコンテキストスイッチを効果的に実施してくれる。0は上限なし。デフォルトでOK
+  - 並列度で問題が出た場合は、値を調整する。この場合の推奨値は、CPU 数の 2 倍にディスクの数を足したもの。動的変数なのでオンラインで変更可能。
 
 - InnoDB compression (圧縮機能)
   - 以下のメリットがある
@@ -144,7 +158,8 @@ mysql> select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_m
   - read-aheadリクエストは、バッファプールへ近い将来必要になりそうな複数のページを先読みするI/Oリクエスト。1エクステントの全ページに対してリクエストする。I/O性能の改善効果がある。Linear read-head(デフォルト)とRandom read-headの2つのアルゴリズムがある
   - この関連パラメータはチューニングする余地あり
 
-- 再起動時のウォームアップ運用。再起動後、データをキャッシュに載せる。
+- 再起動時のウォームアップ運用
+  - バッファプールの中身を保存・リストアする機能がある。この機能を利用して、再起動後、データをキャッシュに載せ高速化する。
   - [MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.8 Saving and Restoring the Buffer Pool State](https://dev.mysql.com/doc/refman/5.7/en/innodb-preload-buffer-pool.html)
 
 
@@ -188,6 +203,11 @@ mysql> select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wait_m
 性能測定
 ========
 
+推測するな、計測せよ。
+
+設定を変えたり、プログラムを変えたりしても、効果を測れないと意味がない。
+
+
 MySQL のステータス
 ------------------
 
@@ -226,3 +246,11 @@ MySQL のステータス
 - flexAsynch
   - MySQL Cluster用のテストツール
 
+
+参考資料
+========
+
+- [MySQL :: MySQL 5.7 Reference Manual](https://dev.mysql.com/doc/refman/5.7/en/)
+- [20151208_02_MySQL_Tuning_for_Beginners.pdf](https://downloads.mysql.com/presentations/20151208_02_MySQL_Tuning_for_Beginners.pdf)
+- [漢(オトコ)のコンピュータ道: MySQLを高速化する10の方法](http://nippondanji.blogspot.jp/2009/02/mysql10.html)
+- [(帰ってきた)InnoDBパフォーマンス最適化の基礎 | Yakst](https://yakst.com/ja/posts/65)
