@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mysql | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mysql/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2017-04-20T23:00:05+09:00</updated>
+  <updated>2017-04-22T13:02:48+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,8 +18,11 @@
     <link href="http://momota.github.io/blog/2017/04/20/mysql/"/>
     <updated>2017-04-20T22:41:00+09:00</updated>
     <id>http://momota.github.io/blog/2017/04/20/mysql</id>
-    <content type="html"><![CDATA[<p>MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。
-大きく、2つのアプローチがある。</p>
+    <content type="html"><![CDATA[<p>MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。</p>
+
+<p>// 結構な文量になってしまった…</p>
+
+<p>大きく、2つのアプローチがある。</p>
 
 <ol>
 <li>DBチューニング
@@ -38,7 +41,7 @@
 </ol>
 
 
-<p>まあ、計測→問題点の特定→修正→計測… のサイクルを回すしかない。</p>
+<p>まあ、地道に、計測→問題点の特定→修正→計測… のサイクルを回すしかない。</p>
 
 <!-- more -->
 
@@ -66,15 +69,15 @@
 
 <ul>
 <li>バッファプールサイズ <code>innodb_buffer_pool_size</code> は InnoDB のデータとインデックスをキャッシュするメモリ上の領域。可能な限り大きくすることが基本方針。</li>
-<li>MySQL (InnoDB) のみを利用していれば、バッファプールサイズ <code>innodb_buffer_pool_size</code> はメインメモリの80%程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)</li>
+<li>MySQL (InnoDB) のみを利用していれば、バッファプールサイズ <code>innodb_buffer_pool_size</code> はメインメモリの 70-80% 程度を割り当てる。データとインデックスの両方をキャッシュする。(デフォルトは128MB)</li>
 <li>ログファイル全体をOSがキャッシュできる程度の余裕を持たせると更新系の性能に利点が大きい。</li>
 </ul>
 </li>
 <li><p>バッファプールインスタンス <code>innodb_buffer_pool_instances</code></p>
 
 <ul>
-<li>バッファプールをいくつのインスタンスに分けるか指定する。デフォルト1</li>
-<li>十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。</li>
+<li>バッファプールをいくつのインスタンスに分けるか指定する。デフォルト8</li>
+<li>十分なメモリがある場合、複数のバッファプールインスタンスに分割することで、グローバル Mutex の衝突を減らすことができ同時並行性を改善可能。キャッシュされたページに対して、異なるスレッドがI/Oを行うときの競合が減るため並列性が増す。</li>
 <li><code>innodb_buffer_pool_size</code> が大きく、mutex競合がオーバヘッドとなっている場合は、2以上に設定</li>
 <li><code>innodb_buffer_pool_size</code> は <code>N * innodb_buffer_pool_chunk_size * innodb_buffer_pool_instances</code>に等しいサイズにする必要あり。</li>
 <li>オンラインでもサイズ変更可能。</li>
@@ -120,6 +123,21 @@ mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wai
 <li><code>innodb_buffer_pool_size</code> の25%～100%。デフォルト45MB。最大リカバリ時間に影響するので考慮しつつ大きく設定する。</li>
 </ul>
 </li>
+<li><p><code>innodb_log_buffer_size</code></p>
+
+<ul>
+<li>InnoDB は、変更されたデータのレコードを、メモリ上のバッファに書き込み、トランザクションがコミットする前にログがディスクに書き込まれないようにすることで、大きなトランザクション
+のI/Oを節約する。</li>
+<li>大量・巨大な blob を書き込む必要がなければ、4MB-8MBが適切。</li>
+</ul>
+</li>
+<li><p><code>innodb_flush_log_at_trx_commit</code></p>
+
+<ul>
+<li><code>innodb_flush_log_log_at_trx_commit</code> が 1 の時、ログバッファはトランザクションがコミットされるたびにディスク上のログファイルに書き出され、データの整合性を最大限保つ。しかし、これはパフォーマンスへの影響がある。この値を2にすると、ログバッファはトランザクションのコミットごとにOSのファイルキャッシュへ書き出される。これにより、ACIDを意識しないのであればパフ
+ォーマンスを最適化・高速化できるが、OSのクラッシュ時には数秒分のトランザクションが消えてしまう可能</li>
+</ul>
+</li>
 <li><p><code>innodb_file_per_table</code></p>
 
 <ul>
@@ -146,6 +164,7 @@ mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wai
 <ul>
 <li>処理を並列に行うとスループットの向上が期待出来るが、同時に実行中のスレッドがあまりに多すぎるとロックの競合が多発してしまって返って性能を落とす原因になってしまう。</li>
 <li>5.5 以上であればリミットをかける必要はない。現代的なOSであれば、マルチコア・プロセッサのコンテキストスイッチを効果的に実施してくれる。0は上限なし。デフォルトでOK</li>
+<li>並列度で問題が出た場合は、値を調整する。この場合の推奨値は、CPU 数の 2 倍にディスクの数を足したもの。動的変数なのでオンラインで変更可能。</li>
 </ul>
 </li>
 <li><p>InnoDB compression (圧縮機能)</p>
@@ -253,9 +272,10 @@ mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wai
 <li>この関連パラメータはチューニングする余地あり</li>
 </ul>
 </li>
-<li><p>再起動時のウォームアップ運用。再起動後、データをキャッシュに載せる。</p>
+<li><p>再起動時のウォームアップ運用</p>
 
 <ul>
+<li>バッファプールの中身を保存・リストアする機能がある。この機能を利用して、再起動後、データをキャッシュに載せ高速化する。</li>
 <li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-preload-buffer-pool.html">MySQL :: MySQL 5.7 Reference Manual :: 15.6.3.8 Saving and Restoring the Buffer Pool State</a></li>
 </ul>
 </li>
@@ -341,6 +361,10 @@ mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wai
 
 <h1>性能測定</h1>
 
+<p>推測するな、計測せいよ。</p>
+
+<p>設定を変えたり、プログラムを変えたりしても、効果を測れないと意味がない。</p>
+
 <h2>MySQL のステータス</h2>
 
 <ul>
@@ -414,6 +438,16 @@ mysql&gt; select event_name, count_star, sum_timer_wait/1000000000 sum_timer_wai
 <li>MySQL Cluster用のテストツール</li>
 </ul>
 </li>
+</ul>
+
+
+<h1>参考資料</h1>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/">MySQL :: MySQL 5.7 Reference Manual</a></li>
+<li><a href="https://downloads.mysql.com/presentations/20151208_02_MySQL_Tuning_for_Beginners.pdf">20151208_02_MySQL_Tuning_for_Beginners.pdf</a></li>
+<li><a href="http://nippondanji.blogspot.jp/2009/02/mysql10.html">漢(オトコ)のコンピュータ道: MySQLを高速化する10の方法</a></li>
+<li><a href="https://yakst.com/ja/posts/65">(帰ってきた)InnoDBパフォーマンス最適化の基礎 | Yakst</a></li>
 </ul>
 
 ]]></content>
