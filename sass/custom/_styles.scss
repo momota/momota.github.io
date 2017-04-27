@@ -23,5 +23,13 @@ article {
     margin: 10px;
     padding: 10px;
   }
+
+	ul, ol, dl{
+		margin-left: 20px;
+		padding-left: 24px;
+		ul, ol, dl{
+			margin-top: 0;
+		}
+	}
 }
 
