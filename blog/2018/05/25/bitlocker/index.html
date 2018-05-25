@@ -127,8 +127,12 @@
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ps1'><span class='line'><span class="nv">$pw</span> <span class="p">=</span> <span class="nb">ConvertTo-SecureString</span> <span class="s2">&quot;YOUR_PASSWORD&quot;</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span>
-</span><span class='line'><span class="n">Unlock-BitLocker</span> <span class="n">-MountPoint</span> <span class="s2">&quot;D:&quot;</span> <span class="n">-Password</span> <span class="nv">$pw</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ps1'><span class='line'><span class="nv">$password</span> <span class="p">=</span> <span class="nb">ConvertTo-SecureString</span> <span class="s2">&quot;YOUR_PASSWORD&quot;</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span>
+</span><span class='line'><span class="nv">$d_drive</span> <span class="p">=</span> <span class="s2">&quot;D:&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Unlock-BitLocker</span> <span class="n">-MountPoint</span> <span class="nv">$d_drive</span> <span class="n">-Password</span> <span class="nv">$password</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

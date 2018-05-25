@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windows | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/windows/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-05-25T18:05:42+09:00</updated>
+  <updated>2018-05-25T18:20:57+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -36,10 +36,12 @@
 
 <p>ここでは D ドライブの BitLocker 解除するスクリプト <code>C:\PATH-YOU-WANT\unlock-bitLocker.ps1</code> を書く。</p>
 
-<p><code>ps1
-$pw = ConvertTo-SecureString "YOUR_PASSWORD" -AsPlainText -Force
-Unlock-BitLocker -MountPoint "D:" -Password $pw
-</code></p>
+<p>```ps1
+$password = ConvertTo-SecureString &ldquo;YOUR_PASSWORD&rdquo; -AsPlainText -Force
+$d_drive = &ldquo;D:&rdquo;</p>
+
+<p>Unlock-BitLocker -MountPoint $d_drive -Password $password
+```</p>
 
 <h2>2. バッチファイルを書く</h2>
 
