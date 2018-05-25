@@ -24,8 +24,10 @@ BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、
 
 
 ```ps1
-$pw = ConvertTo-SecureString "YOUR_PASSWORD" -AsPlainText -Force
-Unlock-BitLocker -MountPoint "D:" -Password $pw
+$password = ConvertTo-SecureString "YOUR_PASSWORD" -AsPlainText -Force
+$d_drive = "D:"
+
+Unlock-BitLocker -MountPoint $d_drive -Password $password
 ```
 
 
