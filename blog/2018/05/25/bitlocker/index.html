@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Windows ログイン時に、Cドライブ以外のBitLockerを解除する - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
+最近、会社 PC を Windows 10 にアップデートしたので使うようになった。 BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2018/05/25/bitlocker/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-05-25T17:23:00+09:00" pubdate data-updated="true">2018-05-25</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
+最近、会社 PC を Windows 10 にアップデートしたので使うようになった。</p>
+
+<p>BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、とパスワード入力を求めてくる。
+ただし、その後、OS ログインしても、C ドライブ以外 (たとえば、D ドライブ) は暗号化されたままとなっており、いちいち当該ドライブへアクセスしてパスワード入力して暗号化を解除する必要があった。
+また、暗号化解除前に D ドライブ上のファイルへアクセスするとエラーが起きてしまい、大変うざったい。</p>
+
+<p>そこで、OS ログイン時に自動的に C ドライブ以外のディスク暗号化解除するために PowerShell とバッチを書いてスタートアッププログラムに登録した話を書く。</p>
+
+<p>セキュリティクラスタには怒られるのかもしれないが、OS に管理者権限ユーザでログインできている時点でもういろいろ見れて当たり前やろ、という思想。</p>
+
+<!-- more -->
+
+
+<h2>1. BitLocker 解除用の PowerShell を書く</h2>
+
+<p>ここでは D ドライブの BitLocker 解除するスクリプト <code>C:\PATH-YOU-WANT\unlock-bitLocker.ps1</code> を書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ps1'><span class='line'><span class="nv">$pw</span> <span class="p">=</span> <span class="nb">ConvertTo-SecureString</span> <span class="s2">&quot;YOUR_PASSWORD&quot;</span> <span class="n">-AsPlainText</span> <span class="n">-Force</span>
+</span><span class='line'><span class="n">Unlock-BitLocker</span> <span class="n">-MountPoint</span> <span class="s2">&quot;D:&quot;</span> <span class="n">-Password</span> <span class="nv">$pw</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2. バッチファイルを書く</h2>
+
+<p>スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル <code>C:\PATH-YOU-WANT\unlock-bitLocker.cmd</code> を書いてあげる。
+PowerShell を直接登録したかったのだが、調査力が足りず変な構成になった…</p>
+
+<p>もしくは、これくらいなら PowerShell スクリプトはいらず、バッチスクリプトだけでもよかったかもしれない。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='bat'><span class='line'><span class="p">@</span><span class="k">echo</span> <span class="k">off</span>
+</span><span class='line'><span class="k">setlocal</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">set</span> <span class="nv">DDrive</span><span class="o">=</span>D:
+</span><span class='line'><span class="k">set</span> <span class="n">/a</span> SleepInterval<span class="o">=</span><span class="m">5</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">echo</span> Unlocking bitlocker <span class="k">on</span> <span class="nv">%DDrive%</span> drive...
+</span><span class='line'><span class="p">@</span>powershell -Command <span class="s2">&quot;Start-Process powershell.exe -ArgumentList C:\PATH-YOU-WANT\unlock_bitlocker.ps1 -Verb runas&quot;</span>
+</span><span class='line'>timeout <span class="nv">%SleepInterval%</span> <span class="n">/nobreak</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="k">ERRORLEVEL</span> <span class="m">0</span> (
+</span><span class='line'>  dir <span class="nv">%DDrive%</span>
+</span><span class='line'>  <span class="k">echo</span> Yey<span class="p">,</span> unlocked bitlocker <span class="k">on</span> <span class="nv">%DDrive%</span> drive !!
+</span><span class='line'>) <span class="k">else</span> (
+</span><span class='line'>  <span class="k">echo</span> Error occured: unloker script returned error code: <span class="nv">%ERRORLEVEL%</span>
+</span><span class='line'>)
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">endlocal</span>
+</span><span class='line'><span class="k">pause</span> <span class="p">&gt;</span> <span class="n">nul</span>
+</span><span class='line'>exit
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3. バッチファイルをスタートアッププログラムに登録してあげる</h2>
+
+<ol>
+<li><code>Windows キー + r</code> : ファイル名を指定して実行を起動</li>
+<li><code>shell:startup</code> を入力: スタートアップのフォルダが開く</li>
+<li>作ったバッチファイル <code>unlock_bitlocker.cmd</code> のショートカットをスタートアップフォルダの中に作成</li>
+</ol>
+
+
+<p>以上で、OS ログイン後に D ドライブの BitLocker を解除できる。</p>
+
+<p>正確に言うと、スクリプトの実行に管理者権限が必要なので、ログイン後に「このアプリがデバイスへ変更を加えることを許可しますか」と確認ダイアログが出る。「はい」とボタン押下し許可してあげればOK。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-05-25T17:23:00+09:00" pubdate data-updated="true">2018-05-25</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/powershell/'>powershell</a>, <a class='category' href='/blog/categories/windows/'>windows</a>, <a class='category' href='/blog/categories/work/'>work</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2018/05/25/bitlocker/" data-via="momota" data-counturl="http://momota.github.io/blog/2018/05/25/bitlocker/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2018/05/25/bitlocker/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2017/04/20/mysql/" title="Previous Post: MySQL パフォーマンスチューニング">&laquo; MySQL パフォーマンスチューニング</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/05/25/bitlocker/">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/04/20/mysql/">MySQL パフォーマンスチューニング</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/19/ansible-abc/">ansible ABC</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/10/ansible-mac/">ansible で MacBook Pro をセットアップ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2018/05/25/bitlocker/';
+        var disqus_url = 'http://momota.github.io/blog/2018/05/25/bitlocker/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

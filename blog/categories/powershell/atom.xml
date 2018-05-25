@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: powershell | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/powershell/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2018-05-25T18:05:42+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Windows ログイン時に、Cドライブ以外のBitLockerを解除する]]></title>
+    <link href="http://momota.github.io/blog/2018/05/25/bitlocker/"/>
+    <updated>2018-05-25T17:23:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/05/25/bitlocker</id>
+    <content type="html"><![CDATA[<p>BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
+最近、会社 PC を Windows 10 にアップデートしたので使うようになった。</p>
+
+<p>BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、とパスワード入力を求めてくる。
+ただし、その後、OS ログインしても、C ドライブ以外 (たとえば、D ドライブ) は暗号化されたままとなっており、いちいち当該ドライブへアクセスしてパスワード入力して暗号化を解除する必要があった。
+また、暗号化解除前に D ドライブ上のファイルへアクセスするとエラーが起きてしまい、大変うざったい。</p>
+
+<p>そこで、OS ログイン時に自動的に C ドライブ以外のディスク暗号化解除するために PowerShell とバッチを書いてスタートアッププログラムに登録した話を書く。</p>
+
+<p>セキュリティクラスタには怒られるのかもしれないが、OS に管理者権限ユーザでログインできている時点でもういろいろ見れて当たり前やろ、という思想。</p>
+
+<!-- more -->
+
+
+<h2>1. BitLocker 解除用の PowerShell を書く</h2>
+
+<p>ここでは D ドライブの BitLocker 解除するスクリプト <code>C:\PATH-YOU-WANT\unlock-bitLocker.ps1</code> を書く。</p>
+
+<p><code>ps1
+$pw = ConvertTo-SecureString "YOUR_PASSWORD" -AsPlainText -Force
+Unlock-BitLocker -MountPoint "D:" -Password $pw
+</code></p>
+
+<h2>2. バッチファイルを書く</h2>
+
+<p>スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル <code>C:\PATH-YOU-WANT\unlock-bitLocker.cmd</code> を書いてあげる。
+PowerShell を直接登録したかったのだが、調査力が足りず変な構成になった…</p>
+
+<p>もしくは、これくらいなら PowerShell スクリプトはいらず、バッチスクリプトだけでもよかったかもしれない。</p>
+
+<p>```bat
+@echo off
+setlocal</p>
+
+<p>set DDrive=D:
+set /a SleepInterval=5</p>
+
+<p>echo Unlocking bitlocker on %DDrive% drive&hellip;
+@powershell -Command &ldquo;Start-Process powershell.exe -ArgumentList C:\PATH-YOU-WANT\unlock_bitlocker.ps1 -Verb runas&rdquo;
+timeout %SleepInterval% /nobreak</p>
+
+<p>if ERRORLEVEL 0 (
+  dir %DDrive%
+  echo Yey, unlocked bitlocker on %DDrive% drive !!
+) else (
+  echo Error occured: unloker script returned error code: %ERRORLEVEL%
+)</p>
+
+<p>endlocal
+pause > nul
+exit
+```</p>
+
+<h2>3. バッチファイルをスタートアッププログラムに登録してあげる</h2>
+
+<ol>
+<li><code>Windows キー + r</code> : ファイル名を指定して実行を起動</li>
+<li><code>shell:startup</code> を入力: スタートアップのフォルダが開く</li>
+<li>作ったバッチファイル <code>unlock_bitlocker.cmd</code> のショートカットをスタートアップフォルダの中に作成</li>
+</ol>
+
+
+<p>以上で、OS ログイン後に D ドライブの BitLocker を解除できる。</p>
+
+<p>正確に言うと、スクリプトの実行に管理者権限が必要なので、ログイン後に「このアプリがデバイスへ変更を加えることを許可しますか」と確認ダイアログが出る。「はい」とボタン押下し許可してあげればOK。</p>
+]]></content>
+  </entry>
+  
+</feed>
