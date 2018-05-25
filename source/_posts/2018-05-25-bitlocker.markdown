@@ -33,7 +33,7 @@ Unlock-BitLocker -MountPoint $d_drive -Password $password
 
 ## 2. バッチファイルを書く
 
-スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル `C:\PATH-YOU-WANT\unlock-bitLocker.cmd` を書いてあげる。
+上述の PowerShell スクリプトを管理者権限で実行し、かつ、スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル `C:\PATH-YOU-WANT\unlock-bitLocker.cmd` を書いてあげる。
 PowerShell を直接登録したかったのだが、調査力が足りず変な構成になった…
 
 もしくは、これくらいなら PowerShell スクリプトはいらず、バッチスクリプトだけでもよかったかもしれない。
@@ -74,3 +74,6 @@ exit
 以上で、OS ログイン後に D ドライブの BitLocker を解除できる。
 
 正確に言うと、スクリプトの実行に管理者権限が必要なので、ログイン後に「このアプリがデバイスへ変更を加えることを許可しますか」と確認ダイアログが出る。「はい」とボタン押下し許可してあげればOK。
+
+
+BitLocker を有効にしていると、初回起動時に NumLock が有効になっているのを無効化したいんだが、だれか方法を教えてほしい。
