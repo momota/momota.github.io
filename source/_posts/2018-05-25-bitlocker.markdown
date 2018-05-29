@@ -31,6 +31,18 @@ Unlock-BitLocker -MountPoint $d_drive -Password $password
 ```
 
 
+複数のドライブがある場合は以下。
+
+```ps1
+$password = ConvertTo-SecureString "YOUR_PASSWORD" -AsPlainText -Force
+$drives = @("D:", "E:", "F:", "G:", "H:")
+
+Foreach($drive in $drives) {
+  Unlock-BitLocker -MountPoint $drive -Password $password
+}
+```
+
+
 ## 2. バッチファイルを書く
 
 上述の PowerShell スクリプトを管理者権限で実行し、かつ、スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル `C:\PATH-YOU-WANT\unlock-bitLocker.cmd` を書いてあげる。
