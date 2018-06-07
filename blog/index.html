@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
-最近、会社 PC を Windows 10 にアップデートしたので使うようになった。 BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、 &hellip;">
+  <meta name="description" content="Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。 Docker: 18.03.1-ce-win65 (17513)
+Elasticsearch: 6.2.4 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,51 @@
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/06/07/elasticsearch/">Docker で Elasticsearch</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-07T13:56:00+09:00" pubdate data-updated="true">2018-06-07</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。</p>
+
+<ul>
+<li>Docker: 18.03.1-ce-win65 (17513)</li>
+<li>Elasticsearch: 6.2.4</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/06/07/elasticsearch/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -656,60 +701,6 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
   
     <footer>
       <a rel="full-article" href="/blog/2016/02/26/selenium/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/02/08/ansible/">Ansible でノートPCをセットアップ</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-02-08T09:42:00+09:00" pubdate data-updated="true">2016-02-08</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://momota.github.io/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a> で書いたが、まっさらなCentOSが手元にあったので
-<a href="http://www.ansible.com/">ansible</a> を使っていろいろインストールしてみた。</p>
-
-<p>ちょっと前に、<a href="http://www.ansible.com/blog/ansible-2.0-launch">Ansible 2.0 Has Arrived</a> という記事も話題になってたし。</p>
-
-<p>ansible は Chef のような構成管理ツール。
-システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
-管理対象ノードが多いほどメリットが大きい。</p>
-
-<p>Chef と比較すると、エージェントレスのアーキテクチャで、Chefのように特定言語(Ruby)を学ぶ必要はなく、YAMLで構成を表現する。
-これは、Playbookと呼ばれる。Chef でいうレシピ。</p>
-
-<p>マネージャ側は最近は大抵プリインストールされている python とansible さえインストールすればよい。
-クライアント側は、マネージャから SSH アクセスさえできればよい。</p>
-
-<p>これを1回やってファイル群をリポジトリで管理しておけば、環境の複製が楽になるし、Infrastructure as a Code ですね。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/02/08/ansible/">続きを読む &rarr;</a>
     </footer>
   
 

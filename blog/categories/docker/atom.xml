@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: docker | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/docker/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2018-06-07T21:26:23+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[docker で Elasticsearch]]></title>
+    <link href="http://momota.github.io/blog/2018/06/07/elasticsearch/"/>
+    <updated>2018-06-07T13:56:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/06/07/elasticsearch</id>
+    <content type="html"><![CDATA[<p>Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。</p>
+
+<ul>
+<li>Docker: 18.03.1-ce-win65 (17513)</li>
+<li>Elasticsearch: 6.2.4</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>日本語を扱いたいのでプラグイン <code>kuromoji</code> をインストールする Dockerfile を用意する。</p>
+
+<p>Dockerfile の内容は以下。</p>
+
+<p>```
+FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.4</p>
+
+<h1>Plugin x-pack already exists in this image</h1>
+
+<h1>RUN elasticsearch-plugin install &mdash;batch x-pack</h1>
+
+<p>RUN elasticsearch-plugin install analysis-kuromoji
+```</p>
+
+<p>この Dockerfile に基づいてイメージをビルドする。</p>
+
+<p>```</p>
+
+<blockquote><p>docker build -t es-kuromoji:1.0 ./
+docker images
+REPOSITORY                                               TAG                 IMAGE ID            CREATED              SIZE
+es-kuromoji                                              1.0                 dxxxxxxxxxxx        About a minute ago   519MB
+&hellip;
+```</p></blockquote>
+
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run">Install Elasticsearch with Docker | Elasticsearch Reference ［6.2］ | Elastic</a> に書いてあるとおりに起動する。</p>
+
+<p>```</p>
+
+<blockquote><p>docker run -p 9200:9200 -p 9300:9300 -e &ldquo;discovery.type=single-node&rdquo; es-kuromoji:1.0
+```</p></blockquote>
+
+<p>Elasticsearch の起動を REST APIから確認する。
+<code>health</code> が <code>green</code> なので問題ない。</p>
+
+<p>```sh</p>
+
+<h1>In my environment, need <code>noproxy</code> option: curl <a href="http://localhost:9200/_cat/indices?v">http://localhost:9200/_cat/indices?v</a> &mdash;noproxy localhost</h1>
+
+<p>$ curl <a href="http://localhost:9200/_cat/indices?v">http://localhost:9200/_cat/indices?v</a>
+health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0       3094            2      1.1mb          1.1mb
+```</p>
+
+<p>Windows側で確認する場合は、<code>curl</code> の代わりに PowerShell <code>Invoke-WebRequest</code> コマンドで確認できる。</p>
+
+<p>```sh</p>
+
+<h1>In windows, we can confirm Elasticsearch is running by using powershell</h1>
+
+<p>PS C:> Invoke-WebRequest -Uri <a href="http://localhost:9200/_cat/indices?v">http://localhost:9200/_cat/indices?v</a></p>
+
+<p>StatusCode        : 200
+StatusDescription : OK
+Content           : health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size</p>
+
+<pre><code>                green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0     ...
+</code></pre>
+
+<p>RawContent        : HTTP/1.1 200 OK</p>
+
+<pre><code>                Content-Length: 246
+                Content-Type: text/plain; charset=UTF-8
+
+                health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.s...
+</code></pre>
+
+<p>Forms             : {}
+Headers           : {[Content-Length, 246], [Content-Type, text/plain; charset=UTF-8]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 246
+```</p>
+
+<p>index を作ってみる。
+index は RDB のテーブルやビューにあたる。</p>
+
+<p>PUT メソッドを使って <code>customer</code> という index を作る。
+<code>pretty</code> は JSON を pretty-print (pretty-print) してくれる。 <code>jq</code> みたいに整形してくれる。</p>
+
+<p><code>sh
+$ curl -X PUT http://localhost:9200/customer?pretty
+{
+  "acknowledged" : true,
+  "shards_acknowledged" : true,
+  "index" : "customer"
+}
+</code></p>
+
+<p>index が増えていることが確認できる。</p>
+
+<p><code>sh
+$ curl http://localhost:9200/_cat/indices?v
+health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0       4775           44      1.9mb          1.9mb
+yellow open   customer                    xxxxxxxxxxxxxxxxxxxxxx   5   1          0            0      1.1kb          1.1kb
+</code></p>
+
+<p>document を追加する。
+RDB のレコードみたいなもの。</p>
+
+<p>```sh
+$ curl -H &ldquo;Content-Type: application/json&rdquo; -X PUT <a href="http://localhost:9200/customer/_doc/1?pretty">http://localhost:9200/customer/_doc/1?pretty</a> -d '</p>
+
+<blockquote><p>{
+  &ldquo;name&rdquo;: &ldquo;John Doe&rdquo;
+}
+&lsquo;
+{
+  &ldquo;<em>index&rdquo; : &ldquo;customer&rdquo;,
+  &ldquo;</em>type&rdquo; : &ldquo;<em>doc&rdquo;,
+  &ldquo;</em>id&rdquo; : &ldquo;1&rdquo;,
+  &ldquo;<em>version&rdquo; : 1,
+  &ldquo;result&rdquo; : &ldquo;created&rdquo;,
+  &ldquo;</em>shards&rdquo; : {</p>
+
+<pre><code>"total" : 2,
+"successful" : 1,
+"failed" : 0
+</code></pre>
+
+<p>  },
+  &ldquo;<em>seq_no&rdquo; : 0,
+  &ldquo;</em>primary_term&rdquo; : 1
+}
+```</p></blockquote>
+
+<p>PowerShell バージョンは以下。</p>
+
+<p><code>sh
+$person = @{
+  "name": "John Doe"
+}
+$json = $person | ConvertTo-Json
+$response = Invoke-RestMethod 'http://localhost:9200/customer/_doc/1' -Method Put -Body $json -ContentType 'application/json'
+</code></p>
+
+<p>document の確認。</p>
+
+<p>```sh
+$ curl -sS -w &lsquo;\n&rsquo; <a href="http://localhost:9200/customer/_doc/1?pretty">http://localhost:9200/customer/_doc/1?pretty</a>
+{
+  &ldquo;<em>index&rdquo; : &ldquo;customer&rdquo;,
+  &ldquo;</em>type&rdquo; : &ldquo;<em>doc&rdquo;,
+  &ldquo;</em>id&rdquo; : &ldquo;1&rdquo;,
+  &ldquo;<em>version&rdquo; : 1,
+  &ldquo;found&rdquo; : true,
+  &ldquo;</em>source&rdquo; : {</p>
+
+<pre><code>"name" : "John Doe"
+</code></pre>
+
+<p>  }
+}
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>docker で Elasticsearch - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。 Docker: 18.03.1-ce-win65 (17513)
+Elasticsearch: 6.2.4 日本語を扱いたいのでプラグイン kuromoji をインストールする &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2018/06/07/elasticsearch/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Docker で Elasticsearch</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-07T13:56:00+09:00" pubdate data-updated="true">2018-06-07</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。</p>
+
+<ul>
+<li>Docker: 18.03.1-ce-win65 (17513)</li>
+<li>Elasticsearch: 6.2.4</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>日本語を扱いたいのでプラグイン <code>kuromoji</code> をインストールする Dockerfile を用意する。</p>
+
+<p>Dockerfile の内容は以下。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+</span><span class='line'>
+</span><span class='line'># Plugin x-pack already exists in this image
+</span><span class='line'># RUN elasticsearch-plugin install --batch x-pack
+</span><span class='line'>RUN elasticsearch-plugin install analysis-kuromoji</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この Dockerfile に基づいてイメージをビルドする。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; docker build -t es-kuromoji:1.0 ./
+</span><span class='line'>&gt; docker images
+</span><span class='line'>REPOSITORY                                               TAG                 IMAGE ID            CREATED              SIZE
+</span><span class='line'>es-kuromoji                                              1.0                 dxxxxxxxxxxx        About a minute ago   519MB
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run">Install Elasticsearch with Docker | Elasticsearch Reference ［6.2］ | Elastic</a> に書いてあるとおりに起動する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" es-kuromoji:1.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Elasticsearch の起動を REST APIから確認する。
+<code>health</code> が <code>green</code> なので問題ない。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># In my environment, need `noproxy` option: curl http://localhost:9200/_cat/indices?v --noproxy localhost</span>
+</span><span class='line'><span class="nv">$ </span>curl http://localhost:9200/_cat/indices?v
+</span><span class='line'>health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+</span><span class='line'>green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0       3094            2      1.1mb          1.1mb
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Windows側で確認する場合は、<code>curl</code> の代わりに PowerShell <code>Invoke-WebRequest</code> コマンドで確認できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># In windows, we can confirm Elasticsearch is running by using powershell</span>
+</span><span class='line'>PS C:<span class="se">\&gt;</span> Invoke-WebRequest -Uri http://localhost:9200/_cat/indices?v
+</span><span class='line'>
+</span><span class='line'>StatusCode        : 200
+</span><span class='line'>StatusDescription : OK
+</span><span class='line'>Content           : health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+</span><span class='line'>                    green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0     ...
+</span><span class='line'>RawContent        : HTTP/1.1 200 OK
+</span><span class='line'>                    Content-Length: 246
+</span><span class='line'>                    Content-Type: text/plain; <span class="nv">charset</span><span class="o">=</span>UTF-8
+</span><span class='line'>
+</span><span class='line'>                    health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.s...
+</span><span class='line'>Forms             : <span class="o">{}</span>
+</span><span class='line'>Headers           : <span class="o">{[</span>Content-Length, 246<span class="o">]</span>, <span class="o">[</span>Content-Type, text/plain; <span class="nv">charset</span><span class="o">=</span>UTF-8<span class="o">]}</span>
+</span><span class='line'>Images            : <span class="o">{}</span>
+</span><span class='line'>InputFields       : <span class="o">{}</span>
+</span><span class='line'>Links             : <span class="o">{}</span>
+</span><span class='line'>ParsedHtml        : mshtml.HTMLDocumentClass
+</span><span class='line'>RawContentLength  : 246
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>index を作ってみる。
+index は RDB のテーブルやビューにあたる。</p>
+
+<p>PUT メソッドを使って <code>customer</code> という index を作る。
+<code>pretty</code> は JSON を pretty-print (pretty-print) してくれる。 <code>jq</code> みたいに整形してくれる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -X PUT http://localhost:9200/customer?pretty
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;acknowledged&quot;</span> : <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;shards_acknowledged&quot;</span> : <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;index&quot;</span> : <span class="s2">&quot;customer&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>index が増えていることが確認できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl http://localhost:9200/_cat/indices?v
+</span><span class='line'>health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+</span><span class='line'>green  open   .monitoring-es-6-2018.06.07 xxxxxxxxxxxxxxxxxxxxxx   1   0       4775           44      1.9mb          1.9mb
+</span><span class='line'>yellow open   customer                    xxxxxxxxxxxxxxxxxxxxxx   5   1          0            0      1.1kb          1.1kb
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>document を追加する。
+RDB のレコードみたいなもの。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -H <span class="s2">&quot;Content-Type: application/json&quot;</span> -X PUT http://localhost:9200/customer/_doc/1?pretty -d <span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">&gt; {</span>
+</span><span class='line'><span class="s1">&gt;   &quot;name&quot;: &quot;John Doe&quot;</span>
+</span><span class='line'><span class="s1">&gt; }</span>
+</span><span class='line'><span class="s1">&gt; &#39;</span>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;_index&quot;</span> : <span class="s2">&quot;customer&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_type&quot;</span> : <span class="s2">&quot;_doc&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_id&quot;</span> : <span class="s2">&quot;1&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_version&quot;</span> : 1,
+</span><span class='line'>  <span class="s2">&quot;result&quot;</span> : <span class="s2">&quot;created&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_shards&quot;</span> : <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;total&quot;</span> : 2,
+</span><span class='line'>    <span class="s2">&quot;successful&quot;</span> : 1,
+</span><span class='line'>    <span class="s2">&quot;failed&quot;</span> : 0
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;_seq_no&quot;</span> : 0,
+</span><span class='line'>  <span class="s2">&quot;_primary_term&quot;</span> : 1
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>PowerShell バージョンは以下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$person</span> <span class="o">=</span> @<span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;John Doe&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="nv">$json</span> <span class="o">=</span> <span class="nv">$person</span> | ConvertTo-Json
+</span><span class='line'><span class="nv">$response</span> <span class="o">=</span> Invoke-RestMethod <span class="s1">&#39;http://localhost:9200/customer/_doc/1&#39;</span> -Method Put -Body <span class="nv">$json</span> -ContentType <span class="s1">&#39;application/json&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>document の確認。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -sS -w <span class="s1">&#39;\n&#39;</span> http://localhost:9200/customer/_doc/1?pretty
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;_index&quot;</span> : <span class="s2">&quot;customer&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_type&quot;</span> : <span class="s2">&quot;_doc&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_id&quot;</span> : <span class="s2">&quot;1&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;_version&quot;</span> : 1,
+</span><span class='line'>  <span class="s2">&quot;found&quot;</span> : <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;_source&quot;</span> : <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;name&quot;</span> : <span class="s2">&quot;John Doe&quot;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-07T13:56:00+09:00" pubdate data-updated="true">2018-06-07</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/docker/'>docker</a>, <a class='category' href='/blog/categories/elasticsearch/'>elasticsearch</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2018/06/07/elasticsearch/" data-via="momota" data-counturl="http://momota.github.io/blog/2018/06/07/elasticsearch/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2018/06/07/elasticsearch/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/05/25/bitlocker/" title="Previous Post: Windows ログイン時に、Cドライブ以外のBitLockerを解除する">&laquo; Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/06/07/elasticsearch/">docker で Elasticsearch</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/05/25/bitlocker/">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/04/20/mysql/">MySQL パフォーマンスチューニング</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/19/ansible-abc/">ansible ABC</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/10/ansible-mac/">ansible で MacBook Pro をセットアップ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2018/06/07/elasticsearch/';
+        var disqus_url = 'http://momota.github.io/blog/2018/06/07/elasticsearch/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

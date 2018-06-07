@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="最近、自宅の Mac Mini が重くなってきたので、別環境でブログを書くべく環境を整備した。
-5年目選手くらいなので、そろそろ買い換えたいな… 結論としては、以下を参考にやればOK。deploy のとこでちょいハマりしたのでメモ。 Clone your Octopess to blog From &hellip;">
+  <meta name="description" content="CentOS 7 を USB メモリからインストール で書いたが、まっさらなCentOSが手元にあったので
+ansible を使っていろいろインストールしてみた。 ちょっと前に、Ansible 2.0 Has Arrived という記事も話題になってたし。 ansible は Chef &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,62 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/08/ansible/">Ansible でノートPCをセットアップ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-08T09:42:00+09:00" pubdate data-updated="true">2016-02-08</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://momota.github.io/blog/2015/11/15/centos-install/">CentOS 7 を USB メモリからインストール</a> で書いたが、まっさらなCentOSが手元にあったので
+<a href="http://www.ansible.com/">ansible</a> を使っていろいろインストールしてみた。</p>
+
+<p>ちょっと前に、<a href="http://www.ansible.com/blog/ansible-2.0-launch">Ansible 2.0 Has Arrived</a> という記事も話題になってたし。</p>
+
+<p>ansible は Chef のような構成管理ツール。
+システムの設定や、ソフトウェアのデプロイ、オーケストレーションなどが可能なIT自動化ツール。
+管理対象ノードが多いほどメリットが大きい。</p>
+
+<p>Chef と比較すると、エージェントレスのアーキテクチャで、Chefのように特定言語(Ruby)を学ぶ必要はなく、YAMLで構成を表現する。
+これは、Playbookと呼ばれる。Chef でいうレシピ。</p>
+
+<p>マネージャ側は最近は大抵プリインストールされている python とansible さえインストールすればよい。
+クライアント側は、マネージャから SSH アクセスさえできればよい。</p>
+
+<p>これを1回やってファイル群をリポジトリで管理しておけば、環境の複製が楽になるし、Infrastructure as a Code ですね。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/02/08/ansible/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -559,82 +615,6 @@ MS Office も毎日触っているけど割愛。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/09/23/sinatra/">Rails から外れた僕らは Sinatra で I Did It My Way (3)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-23T20:39:00+09:00" pubdate data-updated="true">2013-09-23</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
-
-<p>今回はこれまで作った sinatra アプリケーションを PaaS の <a href="https://www.heroku.com/">heroku</a> へデプロイする。
-事前に heroku には sign up しておこう。</p>
-
-<p>最初にできあがりを示す。</p>
-
-<p>heroku: <a href="http://sample-mongo-app.herokuapp.com/">http://sample-mongo-app.herokuapp.com/</a></p>
-
-<p>github: <a href="https://github.com/momota/heroku_sinatra_sample">https://github.com/momota/heroku_sinatra_sample</a></p>
-
-<hr />
-
-<ul>
-<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
-
-<ul>
-<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
-
-<ul>
-<li>sinatra で MongoDB を使ったデータ永続化</li>
-<li>HTTP POSTへの対応</li>
-<li>Bootstrap でのお化粧</li>
-</ul>
-</li>
-<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
-
-<ul>
-<li>sinatra の heroku へのデプロイ</li>
-</ul>
-</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/09/23/sinatra/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -652,6 +632,10 @@ MS Office も毎日触っているけど割愛。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/06/07/elasticsearch/">docker で Elasticsearch</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/05/25/bitlocker/">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a>
       </li>
     
@@ -665,10 +649,6 @@ MS Office も毎日触っているけど割愛。</p>
     
       <li class="post">
         <a href="/blog/2016/08/10/ansible-mac/">ansible で MacBook Pro をセットアップ</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a>
       </li>
     
   </ul>
