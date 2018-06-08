@@ -164,6 +164,17 @@ Elasticsearch: 6.2.4 ">
 
 <p>セキュリティクラスタには怒られるのかもしれないが、OS に管理者権限ユーザでログインできている時点でもういろいろ見れて当たり前やろ、という思想。</p>
 
+<p>全体の流れは以下。</p>
+
+<ol>
+<li>BitLocker 解除用の PowerShell を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をタスクスケジューラに登録する</li>
+<li>タスクを呼び出すバッチファイル trigger_unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をスタートアッププログラムに登録してあげる</li>
+</ol>
+
+
 </div>
   
   

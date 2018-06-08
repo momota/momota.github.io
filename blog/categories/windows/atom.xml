@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windows | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/windows/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-07T21:26:23+09:00</updated>
+  <updated>2018-06-08T12:34:46+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -28,6 +28,17 @@
 <p>そこで、OS ログイン時に自動的に C ドライブ以外のディスク暗号化解除するために PowerShell とバッチを書いてスタートアッププログラムに登録した話を書く。</p>
 
 <p>セキュリティクラスタには怒られるのかもしれないが、OS に管理者権限ユーザでログインできている時点でもういろいろ見れて当たり前やろ、という思想。</p>
+
+<p>全体の流れは以下。</p>
+
+<ol>
+<li>BitLocker 解除用の PowerShell を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をタスクスケジューラに登録する</li>
+<li>タスクを呼び出すバッチファイル trigger_unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をスタートアッププログラムに登録してあげる</li>
+</ol>
+
 
 <!-- more -->
 
@@ -54,7 +65,7 @@ $drives = @(&ldquo;D:&rdquo;, &ldquo;E:&rdquo;, &ldquo;F:&rdquo;, &ldquo;G:&rdqu
 }
 ```</p>
 
-<h2>2. バッチファイルを書く</h2>
+<h2>2. バッチファイル unlock-bitLocker.cmd を書く</h2>
 
 <p>上述の PowerShell スクリプトを管理者権限で実行し、かつ、スタートアッププログラムに登録するために、上記の PowerShell を呼び出すバッチファイル <code>C:\PATH-YOU-WANT\unlock-bitLocker.cmd</code> を書いてあげる。
 PowerShell を直接登録したかったのだが、調査力が足りず変な構成になった…</p>
@@ -84,18 +95,50 @@ pause > nul
 exit
 ```</p>
 
-<h2>3. バッチファイルをスタートアッププログラムに登録してあげる</h2>
+<h2>3. バッチファイル unlock-bitLocker.cmd をタスクスケジューラに登録する</h2>
+
+<p><code>unlock-bitLocker.cmd</code> をスタートアッププログラムに登録すると、実行時に管理者権限で実行するかという確認ダイアログがでて毎回うざったい。
+そこで、いったん上記のバッチスクリプトをタスクスケジューラに管理者権限実行のタスクとして登録してそのタスクをスタートアッププログラムから起動する。</p>
+
+<ol>
+<li><code>Windows キー + r</code> : ファイル名を指定して実行を起動</li>
+<li><code>taskschd.msc</code> を入力: タスクスケジューラが開く</li>
+<li>新規タスクの作成:
+
+<ul>
+<li>「タスクの作成」から <code>unlock_bitlocker.cmd</code> を起動するタスクを作成する</li>
+<li>「全般」タブの「最上位の特権で実行する」にチェックを入れる</li>
+<li>「操作」タブから「新規」ボタンを押す。操作は「プログラムの開始」、プログラム/スクリプトに <code>C:\PATH-YOU-WANT\unlock-bitLocker.cmd</code> を指定</li>
+<li>「トリガー」は空でOK</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>4. タスクを呼び出すバッチファイル trigger_unlock-bitLocker.cmd を書く</h2>
+
+<p>```bat
+@echo off
+setlocal
+rem &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</p>
+
+<p>schtasks.exe /run /tn unlock_bitlocker</p>
+
+<p>rem &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+endlocal
+exit
+```</p>
+
+<h2>5. バッチファイル unlock-bitLocker.cmd をスタートアッププログラムに登録してあげる</h2>
 
 <ol>
 <li><code>Windows キー + r</code> : ファイル名を指定して実行を起動</li>
 <li><code>shell:startup</code> を入力: スタートアップのフォルダが開く</li>
-<li>作ったバッチファイル <code>unlock_bitlocker.cmd</code> のショートカットをスタートアップフォルダの中に作成</li>
+<li>作ったバッチファイル <code>trigger_unlock-bitLocker.cmd</code> のショートカットをスタートアップフォルダの中に作成</li>
 </ol>
 
 
 <p>以上で、OS ログイン後に D ドライブの BitLocker を解除できる。</p>
-
-<p>正確に言うと、スクリプトの実行に管理者権限が必要なので、ログイン後に「このアプリがデバイスへ変更を加えることを許可しますか」と確認ダイアログが出る。「はい」とボタン押下し許可してあげればOK。</p>
 
 <p>BitLocker を有効にしていると、初回起動時に NumLock が有効になっているのを無効化したいんだが、だれか方法を教えてほしい。</p>
 ]]></content>
