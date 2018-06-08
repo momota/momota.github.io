@@ -162,3 +162,55 @@ $ curl -sS -w '\n' http://localhost:9200/customer/_doc/1?pretty
   }
 }
 ```
+
+## Python クライアントからアクセス
+
+pip で Python Elasticsearch Client をインストールする。
+
+```
+$ pip install elasticsearch
+```
+
+
+### CSV ファイルを突っ込む
+
+`質問, 回答` みたいな FAQ をためている CSV ファイルを Elasticsearch へインポートする。
+
+
+```python
+import pandas as pd
+from elasticsearch import Elasticsearch
+
+if __name__ == '__main__':
+    es = Elasticsearch(host='127.0.0.1', port=9200)
+
+    df = pd.read_csv('data/faq.csv')
+    for i, row in df.iterrows():
+        d = {
+            'question': row['question'],
+            'answer': row['answer']
+            }
+        es.index(index='faq', doc_type='XXXXX', body=d)
+```
+
+
+### あいまい検索する
+
+```python
+def faq(query):
+    top3 = 3
+
+    query_json = {
+        'query': {
+            'more_like_this': {
+                'fields': ['question', 'answer'],
+                'like': query,
+                'min_term_freq': 1,
+                'max_query_terms': 12
+                }
+            }
+        }
+    es = Elasticsearch(host='127.0.0.1', port=9200)
+    res = es.search(index='faq', doc_type='XXXXX', body=query_json, size=top3)
+    print(json.dumps(res, indent=4))
+```
