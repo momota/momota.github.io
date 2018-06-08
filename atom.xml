@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-08T13:40:00+09:00</updated>
+  <updated>2018-06-08T20:20:00+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -250,6 +250,85 @@ RDB のレコードみたいなもの。</p>
 </span><span class='line'>    <span class="s2">&quot;name&quot;</span> : <span class="s2">&quot;John Doe&quot;</span>
 </span><span class='line'>  <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Python クライアントからアクセス</h2>
+
+<p>pip で Python Elasticsearch Client をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>pip install elasticsearch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>CSV ファイルを突っ込む</h3>
+
+<p><code>質問, 回答</code> みたいな FAQ をためている CSV ファイルを Elasticsearch へインポートする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="kn">import</span> <span class="n">Elasticsearch</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">es</span> <span class="o">=</span> <span class="n">Elasticsearch</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">9200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">&#39;data/faq.csv&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+</span><span class='line'>        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;question&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;question&#39;</span><span class="p">],</span>
+</span><span class='line'>            <span class="s">&#39;answer&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;answer&#39;</span><span class="p">]</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="n">es</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s">&#39;faq&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;XXXXX&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>あいまい検索する</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">faq</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">top3</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">query_json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;query&#39;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;more_like_this&#39;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;question&#39;</span><span class="p">,</span> <span class="s">&#39;answer&#39;</span><span class="p">],</span>
+</span><span class='line'>                <span class="s">&#39;like&#39;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;min_term_freq&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&#39;max_query_terms&#39;</span><span class="p">:</span> <span class="mi">12</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="n">es</span> <span class="o">=</span> <span class="n">Elasticsearch</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">9200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s">&#39;faq&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;XXXXX&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">query_json</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">top3</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 </span></code></pre></td></tr></table></div></figure>
 
 ]]></content>

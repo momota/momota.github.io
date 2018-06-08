@@ -4,7 +4,7 @@
   <title><![CDATA[Category: elasticsearch | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/elasticsearch/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-08T13:40:00+09:00</updated>
+  <updated>2018-06-08T20:20:00+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -196,6 +196,61 @@ $ curl -sS -w &lsquo;\n&rsquo; <a href="http://localhost:9200/customer/_doc/1?pr
 <p>  }
 }
 ```</p>
+
+<h2>Python クライアントからアクセス</h2>
+
+<p>pip で Python Elasticsearch Client をインストールする。</p>
+
+<p><code>
+$ pip install elasticsearch
+</code></p>
+
+<h3>CSV ファイルを突っ込む</h3>
+
+<p><code>質問, 回答</code> みたいな FAQ をためている CSV ファイルを Elasticsearch へインポートする。</p>
+
+<p>```python
+import pandas as pd
+from elasticsearch import Elasticsearch</p>
+
+<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
+
+<pre><code>es = Elasticsearch(host='127.0.0.1', port=9200)
+
+df = pd.read_csv('data/faq.csv')
+for i, row in df.iterrows():
+    d = {
+        'question': row['question'],
+        'answer': row['answer']
+        }
+    es.index(index='faq', doc_type='XXXXX', body=d)
+</code></pre>
+
+<p>```</p>
+
+<h3>あいまい検索する</h3>
+
+<p>```python
+def faq(query):</p>
+
+<pre><code>top3 = 3
+
+query_json = {
+    'query': {
+        'more_like_this': {
+            'fields': ['question', 'answer'],
+            'like': query,
+            'min_term_freq': 1,
+            'max_query_terms': 12
+            }
+        }
+    }
+es = Elasticsearch(host='127.0.0.1', port=9200)
+res = es.search(index='faq', doc_type='XXXXX', body=query_json, size=top3)
+print(json.dumps(res, indent=4))
+</code></pre>
+
+<p>```</p>
 ]]></content>
   </entry>
   
