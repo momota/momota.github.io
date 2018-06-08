@@ -42,8 +42,17 @@ es-kuromoji                                              1.0                 dxx
 > docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" es-kuromoji:1.0
 ```
 
+起動を確認する。
 
-Elasticsearch の起動を REST APIから確認する。
+```
+> docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                                            NAMES
+xxxxxxxxxxxx        es-kuromoji:1.0     "/usr/local/bin/dock…"  About a minute ago   Up Ab out a minute  0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp   sharp_hypatia
+```
+
+
+Elasticsearch の正常稼働を REST APIから確認する。 Ubuntu (WSL) から `curl` を使う。
+
 `health` が `green` なので問題ない。
 
 
