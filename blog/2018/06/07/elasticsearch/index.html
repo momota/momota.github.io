@@ -154,8 +154,19 @@ Elasticsearch: 6.2.4 日本語を扱いたいのでプラグイン kuromoji を�
 </pre></td><td class='code'><pre><code class=''><span class='line'>&gt; docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" es-kuromoji:1.0</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Elasticsearch の起動を REST APIから確認する。
-<code>health</code> が <code>green</code> なので問題ない。</p>
+<p>起動を確認する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; docker ps
+</span><span class='line'>CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                                            NAMES
+</span><span class='line'>xxxxxxxxxxxx        es-kuromoji:1.0     "/usr/local/bin/dock…"  About a minute ago   Up Ab out a minute  0.0.0.0:9200-&gt;9200/tcp, 0.0.0.0:9300-&gt;9300/tcp   sharp_hypatia</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Elasticsearch の正常稼働を REST APIから確認する。 Ubuntu (WSL) から <code>curl</code> を使う。</p>
+
+<p><code>health</code> が <code>green</code> なので問題ない。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

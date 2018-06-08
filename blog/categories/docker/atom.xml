@@ -4,7 +4,7 @@
   <title><![CDATA[Category: docker | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-08T12:34:46+09:00</updated>
+  <updated>2018-06-08T13:40:00+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -61,8 +61,18 @@ es-kuromoji                                              1.0                 dxx
 <blockquote><p>docker run -p 9200:9200 -p 9300:9300 -e &ldquo;discovery.type=single-node&rdquo; es-kuromoji:1.0
 ```</p></blockquote>
 
-<p>Elasticsearch の起動を REST APIから確認する。
-<code>health</code> が <code>green</code> なので問題ない。</p>
+<p>起動を確認する。</p>
+
+<p>```</p>
+
+<blockquote><p>docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                                            NAMES
+xxxxxxxxxxxx        es-kuromoji:1.0     &ldquo;/usr/local/bin/dock…&rdquo;  About a minute ago   Up Ab out a minute  0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp   sharp_hypatia
+```</p></blockquote>
+
+<p>Elasticsearch の正常稼働を REST APIから確認する。 Ubuntu (WSL) から <code>curl</code> を使う。</p>
+
+<p><code>health</code> が <code>green</code> なので問題ない。</p>
 
 <p>```sh</p>
 
