@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="CentOS 7 を USB メモリからインストール で書いたが、まっさらなCentOSが手元にあったので
-ansible を使っていろいろインストールしてみた。 ちょっと前に、Ansible 2.0 Has Arrived という記事も話題になってたし。 ansible は Chef &hellip;">
+  <meta name="description" content="selenium と ruby を使ってブラウザ GUI 操作を自動化する。 selenium は、Web アプリケーションの自動テストのためのツール。
+レグレッションテストによく使われているようだ。 selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,88 @@ ansible を使っていろいろインストールしてみた。 ちょっと�
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-02-26T10:41:00+09:00" pubdate data-updated="true">2016-02-26</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>selenium と ruby を使ってブラウザ GUI 操作を自動化する。</p>
+
+<p><a href="http://www.seleniumhq.org/">selenium</a> は、Web アプリケーションの自動テストのためのツール。
+レグレッションテストによく使われているようだ。</p>
+
+<p>selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。
+シナリオ設定といっても、Firefoxプラグインの Selenium IDE などを使うと操作を
+記録してくれる機能があるのでそこまで大変ではない。
+詳細は、<a href="http://www.ruby.or.jp/ja/tech/development_tool/reg_test/">Ruby アソシエーション &ndash; selenium</a> の &ldquo;1.2 テストの作成&rdquo;
+あたりを参照してほしい</p>
+
+<p>selenium は、クロスブラウザのツールで、IE を使って IE限定みたいなサイトでも使える。
+IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
+
+<p>テスト用と言いつつ、使い道はいろいろとある。</p>
+
+<ul>
+<li>社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるので
+フォーム入力の省力化として利用している。</li>
+<li>hp さんの iLO や日立さんストレージ、F5 さんのBIG-IP みたいな web 画面から設定変更するような機器の
+自動構築なんかもできそう。
+
+<ul>
+<li>スクリーンショットも撮れるので、エビデンスもついでに取得可能。</li>
+<li>vCenter とかも操作できないかという思惑はある。</li>
+<li>AWS とかも操作できるけど、そもそも API が豊富に備わっているから不要か。</li>
+</ul>
+</li>
+<li>あえて selenium を使わなくてもいいけど、クローリングやスクレイピングとかもできる</li>
+</ul>
+
+
+<p>この selenium は、Java や Python, Ruby などのプログラミング言語からシナリオ操作が可能で
+ループ処理などするにはめちゃくちゃ便利。</p>
+
+<p>いままでは Firefox プラグインだけで利用していたが、Ruby と絡めると便利すぎて感謝しかなかった。
+ここでは、サンプルとして、はてなブックマークのホットエントリトップ5を一括で開くことを
+やってみたい。</p>
+
+<p>ちなみに似たツールに iMacro がある。</p>
+
+<p>関連記事: <a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/02/26/selenium/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -573,48 +655,6 @@ MS Office も毎日触っているけど割愛。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/10/13/music/">眠れなくて、高校の頃聴いてた音楽を思い返していたら楽しくなってきた</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-13T04:38:00+09:00" pubdate data-updated="true">2013-10-13</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>眠れなくて、最近同僚に「高校の頃、どんな音楽聴いてたの？」と言われたのを思い出して、そういえば俺どんな音楽聴いてたんだっけ？って思い出してたらなんか楽しくなってきたので記す。
-今でも聴いている音楽とかもあるけど、最近なぜかあまり聴かなくなったやつを中心に書く。そういえば、MD プレイヤーとかで登下校中に聴いてたなあ。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/10/13/music/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -632,6 +672,10 @@ MS Office も毎日触っているけど割愛。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/06/19/unittest/">Python unittest で Flask の単体テスト</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/06/07/elasticsearch/">docker で Elasticsearch</a>
       </li>
     
@@ -645,10 +689,6 @@ MS Office も毎日触っているけど割愛。</p>
     
       <li class="post">
         <a href="/blog/2016/08/19/ansible-abc/">ansible ABC</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/10/ansible-mac/">ansible で MacBook Pro をセットアップ</a>
       </li>
     
   </ul>

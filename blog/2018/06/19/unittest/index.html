@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Python unittest で Flask の単体テスト - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="最近 Slack クローンの mattermost のチャットボットを Python で作った。
+そのコードをテストしたかったときに unittest を覚えたのでそのメモ。 1
+2
+$ python -V
+Python 3.6.4 :: Anaconda, Inc. ディレクトリ構成は以下。 1 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2018/06/19/unittest/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Python Unittest で Flask の単体テスト</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-19T18:58:00+09:00" pubdate data-updated="true">2018-06-19</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>最近 Slack クローンの mattermost のチャットボットを Python で作った。
+そのコードをテストしたかったときに unittest を覚えたのでそのメモ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python -V
+</span><span class='line'>Python 3.6.4 :: Anaconda, Inc.
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>ディレクトリ構成は以下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>tree
+</span><span class='line'>.
+</span><span class='line'>|____log
+</span><span class='line'>| |____mattermost_bot.log
+</span><span class='line'>|____mattermostbot.py
+</span><span class='line'>|____test_mattermostbot.py
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>mattermostbot.py</code>: ボット本体</li>
+<li><code>test_mattermostbot.py</code>: テストコード</li>
+<li><code>log/</code> : ログ保存用のディレクトリ</li>
+</ul>
+
+
+<h2>チャットボット</h2>
+
+<p>mattermost の統合機能から「外向きのウェブフック」を設定する。</p>
+
+<p><img src="/images/20180619_unittest/20180619_mattermost_webhook.png" alt="webhook" /></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>bot_name COMMAND ARGUMENT
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>チャットボットは上記のように呼び出す。
+ここではコマンドは以下の5種類をテストすることにする。</p>
+
+<ul>
+<li>echo: <code>ARGUMENT</code> をそのまま返す</li>
+<li>hoge: &ldquo;hoge&rdquo; と返す</li>
+<li>ping: &ldquo;pong :ping_pong:&rdquo; と返す</li>
+<li>sushi: &ldquo;（っ&#8217;&ndash;&lsquo;)╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ&rdquo; を返す</li>
+<li>tenki: 今日と明日の天気を返す (Livedoor の天気 API を利用)</li>
+</ul>
+
+
+<p>チャットボットのコード <code>mattermostbot.py</code> は以下。Slack のボットとしても機能するはず。</p>
+
+<p>Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/bot&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">bot</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">post_dict</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">post_dict</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">token</span> <span class="o">=</span> <span class="n">post_dict</span><span class="p">[</span><span class="s">&#39;token&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">income_text</span> <span class="o">=</span> <span class="n">post_dict</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">text_array</span> <span class="o">=</span> <span class="n">income_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">bot_name</span> <span class="o">=</span> <span class="n">text_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">command</span> <span class="o">=</span> <span class="n">text_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">arg</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_array</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">payload_text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;echo&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">echo</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;hoge&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">hoge</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;ping&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">pong</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;sushi&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">sushi</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;tenki&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">tenki</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload_text</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="n">bot_name</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;icon_url&#39;</span><span class="p">:</span> <span class="s">&#39;http://your-server/images/bot_icon.png&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">payload_text</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;MATTERMOST_TOKEN&#39;</span><span class="p">:</span> <span class="n">token</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="n">json_payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">json_payload</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">log</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;mattermost_bot_log&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s">&#39;log/mattermost_bot.log&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="se">\t</span><span class="si">%(lineno)d</span><span class="se">\t</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="si">%(name)s</span><span class="se">\t</span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">logger</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="c"># echo command</span>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">text</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="c"># hoge command</span>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">hoge</span><span class="p">():</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s">&quot;hoge&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="c"># ping command</span>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">pong</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">pong_msg</span> <span class="o">=</span> <span class="s">&quot;pong :ping_pong:&quot;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">pong_msg</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="c"># sushi command</span>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">sushi</span><span class="p">():</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s">&quot;（っ&#39;-&#39;)╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="c"># tenki command</span>
+</span><span class='line'><span class="c"># -------------------------------------------------------</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">tenki</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">api_url</span> <span class="o">=</span> <span class="s">&quot;http://weather.livedoor.com/forecast/webservice/json/v1?city=&quot;</span>
+</span><span class='line'>    <span class="c"># 横浜の city id</span>
+</span><span class='line'>    <span class="c"># その他のIDはここから探して: http://weather.livedoor.com/forecast/rss/primary_area.xml</span>
+</span><span class='line'>    <span class="n">city_id</span> <span class="o">=</span> <span class="s">&quot;140010&quot;</span>
+</span><span class='line'>    <span class="n">api_res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api_url</span> <span class="o">+</span> <span class="n">city_id</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">json_res</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">api_res</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">today</span> <span class="o">=</span> <span class="n">json_res</span><span class="p">[</span><span class="s">&#39;forecasts&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">tomorrow</span> <span class="o">=</span> <span class="n">json_res</span><span class="p">[</span><span class="s">&#39;forecasts&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="n">format_tenki_json</span><span class="p">(</span><span class="n">today</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="n">format_tenki_json</span><span class="p">(</span><span class="n">tomorrow</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">tenki_info</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">format_tenki_json</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">=</span> <span class="s">&quot;# &quot;</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;dateLabel&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot; (&quot;</span> <span class="o">+</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;date&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;) の横浜の天気は&quot;</span> <span class="o">+</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;telop&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="s">&quot; ![](&quot;</span> <span class="o">+</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;image&#39;</span><span class="p">][</span><span class="s">&#39;url&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;)</span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">t_min</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;temperature&#39;</span><span class="p">][</span><span class="s">&#39;min&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">t_max</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="s">&#39;temperature&#39;</span><span class="p">][</span><span class="s">&#39;max&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">t_min_str</span> <span class="o">=</span> <span class="s">&quot; -- &quot;</span> <span class="k">if</span> <span class="n">t_min</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_min</span><span class="p">[</span><span class="s">&#39;celsius&#39;</span><span class="p">])</span>
+</span><span class='line'>    <span class="n">t_max_str</span> <span class="o">=</span> <span class="s">&quot; -- &quot;</span> <span class="k">if</span> <span class="n">t_max</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_max</span><span class="p">[</span><span class="s">&#39;celsius&#39;</span><span class="p">])</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="s">&quot;- 最低気温は &quot;</span> <span class="o">+</span> <span class="n">t_min_str</span> <span class="o">+</span><span class="s">&quot;℃</span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>    <span class="n">tenki_info</span> <span class="o">+=</span> <span class="s">&quot;- 最高気温は &quot;</span> <span class="o">+</span> <span class="n">t_max_str</span>  <span class="o">+</span><span class="s">&quot;℃</span><span class="se">\n\n</span><span class="s">&quot;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">tenki_info</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;0.0.0.0&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>テスト</h2>
+
+<p>以下を参考にした。</p>
+
+<p><a href="http://momijiame.tumblr.com/post/39324429279/python-%E3%81%AE-flask-%E3%81%A7%E4%BD%9C%E3%81%A3%E3%81%9F%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E3%83%86%E3%82%B9%E3%83%88%E3%81%99%E3%82%8B">Python の Flask で作ったアプリケーションをテストする | CUBE SUGAR STORAGE</a></p>
+
+<p>各チャットボットコマンドに対応するテストケースを以下のように書ける。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">datetime</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">json</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">mattermostbot</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">unittest</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">TestMattermostBot</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+</span><span class='line'>            <span class="n">channel_id</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">channel_name</span> <span class="o">=</span> <span class="s">&#39;some_channel&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">file_ids</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">post_id</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">team_domain</span> <span class="o">=</span> <span class="s">&#39;some_team&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">team_id</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;your_bot_name &#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">timestamp</span> <span class="o">=</span> <span class="s">&#39;9999999999&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">token</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">trigger_word</span> <span class="o">=</span> <span class="s">&#39;your_bot_name&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">user_id</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="n">user_name</span> <span class="o">=</span> <span class="s">&#39;your_name&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">mattermostbot</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;echo fuga&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;fuga&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_hoge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;hoge&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;hoge&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;ping&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;pong :ping_pong:&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_sushi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;sushi&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;（っ&#39;-&#39;)╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_tenki</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;tenki&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</span><span class='line'>        <span class="k">assert</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+</span><span class='line'>        <span class="n">data</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">command</span>
+</span><span class='line'>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/bot&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>テストを実行するとこんな感じになる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python test_mattermostbot.py
+</span><span class='line'>.....
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Ran 5 tests in 0.115s
+</span><span class='line'>
+</span><span class='line'>OK
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-19T18:58:00+09:00" pubdate data-updated="true">2018-06-19</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/bot/'>bot</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/slack/'>slack</a>, <a class='category' href='/blog/categories/test/'>test</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2018/06/19/unittest/" data-via="momota" data-counturl="http://momota.github.io/blog/2018/06/19/unittest/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2018/06/19/unittest/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/06/07/elasticsearch/" title="Previous Post: docker で Elasticsearch">&laquo; docker で Elasticsearch</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/06/19/unittest/">Python unittest で Flask の単体テスト</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/06/07/elasticsearch/">docker で Elasticsearch</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/05/25/bitlocker/">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/04/20/mysql/">MySQL パフォーマンスチューニング</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/19/ansible-abc/">ansible ABC</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2018/06/19/unittest/';
+        var disqus_url = 'http://momota.github.io/blog/2018/06/19/unittest/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

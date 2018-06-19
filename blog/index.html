@@ -9,8 +9,11 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="Docker for Windows で Windows10 上に Elasticsearch を動かしたときのメモ。 Docker: 18.03.1-ce-win65 (17513)
-Elasticsearch: 6.2.4 ">
+  <meta name="description" content="最近 Slack クローンの mattermost のチャットボットを Python で作った。
+そのコードをテストしたかったときに unittest を覚えたのでそのメモ。 1
+2
+$ python -V
+Python 3.6.4 :: Anaconda, Inc. ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +83,55 @@ Elasticsearch: 6.2.4 ">
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/06/19/unittest/">Python Unittest で Flask の単体テスト</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-06-19T18:58:00+09:00" pubdate data-updated="true">2018-06-19</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近 Slack クローンの mattermost のチャットボットを Python で作った。
+そのコードをテストしたかったときに unittest を覚えたのでそのメモ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python -V
+</span><span class='line'>Python 3.6.4 :: Anaconda, Inc.
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/06/19/unittest/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -632,86 +684,6 @@ selenium が便利すぎて、最近よくスクリプトを書くようにな�
   
     <footer>
       <a rel="full-article" href="/blog/2016/05/28/selenium-know-how/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-02-26T10:41:00+09:00" pubdate data-updated="true">2016-02-26</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>selenium と ruby を使ってブラウザ GUI 操作を自動化する。</p>
-
-<p><a href="http://www.seleniumhq.org/">selenium</a> は、Web アプリケーションの自動テストのためのツール。
-レグレッションテストによく使われているようだ。</p>
-
-<p>selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。
-シナリオ設定といっても、Firefoxプラグインの Selenium IDE などを使うと操作を
-記録してくれる機能があるのでそこまで大変ではない。
-詳細は、<a href="http://www.ruby.or.jp/ja/tech/development_tool/reg_test/">Ruby アソシエーション &ndash; selenium</a> の &ldquo;1.2 テストの作成&rdquo;
-あたりを参照してほしい</p>
-
-<p>selenium は、クロスブラウザのツールで、IE を使って IE限定みたいなサイトでも使える。
-IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
-
-<p>テスト用と言いつつ、使い道はいろいろとある。</p>
-
-<ul>
-<li>社内のもろもろの web 申請は、入力項目が多いのに、毎回ほぼ同じ内容を入力させるので
-フォーム入力の省力化として利用している。</li>
-<li>hp さんの iLO や日立さんストレージ、F5 さんのBIG-IP みたいな web 画面から設定変更するような機器の
-自動構築なんかもできそう。
-
-<ul>
-<li>スクリーンショットも撮れるので、エビデンスもついでに取得可能。</li>
-<li>vCenter とかも操作できないかという思惑はある。</li>
-<li>AWS とかも操作できるけど、そもそも API が豊富に備わっているから不要か。</li>
-</ul>
-</li>
-<li>あえて selenium を使わなくてもいいけど、クローリングやスクレイピングとかもできる</li>
-</ul>
-
-
-<p>この selenium は、Java や Python, Ruby などのプログラミング言語からシナリオ操作が可能で
-ループ処理などするにはめちゃくちゃ便利。</p>
-
-<p>いままでは Firefox プラグインだけで利用していたが、Ruby と絡めると便利すぎて感謝しかなかった。
-ここでは、サンプルとして、はてなブックマークのホットエントリトップ5を一括で開くことを
-やってみたい。</p>
-
-<p>ちなみに似たツールに iMacro がある。</p>
-
-<p>関連記事: <a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/02/26/selenium/">続きを読む &rarr;</a>
     </footer>
   
 
