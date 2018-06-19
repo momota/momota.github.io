@@ -1,0 +1,263 @@
+---
+layout: post
+title: "Python unittest で Flask の単体テスト"
+date: 2018-06-19 18:58
+comments: true
+categories: test python bot slack
+---
+最近 Slack クローンの mattermost のチャットボットを Python で作った。
+そのコードをテストしたかったときに unittest を覚えたのでそのメモ。
+
+```sh
+$ python -V
+Python 3.6.4 :: Anaconda, Inc.
+```
+
+<!-- more -->
+
+ディレクトリ構成は以下。
+
+```
+$ tree
+.
+|____log
+| |____mattermost_bot.log
+|____mattermostbot.py
+|____test_mattermostbot.py
+```
+
+- `mattermostbot.py`: ボット本体
+- `test_mattermostbot.py`: テストコード
+- `log/` : ログ保存用のディレクトリ
+
+
+
+## チャットボット
+
+mattermost の統合機能から「外向きのウェブフック」を設定する。
+
+![webhook](/images/20180619_unittest/20180619_mattermost_webhook.png)
+
+
+
+
+```
+bot_name COMMAND ARGUMENT
+```
+
+チャットボットは上記のように呼び出す。
+ここではコマンドは以下の5種類をテストすることにする。
+
+- echo: `ARGUMENT` をそのまま返す
+- hoge: "hoge" と返す
+- ping: "pong :ping_pong:" と返す
+- sushi: "（っ'-')╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ" を返す
+- tenki: 今日と明日の天気を返す (Livedoor の天気 API を利用)
+
+
+チャットボットのコード `mattermostbot.py` は以下。Slack のボットとしても機能するはず。
+
+Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。
+
+```python
+import json
+import logging
+import requests
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route('/bot', methods=['POST'])
+def bot():
+    logger = log()
+
+    post_dict = request.form
+    logger.info(post_dict)
+
+    token = post_dict['token']
+    income_text = post_dict['text']
+
+    text_array = income_text.split(' ')
+    bot_name = text_array[0]
+    command = text_array[1]
+    arg = " ".join(text_array[2:])
+
+    payload_text = ""
+    if command == "echo":
+        payload_text = echo(arg)
+    elif command == "hoge":
+        payload_text = hoge()
+    elif command == "ping":
+        payload_text = pong()
+    elif command == "sushi":
+        payload_text = sushi()
+    elif command == "tenki":
+        payload_text = tenki()
+
+    logger.info(payload_text)
+    payload = {
+        'username': bot_name,
+        'icon_url': 'http://your-server/images/bot_icon.png',
+        'text': payload_text,
+        'MATTERMOST_TOKEN': token
+    }
+    json_payload = json.dumps(payload)
+
+    return json_payload
+
+def log():
+    logger = logging.getLogger('mattermost_bot_log')
+    logger.setLevel(logging.INFO)
+
+    fh = logging.FileHandler('log/mattermost_bot.log')
+    logger.addHandler(fh)
+
+    formatter = logging.Formatter('%(asctime)s\t%(lineno)d\t%(levelname)s\t%(name)s\t%(message)s')
+    fh.setFormatter(formatter)
+    return logger
+
+# -------------------------------------------------------
+# echo command
+# -------------------------------------------------------
+def echo(text):
+    return text
+
+# -------------------------------------------------------
+# hoge command
+# -------------------------------------------------------
+def hoge():
+    return "hoge"
+
+# -------------------------------------------------------
+# ping command
+# -------------------------------------------------------
+def pong():
+    pong_msg = "pong :ping_pong:"
+    return pong_msg
+
+# -------------------------------------------------------
+# sushi command
+# -------------------------------------------------------
+def sushi():
+    return "（っ'-')╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ"
+
+# -------------------------------------------------------
+# tenki command
+# -------------------------------------------------------
+def tenki():
+    api_url = "http://weather.livedoor.com/forecast/webservice/json/v1?city="
+    # 横浜の city id
+    # その他のIDはここから探して: http://weather.livedoor.com/forecast/rss/primary_area.xml
+    city_id = "140010"
+    api_res = requests.get(api_url + city_id)
+    json_res = json.loads(api_res.text)
+
+    today = json_res['forecasts'][0]
+    tomorrow = json_res['forecasts'][1]
+
+    tenki_info = ""
+    tenki_info += format_tenki_json(today)
+    tenki_info += format_tenki_json(tomorrow)
+    return tenki_info
+
+def format_tenki_json(j):
+    tenki_info = "# "
+    tenki_info += j['dateLabel'] + " (" + j['date'] + ") の横浜の天気は" + j['telop']
+    tenki_info += " ![](" + j['image']['url'] + ")\n"
+
+    t_min = j['temperature']['min']
+    t_max = j['temperature']['max']
+    t_min_str = " -- " if t_min is None else str(t_min['celsius'])
+    t_max_str = " -- " if t_max is None else str(t_max['celsius'])
+    tenki_info += "- 最低気温は " + t_min_str +"℃\n"
+    tenki_info += "- 最高気温は " + t_max_str  +"℃\n\n"
+    return tenki_info
+
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host='0.0.0.0')
+```
+
+
+## テスト
+
+以下を参考にした。
+
+[Python の Flask で作ったアプリケーションをテストする | CUBE SUGAR STORAGE](http://momijiame.tumblr.com/post/39324429279/python-%E3%81%AE-flask-%E3%81%A7%E4%BD%9C%E3%81%A3%E3%81%9F%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E3%83%86%E3%82%B9%E3%83%88%E3%81%99%E3%82%8B)
+
+各チャットボットコマンドに対応するテストケースを以下のように書ける。
+
+```python
+import datetime
+import json
+import mattermostbot
+import unittest
+
+class TestMattermostBot(unittest.TestCase):
+    data = dict(
+            channel_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+            channel_name = 'some_channel',
+            file_ids = '',
+            post_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+            team_domain = 'some_team',
+            team_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+            text = 'your_bot_name ',
+            timestamp = '9999999999',
+            token = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+            trigger_word = 'your_bot_name',
+            user_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+            user_name = 'your_name')
+
+    def setUp(self):
+        self.app = mattermostbot.app.test_client()
+
+    def test_post_echo(self):
+        response = TestMattermostBot.req(self, 'echo fuga')
+        response_data = json.loads(response.data.decode('utf-8'))
+        assert response.status_code == 200
+        assert response_data['text'] == 'fuga'
+
+    def test_post_hoge(self):
+        response = TestMattermostBot.req(self, 'hoge')
+        response_data = json.loads(response.data.decode('utf-8'))
+        assert response.status_code == 200
+        assert response_data['text'] == 'hoge'
+
+    def test_post_ping(self):
+        response = TestMattermostBot.req(self, 'ping')
+        response_data = json.loads(response.data.decode('utf-8'))
+        assert response.status_code == 200
+        assert response_data['text'] == 'pong :ping_pong:'
+
+    def test_post_sushi(self):
+        response = TestMattermostBot.req(self, 'sushi')
+        response_data = json.loads(response.data.decode('utf-8'))
+        assert response.status_code == 200
+        assert response_data['text'] == "（っ'-')╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ"
+
+    def test_post_tenki(self):
+        response = TestMattermostBot.req(self, 'tenki')
+        response_data = json.loads(response.data.decode('utf-8'))
+        assert response.status_code == 200
+        assert datetime.date.today().strftime('%Y-%m-%d') in response_data['text']
+
+    def req(self, command):
+        data = TestMattermostBot.data.copy()
+        data['text'] = data['text'] + command
+        return self.app.post('/bot', data=data)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+テストを実行するとこんな感じになる。
+
+```sh
+$ python test_mattermostbot.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.115s
+
+OK
+```
