@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-19T19:55:00+09:00</updated>
+  <updated>2018-06-20T11:44:24+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Python unittest で Flask の単体テスト]]></title>
+    <title type="html"><![CDATA[Python unittest で Flask (チャットボット) の単体テスト]]></title>
     <link href="http://momota.github.io/blog/2018/06/19/unittest/"/>
     <updated>2018-06-19T18:58:00+09:00</updated>
     <id>http://momota.github.io/blog/2018/06/19/unittest</id>
@@ -63,12 +63,7 @@
 
 <p><img src="http://momota.github.io/images/20180619_unittest/20180619_mattermost_webhook.png" alt="webhook" /></p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>bot_name COMMAND ARGUMENT
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>チャットボットは上記のように呼び出す。
+<p>チャットボットは <code>bot_name COMMAND ARGUMENT</code> のように呼び出す。
 ここではコマンドは以下の5種類をテストすることにする。</p>
 
 <ul>
@@ -201,6 +196,15 @@
 <span class='line-number'>115</span>
 <span class='line-number'>116</span>
 <span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
@@ -212,18 +216,24 @@
 </span><span class='line'><span class="k">def</span> <span class="nf">bot</span><span class="p">():</span>
 </span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="p">()</span>
 </span><span class='line'>
+</span><span class='line'>    <span class="c"># mattermost -&gt; bot へ送信される JSON データの取得</span>
 </span><span class='line'>    <span class="n">post_dict</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span>
 </span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">post_dict</span><span class="p">)</span>
 </span><span class='line'>
+</span><span class='line'>    <span class="c"># JSONから token と text (ユーザが入力したメッセージ) を取得</span>
 </span><span class='line'>    <span class="n">token</span> <span class="o">=</span> <span class="n">post_dict</span><span class="p">[</span><span class="s">&#39;token&#39;</span><span class="p">]</span>
 </span><span class='line'>    <span class="n">income_text</span> <span class="o">=</span> <span class="n">post_dict</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span>
 </span><span class='line'>
+</span><span class='line'>    <span class="c"># income_text は `bot_name COMMAND ARGUMENT` のような形式なので</span>
+</span><span class='line'>    <span class="c"># 半角スペースで分割し、それぞれの要素を変数に格納する</span>
 </span><span class='line'>    <span class="n">text_array</span> <span class="o">=</span> <span class="n">income_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">bot_name</span> <span class="o">=</span> <span class="n">text_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span><span class='line'>    <span class="n">command</span> <span class="o">=</span> <span class="n">text_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </span><span class='line'>    <span class="n">arg</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_array</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">payload_text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># command によって処理を分岐する</span>
 </span><span class='line'>    <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;echo&quot;</span><span class="p">:</span>
 </span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">echo</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;hoge&quot;</span><span class="p">:</span>
@@ -236,6 +246,8 @@
 </span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">tenki</span><span class="p">()</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload_text</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># レスポンス用の JSON を組み立てる</span>
 </span><span class='line'>    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
 </span><span class='line'>        <span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="n">bot_name</span><span class="p">,</span>
 </span><span class='line'>        <span class="s">&#39;icon_url&#39;</span><span class="p">:</span> <span class="s">&#39;http://your-server/images/bot_icon.png&#39;</span><span class="p">,</span>
@@ -246,6 +258,7 @@
 </span><span class='line'>
 </span><span class='line'>    <span class="k">return</span> <span class="n">json_payload</span>
 </span><span class='line'>
+</span><span class='line'><span class="c"># ログ出力用メソッド</span>
 </span><span class='line'><span class="k">def</span> <span class="nf">log</span><span class="p">():</span>
 </span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;mattermost_bot_log&#39;</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
@@ -389,12 +402,14 @@
 <span class='line-number'>58</span>
 <span class='line-number'>59</span>
 <span class='line-number'>60</span>
+<span class='line-number'>61</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">datetime</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">json</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">mattermostbot</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">unittest</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">class</span> <span class="nc">TestMattermostBot</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># mattermost -&gt; bot へのリクエスト JSON のダミーデータ雛形</span>
 </span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
 </span><span class='line'>            <span class="n">channel_id</span> <span class="o">=</span> <span class="s">&#39;xxxxxxxxxxxxxxxxxxxxxxxxxx&#39;</span><span class="p">,</span>
 </span><span class='line'>            <span class="n">channel_name</span> <span class="o">=</span> <span class="s">&#39;some_channel&#39;</span><span class="p">,</span>
@@ -414,31 +429,31 @@
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;echo fuga&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;fuga&#39;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_hoge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;hoge&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;hoge&#39;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;ping&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;pong :ping_pong:&#39;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_sushi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;sushi&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;（っ&#39;-&#39;)╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ&quot;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_tenki</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">TestMattermostBot</span><span class="o">.</span><span class="n">req</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;tenki&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+</span><span class='line'>        <span class="n">response_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 </span><span class='line'>        <span class="k">assert</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response_data</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span>
 </span><span class='line'>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: test | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/test/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-19T19:55:00+09:00</updated>
+  <updated>2018-06-20T11:44:24+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Python unittest で Flask の単体テスト]]></title>
+    <title type="html"><![CDATA[Python unittest で Flask (チャットボット) の単体テスト]]></title>
     <link href="http://momota.github.io/blog/2018/06/19/unittest/"/>
     <updated>2018-06-19T18:58:00+09:00</updated>
     <id>http://momota.github.io/blog/2018/06/19/unittest</id>
@@ -53,11 +53,7 @@ $ tree
 
 <p><img src="/images/20180619_unittest/20180619_mattermost_webhook.png" alt="webhook" /></p>
 
-<p><code>
-bot_name COMMAND ARGUMENT
-</code></p>
-
-<p>チャットボットは上記のように呼び出す。
+<p>チャットボットは <code>bot_name COMMAND ARGUMENT</code> のように呼び出す。
 ここではコマンドは以下の5種類をテストすることにする。</p>
 
 <ul>
@@ -86,18 +82,24 @@ def bot():</p>
 
 <pre><code>logger = log()
 
+# mattermost -&gt; bot へ送信される JSON データの取得
 post_dict = request.form
 logger.info(post_dict)
 
+# JSONから token と text (ユーザが入力したメッセージ) を取得
 token = post_dict['token']
 income_text = post_dict['text']
 
+# income_text は `bot_name COMMAND ARGUMENT` のような形式なので
+# 半角スペースで分割し、それぞれの要素を変数に格納する
 text_array = income_text.split(' ')
 bot_name = text_array[0]
 command = text_array[1]
 arg = " ".join(text_array[2:])
 
 payload_text = ""
+
+# command によって処理を分岐する
 if command == "echo":
     payload_text = echo(arg)
 elif command == "hoge":
@@ -110,6 +112,8 @@ elif command == "tenki":
     payload_text = tenki()
 
 logger.info(payload_text)
+
+# レスポンス用の JSON を組み立てる
 payload = {
     'username': bot_name,
     'icon_url': 'http://your-server/images/bot_icon.png',
@@ -120,6 +124,8 @@ json_payload = json.dumps(payload)
 
 return json_payload
 </code></pre>
+
+<h1>ログ出力用メソッド</h1>
 
 <p>def log():</p>
 
@@ -242,7 +248,8 @@ import unittest</p>
 
 <p>class TestMattermostBot(unittest.TestCase):</p>
 
-<pre><code>data = dict(
+<pre><code># mattermost -&gt; bot へのリクエスト JSON のダミーデータ雛形
+data = dict(
         channel_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxx',
         channel_name = 'some_channel',
         file_ids = '',
@@ -261,31 +268,31 @@ def setUp(self):
 
 def test_post_echo(self):
     response = TestMattermostBot.req(self, 'echo fuga')
-    response_data = json.loads(response.data.decode('utf-8'))
+    response_data = json.loads(response.data)
     assert response.status_code == 200
     assert response_data['text'] == 'fuga'
 
 def test_post_hoge(self):
     response = TestMattermostBot.req(self, 'hoge')
-    response_data = json.loads(response.data.decode('utf-8'))
+    response_data = json.loads(response.data)
     assert response.status_code == 200
     assert response_data['text'] == 'hoge'
 
 def test_post_ping(self):
     response = TestMattermostBot.req(self, 'ping')
-    response_data = json.loads(response.data.decode('utf-8'))
+    response_data = json.loads(response.data)
     assert response.status_code == 200
     assert response_data['text'] == 'pong :ping_pong:'
 
 def test_post_sushi(self):
     response = TestMattermostBot.req(self, 'sushi')
-    response_data = json.loads(response.data.decode('utf-8'))
+    response_data = json.loads(response.data)
     assert response.status_code == 200
     assert response_data['text'] == "（っ'-')╮ =͟͟͞͞ :sushi: ﾌﾞｫﾝ"
 
 def test_post_tenki(self):
     response = TestMattermostBot.req(self, 'tenki')
-    response_data = json.loads(response.data.decode('utf-8'))
+    response_data = json.loads(response.data)
     assert response.status_code == 200
     assert datetime.date.today().strftime('%Y-%m-%d') in response_data['text']
 
