@@ -53,22 +53,22 @@ mattermost の統合機能から「外向きのウェブフック」を設定す
 チャットボットのコード `mattermostbot.py` は以下。Slack のボットとしても機能するはず。
 
 Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。
+`bot()` メソッドがボットメイン処理。
 
 ```python
 import json
 import logging
 import requests
 from flask import Flask, request
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
 @app.route('/bot', methods=['POST'])
 def bot():
-    logger = log()
-
     # mattermost -> bot へ送信される JSON データの取得
     post_dict = request.form
-    logger.info(post_dict)
+    app.logger.info(post_dict)
 
     # JSONから token と text (ユーザが入力したメッセージ) を取得
     token = post_dict['token']
@@ -95,7 +95,7 @@ def bot():
     elif command == "tenki":
         payload_text = tenki()
 
-    logger.info(payload_text)
+    app.logger.info(payload_text)
 
     # レスポンス用の JSON を組み立てる
     payload = {
@@ -109,16 +109,12 @@ def bot():
     return json_payload
 
 # ログ出力用メソッド
-def log():
-    logger = logging.getLogger('mattermost_bot_log')
-    logger.setLevel(logging.INFO)
-
-    fh = logging.FileHandler('log/mattermost_bot.log')
-    logger.addHandler(fh)
-
+def log(app):
+    handler = RotatingFileHandler('log/mattermost_bot.log', maxBytes=10000, backupCount=2)
+    handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s\t%(lineno)d\t%(levelname)s\t%(name)s\t%(message)s')
-    fh.setFormatter(formatter)
-    return logger
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
 
 # -------------------------------------------------------
 # echo command
@@ -179,6 +175,7 @@ def format_tenki_json(j):
 
 
 if __name__ == '__main__':
+    log(app)
     app.debug = True
     app.run(host='0.0.0.0')
 ```
