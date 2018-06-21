@@ -4,7 +4,7 @@
   <title><![CDATA[Category: slack | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/slack/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-20T11:49:22+09:00</updated>
+  <updated>2018-06-21T11:10:33+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -67,7 +67,8 @@ $ tree
 
 <p>チャットボットのコード <code>mattermostbot.py</code> は以下。Slack のボットとしても機能するはず。</p>
 
-<p>Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。</p>
+<p>Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。
+<code>bot()</code> メソッドがボットメイン処理。</p>
 
 <p>```python
 import json
@@ -80,11 +81,9 @@ from flask import Flask, request</p>
 <p>@app.route(&lsquo;/bot&rsquo;, methods=[&lsquo;POST&rsquo;])
 def bot():</p>
 
-<pre><code>logger = log()
-
-# mattermost -&gt; bot へ送信される JSON データの取得
+<pre><code># mattermost -&gt; bot へ送信される JSON データの取得
 post_dict = request.form
-logger.info(post_dict)
+app.logger.info(post_dict)
 
 # JSONから token と text (ユーザが入力したメッセージ) を取得
 token = post_dict['token']
@@ -111,7 +110,7 @@ elif command == "sushi":
 elif command == "tenki":
     payload_text = tenki()
 
-logger.info(payload_text)
+app.logger.info(payload_text)
 
 # レスポンス用の JSON を組み立てる
 payload = {
@@ -127,17 +126,13 @@ return json_payload
 
 <h1>ログ出力用メソッド</h1>
 
-<p>def log():</p>
+<p>def log(app):</p>
 
-<pre><code>logger = logging.getLogger('mattermost_bot_log')
-logger.setLevel(logging.INFO)
-
-fh = logging.FileHandler('log/mattermost_bot.log')
-logger.addHandler(fh)
-
+<pre><code>handler = RotatingFileHandler('log/mattermost_bot.log', maxBytes=10000, backupCount=2)
+handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s\t%(lineno)d\t%(levelname)s\t%(name)s\t%(message)s')
-fh.setFormatter(formatter)
-return logger
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
 </code></pre>
 
 <h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</h1>
@@ -226,7 +221,8 @@ return tenki_info
 
 <p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
 
-<pre><code>app.debug = True
+<pre><code>log(app)
+app.debug = True
 app.run(host='0.0.0.0')
 </code></pre>
 

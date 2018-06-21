@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-20T11:49:22+09:00</updated>
+  <updated>2018-06-21T11:10:33+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -77,7 +77,8 @@
 
 <p>チャットボットのコード <code>mattermostbot.py</code> は以下。Slack のボットとしても機能するはず。</p>
 
-<p>Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。</p>
+<p>Flask を使って HTTP POST で送られてくる JSON データを mattermost から受け取って、処理している。
+<code>bot()</code> メソッドがボットメイン処理。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -200,11 +201,6 @@
 <span class='line-number'>119</span>
 <span class='line-number'>120</span>
 <span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
@@ -214,11 +210,9 @@
 </span><span class='line'>
 </span><span class='line'><span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/bot&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
 </span><span class='line'><span class="k">def</span> <span class="nf">bot</span><span class="p">():</span>
-</span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="p">()</span>
-</span><span class='line'>
 </span><span class='line'>    <span class="c"># mattermost -&gt; bot へ送信される JSON データの取得</span>
 </span><span class='line'>    <span class="n">post_dict</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">post_dict</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">post_dict</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c"># JSONから token と text (ユーザが入力したメッセージ) を取得</span>
 </span><span class='line'>    <span class="n">token</span> <span class="o">=</span> <span class="n">post_dict</span><span class="p">[</span><span class="s">&#39;token&#39;</span><span class="p">]</span>
@@ -245,7 +239,7 @@
 </span><span class='line'>    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s">&quot;tenki&quot;</span><span class="p">:</span>
 </span><span class='line'>        <span class="n">payload_text</span> <span class="o">=</span> <span class="n">tenki</span><span class="p">()</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload_text</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload_text</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c"># レスポンス用の JSON を組み立てる</span>
 </span><span class='line'>    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
@@ -259,16 +253,12 @@
 </span><span class='line'>    <span class="k">return</span> <span class="n">json_payload</span>
 </span><span class='line'>
 </span><span class='line'><span class="c"># ログ出力用メソッド</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">log</span><span class="p">():</span>
-</span><span class='line'>    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;mattermost_bot_log&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s">&#39;log/mattermost_bot.log&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
-</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">handler</span> <span class="o">=</span> <span class="n">RotatingFileHandler</span><span class="p">(</span><span class="s">&#39;log/mattermost_bot.log&#39;</span><span class="p">,</span> <span class="n">maxBytes</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">backupCount</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="se">\t</span><span class="si">%(lineno)d</span><span class="se">\t</span><span class="si">%(levelname)s</span><span class="se">\t</span><span class="si">%(name)s</span><span class="se">\t</span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">logger</span>
+</span><span class='line'>    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'><span class="c"># -------------------------------------------------------</span>
 </span><span class='line'><span class="c"># echo command</span>
@@ -329,6 +319,7 @@
 </span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">log</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
 </span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;0.0.0.0&#39;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
