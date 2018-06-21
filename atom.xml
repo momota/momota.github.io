@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-21T11:10:33+09:00</updated>
+  <updated>2018-06-21T11:17:40+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -201,10 +201,12 @@
 <span class='line-number'>119</span>
 <span class='line-number'>120</span>
 <span class='line-number'>121</span>
+<span class='line-number'>122</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
 </span><span class='line'><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">RotatingFileHandler</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 </span><span class='line'>

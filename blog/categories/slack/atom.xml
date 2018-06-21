@@ -4,7 +4,7 @@
   <title><![CDATA[Category: slack | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/slack/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-21T11:10:33+09:00</updated>
+  <updated>2018-06-21T11:17:40+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -74,7 +74,8 @@ $ tree
 import json
 import logging
 import requests
-from flask import Flask, request</p>
+from flask import Flask, request
+from logging.handlers import RotatingFileHandler</p>
 
 <p>app = Flask(<strong>name</strong>)</p>
 

@@ -293,10 +293,12 @@ Python 3.6.4 :: Anaconda, Inc. ディレクトリ構成は以下。 1 &hellip;">
 <span class='line-number'>119</span>
 <span class='line-number'>120</span>
 <span class='line-number'>121</span>
+<span class='line-number'>122</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">logging</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
 </span><span class='line'><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">RotatingFileHandler</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 </span><span class='line'>
