@@ -9,8 +9,10 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="selenium と ruby を使ってブラウザ GUI 操作を自動化する。 selenium は、Web アプリケーションの自動テストのためのツール。
-レグレッションテストによく使われているようだ。 selenium は、ブラウザ操作シナリオを事前に設定して、シナリオ通りに実行してくれる。 &hellip;">
+  <meta name="description" content="ブラウザ操作の自動化: Selenium と Ruby でも書いたが、
+selenium が便利すぎて、最近よくスクリプトを書くようになった。 以下のようなノウハウが溜まってきたので、ここらで放出する。 ウィンドウサイズのリサイズ
+ウィンドウ位置の移動
+スクリーンショットの取得 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +83,79 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/05/28/selenium-know-how/">Seleniumノウハウ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-28T16:57:00+09:00" pubdate data-updated="true">2016-05-28</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/selenium.png" alt="selenium" /></p>
+
+<p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
+selenium が便利すぎて、最近よくスクリプトを書くようになった。</p>
+
+<p>以下のようなノウハウが溜まってきたので、ここらで放出する。</p>
+
+<ul>
+<li>ウィンドウサイズのリサイズ</li>
+<li>ウィンドウ位置の移動</li>
+<li>スクリーンショットの取得</li>
+<li>要素セレクタメソッドの使い分け</li>
+<li>ドロップダウンリストの選択</li>
+<li>マウスオーバ (hover)</li>
+<li>フレーム移動</li>
+<li>ポップアップダイアログの扱い</li>
+<li>コード量を減らすためのモンキーパッチ</li>
+<li>よく採るプログラム構造</li>
+</ul>
+
+
+<p>インストール方法などは <a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a>
+を参照。</p>
+
+<p>selenium用スクリプト開発のノウハウというべきかコツといういべきかアレな感じだが、結局、
+スクレイピングと同様にHTML構造を理解することが必要なのでブラウザ付属の開発ツールが
+手離せない。</p>
+
+<ul>
+<li><a href="https://developer.mozilla.org/ja/docs/Tools">Firefox 開発ツール</a></li>
+<li><a href="https://developer.chrome.com/devtools">chrome devtools</a></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/05/28/selenium-know-how/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -608,53 +683,6 @@ MS Office も毎日触っているけど割愛。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/13/trema/">Trema をインストールする (Ruby 2.0)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-13T00:02:00+09:00" pubdate data-updated="true">2013-11-13</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="https://github.com/trema/trema">trema</a> は、ネットワークをソフトウェアでコントロールするという思想のSDNの中のひとつ、openflowのコントローラを開発するためのフレームワーク。</p>
-
-<p>インストール環境は、 ubuntu12.04.2 LTS on vagrant on windows 7。</p>
-
-<p>インストールする trema バージョンは 0.4.3。</p>
-
-<p>ruby バージョンは 2.0.0p247。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/11/13/trema/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -672,6 +700,10 @@ MS Office も毎日触っているけど割愛。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/06/25/apps-script/">Google Apps Script でサーバレスな為替レート取得クローラをつくる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト</a>
       </li>
     
@@ -685,10 +717,6 @@ MS Office も毎日触っているけど割愛。</p>
     
       <li class="post">
         <a href="/blog/2017/04/20/mysql/">MySQL パフォーマンスチューニング</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/19/ansible-abc/">ansible ABC</a>
       </li>
     
   </ul>

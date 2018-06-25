@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: serverless | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/serverless/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2018-06-25T18:36:51+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Google Apps Script でサーバレスな為替レート取得クローラをつくる]]></title>
+    <link href="http://momota.github.io/blog/2018/06/25/apps-script/"/>
+    <updated>2018-06-25T14:35:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/06/25/apps-script</id>
+    <content type="html"><![CDATA[<p>Google <a href="https://script.google.com/home">Apps Script</a> (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
+Excel マクロのすごい版みたいな感覚。</p>
+
+<p>このスクリプトからHTTP GETリクエストを出したり、受け付けたりできる。</p>
+
+<p>今回は、この GAS を使って、無料の Web クローラを作ってみる。</p>
+
+<!-- more -->
+
+
+<h2>処理の流れ</h2>
+
+<ol>
+<li>GAS から為替レート API をたたく</li>
+<li>取得した為替レートデータを Google Sheets へ出力する</li>
+<li>上記を1分間隔で実行する。</li>
+</ol>
+
+
+<h2>1. GAS から為替レート API をたたく</h2>
+
+<h3>為替レート API の確認</h3>
+
+<p>API は <a href="https://www.gaitameonline.com/rateaj/getrate">https://www.gaitameonline.com/rateaj/getrate</a> を利用する。
+ここへ HTTP GET すると以下のような JSON フォーマットが返ってくる。 (整形済み)</p>
+
+<p>```json
+{
+  quotes=[</p>
+
+<pre><code>{
+  high=1.9196,
+  low=1.9162,
+  ask=1.9212,
+  bid=1.9195,
+  currencyPairCode=GBPNZD,
+  open=1.9167
+},
+{
+  high=82.83,
+  low=82.35,
+  ask=82.41,
+  bid=82.36,
+  currencyPairCode=CADJPY,
+  open=82.76
+},
+// ... (snip) ...
+</code></pre>
+
+<p>```</p>
+
+<p><a href="https://www.gaitameonline.com/robots.txt">robots.txt</a> には特に言及されていないが、非常識なアクセスはしないように注意。</p>
+
+<h3>GAS の作成</h3>
+
+<p><a href="https://script.google.com/home">Apps Script</a> のメニューから <code>+ 新規スクリプト</code> をクリックすると、新規プロジェクトが立ち上がる。
+プロジェクト名やスクリプト名 (デフォルト <code>Code.gs</code>) は適当に変更する。</p>
+
+<p>GAS で API をたたく処理は以下のように書ける。</p>
+
+<p><code>UrlFetchApp.fetch(url)</code> 部分で API をたたきにいっている。
+<code>fx.date = now</code> で、取得した JSON に取得日時フィールド <code>date</code> を足している。</p>
+
+<p>```javascript
+function callExchangeAPI() {</p>
+
+<pre><code>var now      = new Date(),
+    url      = "https://www.gaitameonline.com/rateaj/getrate",
+    response = UrlFetchApp.fetch(url),
+    content  = response.getContentText(),
+    fx       = JSON.parse(content);
+
+fx.date = now;
+Logger.log(fx);
+return fx;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上記をコピペして実行する (▶ボタンを押す) と初回実行時には以下のような確認ダイアログがでるので <code>Review Permissions</code> を押す。</p>
+
+<p><img src="/images/20180625_gas/01_notice_initial_run.png" alt="01_notice_initial_run" /></p>
+
+<p>その後、Choose an account画面で自分のアカウントを選ぶと、確認画面 <code>YOUR-PROJECT-NAME wants to access your Google Account</code> が出てくるので <code>ALLOW</code> ボタンを押す。そうすると実行できる。</p>
+
+<p><code>Logger.log(fx);</code> 部分でログ出力しているので、メニュー <code>View</code> > <code>Logs</code> からログ出力できていることが確認できる。</p>
+
+<p><code>
+[18-06-24 23:24:06:486 PDT] {date=Mon Jun 25 15:24:06 GMT+09:00 2018, quotes=[{high=1.9224, low=1.9162, ask=1.9223, bid=1.9206, currencyPairCode=GBPNZD, open=1.9167}, {high=82.83, low=82.22, ask=82.45, bid=82.40, currencyPairCode=CADJPY, open=82.76}, {high=1.7870, low=1.7817, ask=1.7855, bid=1.7846, currencyPairCode=GBPAUD, open=1.7817},
+... snip ...
+</code></p>
+
+<h2>2. 取得した為替レートデータを Google Sheets へ出力する</h2>
+
+<p>取得した為替レートを以下のように Google sheetsに出力する。</p>
+
+<p><img src="/images/20180625_gas/03_sheet.png" alt="03_sheet" /></p>
+
+<p>1行目はヘッダ、列の定義は以下。通貨ペア種別すべての Ask や Bid などを1行で表現する。</p>
+
+<p><code>
+date, currencyPairCode1, high1, low1, ask1, bid1, open1, currencyPairCode2, high2, ...
+</code></p>
+
+<p>まずは、Google sheetsを新規作成し、その URL をコピーする。</p>
+
+<p>個別の URL をコードに埋め込みたくないので、<code>Script properties</code> に値をセットしてそれをコードの中から利用する。</p>
+
+<p>GAS のメニュー <code>File</code> > <code>Project properties</code> から <code>Script properties</code> タブへ移動する。
+<code>+ Add row</code> のリンクから行をエントリーする。
+<code>Property</code> に SHEET_URL、<code>Value</code> に先程コピーした Google sheets の URLを登録する。
+登録するURL は <code>https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxxxx/edit</code> のような形式。</p>
+
+<p>上述した <code>Script properties</code> から値を参照して、Sheet オブジェクトを取得する処理は以下。</p>
+
+<p>```javascript
+  function() {</p>
+
+<pre><code>if(this.getSheet.sheet) { return this.getSheet.sheet; }
+
+var SHEET_URL = PropertiesService.getScriptProperties().getProperty('SHEET_URL');
+if (!SHEET_URL) {
+  throw 'You should set "SHEET_URL" property from [File] &gt; [Project properties] &gt; [Script properties]';
+}
+
+var sheets = SpreadsheetApp.openByUrl(SHEET_URL);
+this.getSheet.sheet = sheets.getActiveSheet();
+return this.getSheet.sheet;
+</code></pre>
+
+<p>  }
+```</p>
+
+<p>以下のようにAPI から取得してきた JSON データをシートに出力する。</p>
+
+<p>```javascript
+  function(ex_json) {</p>
+
+<pre><code>var sheet = this.getSheet();
+
+// データ追加行 (Sheetの最終行 + 1) を取得する
+var last_row = sheet.getLastRow() + 1;
+
+var col = 1;
+sheet.getRange(last_row, col++).setValue(ex_json.date);
+
+for each(var quote in ex_json.quotes) {
+  sheet.getRange(last_row, col++).setValue(quote.currencyPairCode);
+  sheet.getRange(last_row, col++).setValue(quote.high);
+  sheet.getRange(last_row, col++).setValue(quote.low);
+  sheet.getRange(last_row, col++).setValue(quote.ask);
+  sheet.getRange(last_row, col++).setValue(quote.bid);
+  sheet.getRange(last_row, col++).setValue(quote.open);
+}
+</code></pre>
+
+<p>  }
+```</p>
+
+<p>上記をまとめると以下。
+コピペして実行する (▶ボタンを押す) と Google sheetsに為替データが挿入される。
+初回実行時に権限の確認ダイアログがでると思うが許可してあげる。</p>
+
+<p>```javascript
+// Main
+function scrapeExchangeToSheet() {
+  var ex_json = exchange.callExchangeAPI();
+  exchange.writeSheets(ex_json);
+}</p>
+
+<p>var exchange = {
+  getSheet: function() {</p>
+
+<pre><code>if(this.getSheet.sheet) { return this.getSheet.sheet; }
+
+var SHEET_URL = PropertiesService.getScriptProperties().getProperty('SHEET_URL');
+if (!SHEET_URL) {
+  throw 'You should set "SHEET_URL" property from [File] &gt; [Project properties] &gt; [Script properties]';
+}
+
+var sheets = SpreadsheetApp.openByUrl(SHEET_URL);
+this.getSheet.sheet = sheets.getActiveSheet();
+return this.getSheet.sheet;
+</code></pre>
+
+<p>  },</p>
+
+<p>  // call exchange API
+  callExchangeAPI: function() {</p>
+
+<pre><code>var now      = new Date(),
+    url      = "https://www.gaitameonline.com/rateaj/getrate",
+    response = UrlFetchApp.fetch(url),
+    content  = response.getContentText(),
+    fx       = JSON.parse(content);
+
+fx.date = now;
+return fx;
+</code></pre>
+
+<p>  },</p>
+
+<p>  // Write exchange data (JSON) to the Google Sheet
+  writeSheets: function(ex_json) {</p>
+
+<pre><code>var sheet = this.getSheet();
+
+// get last row to add exchange data
+var last_row = sheet.getLastRow() + 1;
+
+var col = 1;
+sheet.getRange(last_row, col++).setValue(ex_json.date);
+
+for each(var quote in ex_json.quotes) {
+  sheet.getRange(last_row, col++).setValue(quote.currencyPairCode);
+  sheet.getRange(last_row, col++).setValue(quote.high);
+  sheet.getRange(last_row, col++).setValue(quote.low);
+  sheet.getRange(last_row, col++).setValue(quote.ask);
+  sheet.getRange(last_row, col++).setValue(quote.bid);
+  sheet.getRange(last_row, col++).setValue(quote.open);
+}
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<h2>3. 上記を1分間隔で実行する。</h2>
+
+<p>上記の処理を定期的に実行する。</p>
+
+<p>時計マークのアイコンをクリックする。もしくは、メニュー <code>Edit</code> > <code>Current project's trigger</code> を選択する。
+そうするとダイアログが出てくるので、<code>No triggers set up. Click here to add one now.</code> をクリックする。</p>
+
+<p><code>Run</code> にはメイン処理の <code>scrapeExchangeToSheet</code>, <code>Events</code> には好きな起動時間を設定できる。
+ここでは1分間隔で実行するため、<code>Time-driven : Minutes timer: Every minute</code> を選択する。</p>
+
+<p>1分間隔で Google sheets にデータが挿入されていることが確認できる。</p>
+]]></content>
+  </entry>
+  
+</feed>
