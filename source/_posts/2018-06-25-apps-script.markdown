@@ -5,12 +5,12 @@ date: 2018-06-25 14:35
 comments: true
 categories: gas google javascript serverless
 ---
-Google [Apps Script](https://script.google.com/home) (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
+[Google Apps Script](https://script.google.com/home) (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
 Excel マクロのすごい版みたいな感覚。
 
 このスクリプトからHTTP GETリクエストを出したり、受け付けたりできる。
 
-今回は、この GAS を使って、無料の Web クローラを作ってみる。
+今回は、この GAS を使って、無料の Web クローラをサーバレスでつくってみる。
 
 <!-- more -->
 
@@ -50,19 +50,17 @@ API は https://www.gaitameonline.com/rateaj/getrate を利用する。
     // ... (snip) ...
 ```
 
+JSON の quotes は各通貨ペアの配列になっており、各要素に high, low, ... などのフィールドがある構造になっている。
+
 [robots.txt](https://www.gaitameonline.com/robots.txt) には特に言及されていないが、非常識なアクセスはしないように注意。
 
 
 ### GAS の作成
 
 [Apps Script](https://script.google.com/home) のメニューから `+ 新規スクリプト` をクリックすると、新規プロジェクトが立ち上がる。
-プロジェクト名やスクリプト名 (デフォルト `Code.gs`) は適当に変更する。
-
+プロジェクト名やスクリプト名は適当に変更する。 (デフォルト `Code.gs`)
 
 GAS で API をたたく処理は以下のように書ける。
-
-`UrlFetchApp.fetch(url)` 部分で API をたたきにいっている。
-`fx.date = now` で、取得した JSON に取得日時フィールド `date` を足している。
 
 ```javascript
 function callExchangeAPI() {
@@ -78,13 +76,17 @@ function callExchangeAPI() {
 }
 ```
 
-上記をコピペして実行する (▶ボタンを押す) と初回実行時には以下のような確認ダイアログがでるので `Review Permissions` を押す。
+`UrlFetchApp.fetch(url)` で API の URL をたたきにいける。
+`fx.date = now` で、取得した JSON に取得日時フィールド `date` を足している。
+
+上記をコピペして実行する (▶ボタンを押す) と初回実行時には以下のような確認ダイアログがでるので `Review Permissions` を押して許可する。
 
 ![01_notice_initial_run](/images/20180625_gas/01_notice_initial_run.png)
 
 その後、Choose an account画面で自分のアカウントを選ぶと、確認画面 `YOUR-PROJECT-NAME wants to access your Google Account` が出てくるので `ALLOW` ボタンを押す。そうすると実行できる。
 
-`Logger.log(fx);` 部分でログ出力しているので、メニュー `View` > `Logs` からログ出力できていることが確認できる。
+`Logger.log(fx)` 部分でログ出力しているので、メニュー `View` > `Logs` からログ出力できていることが確認できる。
+ログは以下のように出力される。
 
 ```
 [18-06-24 23:24:06:486 PDT] {date=Mon Jun 25 15:24:06 GMT+09:00 2018, quotes=[{high=1.9224, low=1.9162, ask=1.9223, bid=1.9206, currencyPairCode=GBPNZD, open=1.9167}, {high=82.83, low=82.22, ask=82.45, bid=82.40, currencyPairCode=CADJPY, open=82.76}, {high=1.7870, low=1.7817, ask=1.7855, bid=1.7846, currencyPairCode=GBPAUD, open=1.7817}, 
@@ -98,20 +100,20 @@ function callExchangeAPI() {
 
 ![03_sheet](/images/20180625_gas/03_sheet.png)
 
-1行目はヘッダ、列の定義は以下。通貨ペア種別すべての Ask や Bid などを1行で表現する。
+シートの 1 行目はヘッダ、列の定義は以下。通貨ペア種別すべての Ask や Bid などを取得したタイミングごとに1行で表現する。
 
 ```
 date, currencyPairCode1, high1, low1, ask1, bid1, open1, currencyPairCode2, high2, ...
 ```
 
-まずは、Google sheetsを新規作成し、その URL をコピーする。
+まずは、出力先にあたる Google sheets を新規作成し、その URL をコピーする。
 
 個別の URL をコードに埋め込みたくないので、`Script properties` に値をセットしてそれをコードの中から利用する。
 
 GAS のメニュー `File` > `Project properties` から `Script properties` タブへ移動する。
 `+ Add row` のリンクから行をエントリーする。
 `Property` に SHEET_URL、`Value` に先程コピーした Google sheets の URLを登録する。
-登録するURL は `https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxxxx/edit` のような形式。
+登録するURL は `https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxx/edit` のような形式。
 
 
 上述した `Script properties` から値を参照して、Sheet オブジェクトを取得する処理は以下。
@@ -131,7 +133,9 @@ GAS のメニュー `File` > `Project properties` から `Script properties` タ
   }
 ```
 
-以下のようにAPI から取得してきた JSON データをシートに出力する。
+API から取得してきた JSON データをシートに出力する。
+
+シートに対して入力するには、`sheet.getRange(row, column).setValue(something)` のようにシートの行 (row) と列 (column) を指定して setValue を呼べば良い。 
 
 ```javascript
   function(ex_json) {
@@ -155,7 +159,7 @@ GAS のメニュー `File` > `Project properties` から `Script properties` タ
 ```
 
 上記をまとめると以下。
-コピペして実行する (▶ボタンを押す) と Google sheetsに為替データが挿入される。
+以下をコピペして実行する (▶ボタンを押す) と Google sheets に為替データが挿入される。
 初回実行時に権限の確認ダイアログがでると思うが許可してあげる。
 
 ```javascript
