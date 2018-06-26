@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-25T18:36:51+09:00</updated>
+  <updated>2018-06-26T10:31:57+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -18,12 +18,12 @@
     <link href="http://momota.github.io/blog/2018/06/25/apps-script/"/>
     <updated>2018-06-25T14:35:00+09:00</updated>
     <id>http://momota.github.io/blog/2018/06/25/apps-script</id>
-    <content type="html"><![CDATA[<p>Google <a href="https://script.google.com/home">Apps Script</a> (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
+    <content type="html"><![CDATA[<p><a href="https://script.google.com/home">Google Apps Script</a> (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
 Excel マクロのすごい版みたいな感覚。</p>
 
 <p>このスクリプトからHTTP GETリクエストを出したり、受け付けたりできる。</p>
 
-<p>今回は、この GAS を使って、無料の Web クローラを作ってみる。</p>
+<p>今回は、この GAS を使って、無料の Web クローラをサーバレスでつくってみる。</p>
 
 <!-- more -->
 
@@ -85,17 +85,16 @@ Excel マクロのすごい版みたいな感覚。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>JSON の quotes は各通貨ペアの配列になっており、各要素に high, low, &hellip; などのフィールドがある構造になっている。</p>
+
 <p><a href="https://www.gaitameonline.com/robots.txt">robots.txt</a> には特に言及されていないが、非常識なアクセスはしないように注意。</p>
 
 <h3>GAS の作成</h3>
 
 <p><a href="https://script.google.com/home">Apps Script</a> のメニューから <code>+ 新規スクリプト</code> をクリックすると、新規プロジェクトが立ち上がる。
-プロジェクト名やスクリプト名 (デフォルト <code>Code.gs</code>) は適当に変更する。</p>
+プロジェクト名やスクリプト名は適当に変更する。 (デフォルト <code>Code.gs</code>)</p>
 
 <p>GAS で API をたたく処理は以下のように書ける。</p>
-
-<p><code>UrlFetchApp.fetch(url)</code> 部分で API をたたきにいっている。
-<code>fx.date = now</code> で、取得した JSON に取得日時フィールド <code>date</code> を足している。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -122,13 +121,17 @@ Excel マクロのすごい版みたいな感覚。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>上記をコピペして実行する (▶ボタンを押す) と初回実行時には以下のような確認ダイアログがでるので <code>Review Permissions</code> を押す。</p>
+<p><code>UrlFetchApp.fetch(url)</code> で API の URL をたたきにいける。
+<code>fx.date = now</code> で、取得した JSON に取得日時フィールド <code>date</code> を足している。</p>
+
+<p>上記をコピペして実行する (▶ボタンを押す) と初回実行時には以下のような確認ダイアログがでるので <code>Review Permissions</code> を押して許可する。</p>
 
 <p><img src="http://momota.github.io/images/20180625_gas/01_notice_initial_run.png" alt="01_notice_initial_run" /></p>
 
 <p>その後、Choose an account画面で自分のアカウントを選ぶと、確認画面 <code>YOUR-PROJECT-NAME wants to access your Google Account</code> が出てくるので <code>ALLOW</code> ボタンを押す。そうすると実行できる。</p>
 
-<p><code>Logger.log(fx);</code> 部分でログ出力しているので、メニュー <code>View</code> > <code>Logs</code> からログ出力できていることが確認できる。</p>
+<p><code>Logger.log(fx)</code> 部分でログ出力しているので、メニュー <code>View</code> > <code>Logs</code> からログ出力できていることが確認できる。
+ログは以下のように出力される。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -143,21 +146,21 @@ Excel マクロのすごい版みたいな感覚。</p>
 
 <p><img src="http://momota.github.io/images/20180625_gas/03_sheet.png" alt="03_sheet" /></p>
 
-<p>1行目はヘッダ、列の定義は以下。通貨ペア種別すべての Ask や Bid などを1行で表現する。</p>
+<p>シートの 1 行目はヘッダ、列の定義は以下。通貨ペア種別すべての Ask や Bid などを取得したタイミングごとに1行で表現する。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">date</span><span class="p">,</span> <span class="nx">currencyPairCode1</span><span class="p">,</span> <span class="nx">high1</span><span class="p">,</span> <span class="nx">low1</span><span class="p">,</span> <span class="nx">ask1</span><span class="p">,</span> <span class="nx">bid1</span><span class="p">,</span> <span class="nx">open1</span><span class="p">,</span> <span class="nx">currencyPairCode2</span><span class="p">,</span> <span class="nx">high2</span><span class="p">,</span> <span class="p">...</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>まずは、Google sheetsを新規作成し、その URL をコピーする。</p>
+<p>まずは、出力先にあたる Google sheets を新規作成し、その URL をコピーする。</p>
 
 <p>個別の URL をコードに埋め込みたくないので、<code>Script properties</code> に値をセットしてそれをコードの中から利用する。</p>
 
 <p>GAS のメニュー <code>File</code> > <code>Project properties</code> から <code>Script properties</code> タブへ移動する。
 <code>+ Add row</code> のリンクから行をエントリーする。
 <code>Property</code> に SHEET_URL、<code>Value</code> に先程コピーした Google sheets の URLを登録する。
-登録するURL は <code>https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxxxx/edit</code> のような形式。</p>
+登録するURL は <code>https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxx/edit</code> のような形式。</p>
 
 <p>上述した <code>Script properties</code> から値を参照して、Sheet オブジェクトを取得する処理は以下。</p>
 
@@ -188,7 +191,9 @@ Excel マクロのすごい版みたいな感覚。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>以下のようにAPI から取得してきた JSON データをシートに出力する。</p>
+<p>API から取得してきた JSON データをシートに出力する。</p>
+
+<p>シートに対して入力するには、<code>sheet.getRange(row, column).setValue(something)</code> のようにシートの行 (row) と列 (column) を指定して setValue を呼べば良い。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -230,7 +235,7 @@ Excel マクロのすごい版みたいな感覚。</p>
 
 
 <p>上記をまとめると以下。
-コピペして実行する (▶ボタンを押す) と Google sheetsに為替データが挿入される。
+以下をコピペして実行する (▶ボタンを押す) と Google sheets に為替データが挿入される。
 初回実行時に権限の確認ダイアログがでると思うが許可してあげる。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
