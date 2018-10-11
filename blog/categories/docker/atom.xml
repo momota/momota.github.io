@@ -4,7 +4,7 @@
   <title><![CDATA[Category: docker | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-06-26T10:31:57+09:00</updated>
+  <updated>2018-10-11T11:59:32+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,202 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Flask アプリ (チャットボット) のコンテナ化]]></title>
+    <link href="http://momota.github.io/blog/2018/10/11/dockerize-flask-app/"/>
+    <updated>2018-10-11T10:54:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/11/dockerize-flask-app</id>
+    <content type="html"><![CDATA[<p>以下で作ったようなFlaskアプリ (チャットボット) をコンテナ化 (Docker) する。</p>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト &ndash; momota.txt</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>Flask アプリ</h2>
+
+<p>Python のバージョンは 3.6。</p>
+
+<p>Flask アプリのディレクトリ構成は以下。</p>
+
+<p><code>
+$ tree
+.
+|____log
+| |____mattermost_bot.log
+|____mattermostbot.py
+</code></p>
+
+<ul>
+<li><code>mattermostbot.py</code>: ボット本体</li>
+<li><code>log/</code> : ログ保存用のディレクトリ</li>
+</ul>
+
+
+<p><code>mattermost.py</code> は簡易的なオウム返しするボットで以下のようなスクリプト。</p>
+
+<p>```python
+import json
+import logging
+from flask import Flask, request
+from logging.handlers import RotatingFileHandler</p>
+
+<p>SCRIPT_DIR = os.path.dirname(os.path.abspath(<strong>file</strong>))
+BOT_LOG    = SCRIPT_DIR + &lsquo;/log/mattermost_bot.log&rsquo;</p>
+
+<p>app = Flask(<strong>name</strong>)</p>
+
+<p>@app.route(&lsquo;/bot&rsquo;, methods=[&lsquo;POST&rsquo;])
+def bot():</p>
+
+<pre><code># mattermost -&gt; bot へ送信される JSON データの取得
+post_dict = request.form
+app.logger.info(post_dict)
+
+# JSONから token と text (ユーザが入力したメッセージ) を取得
+token = post_dict['token']
+income_text = post_dict['text']
+
+# income_text は `bot_name COMMAND ARGUMENT` のような形式なので
+# 半角スペースで分割し、それぞれの要素を変数に格納する
+text_array = income_text.split(' ')
+bot_name = text_array[0]
+command = text_array[1]
+arg = " ".join(text_array[2:])
+
+payload_text = ""
+
+# command によって処理を分岐する
+if command == "echo":
+    payload_text = echo(arg)
+
+app.logger.info(payload_text)
+
+# レスポンス用の JSON を組み立てる
+payload = {
+    'username': bot_name,
+    'icon_url': 'http://your-server/images/bot_icon.png',
+    'text': payload_text,
+    'MATTERMOST_TOKEN': token
+}
+json_payload = json.dumps(payload)
+
+return json_payload
+</code></pre>
+
+<h1>ログ出力用メソッド</h1>
+
+<p>def log(app):</p>
+
+<pre><code>handler = RotatingFileHandler(BOT_LOG, maxBytes=10000, backupCount=2)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s\t%(lineno)d\t%(levelname)s\t%(name)s\t%(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
+</code></pre>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</h1>
+
+<h1>echo command</h1>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</h1>
+
+<p>def echo(text):</p>
+
+<pre><code>return text
+</code></pre>
+
+<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
+
+<pre><code>log(app)
+app.debug = True
+app.run(host='0.0.0.0')
+</code></pre>
+
+<p>```</p>
+
+<h2>Requirements File</h2>
+
+<p>コンテナにインストールする必要のある Python パッケージ を <code>requirements.txt</code> に書き出す。ようは <code>pip</code> でインストールやつを列挙する。</p>
+
+<p><code>
+Flask==0.12.2
+</code></p>
+
+<p>手で作らなくても、すでに Flask アプリを動かしている環境があれば、以下のコマンドで出力できる。</p>
+
+<p><code>sh
+$ pip freeze &gt; requirements.txt
+</code></p>
+
+<h2>Dockerfile</h2>
+
+<p>Docker イメージを生成するため、以下のような <code>Dockerfile</code> を作成する。</p>
+
+<p>```
+FROM python:3.6</p>
+
+<p>ARG project_dir=/chatbot/</p>
+
+<p>ADD requirements.txt $project_dir
+ADD mattermostbot.py $project_dir
+ADD log &ldquo;${project_dir}log&rdquo;</p>
+
+<p>WORKDIR $project_dir</p>
+
+<p>RUN pip install -r requirements.txt
+CMD [&ldquo;python&rdquo;, &ldquo;mattermostbot.py&rdquo;]
+```</p>
+
+<p>プロキシ環境下でビルドする場合は、以下のようにコンテナ内の環境変数を設定してあげれば良い。
+追記する場所は、<code>RUN pip install -r requirements.txt</code> より前。</p>
+
+<p>```
+ARG proxy_host=&ldquo;proxy.co.jp&rdquo;
+ARG proxy_port=&ldquo;85&rdquo;
+ARG proxy_user=&ldquo;USER&rdquo;
+ARG proxy_pass=&ldquo;PASSWORD&rdquo;
+ARG PROXY=&ldquo;${proxy_user}:${proxy_pass}@${proxy_host}:${proxy_port}&rdquo;</p>
+
+<p>ENV http_proxy=&ldquo;<a href="http://$">http://$</a>{PROXY}&rdquo; \</p>
+
+<pre><code>https_proxy="https://${PROXY}" \
+ftp_proxy="ftp://${PROXY}"
+</code></pre>
+
+<p>```</p>
+
+<h2>Docker イメージのビルド</h2>
+
+<p>以下のコマンドで Docker イメージをビルドする。</p>
+
+<p><code>sh
+$ docker build -t mattemost_bot:latest .
+</code></p>
+
+<p>できたイメージは以下で確認できる。</p>
+
+<p><code>sh
+$ docker images
+</code></p>
+
+<h2>コンテナの実行</h2>
+
+<p><code>sh
+$ docker run -p 5000:5000 -it mattermost_bot
+</code></p>
+
+<p>起動状態などの詳細は以下で確認できる。</p>
+
+<p><code>sh
+$ docker ps -a
+</code></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[docker で Elasticsearch]]></title>
