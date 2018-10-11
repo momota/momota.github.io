@@ -172,3 +172,16 @@ $ docker run -p 5000:5000 -it mattermost_bot
 ```sh
 $ docker ps -a
 ```
+
+## 動作確認
+
+`curl` や POSTMAN などを使って HTTP POST リクエストを投げて確認する。
+
+```sh
+$ curl -X POST \
+>   http://localhost:5000/bot \
+>   -H 'cache-control: no-cache' \
+>   -H 'content-type: application/x-www-form-urlencoded' \
+>   -d 'token=dummy&text=botname%20echo%20hogehoge'
+{"username": "botname", "icon_url": "http://your-server/images/bot_icon.png", "text": "hogehoge", "MATTERMOST_TOKEN": "dummy"}
+```
