@@ -375,6 +375,25 @@
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>docker ps -a
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h2>動作確認</h2>
+
+<p><code>curl</code> や POSTMAN などを使って HTTP POST リクエストを投げて確認する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -X POST <span class="se">\</span>
+</span><span class='line'>&gt;   http://localhost:5000/bot <span class="se">\</span>
+</span><span class='line'>&gt;   -H <span class="s1">&#39;cache-control: no-cache&#39;</span> <span class="se">\</span>
+</span><span class='line'>&gt;   -H <span class="s1">&#39;content-type: application/x-www-form-urlencoded&#39;</span> <span class="se">\</span>
+</span><span class='line'>&gt;   -d <span class="s1">&#39;token=dummy&amp;text=botname%20echo%20hogehoge&#39;</span>
+</span><span class='line'><span class="o">{</span><span class="s2">&quot;username&quot;</span>: <span class="s2">&quot;botname&quot;</span>, <span class="s2">&quot;icon_url&quot;</span>: <span class="s2">&quot;http://your-server/images/bot_icon.png&quot;</span>, <span class="s2">&quot;text&quot;</span>: <span class="s2">&quot;hogehoge&quot;</span>, <span class="s2">&quot;MATTERMOST_TOKEN&quot;</span>: <span class="s2">&quot;dummy&quot;</span><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
 </div>
 
 

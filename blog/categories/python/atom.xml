@@ -4,7 +4,7 @@
   <title><![CDATA[Category: python | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-11T11:59:32+09:00</updated>
+  <updated>2018-10-11T19:43:20+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -206,6 +206,20 @@ $ docker run -p 5000:5000 -it mattermost_bot
 <p><code>sh
 $ docker ps -a
 </code></p>
+
+<h2>動作確認</h2>
+
+<p><code>curl</code> や POSTMAN などを使って HTTP POST リクエストを投げて確認する。</p>
+
+<p>```sh
+$ curl -X POST \</p>
+
+<blockquote><p>  <a href="http://localhost:5000/bot">http://localhost:5000/bot</a> \
+  -H &lsquo;cache-control: no-cache&rsquo; \
+  -H &lsquo;content-type: application/x-www-form-urlencoded&rsquo; \
+  -d &lsquo;token=dummy&amp;text=botname%20echo%20hogehoge&rsquo;
+{&ldquo;username&rdquo;: &ldquo;botname&rdquo;, &ldquo;icon_url&rdquo;: &ldquo;<a href="http://your-server/images/bot_icon.png">http://your-server/images/bot_icon.png</a>&rdquo;, &ldquo;text&rdquo;: &ldquo;hogehoge&rdquo;, &ldquo;MATTERMOST_TOKEN&rdquo;: &ldquo;dummy&rdquo;}
+```</p></blockquote>
 ]]></content>
   </entry>
   
