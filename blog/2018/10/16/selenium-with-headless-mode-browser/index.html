@@ -1,0 +1,586 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Windows + Chrome Headless mode + Ruby + Selenium - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Windows + Chrome Headless Mode + Ruby + Selenium</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-10-16T11:31:00+09:00" pubdate data-updated="true">2018-10-16</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium スクリプトへ順次移行していこうと思う。</p>
+
+<p>動作の軽量化もちょっとは期待できるかも。 (比較計測はしていない)</p>
+
+<p>以下は、関連記事。</p>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化： selenium と ruby &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ &ndash; momota.txt</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>環境情報</h2>
+
+<table>
+<thead>
+<tr>
+<th>ソフトウェア           </th>
+<th> バージョン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS                     </td>
+<td> Windows 10 Pro 1709</td>
+</tr>
+<tr>
+<td>ブラウザ               </td>
+<td> Google Chrome 69.0.3497.100</td>
+</tr>
+<tr>
+<td>ChromeDriver           </td>
+<td> 2.39.562718</td>
+</tr>
+<tr>
+<td>ruby                   </td>
+<td> 2.5.1p57</td>
+</tr>
+<tr>
+<td>gem selenium-webdriver </td>
+<td> (3.14.1, 3.12.0)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Ruby と gem はインストールされているものとする。</p>
+
+<h2>Chrome headless モードの動作確認</h2>
+
+<p>Chrome のバージョン59以降からヘッドレスモードを搭載している。
+Chrome をインストールしていない場合は、インストールする。</p>
+
+<p>動作確認はコマンドライン (Powershell or コマンドプロンプト) から可能で、以下のように動けば OK。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; cd "C:\Program Files (x86)\Google\Chrome\Application"
+</span><span class='line'>&gt; ls
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    ディレクトリ: C:\Program Files (x86)\Google\Chrome\Application
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>Mode                LastWriteTime         Length Name
+</span><span class='line'>----                -------------         ------ ----
+</span><span class='line'>d-----       2018/09/21     19:12                69.0.3497.100
+</span><span class='line'>d-----       2018/09/25     16:45                SetupMetrics
+</span><span class='line'>-a----       2018/09/15     17:47        1378648 chrome.exe
+</span><span class='line'>-a----       2018/09/25     16:45            410 chrome.VisualElementsManifest.xml
+</span><span class='line'>-a----       2018/05/17     17:06         122574 master_preferences
+</span><span class='line'>
+</span><span class='line'>&gt; .\chrome.exe --enable-logging --headless --disable-gpu --dump-dom https://www.chromestatus.com
+</span><span class='line'>&lt;!DOCTYPE html&gt;
+</span><span class='line'>&lt;html lang="en"&gt;&lt;head&gt;
+</span><span class='line'>&lt;meta charset="utf-8"&gt;
+</span><span class='line'>&lt;title&gt;Chrome Platform Status&lt;/title&gt;
+</span><span class='line'>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;link rel="manifest" href="/static/manifest.json"&gt;
+</span><span class='line'>... (snip) ...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Proxy 環境下にいる場合は、<code>--proxy-server</code> や <code>--proxy-auth</code> オプションで指定してあげればよい。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; .\chrome.exe --enable-logging --headless --disable-gpu --dump-dom --proxy-server=http://PROXY_HOST:PORT --proxy-auth=USER:PASSWORD https://www.chromestatus.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>詳細は <a href="https://developers.google.com/web/updates/2017/04/headless-chrome?hl=ja">ヘッドレス Chrome ことはじめ | Web | Google Developers</a> のあたりを参照。</p>
+
+<h2>ChromeDriver</h2>
+
+<p>Selenium WebDriver は Selenium から Web ブラウザをコントロールするライブラリ群。
+各ブラウザ向けに実装されていて、ChromeDriver は Chrome 用の WebDriver。</p>
+
+<p>以下から入手し、PATHを通す。(もしくは通っているところに置く)</p>
+
+<ul>
+<li><a href="http://chromedriver.chromium.org/downloads">Downloads &ndash; ChromeDriver &ndash; WebDriver for Chrome</a></li>
+</ul>
+
+
+<p>コンソールからバージョンが表示できれば PATH 設定の確認になる。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; chromedriver.exe -v
+</span><span class='line'>ChromeDriver 2.39.562718 (9a2698cba08cf5a471a29d30c8b3e12becabb0e9)</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Selenium スクリプト</h2>
+
+<p>サンプルとして、本ブログのいくつかのページのスクリーンショットを取得する。
+<a href="http://momota.github.io/blog/page/2/">http://momota.github.io/blog/page/2/</a> ～ <a href="http://momota.github.io/blog/page/4/">http://momota.github.io/blog/page/4/</a> のスクリーンショットを取得してみる。</p>
+
+<p>Headless モードといっても特段難しいことはなく、以下のように Webdriver にオプションしてあげるだけでよい。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">options</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Chrome</span><span class="p">:</span><span class="ss">:Options</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--headless&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--disable-gpu&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--window-size=1929,2160&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:chrome</span><span class="p">,</span> <span class="ss">options</span><span class="p">:</span> <span class="n">options</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Proxy の設定が必要な場合は、以下のようにオプションで指定する。
+環境変数 <code>ENV['http_proxy']</code> に設定してもだめなので注意。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gi">+ proxy_host = &#39;PROXY_HOST&#39;</span>
+</span><span class='line'><span class="gi">+ proxy_port = &#39;PORT&#39;</span>
+</span><span class='line'>
+</span><span class='line'>options = Selenium::WebDriver::Chrome::Options.new
+</span><span class='line'>options.add_argument(&#39;--headless&#39;)
+</span><span class='line'>options.add_argument(&#39;--disable-gpu&#39;)
+</span><span class='line'>options.add_argument(&#39;--window-size=1929,2160&#39;)
+</span><span class='line'><span class="gi">+ options.add_argument(&quot;--proxy-server=http://#{proxy_host}:#{proxy_port}&quot;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>スクリプトとしては以下のような感じ。
+普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot_i.png</code> が出力される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># conding: utf-8</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;selenium-webdriver&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Blog</span>
+</span><span class='line'>  <span class="no">SCREENSHOT_DIR</span> <span class="o">=</span> <span class="s1">&#39;./screenshot/&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
+</span><span class='line'>    <span class="n">proxy_host</span> <span class="o">=</span> <span class="s1">&#39;PROXY_HOST&#39;</span>
+</span><span class='line'>    <span class="n">proxy_port</span> <span class="o">=</span> <span class="s1">&#39;PORT&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">options</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Chrome</span><span class="p">:</span><span class="ss">:Options</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--headless&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--disable-gpu&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--window-size=1929,2160&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--proxy-server=http://</span><span class="si">#{</span><span class="n">proxy_host</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="n">proxy_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vi">@driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:chrome</span><span class="p">,</span> <span class="ss">options</span><span class="p">:</span> <span class="n">options</span>
+</span><span class='line'>    <span class="vi">@base_url</span> <span class="o">=</span> <span class="s1">&#39;http://momota.github.io/&#39;</span>
+</span><span class='line'>    <span class="vi">@accept_next_alert</span> <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">timeouts</span><span class="o">.</span><span class="n">implicit_wait</span> <span class="o">=</span> <span class="mi">20</span>
+</span><span class='line'>    <span class="vi">@verification_errors</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="no">SCREENSHOT_DIR</span><span class="p">)</span> <span class="k">unless</span> <span class="no">Dir</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="no">SCREENSHOT_DIR</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">get_and_screenshot</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="n">.</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="vi">@driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@base_url</span><span class="si">}</span><span class="s2">blog/page/</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">SCREENSHOT_DIR</span><span class="si">}</span><span class="s2">headles_</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;access and save screenshot: </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">close</span>
+</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">quit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
+</span><span class='line'><span class="c1"># main</span>
+</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
+</span><span class='line'><span class="k">if</span> <span class="bp">__FILE__</span> <span class="o">==</span> <span class="vg">$PROGRAM_NAME</span>
+</span><span class='line'>  <span class="n">blog</span> <span class="o">=</span> <span class="no">Blog</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">blog</span><span class="o">.</span><span class="n">get_and_screenshot</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-10-16T11:31:00+09:00" pubdate data-updated="true">2018-10-16</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/chrome/'>chrome</a>, <a class='category' href='/blog/categories/headless/'>headless</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/selenium/'>selenium</a>, <a class='category' href='/blog/categories/windows/'>windows</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/" data-via="momota" data-counturl="http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/10/11/dockerize-flask-app/" title="Previous Post: Flask アプリ (チャットボット) のコンテナ化">&laquo; Flask アプリ (チャットボット) のコンテナ化</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless mode + Ruby + Selenium</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/11/dockerize-flask-app/">Flask アプリ (チャットボット) のコンテナ化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/06/25/apps-script/">Google Apps Script でサーバレスな為替レート取得クローラをつくる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/06/07/elasticsearch/">docker で Elasticsearch</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/';
+        var disqus_url = 'http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

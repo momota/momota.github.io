@@ -9,7 +9,9 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="以下で作ったようなFlaskアプリ (チャットボット) をコンテナ化 (Docker) する。 Python unittest で Flask (チャットボット) の単体テスト &ndash; momota.txt ">
+  <meta name="description" content="Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +81,57 @@
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless Mode + Ruby + Selenium</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-10-16T11:31:00+09:00" pubdate data-updated="true">2018-10-16</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium スクリプトへ順次移行していこうと思う。</p>
+
+<p>動作の軽量化もちょっとは期待できるかも。 (比較計測はしていない)</p>
+
+<p>以下は、関連記事。</p>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化： selenium と ruby &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ &ndash; momota.txt</a></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/10/16/selenium-with-headless-mode-browser/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -576,74 +629,6 @@ configuration 作成時のミスに気づきやすくしたりする効果が期
   
     <footer>
       <a rel="full-article" href="/blog/2016/06/24/cisco-dot-vim/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-06-22T10:57:00+09:00" pubdate data-updated="true">2016-06-22</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>ネットワークエンジニアのみなさん、こんにちは。</p>
-
-<p>Juniper の configuration をカラーリングする vim プラグイン
-<a href="https://github.com/momota/junos.vim">momota/junos.vim</a> を作ったのでご活用下さい。</p>
-
-<p>対象は、Juniper EX シリーズとSRX シリーズです。</p>
-
-<p>色を付けることによって、junos configuration の解釈を手助けしたり、
-configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
-(誤ったタームを入力すると色が付かないので)</p>
-
-<p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
-
-<h2>before</h2>
-
-<p><img src="/images/20160622_junos-confg_before.png" alt="display_before" /></p>
-
-<h2>after</h2>
-
-<p><img src="/images/20160622_junos-confg_after.png" alt="display_after" /></p>
-
-<h2>before: <code>display set</code> モード</h2>
-
-<p><img src="/images/20160622_junos-confg-set_before.png" alt="display-set_before" /></p>
-
-<h2>after: <code>display set</code> モード</h2>
-
-<p><img src="/images/20160622_junos-confg-set_after.png" alt="display-set_after" /></p>
-
-<p>cisco 版はこちら <a href="http://momota.github.io/blog/2016/06/24/cisco-dot-vim/">ネットワークエンジニアのための cisco.vim</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/06/22/junos-dot-vim/">続きを読む &rarr;</a>
     </footer>
   
 

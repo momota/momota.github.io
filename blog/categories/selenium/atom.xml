@@ -4,7 +4,7 @@
   <title><![CDATA[Category: selenium | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/selenium/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-11T19:43:20+09:00</updated>
+  <updated>2018-10-16T11:41:37+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,227 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Windows + Chrome Headless mode + Ruby + Selenium]]></title>
+    <link href="http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/"/>
+    <updated>2018-10-16T11:31:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser</id>
+    <content type="html"><![CDATA[<p>Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium スクリプトへ順次移行していこうと思う。</p>
+
+<p>動作の軽量化もちょっとは期待できるかも。 (比較計測はしていない)</p>
+
+<p>以下は、関連記事。</p>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化： selenium と ruby &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ &ndash; momota.txt</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>環境情報</h2>
+
+<table>
+<thead>
+<tr>
+<th>ソフトウェア           </th>
+<th> バージョン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS                     </td>
+<td> Windows 10 Pro 1709</td>
+</tr>
+<tr>
+<td>ブラウザ               </td>
+<td> Google Chrome 69.0.3497.100</td>
+</tr>
+<tr>
+<td>ChromeDriver           </td>
+<td> 2.39.562718</td>
+</tr>
+<tr>
+<td>ruby                   </td>
+<td> 2.5.1p57</td>
+</tr>
+<tr>
+<td>gem selenium-webdriver </td>
+<td> (3.14.1, 3.12.0)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Ruby と gem はインストールされているものとする。</p>
+
+<h2>Chrome headless モードの動作確認</h2>
+
+<p>Chrome のバージョン59以降からヘッドレスモードを搭載している。
+Chrome をインストールしていない場合は、インストールする。</p>
+
+<p>動作確認はコマンドライン (Powershell or コマンドプロンプト) から可能で、以下のように動けば OK。</p>
+
+<p>```</p>
+
+<blockquote><p>cd &ldquo;C:\Program Files (x86)\Google\Chrome\Application&rdquo;
+ls</p></blockquote>
+
+<pre><code>ディレクトリ: C:\Program Files (x86)\Google\Chrome\Application
+</code></pre>
+
+<p>Mode                LastWriteTime         Length Name</p>
+
+<hr />
+
+<p>d&mdash;&mdash;&ndash;       2018/09/21     19:12                69.0.3497.100
+d&mdash;&mdash;&ndash;       2018/09/25     16:45                SetupMetrics
+-a&mdash;&mdash;       2018/09/15     17:47        1378648 chrome.exe
+-a&mdash;&mdash;       2018/09/25     16:45            410 chrome.VisualElementsManifest.xml
+-a&mdash;&mdash;       2018/05/17     17:06         122574 master_preferences</p>
+
+<blockquote><p>.\chrome.exe &mdash;enable-logging &mdash;headless &mdash;disable-gpu &mdash;dump-dom <a href="https://www.chromestatus.com">https://www.chromestatus.com</a>
+&lt;!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Chrome Platform Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"></p></blockquote>
+
+<p><link rel="manifest" href="http://momota.github.io/static/manifest.json">
+&hellip; (snip) &hellip;
+```</p>
+
+<p>Proxy 環境下にいる場合は、<code>--proxy-server</code> や <code>--proxy-auth</code> オプションで指定してあげればよい。</p>
+
+<p>```</p>
+
+<blockquote><p>.\chrome.exe &mdash;enable-logging &mdash;headless &mdash;disable-gpu &mdash;dump-dom &mdash;proxy-server=<a href="http://PROXY_HOST:PORT">http://PROXY_HOST:PORT</a> &mdash;proxy-auth=USER:PASSWORD <a href="https://www.chromestatus.com">https://www.chromestatus.com</a>
+```</p></blockquote>
+
+<p>詳細は <a href="https://developers.google.com/web/updates/2017/04/headless-chrome?hl=ja">ヘッドレス Chrome ことはじめ | Web | Google Developers</a> のあたりを参照。</p>
+
+<h2>ChromeDriver</h2>
+
+<p>Selenium WebDriver は Selenium から Web ブラウザをコントロールするライブラリ群。
+各ブラウザ向けに実装されていて、ChromeDriver は Chrome 用の WebDriver。</p>
+
+<p>以下から入手し、PATHを通す。(もしくは通っているところに置く)</p>
+
+<ul>
+<li><a href="http://chromedriver.chromium.org/downloads">Downloads &ndash; ChromeDriver &ndash; WebDriver for Chrome</a></li>
+</ul>
+
+
+<p>コンソールからバージョンが表示できれば PATH 設定の確認になる。</p>
+
+<p>```</p>
+
+<blockquote><p>chromedriver.exe -v
+ChromeDriver 2.39.562718 (9a2698cba08cf5a471a29d30c8b3e12becabb0e9)
+```</p></blockquote>
+
+<h2>Selenium スクリプト</h2>
+
+<p>サンプルとして、本ブログのいくつかのページのスクリーンショットを取得する。
+<a href="http://momota.github.io/blog/page/2/">http://momota.github.io/blog/page/2/</a> ～ <a href="http://momota.github.io/blog/page/4/">http://momota.github.io/blog/page/4/</a> のスクリーンショットを取得してみる。</p>
+
+<p>Headless モードといっても特段難しいことはなく、以下のように Webdriver にオプションしてあげるだけでよい。</p>
+
+<p>```ruby
+options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument(&lsquo;&mdash;headless&rsquo;)
+options.add_argument(&lsquo;&mdash;disable-gpu&rsquo;)
+options.add_argument(&lsquo;&mdash;window-size=1929,2160&rsquo;)</p>
+
+<p>driver = Selenium::WebDriver.for :chrome, options: options
+```</p>
+
+<p>Proxy の設定が必要な場合は、以下のようにオプションで指定する。
+環境変数 <code>ENV['http_proxy']</code> に設定してもだめなので注意。</p>
+
+<p>```diff
++ proxy_host = &lsquo;PROXY_HOST&rsquo;
++ proxy_port = &lsquo;PORT&rsquo;</p>
+
+<p>options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument(&lsquo;&mdash;headless&rsquo;)
+options.add_argument(&lsquo;&mdash;disable-gpu&rsquo;)
+options.add_argument(&lsquo;&mdash;window-size=1929,2160&rsquo;)
++ options.add_argument(&ldquo;&mdash;proxy-server=<a href="http://#">http://#</a>{proxy_host}:#{proxy_port}&rdquo;)
+```</p>
+
+<p>スクリプトとしては以下のような感じ。
+普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot_i.png</code> が出力される。</p>
+
+<p>```ruby</p>
+
+<h1>conding: utf-8</h1>
+
+<p>require &lsquo;selenium-webdriver&rsquo;
+require &lsquo;fileutils&rsquo;</p>
+
+<p>class Blog
+  SCREENSHOT_DIR = &lsquo;./screenshot/&rsquo;</p>
+
+<p>  def initialize</p>
+
+<pre><code>proxy_host = 'PROXY_HOST'
+proxy_port = 'PORT'
+
+options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+options.add_argument('--window-size=1929,2160')
+options.add_argument("--proxy-server=http://#{proxy_host}:#{proxy_port}")
+
+@driver = Selenium::WebDriver.for :chrome, options: options
+@base_url = 'http://momota.github.io/'
+@accept_next_alert = true
+@driver.manage.timeouts.implicit_wait = 20
+@verification_errors = []
+
+FileUtils.mkdir(SCREENSHOT_DIR) unless Dir.exist?(SCREENSHOT_DIR)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def get_and_screenshot</p>
+
+<pre><code>(2..4).each do |i|
+  @driver.get("#{@base_url}blog/page/#{i}/")
+  @driver.save_screenshot("#{SCREENSHOT_DIR}headles_#{i}.png")
+  puts "access and save screenshot: #{i}"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  def close</p>
+
+<pre><code>@driver.quit
+</code></pre>
+
+<p>  end
+end</p>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<h1>main</h1>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<p>if <strong>FILE</strong> == $PROGRAM_NAME
+  blog = Blog.new
+  blog.get_and_screenshot
+end
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[seleniumノウハウ]]></title>

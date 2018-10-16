@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-11T19:43:20+09:00</updated>
+  <updated>2018-10-16T11:41:37+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,227 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Windows + Chrome Headless mode + Ruby + Selenium]]></title>
+    <link href="http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser/"/>
+    <updated>2018-10-16T11:31:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/16/selenium-with-headless-mode-browser</id>
+    <content type="html"><![CDATA[<p>Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
+コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
+したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium スクリプトへ順次移行していこうと思う。</p>
+
+<p>動作の軽量化もちょっとは期待できるかも。 (比較計測はしていない)</p>
+
+<p>以下は、関連記事。</p>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化： selenium と ruby &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ &ndash; momota.txt</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>環境情報</h2>
+
+<table>
+<thead>
+<tr>
+<th>ソフトウェア           </th>
+<th> バージョン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS                     </td>
+<td> Windows 10 Pro 1709</td>
+</tr>
+<tr>
+<td>ブラウザ               </td>
+<td> Google Chrome 69.0.3497.100</td>
+</tr>
+<tr>
+<td>ChromeDriver           </td>
+<td> 2.39.562718</td>
+</tr>
+<tr>
+<td>ruby                   </td>
+<td> 2.5.1p57</td>
+</tr>
+<tr>
+<td>gem selenium-webdriver </td>
+<td> (3.14.1, 3.12.0)</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Ruby と gem はインストールされているものとする。</p>
+
+<h2>Chrome headless モードの動作確認</h2>
+
+<p>Chrome のバージョン59以降からヘッドレスモードを搭載している。
+Chrome をインストールしていない場合は、インストールする。</p>
+
+<p>動作確認はコマンドライン (Powershell or コマンドプロンプト) から可能で、以下のように動けば OK。</p>
+
+<p>```</p>
+
+<blockquote><p>cd &ldquo;C:\Program Files (x86)\Google\Chrome\Application&rdquo;
+ls</p></blockquote>
+
+<pre><code>ディレクトリ: C:\Program Files (x86)\Google\Chrome\Application
+</code></pre>
+
+<p>Mode                LastWriteTime         Length Name</p>
+
+<hr />
+
+<p>d&mdash;&mdash;&ndash;       2018/09/21     19:12                69.0.3497.100
+d&mdash;&mdash;&ndash;       2018/09/25     16:45                SetupMetrics
+-a&mdash;&mdash;       2018/09/15     17:47        1378648 chrome.exe
+-a&mdash;&mdash;       2018/09/25     16:45            410 chrome.VisualElementsManifest.xml
+-a&mdash;&mdash;       2018/05/17     17:06         122574 master_preferences</p>
+
+<blockquote><p>.\chrome.exe &mdash;enable-logging &mdash;headless &mdash;disable-gpu &mdash;dump-dom <a href="https://www.chromestatus.com">https://www.chromestatus.com</a>
+&lt;!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Chrome Platform Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"></p></blockquote>
+
+<p><link rel="manifest" href="http://momota.github.io/static/manifest.json">
+&hellip; (snip) &hellip;
+```</p>
+
+<p>Proxy 環境下にいる場合は、<code>--proxy-server</code> や <code>--proxy-auth</code> オプションで指定してあげればよい。</p>
+
+<p>```</p>
+
+<blockquote><p>.\chrome.exe &mdash;enable-logging &mdash;headless &mdash;disable-gpu &mdash;dump-dom &mdash;proxy-server=<a href="http://PROXY_HOST:PORT">http://PROXY_HOST:PORT</a> &mdash;proxy-auth=USER:PASSWORD <a href="https://www.chromestatus.com">https://www.chromestatus.com</a>
+```</p></blockquote>
+
+<p>詳細は <a href="https://developers.google.com/web/updates/2017/04/headless-chrome?hl=ja">ヘッドレス Chrome ことはじめ | Web | Google Developers</a> のあたりを参照。</p>
+
+<h2>ChromeDriver</h2>
+
+<p>Selenium WebDriver は Selenium から Web ブラウザをコントロールするライブラリ群。
+各ブラウザ向けに実装されていて、ChromeDriver は Chrome 用の WebDriver。</p>
+
+<p>以下から入手し、PATHを通す。(もしくは通っているところに置く)</p>
+
+<ul>
+<li><a href="http://chromedriver.chromium.org/downloads">Downloads &ndash; ChromeDriver &ndash; WebDriver for Chrome</a></li>
+</ul>
+
+
+<p>コンソールからバージョンが表示できれば PATH 設定の確認になる。</p>
+
+<p>```</p>
+
+<blockquote><p>chromedriver.exe -v
+ChromeDriver 2.39.562718 (9a2698cba08cf5a471a29d30c8b3e12becabb0e9)
+```</p></blockquote>
+
+<h2>Selenium スクリプト</h2>
+
+<p>サンプルとして、本ブログのいくつかのページのスクリーンショットを取得する。
+<a href="http://momota.github.io/blog/page/2/">http://momota.github.io/blog/page/2/</a> ～ <a href="http://momota.github.io/blog/page/4/">http://momota.github.io/blog/page/4/</a> のスクリーンショットを取得してみる。</p>
+
+<p>Headless モードといっても特段難しいことはなく、以下のように Webdriver にオプションしてあげるだけでよい。</p>
+
+<p>```ruby
+options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument(&lsquo;&mdash;headless&rsquo;)
+options.add_argument(&lsquo;&mdash;disable-gpu&rsquo;)
+options.add_argument(&lsquo;&mdash;window-size=1929,2160&rsquo;)</p>
+
+<p>driver = Selenium::WebDriver.for :chrome, options: options
+```</p>
+
+<p>Proxy の設定が必要な場合は、以下のようにオプションで指定する。
+環境変数 <code>ENV['http_proxy']</code> に設定してもだめなので注意。</p>
+
+<p>```diff
++ proxy_host = &lsquo;PROXY_HOST&rsquo;
++ proxy_port = &lsquo;PORT&rsquo;</p>
+
+<p>options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument(&lsquo;&mdash;headless&rsquo;)
+options.add_argument(&lsquo;&mdash;disable-gpu&rsquo;)
+options.add_argument(&lsquo;&mdash;window-size=1929,2160&rsquo;)
++ options.add_argument(&ldquo;&mdash;proxy-server=<a href="http://#">http://#</a>{proxy_host}:#{proxy_port}&rdquo;)
+```</p>
+
+<p>スクリプトとしては以下のような感じ。
+普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot_i.png</code> が出力される。</p>
+
+<p>```ruby</p>
+
+<h1>conding: utf-8</h1>
+
+<p>require &lsquo;selenium-webdriver&rsquo;
+require &lsquo;fileutils&rsquo;</p>
+
+<p>class Blog
+  SCREENSHOT_DIR = &lsquo;./screenshot/&rsquo;</p>
+
+<p>  def initialize</p>
+
+<pre><code>proxy_host = 'PROXY_HOST'
+proxy_port = 'PORT'
+
+options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+options.add_argument('--window-size=1929,2160')
+options.add_argument("--proxy-server=http://#{proxy_host}:#{proxy_port}")
+
+@driver = Selenium::WebDriver.for :chrome, options: options
+@base_url = 'http://momota.github.io/'
+@accept_next_alert = true
+@driver.manage.timeouts.implicit_wait = 20
+@verification_errors = []
+
+FileUtils.mkdir(SCREENSHOT_DIR) unless Dir.exist?(SCREENSHOT_DIR)
+</code></pre>
+
+<p>  end</p>
+
+<p>  def get_and_screenshot</p>
+
+<pre><code>(2..4).each do |i|
+  @driver.get("#{@base_url}blog/page/#{i}/")
+  @driver.save_screenshot("#{SCREENSHOT_DIR}headles_#{i}.png")
+  puts "access and save screenshot: #{i}"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  def close</p>
+
+<pre><code>@driver.quit
+</code></pre>
+
+<p>  end
+end</p>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<h1>main</h1>
+
+<h1>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</h1>
+
+<p>if <strong>FILE</strong> == $PROGRAM_NAME
+  blog = Blog.new
+  blog.get_and_screenshot
+end
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RuboCop でコーディングスタイルを矯正する]]></title>
@@ -1148,539 +1369,6 @@ $ git push heroku master
 <p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
 
 <p><img src="/images/20150111_lita/slack_lita.png" alt="lita java" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rails じゃなくても ActiveRecord を使う]]></title>
-    <link href="http://momota.github.io/blog/2014/05/10/activerecord/"/>
-    <updated>2014-05-10T14:54:00+09:00</updated>
-    <id>http://momota.github.io/blog/2014/05/10/activerecord</id>
-    <content type="html"><![CDATA[<p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
-
-<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
-Ruby on Rails 標準で、モデル層で使われる。</p>
-
-<p>環境は以下。</p>
-
-<ul>
-<li>Mac OSX</li>
-<li>ruby 2.1.1p76</li>
-<li>MySQL mysqld5.6.17</li>
-</ul>
-
-
-<p>最終的なディレクトリ構成は以下のようになる。</p>
-
-<p>```sh
-.
-├── Gemfile
-├── Gemfile.lock
-├── README.md
-├── Rakefile
-├── app
-│   └── models
-│       └── hoges.rb
-├── app.rb
-├── config
-│   └── database.yml
-├── db
-│   └── migrate
-│       └── 20140510_create_hoges.rb
-├── log
-│   ├── database.log
-│   └── trace.log
-└── vendor</p>
-
-<pre><code>└── bundle
-        └── (略)
-</code></pre>
-
-<p>```</p>
-
-<ul>
-<li><a href="https://github.com/momota/activerecord_sample">https://github.com/momota/activerecord_sample</a></li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>前準備</h2>
-
-<h3>ruby</h3>
-
-<p>rbenv で ruby 2.1.1 をインストールする。</p>
-
-<p><code>sh
-$ rbenv install 2.1.1
-$ rbenv local 2.1.1
-$ rbenv rehash
-$ ruby -v
-ruby 2.1.1p76 (2014-02-24 revision 45161) [x86_64-darwin13.0]
-</code></p>
-
-<h3>gem</h3>
-
-<p>bundler で gem をインストールする。
-まず、bundler をインストールする。</p>
-
-<p><code>sh
-$ gem install bundle
-$ bundle -v
-Bundler version 1.6.2
-</code></p>
-
-<p>以下の <code>Gemfile</code> をつくって<code>bundle install --path vendor/bundle</code> して gem をインストールする。</p>
-
-<p>```ruby
-source &ldquo;<a href="https://rubygems.org">https://rubygems.org</a>&rdquo;</p>
-
-<p>gem &ldquo;activerecord&rdquo;
-gem &ldquo;rake&rdquo;
-gem &ldquo;mysql2&rdquo;
-gem &ldquo;pry&rdquo;
-```</p>
-
-<p><code>mysql2</code> はDBアダプタ。MySQLと接続するために必要。</p>
-
-<p><code>pry</code> はなくてもよい。<code>irb</code> の便利バージョン。</p>
-
-<h3>mysql</h3>
-
-<p>homebrew でインストールした。</p>
-
-<p><code>my.cnf</code>はよしなに。</p>
-
-<p><code>create database</code> とか <code>grant</code> でユーザやデータベースなどはあらかじめ作っておく。</p>
-
-<h2>create table: rake タスクを使ってテーブルを作成する</h2>
-
-<p><code>rake</code> (makeみたいなもん) でテーブルを作成する。(マイグレーション)</p>
-
-<p>マイグレーションは、SQLを使わずにデータベースのテーブルやカラムなどの構造を変更できる仕組みで、移行と解釈するとややこしい。データベース移行をしやすくする仕組み、くらいに捉えておくとよい。</p>
-
-<h3>マイグレーション用ファイルを作成する</h3>
-
-<p><code>db/migrate</code> ディレクトリを作ってマイグレーション用ファイルを作る。</p>
-
-<p>ここでは hoges テーブルを作ることにする。
-マイグレーション用ファイルには、テーブル定義を書く。ここでは <code>db/migrate/20140510_create_hoges.rb</code> を作成する。</p>
-
-<p>このファイル名が大事で <code>20140510</code> の部分がバージョンとして管理される。<code>schema_migrations</code> テーブルが自動生成され、そこで管理される。また、マイグレーション用ファイル中に class 名を<code>CreateHoges</code> のようにキャメルケースで定義した場合は、ファイル名は <code>VERSION_create_hoge.rb</code> のようにスネークケースとして命名する必要がある。ファイル名がこの命名規約に反するとマイグレーションがこける。</p>
-
-<p>rails文化の「設定より規約」(CoC: Convention over Configuration)ってやつですね。</p>
-
-<p><code>ActiveRecord::Migration</code> を継承したクラス <code>Createhoges</code> を定義する。
-シンボル <code>:hoges</code> がテーブル名。カラム定義は見ての通りだと思う。
-主キーは自動的に <code>id</code> というカラム名で生成されるので書かない。(書くとエラーになる)</p>
-
-<p>```ruby
-class CreateHoges &lt; ActiveRecord::Migration
-  def self.up</p>
-
-<pre><code>create_table :hoges do |t|
-  t.string  :name
-  t.string  :url
-  t.timestamps  # =&gt; これでcreated_atとupdated_atカラムが定義される
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  def self.down</p>
-
-<pre><code>drop_table :hoges
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>書き方の詳細は、<a href="http://guides.rubyonrails.org/migrations.html">Active Record Migrations</a> を見れば良いと思う。</p>
-
-<h3>データベース接続情報を yaml に書き出す</h3>
-
-<p>MySQL への接続情報(DBユーザ名とかパスワードとか使うDB名とか)を yaml ファイルに書き出しておく。めんどくさい、かつ、使い捨てのコードならハードコーディングしといてもOK。</p>
-
-<p>ここでは、以下の内容で <code>config/database.yml</code> を作成した。</p>
-
-<p>```erb
-db:
-  production:</p>
-
-<pre><code>adapter:  mysql2
-host:     localhost
-username: &lt;%= ENV['DATABASE_USERNAME'] %&gt;
-password: &lt;%= ENV['DATABASE_PASSWORD'] %&gt;
-database: &lt;%= ENV['DATABASE_NAME']%&gt;
-</code></pre>
-
-<p>  development:</p>
-
-<pre><code>adapter:  mysql2
-host:     localhost
-username: &lt;%= ENV['DEV_DATABASE_USERNAME'] %&gt;
-password: &lt;%= ENV['DEV_DATABASE_PASSWORD'] %&gt;
-database: &lt;%= ENV['DEV_DATABASE_NAME']%&gt;
-</code></pre>
-
-<p>```</p>
-
-<p>パスワードなどの秘匿情報は環境変数から読み込むようにする。(ここではERB形式で書いた)
-パスワードをべた書きしといて、間違えて github とかで公開しちゃうと大変なので。</p>
-
-<p><code>~/.zshrc</code> とか <code>~/.bashrc</code> にあらかじめ作っておいたデータベース名とかユーザ名を以下のように足して <code>source ~/.zshrc</code> で読み込めばいいと思う。</p>
-
-<p><code>sh
-export DEV_DATABASE_NAME="hoge_db"
-export DEV_DATABASE_USERNAME="hoge_user"
-export DEV_DATABASE_PASSWORD="hoge_password"
-</code></p>
-
-<h3>Rakefile をつくって rakeタスクを実行する</h3>
-
-<p>以下の内容で <code>Rakefile</code> を作る。
-DB接続用の設定や環境指定(development/production) やバージョン指定の設定を書いてます。</p>
-
-<p>```ruby
-require &ldquo;active_record&rdquo;
-require &ldquo;yaml&rdquo;
-require &ldquo;erb&rdquo;
-require &ldquo;logger&rdquo;</p>
-
-<p>task :default => :migrate</p>
-
-<p>desc &ldquo;Migrate database&rdquo;
-task :migrate => :environment do
-  ActiveRecord::Migrator.migrate(&lsquo;db/migrate&rsquo;, ENV[&ldquo;VERSION&rdquo;] ? ENV[&ldquo;VERSION&rdquo;].to_i : nil)
-end</p>
-
-<p>task :environment do
-  db_conf = YAML.load( ERB.new( File.read(&ldquo;./config/database.yml&rdquo;) ).result )</p>
-
-<p>  # <code>rake ENV=development</code>/<code>rake ENV=production</code>で切り替え可能
-  ActiveRecord::Base.establish_connection( db_conf[&ldquo;db&rdquo;][ENV[&ldquo;ENV&rdquo;]] )
-  ActiveRecord::Base.logger = Logger.new(&ldquo;log/database.log&rdquo;)
-end
-```</p>
-
-<p>以下を参考。</p>
-
-<ul>
-<li><a href="http://qiita.com/foloinfo/items/6ecfe3c5fd1b56f1dceb">非Rails AppでActiveRecord::Migrationを使う + Rakeでバージョン管理する</a></li>
-</ul>
-
-
-<h3>rake タスクを実行する</h3>
-
-<p>まずは rake タスクの確認。</p>
-
-<p><code>sh
-$ bundle exec rake -T
-rake migrate  # Migrate database
-</code></p>
-
-<p>開発環境設定で実行する。(ENV=development)</p>
-
-<p>```sh</p>
-
-<h1>debug 用に&mdash;traceオプションをつけ、標準エラーをlog/trace.txtへリダイレクト。</h1>
-
-<h1>bundle exec rake ENV=development でもOK</h1>
-
-<p>$ bundle exec rake ENV=development &mdash;trace 2> log/trace.txt
-== 20140510 CreateHoges: migrating ============================================
-&mdash; create_table(:hoges)
-   &ndash;> 0.1159s
-== 20140510 CreateHoges: migrated (0.1160s) ===================================
-```</p>
-
-<p>問題なければテーブルが作成されているはず。</p>
-
-<p>```
-mysql> show tables;
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-| Tables_in_dev_********** |
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-| hoges                    |
-| schema_migrations        |
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-2 rows in set (0.00 sec)</p>
-
-<p>mysql> desc schema_migrations;
-+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&ndash;+
-| Field   | Type         | Null | Key | Default | Extra |
-+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&ndash;+
-| version | varchar(255) | NO   | PRI | NULL    |       |
-+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&ndash;+
-1 row in set (0.00 sec)</p>
-
-<p>mysql> select * from schema_migrations;
-+&mdash;&mdash;&mdash;&mdash;&mdash;+
-| version  |
-+&mdash;&mdash;&mdash;&mdash;&mdash;+
-| 20140510 |
-+&mdash;&mdash;&mdash;&mdash;&mdash;+
-1 row in set (0.00 sec)</p>
-
-<p>mysql> desc hoges;
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-| Field      | Type         | Null | Key | Default | Extra          |
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-| id         | int(11)      | NO   | PRI | NULL    | auto_increment |
-| name       | varchar(255) | YES  |     | NULL    |                |
-| url        | varchar(255) | YES  |     | NULL    |                |
-| created_at | datetime     | YES  |     | NULL    |                |
-| updated_at | datetime     | YES  |     | NULL    |                |
-+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;+&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&ndash;+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+
-5 rows in set (0.01 sec)</p>
-
-<p>mysql> select * from hoges;
-Empty set (0.00 sec)
-```</p>
-
-<h2>CRUD 操作について</h2>
-
-<p>ActiveRecordを使って CRUD 操作する。(insert/select/update/delete)</p>
-
-<p>ActiveRecord では、<code>ActiveRecord::Base</code> を継承したクラスがDBの1テーブルに対応し、そのクラスの属性がテーブルの各カラムに対応する。
-このクラスのことを一般的に「モデル」と呼ぶ。
-Rails では、Rails アプリを生成した段階で MVC 別にディレクトリが生成されるので、<code>app/models</code> 以下にこの <code>ActiveRecord::Base</code> 継承クラスを作る。
-今回は Rails ではないのでそれに従う必要はない。が、モデルが増えた場合を考慮すると <code>app/models</code> 以下に整理できておいたほうがコードの可読性とかメンテナンスはしやすそうなので、<code>app/models/hoges.rb</code> ファイルを作ることにする。
-Rails って理にかなっているんだな。</p>
-
-<p><code>ruby
-class Hoges &lt; ActiveRecord::Base
-end
-</code></p>
-
-<p>この <code>Hoges</code> は対応するテーブル名にあわせる。これもCoC。
-レコードを単数形で扱うため、テーブル名を複数形にすることが多いみたい。</p>
-
-<h3>Create: テーブルへ insert する</h3>
-
-<p>CRUD の C。</p>
-
-<p><code>app.rb</code> をつくる。</p>
-
-<p>モデルを <code>new</code> して属性値をセットしてあげればOK。</p>
-
-<p>```ruby
-require &ldquo;active_record&rdquo;
-require &ldquo;yaml&rdquo;
-require &ldquo;erb&rdquo;
-require &ldquo;./app/models/hoges&rdquo;</p>
-
-<p>db_conf = YAML.load( ERB.new( File.read(&ldquo;./config/database.yml&rdquo;) ).result )</p>
-
-<h1>開発用DB接続パラメータ読み込み, 接続する</h1>
-
-<p>ActiveRecord::Base.establish_connection(db_conf[&ldquo;db&rdquo;][&ldquo;development&rdquo;])</p>
-
-<p>test_name = &ldquo;momota.txt&rdquo;
-test_url  = &ldquo;<a href="http://momota.github.io/">http://momota.github.io/</a>&rdquo;</p>
-
-<p>hoge = Hoges.new { |h|
-  h.name = test_name
-  h.url  = test_url
-}
-p hoge
-hoge.save
-p hoge
-```</p>
-
-<p>なお、<code>save</code> しないと insert されない。</p>
-
-<p>こんな感じで生成時にハッシュを渡してもOK。</p>
-
-<p><code>ruby
-hoge = Hoges.new(:name =&gt; test_name, :url =&gt; test_url)
-hoge.save
-</code></p>
-
-<p>それでは実行してみる。</p>
-
-<p>```sh
-$ bundle exec ruby app.rb</p>
-
-<h1><Hoges id: nil, name: "momota.txt", url: "http://momota.github.io/", created_at: nil, updated_at: nil></h1>
-
-<h1><Hoges id: 1, name: "momota.txt", url: "http://momota.github.io/", created_at: "2014-05-10 23:50:46", updated_at: "2014-05-10 23:50:46"></h1>
-
-<p>```</p>
-
-<p>上記から、saveしないと <code>id</code> や <code>created_at</code> などの値が空なので insert されていないことが分かる。</p>
-
-<p>実際にテーブルの内容を見てみよう。ちゃんと insert されている。</p>
-
-<p><code>
-mysql&gt; select * from hoges;
-+----+------------+--------------------------+---------------------+---------------------+
-| id | name       | url                      | created_at          | updated_at          |
-+----+------------+--------------------------+---------------------+---------------------+
-|  1 | momota.txt | http://momota.github.io/ | 2014-05-10 23:50:46 | 2014-05-10 23:50:46 |
-+----+------------+--------------------------+---------------------+---------------------+
-1 row in set (0.00 sec)
-</code></p>
-
-<h3>Read: レコードを select する</h3>
-
-<p>CRUD の R。</p>
-
-<p>主キーで select する場合は、<code>find</code> メソッドを使う。</p>
-
-<p><code>ruby
-hoges = Hoges.find( 1 )
-</code></p>
-
-<p>これは以下の SQL と同じ。</p>
-
-<p><code>sql
-SELECT * FROM hoges where hoges.id = 1 LIMIT 1;
-</code></p>
-
-<p>主キー以外だと、<code>find_by</code> メソッドを使う。</p>
-
-<p>該当するレコードがなければ <code>nil</code> が返ってくる。</p>
-
-<p><code>ruby
-hoges = Hoges.find_by name: "momota.txt"
-</code></p>
-
-<p>これは以下のような書き方もできる。</p>
-
-<p><code>ruby
-hoges = Hoges.where(name: "momota.txt").take
-</code></p>
-
-<p>これらは以下の SQL と同じ。</p>
-
-<p><code>sql
-SELECT * FROM hoges where hoges.name = "momota.txt" LIMIT 1;
-</code></p>
-
-<p><code>find_by</code> メソッドを使ってレコードが存在しないときにだけ insert するように <code>app.rb</code> を書き変えてみよう。</p>
-
-<p>```diff
--hoge = Hoges.new { |h|
-&ndash;  h.name = test_name
-&ndash;  h.url  = test_url
-&ndash;}
--p hoge
--hoge.save
--p hoge
-+rec = Hoges.find_by url: test_url
-+unless rec
-+  hoge = Hoges.new { |h|
-+    h.name = test_name
-+    h.url  = test_url
-+  }
-+  hoge.save
-+  puts &ldquo;すでにデータは insert 済みなのでここには入らない&rdquo;
-+end</p>
-
-<p>+p rec
-```</p>
-
-<p>実行すると最終行の <code>p rec</code> が呼ばれていることが分かる。</p>
-
-<p><code>sh
-$ bundle exec ruby app.rb
-&lt;Hoges id: 1, name: "momota.txt", url: "http://momota.github.io/", created_at: "2014-05-10 23:50:46", updated_at: "2014-05-10 23:50:46"&gt;
-</code></p>
-
-<p><code>find_or_create_by</code> メソッドによりさらにスマートな書き方ができる。</p>
-
-<p><code>diff
--rec = Hoges.find_by url: test_url
--unless rec
--  hoge = Hoges.new { |h|
--    h.name = test_name
--    h.url  = test_url
--  }
--  hoge.save
-+rec = Hoges.find_or_create_by( url: test_url ) do |h|
-+  h.name = test_name
-  puts "すでにデータは insert 済みなのでここには入らない"
-end
-</code></p>
-
-<p>その他いろいろと以下のページが参考になる。</p>
-
-<ul>
-<li><a href="http://edgeguides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a></li>
-</ul>
-
-
-<h3>Update: レコードを update する</h3>
-
-<p>CRUD の U。</p>
-
-<p>これはオブジェクトの属性を更新して <code>save</code> するだけ。</p>
-
-<p><code>ruby
-changed_name = "momota.log"
-hoges = Hoges.find_by url: test_url
-hoges.name = changed_name
-hoges.save
-</code></p>
-
-<h3>Delete: レコードを delete する</h3>
-
-<p>CRUD の D。</p>
-
-<p>これも簡単でモデルオブジェクトから <code>destroy</code> or <code>delete</code> メソッドを呼ぶだけ。<code>save</code> は不要。</p>
-
-<p><code>delete</code> はレコードの削除のみなので高速。<code>destroy</code> はレコードとオブジェクトも削除してくれるが、<code>delete</code> に比べて低速。</p>
-
-<p><code>ruby
-hoges = Hoges.find( 1 )
-hoges.destroy
-</code></p>
-
-<p><code>where</code> で複数のレコードをひっかけて全部削除したい場合は、<code>destroy_all</code> or <code>delete_all</code> メソッドを呼ぶ。</p>
-
-<p><code>ruby
-hoges = Hoges.destroy_all(url: test_url)
-</code></p>
-
-<p><code>find_by</code> してからでもOK。</p>
-
-<p><code>ruby
-hoges = Hoges.find_by url: test_url
-hoges.destroy_all
-</code></p>
-
-<p><code>app.rb</code> を書き換えてみる。</p>
-
-<p>```ruby
--rec = Hoges.find_or_create_by( url: test_url ) do |h|
-+hoges = Hoges.find_or_create_by( url: test_url ) do |h|
-   h.name = test_name
-&ndash;  puts &ldquo;すでにデータは insert 済みなのでここには入らない&rdquo;
- end</p>
-
-<p>-p rec
-+puts &ldquo;[before delete]record count: #{Hoges.count}&rdquo;
-+Hoges.delete_all(url: test_url)
-```</p>
-
-<p>実行すると、確かにレコードが削除されている。</p>
-
-<p><code>sh
-$ bundle exec ruby app.rb
-[before delete]record count: 1
-[after delete] record count: 0
-</code></p>
-
-<p>sqlでも確認できる。</p>
-
-<p>```
-mysql> select * from hoges;
-Empty set (0.00 sec)</p>
-
-<p>```</p>
 ]]></content>
   </entry>
   
