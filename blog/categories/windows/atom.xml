@@ -4,7 +4,7 @@
   <title><![CDATA[Category: windows | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/windows/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-16T11:41:37+09:00</updated>
+  <updated>2018-10-17T12:54:53+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -166,8 +166,7 @@ options.add_argument(&lsquo;&mdash;window-size=1929,2160&rsquo;)
 + options.add_argument(&ldquo;&mdash;proxy-server=<a href="http://#">http://#</a>{proxy_host}:#{proxy_port}&rdquo;)
 ```</p>
 
-<p>スクリプトとしては以下のような感じ。
-普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot_i.png</code> が出力される。</p>
+<p>スクリプトとしては以下のような感じ。</p>
 
 <p>```ruby</p>
 
@@ -205,7 +204,7 @@ FileUtils.mkdir(SCREENSHOT_DIR) unless Dir.exist?(SCREENSHOT_DIR)
 
 <pre><code>(2..4).each do |i|
   @driver.get("#{@base_url}blog/page/#{i}/")
-  @driver.save_screenshot("#{SCREENSHOT_DIR}headles_#{i}.png")
+  @driver.save_screenshot("#{SCREENSHOT_DIR}headless_#{i}.png")
   puts "access and save screenshot: #{i}"
 end
 </code></pre>
@@ -230,6 +229,23 @@ end</p>
   blog = Blog.new
   blog.get_and_screenshot
 end
+```</p>
+
+<p>普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot/headless_i.png</code> が出力される。</p>
+
+<p>```
+PS > ls .\screenshot\</p>
+
+<pre><code>ディレクトリ: C:\SOMEWHERE\screenshot
+</code></pre>
+
+<p>Mode                LastWriteTime         Length Name</p>
+
+<hr />
+
+<p>-a&mdash;&mdash;       2018/10/16     12:39         438601 headless_2.png
+-a&mdash;&mdash;       2018/10/16     12:39         405054 headless_3.png
+-a&mdash;&mdash;       2018/10/16     12:39         399793 headless_4.png
 ```</p>
 ]]></content>
   </entry>

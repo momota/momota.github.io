@@ -290,8 +290,7 @@ Chrome をインストールしていない場合は、インストールする�
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>スクリプトとしては以下のような感じ。
-普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot_i.png</code> が出力される。</p>
+<p>スクリプトとしては以下のような感じ。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -368,7 +367,7 @@ Chrome をインストールしていない場合は、インストールする�
 </span><span class='line'>  <span class="k">def</span> <span class="nf">get_and_screenshot</span>
 </span><span class='line'>    <span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="n">.</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
 </span><span class='line'>      <span class="vi">@driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@base_url</span><span class="si">}</span><span class="s2">blog/page/</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">SCREENSHOT_DIR</span><span class="si">}</span><span class="s2">headles_</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">SCREENSHOT_DIR</span><span class="si">}</span><span class="s2">headless_</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
 </span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;access and save screenshot: </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
@@ -386,6 +385,35 @@ Chrome をインストールしていない場合は、インストールする�
 </span><span class='line'>  <span class="n">blog</span><span class="o">.</span><span class="n">get_and_screenshot</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<p>普通に <code>ruby script.rb</code> で実行すると、スクリーンショット <code>実行ディレクトリ/screeshot/headless_i.png</code> が出力される。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">PS</span> <span class="o">&gt;</span> <span class="n">ls</span> <span class="o">.</span><span class="p">\</span><span class="n">screenshot</span><span class="p">\</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="err">ディレクトリ</span><span class="p">:</span> <span class="ss">C</span><span class="p">:\</span><span class="no">SOMEWHERE</span><span class="p">\</span><span class="n">screenshot</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Mode</span>                <span class="no">LastWriteTime</span>         <span class="no">Length</span> <span class="no">Name</span>
+</span><span class='line'><span class="o">----</span>                <span class="o">-------------</span>         <span class="o">------</span> <span class="o">----</span>
+</span><span class='line'><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">2018</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">16</span>     <span class="mi">12</span><span class="p">:</span><span class="mi">39</span>         <span class="mi">438601</span> <span class="n">headless_2</span><span class="o">.</span><span class="n">png</span>
+</span><span class='line'><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">2018</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">16</span>     <span class="mi">12</span><span class="p">:</span><span class="mi">39</span>         <span class="mi">405054</span> <span class="n">headless_3</span><span class="o">.</span><span class="n">png</span>
+</span><span class='line'><span class="o">-</span><span class="n">a</span><span class="o">----</span>       <span class="mi">2018</span><span class="o">/</span><span class="mi">10</span><span class="o">/</span><span class="mi">16</span>     <span class="mi">12</span><span class="p">:</span><span class="mi">39</span>         <span class="mi">399793</span> <span class="n">headless_4</span><span class="o">.</span><span class="n">png</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 
 </div>
 
