@@ -126,7 +126,6 @@ options.add_argument('--window-size=1929,2160')
 ```
 
 スクリプトとしては以下のような感じ。
-普通に `ruby script.rb` で実行すると、スクリーンショット `実行ディレクトリ/screeshot_i.png` が出力される。
 
 
 ```ruby
@@ -159,7 +158,7 @@ class Blog
   def get_and_screenshot
     (2..4).each do |i|
       @driver.get("#{@base_url}blog/page/#{i}/")
-      @driver.save_screenshot("#{SCREENSHOT_DIR}headles_#{i}.png")
+      @driver.save_screenshot("#{SCREENSHOT_DIR}headless_#{i}.png")
       puts "access and save screenshot: #{i}"
     end
   end
@@ -177,3 +176,20 @@ if __FILE__ == $PROGRAM_NAME
   blog.get_and_screenshot
 end
 ```
+
+普通に `ruby script.rb` で実行すると、スクリーンショット `実行ディレクトリ/screeshot/headless_i.png` が出力される。
+
+```
+PS > ls .\screenshot\
+
+
+    ディレクトリ: C:\SOMEWHERE\screenshot
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----       2018/10/16     12:39         438601 headless_2.png
+-a----       2018/10/16     12:39         405054 headless_3.png
+-a----       2018/10/16     12:39         399793 headless_4.png
+```
+
