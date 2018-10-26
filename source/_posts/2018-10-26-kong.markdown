@@ -1,0 +1,611 @@
+---
+layout: post
+title: "API アグリゲーション: Kong"
+date: 2018-10-26 11:55
+comments: true
+categories: kong api restful
+---
+
+![kong-logo](/images/20181026_kong/kong-logo.png)
+
+## Kong の概要
+
+- Kong は、オープンソースの API ゲートウェイソフトウェア
+- 低レイテンシー、スケーラブルなアーキテクチャ
+- フロントはNginx、バックエンド DB は PostgreSQL or Cassandra で構成される
+- 複数のマイクロサービス (API) をアグリゲーションし、以下のような機能を統合的に提供する
+  - 認証
+    - Basic 認証
+    - API キー
+    - OAuth2
+    - JWT
+    - HMAC
+    - LDAP
+  - セキュリティ
+    - ACL
+    - CORS
+    - IP制限
+    - ボット検出
+    - SSL
+  - トラフィック制御
+    - レート制限
+    - 応答速度制限
+    - リクエストサイズ制限
+  - 変換
+    - リクエスト変換
+    - レスポンス変換
+    - Correlation ID
+  - ロギング
+    - TCP、UDP、HTTP、ファイル、Syslog、StatsD、Loggly
+  - 分析
+    - Datadog、Galileo、Runscope
+  - ロードバランシング
+  - サーキットブレーカー
+
+最近はあまり流行っていないらしく、Web 上の記事が古かったので、使い方に関するメモ。といってもほぼチュートリアル通り。
+
+古いなと感じたのは、たとえば、マイクロサービスの流行りを受けてか、api という概念が service に置き換えられている感じだった。
+
+- 昔: http://kong-server:8001/apis
+- 今: http://kong-server:8001/services
+
+## 環境
+
+- Azure
+- Kong: 0.14.1
+
+
+<!-- more -->
+## インストール
+
+Docker や Vagrant など様々な形で提供されているので、略。
+
+- [Installations - KongHQ](https://konghq.com/install/)
+
+
+## Service の設定
+
+kong に API を追加するためには、まず Service を追加する必要がある。
+Service は、Kong が管理する上流の API およびマイクロサービスを参照するための名前。
+
+ここでは、[Mockbin API](https://mockbin.com/) を利用する。
+Mockbin は「echo」タイプの Web サービスで、リクエストをレスポンスとして返すサービス。
+
+Service には、route を追加する必要がある。
+Route は、Kongにリクエストが到達したあとに、バックエンドの service 郡に対するリクエスト送信方法を指定する。1つの service に複数の route を含めることができる。
+
+Service と route を設定したら、Kong 経由の API リクエストが可能になる。
+
+これらの設定は、[RESTful Admin API](https://docs.konghq.com/0.14.x/admin-api/) を利用する。
+(デフォルトでは、TCP ポート `:8001` で公開されている)
+
+### Admin APIを使った service 追加
+
+
+[Mockbin API](https://mockbin.com/) を指す、service `example-service` を追加する。
+
+```sh
+$ curl -i -X POST --url http://localhost:8001/services/ --data "name=example-service" --data "url=http://mockbin.org"
+HTTP/1.1 201 Created
+Date: Tue, 23 Oct 2018 10:00:25 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 259
+
+{
+  "host": "mockbin.org",
+  "created_at": 1540288825,
+  "connect_timeout": 60000,
+  "id": "85a5f745-2e9f-4f6e-b093-fce81476d374",
+  "protocol": "http",
+  "name": "example-service",
+  "read_timeout": 60000,
+  "port": 80,
+  "path": null,
+  "updated_at": 1540288825,
+  "retries": 5,
+  "write_timeout": 60000
+}
+```
+
+### Route の追加
+
+```sh
+$ curl -i -X POST --url http://localhost:8001/services/example-service/routes --data "hosts[]=example.com"
+HTTP/1.1 201 Created
+Date: Tue, 23 Oct 2018 10:02:16 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 290
+
+{
+  "created_at": 1540288936,
+  "strip_path": true,
+  "hosts": [
+    "example.com"
+  ],
+  "preserve_host": false,
+  "regex_priority": 0,
+  "updated_at": 1540288936,
+  "paths": null,
+  "service": {
+    "id": "85a5f745-2e9f-4f6e-b093-fce81476d374"
+  },
+  "methods": null,
+  "protocols": [
+    "http",
+    "https"
+  ],
+  "id": "e984a73b-6d17-4e1a-85bf-3ace25905a33"
+}
+```
+
+これにより、Kong は service を認識し、リクエストをプロキシできる準備が整った。
+
+### Kong を経由してリクエスト転送
+
+Kong はデフォルトで、TCP ポート `:8000` で API 利用者のリクエストを受け付ける。
+HTTP レスポンス `200 OK` が返ってきており、Kong 経由で Mockbin のレスポンスが返っている。
+Kong は、HTTP ヘッダ `Host: <given host>` でどうフォワーディングするかを認識する。
+
+```sh
+$ curl -i -X GET --url http://localhost:8000/ --header 'Host: example.com'
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 10750
+Connection: keep-alive
+Server: openresty/1.13.6.2
+Date: Tue, 23 Oct 2018 10:03:23 GMT
+Etag: W/"29fe-zRGDbSTAzeA2BElashPm2g"
+Vary: Accept-Encoding
+Via: kong/0.14.1
+X-Kong-Upstream-Status: 200
+X-Kong-Upstream-Latency: 290
+X-Kong-Proxy-Latency: 992
+Kong-Request-ID: 9e23d34d93d3b9afb7ac4c23b954a528
+
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Mockbin by Mashape</title><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/main.css" media="all"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="robots" content="index,follow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta itemprop="name" content="Mockbin by Mashape"><meta property="og:title" content="Mockbin by Mashape"><meta name="twitter:title" content="Mockbin by Mashape"><link rel="author" href="https://www.mashape.com/"><meta name="author" content="Mashape"><meta name="twitter:creator" content="@Mashape"><meta name="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta property="og:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta name="twitter:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="image" content="https://mockbin.org/public/share.png"><meta property="og:image" content="https://mockbin.org/public/share.png"><meta name="twitter:image:src" content="https://mockbin.org/public/share.png"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@mashape"><meta name="twitter:domain" content="mockbin.org"><link rel="canonical" href="http://mockbin.org/"><meta name="twitter:url" content="http://mockbin.org/"><meta property="og:url" content="http://mockbin.org/"><meta property="og:type" content="website"><meta property="og:site_name" content="Mockbin by Mashape"><meta property="fb:admins" content="227304446"><meta property="fb:admins" content="576641408"><link rel="shortcut icon" href="/public/favicon.ico"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="/public/style.css" media="all"><meta name="google-site-verification" content="OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww"></head><body><header><nav class="navbar navbar-default"><div class="container"><div class="navbar-header"><button type="button" data-toggle="collapse" data-target="#navbar" class="navbar-toggle collapsed"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><div class="navbar-brand logo"><span><a href="/"><span class="logo fa fa-terminal"></span> mockbin</a> <span class="text-muted">by <a href="https://www.mashape.com">Mashape</a></span></span></div></div><div id="navbar" class="collapse navbar-collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/docs">Docs</a></li><li><a href="/bin/create">Create Bin</a></li><li><a href="https://github.com/Mashape/mockbin">Github</a></li></ul></div></div></nav></header><div class="home"><div class="showcase"><div class="container"><h1>Mockbin</h1><p class="col-lg-offset-2 col-lg-8 lead">Mockbin allows you to generate <a href="/bin/create">custom endpoints</a> to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs.</p></div></div><div class="container"><div class="btn-toolbar"><a href="/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view" class="btn btn-primary">View Sample Bin</a><a href="/bin/create" class="btn btn-success">Create Bin</a><a href="#example" class="btn btn-primary hidden-xs">Send a Request</a></div><hr><h2 class="text-center">Feature Highlights</h2><div class="row features"><div class="col-md-6"><div class="media"><div class="media-left"><img src="/public/friendly.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Mock Custom Endpoints</h4><p>Mock custom endpoints using any <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> response object <em>(can be used as webhooks, api mocks, or anything you want!)</em></p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/formats.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">JSON, XML, YAML, HTML</h4><p>Don't like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing</p><p><a href="/docs#content-negotiation">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/history.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Log and Inspect Calls</h4><p>Log and inspect incoming calls to your custom endpoints <em>(get detailed view to how clients are calling your api/webhook)</em></p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div><div class="col-md-6"><div class="media"><div class="media-left"><img src="/public/mock.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Custom HTTP Method</h4><p>No longer are you limited to <code>GET</code> &amp; <code>POST</code>, Mockbin accepts all standard Methods and allows method overriding</p><p><a href="/docs#http-methods">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/inspect.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">CORS Headers</h4><p>Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers</p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/har.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">HTTP Archive (HAR)</h4><p>Mockbin relies on the popular <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> format to create mock endpoints (Bins), import data and describe HTTP call logs.</p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div></div><hr><h2 class="text-center">Test using your preferred language:</h2><iframe id="example" src="https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;targets=all" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" height="500" seamless class="embed"></iframe></div></div><footer class="hidden-xs"><nav class="navbar navbar-default navbar-fixed-bottom"><div class="container"><div class="navbar-text"><a href="https://github.com/Mashape/mockbin" data-icon="octicon-star" data-count-href="/Mashape/mockbin/stargazers" data-count-api="/repos/Mashape/mockbin#stargazers_count" class="github-button">Star</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin" data-icon="octicon-eye" data-count-href="/Mashape/mockbin/watchers" data-count-api="/repos/Mashape/mockbin#subscribers_count" class="github-button">Watch</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin/issues" data-icon="octicon-issue-opened" data-count-api="/repos/Mashape/mockbin#open_issues_count" class="github-button">Issue</a></div><div class="nav navbar-right navbar-text hidden-xs"><a href="https://twitter.com/share" data-url="http://mockbin.org" data-via="Mashape" data-related="Mashape" data-hashtags="Mock, Test, Track, HTTP" data-dnt="true" class="twitter-share-button">Tweet</a><span>&nbsp;</span></div></div></nav></footer><script type="text/javascript" id="twitter-wjs" src="https://platform.twitter.com/widgets.js" async defer></script><script type="text/javascript" id="github-bjs" src="https://buttons.github.io/buttons.js" async defer></script><script type="text/javascript" src="//mashape.github.io/notification-bar/embed.js" async defer></script><script type="text/javascript">!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";
+  analytics.load('tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU');
+  analytics.page()
+}}();</script></body></html>
+```
+
+### Service の一覧
+
+登録した service の一覧は、http://localhost:8001/services/ に GET リクエストを投げる。
+
+
+```sh
+$ curl -i -X GET http://localhost:8001/services/
+HTTP/1.1 200 OK
+Date: Wed, 24 Oct 2018 06:46:28 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 282
+
+{
+  "next": null,
+  "data": [
+    {
+      "host": "mockbin.org",
+      "created_at": 1540288825,
+      "connect_timeout": 60000,
+      "id": "85a5f745-2e9f-4f6e-b093-fce81476d374",
+      "protocol": "http",
+      "name": "example-service",
+      "read_timeout": 60000,
+      "port": 80,
+      "path": null,
+      "updated_at": 1540288825,
+      "retries": 5,
+      "write_timeout": 60000
+    }
+  ]
+}
+```
+
+
+## プラグインの有効化
+
+Kong はプラグインにより拡張できる。
+ここでは、[key-auth plugin](https://docs.konghq.com/hub/kong-inc/key-auth/) を service に追加する。
+これまでの設定では、すべてのリクエストが上流サービスに流れる。
+key-auth プラグインを設定することにより、適切な API キーを持つリクエストのみがプロキシされる。
+
+
+### key-auth プラグインの設定
+
+```sh
+$ curl -i -X POST --url http://localhost:8001/services/example-service/plugins/ --data 'name=key-auth'
+HTTP/1.1 201 Created
+Date: Tue, 23 Oct 2018 10:05:50 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 276
+
+{
+  "created_at": 1540289149992,
+  "config": {
+    "key_in_body": false,
+    "run_on_preflight": true,
+    "anonymous": "",
+    "hide_credentials": false,
+    "key_names": [
+      "apikey"
+    ]
+  },
+  "id": "7aadeb9d-cbc1-4480-9ea1-6771e85b9bfb",
+  "service_id": "85a5f745-2e9f-4f6e-b093-fce81476d374",
+  "name": "key-auth",
+  "enabled": true
+}
+```
+
+key-auth プラグインは、`config.key_names` パラメータを受け付ける。
+デフォルトは `['apikey']` になる。
+
+
+### プラグイン設定の検証
+
+
+```sh
+$ curl -i -X GET --url http://localhost:8000/ --header 'Host: example.com'
+HTTP/1.1 401 Unauthorized
+Date: Tue, 23 Oct 2018 10:06:21 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+WWW-Authenticate: Key realm="kong"
+Server: kong/0.14.1
+Content-Length: 41
+
+{
+  "message": "No API key found in request"
+}
+```
+
+必要な `apikey` ヘッダーまたはパラメータを指定していないため、応答は401 Unauthorized になる。
+
+## Consumer の登録
+
+Kong インスタンスに consumer (APIの利用者) を追加する方法を学習します。
+Consumer は API を使用する個人に関連付けられ、追跡、アクセス管理などに使用できる。
+
+### RESTful APIを利用した consumer の登録
+
+`Jason` という名のユーザを追加する。
+
+```sh
+$ curl -i -X POST --url http://localhost:8001/consumers/ --data 'username=Jason'
+HTTP/1.1 201 Created
+Date: Tue, 23 Oct 2018 10:13:39 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 106
+
+{
+  "custom_id": null,
+  "created_at": 1540289619,
+  "username": "Jason",
+  "id": "a05abe3c-c397-45c6-b032-742505bce425"
+}
+```
+
+### Consumer へのキークレデンシャルの発行
+
+`Jason` に対して、キーを作成する。
+
+```sh
+$ curl -i -X POST --url http://localhost:8001/consumers/Jason/key-auth/ --data 'key=hogehogehogehoge'
+HTTP/1.1 201 Created
+Date: Tue, 23 Oct 2018 10:15:41 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 151
+
+{
+  "id": "21eae9cb-74a3-4130-b4f2-71e2406e0187",
+  "created_at": 1540289741055,
+  "key": "hogehogehogehoge",
+  "consumer_id": "a05abe3c-c397-45c6-b032-742505bce425"
+}
+```
+
+### クレデンシャルが有効なことを検証
+
+```sh
+$ curl -i -X GET http://localhost:8000 --header "Host: example.com" --header "apikey: hogehogehogehoge"
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 10750
+Connection: keep-alive
+Server: openresty/1.13.6.2
+Date: Tue, 23 Oct 2018 10:17:34 GMT
+Etag: W/"29fe-zRGDbSTAzeA2BElashPm2g"
+Vary: Accept-Encoding
+Via: kong/0.14.1
+X-Kong-Upstream-Status: 200
+X-Kong-Upstream-Latency: 296
+X-Kong-Proxy-Latency: 470
+Kong-Request-ID: 592552e61fb104c1a9d9c188882c31cf
+
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Mockbin by Mashape</title><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/main.css" media="all"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="robots" content="index,follow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta itemprop="name" content="Mockbin by Mashape"><meta property="og:title" content="Mockbin by Mashape"><meta name="twitter:title" content="Mockbin by Mashape"><link rel="author" href="https://www.mashape.com/"><meta name="author" content="Mashape"><meta name="twitter:creator" content="@Mashape"><meta name="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta property="og:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta name="twitter:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="image" content="https://mockbin.org/public/share.png"><meta property="og:image" content="https://mockbin.org/public/share.png"><meta name="twitter:image:src" content="https://mockbin.org/public/share.png"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@mashape"><meta name="twitter:domain" content="mockbin.org"><link rel="canonical" href="http://mockbin.org/"><meta name="twitter:url" content="http://mockbin.org/"><meta property="og:url" content="http://mockbin.org/"><meta property="og:type" content="website"><meta property="og:site_name" content="Mockbin by Mashape"><meta property="fb:admins" content="227304446"><meta property="fb:admins" content="576641408"><link rel="shortcut icon" href="/public/favicon.ico"><link rel="icon" type="image/x-icon" href="/public/favicon.ico"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="/public/style.css" media="all"><meta name="google-site-verification" content="OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww"></head><body><header><nav class="navbar navbar-default"><div class="container"><div class="navbar-header"><button type="button" data-toggle="collapse" data-target="#navbar" class="navbar-toggle collapsed"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><div class="navbar-brand logo"><span><a href="/"><span class="logo fa fa-terminal"></span> mockbin</a> <span class="text-muted">by <a href="https://www.mashape.com">Mashape</a></span></span></div></div><div id="navbar" class="collapse navbar-collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/docs">Docs</a></li><li><a href="/bin/create">Create Bin</a></li><li><a href="https://github.com/Mashape/mockbin">Github</a></li></ul></div></div></nav></header><div class="home"><div class="showcase"><div class="container"><h1>Mockbin</h1><p class="col-lg-offset-2 col-lg-8 lead">Mockbin allows you to generate <a href="/bin/create">custom endpoints</a> to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs.</p></div></div><div class="container"><div class="btn-toolbar"><a href="/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view" class="btn btn-primary">View Sample Bin</a><a href="/bin/create" class="btn btn-success">Create Bin</a><a href="#example" class="btn btn-primary hidden-xs">Send a Request</a></div><hr><h2 class="text-center">Feature Highlights</h2><div class="row features"><div class="col-md-6"><div class="media"><div class="media-left"><img src="/public/friendly.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Mock Custom Endpoints</h4><p>Mock custom endpoints using any <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> response object <em>(can be used as webhooks, api mocks, or anything you want!)</em></p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/formats.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">JSON, XML, YAML, HTML</h4><p>Don't like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing</p><p><a href="/docs#content-negotiation">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/history.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Log and Inspect Calls</h4><p>Log and inspect incoming calls to your custom endpoints <em>(get detailed view to how clients are calling your api/webhook)</em></p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div><div class="col-md-6"><div class="media"><div class="media-left"><img src="/public/mock.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Custom HTTP Method</h4><p>No longer are you limited to <code>GET</code> &amp; <code>POST</code>, Mockbin accepts all standard Methods and allows method overriding</p><p><a href="/docs#http-methods">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/inspect.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">CORS Headers</h4><p>Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers</p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="/public/har.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">HTTP Archive (HAR)</h4><p>Mockbin relies on the popular <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> format to create mock endpoints (Bins), import data and describe HTTP call logs.</p><p><a href="/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div></div><hr><h2 class="text-center">Test using your preferred language:</h2><iframe id="example" src="https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;targets=all" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" height="500" seamless class="embed"></iframe></div></div><footer class="hidden-xs"><nav class="navbar navbar-default navbar-fixed-bottom"><div class="container"><div class="navbar-text"><a href="https://github.com/Mashape/mockbin" data-icon="octicon-star" data-count-href="/Mashape/mockbin/stargazers" data-count-api="/repos/Mashape/mockbin#stargazers_count" class="github-button">Star</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin" data-icon="octicon-eye" data-count-href="/Mashape/mockbin/watchers" data-count-api="/repos/Mashape/mockbin#subscribers_count" class="github-button">Watch</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin/issues" data-icon="octicon-issue-opened" data-count-api="/repos/Mashape/mockbin#open_issues_count" class="github-button">Issue</a></div><div class="nav navbar-right navbar-text hidden-xs"><a href="https://twitter.com/share" data-url="http://mockbin.org" data-via="Mashape" data-related="Mashape" data-hashtags="Mock, Test, Track, HTTP" data-dnt="true" class="twitter-share-button">Tweet</a><span>&nbsp;</span></div></div></nav></footer><script type="text/javascript" id="twitter-wjs" src="https://platform.twitter.com/widgets.js" async defer></script><script type="text/javascript" id="github-bjs" src="https://buttons.github.io/buttons.js" async defer></script><script type="text/javascript" src="//mashape.github.io/notification-bar/embed.js" async defer></script><script type="text/javascript">!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";
+  analytics.load('tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU');
+  analytics.page()
+}}();</script></body></html>
+```
+
+
+## kong 設定
+
+Kong の設定も RESTful API で確認できる。
+
+```sh
+$ curl -i -X GET http://localhost:8001
+HTTP/1.1 200 OK
+Date: Wed, 24 Oct 2018 06:31:51 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 5968
+
+
+{
+  "plugins": {
+    "enabled_in_cluster": [
+      "key-auth"
+    ],
+    "available_on_server": {
+      "response-transformer": true,
+      "oauth2": true,
+      "acl": true,
+      "correlation-id": true,
+      "pre-function": true,
+      "jwt": true,
+      "cors": true,
+      "ip-restriction": true,
+      "basic-auth": true,
+      "key-auth": true,
+      "rate-limiting": true,
+      "request-transformer": true,
+      "http-log": true,
+      "file-log": true,
+      "hmac-auth": true,
+      "ldap-auth": true,
+      "datadog": true,
+      "tcp-log": true,
+      "zipkin": true,
+      "post-function": true,
+      "request-size-limiting": true,
+      "bot-detection": true,
+      "syslog": true,
+      "loggly": true,
+      "azure-functions": true,
+      "udp-log": true,
+      "response-ratelimiting": true,
+      "aws-lambda": true,
+      "statsd": true,
+      "prometheus": true,
+      "request-termination": true
+    }
+  },
+  "tagline": "Welcome to kong",
+  "configuration": {
+    "plugins": [
+      "bundled"
+    ],
+    "admin_ssl_enabled": true,
+    "lua_ssl_verify_depth": 1,
+    "trusted_ips": {},
+    "prefix": "/opt/bitnami/apps/kong/server",
+    "loaded_plugins": {
+      "response-transformer": true,
+      "request-termination": true,
+      "prometheus": true,
+      "ip-restriction": true,
+      "pre-function": true,
+      "jwt": true,
+      "cors": true,
+      "statsd": true,
+      "basic-auth": true,
+      "key-auth": true,
+      "ldap-auth": true,
+      "aws-lambda": true,
+      "http-log": true,
+      "response-ratelimiting": true,
+      "hmac-auth": true,
+      "request-size-limiting": true,
+      "datadog": true,
+      "tcp-log": true,
+      "zipkin": true,
+      "post-function": true,
+      "bot-detection": true,
+      "acl": true,
+      "loggly": true,
+      "syslog": true,
+      "azure-functions": true,
+      "udp-log": true,
+      "file-log": true,
+      "request-transformer": true,
+      "correlation-id": true,
+      "rate-limiting": true,
+      "oauth2": true
+    },
+    "cassandra_username": "bn_kong",
+    "admin_ssl_cert_csr_default": "/opt/bitnami/apps/kong/server/ssl/admin-kong-default.csr",
+    "ssl_cert_key": "/opt/bitnami/apps/kong/server/ssl/kong-default.key",
+    "admin_ssl_cert_key": "/opt/bitnami/apps/kong/server/ssl/admin-kong-default.key",
+    "dns_resolver": {},
+    "pg_user": "kong",
+    "mem_cache_size": "128m",
+    "cassandra_data_centers": [
+      "dc1:2",
+      "dc2:3"
+    ],
+    "nginx_admin_directives": {},
+    "cassandra_password": "******",
+    "custom_plugins": {},
+    "pg_host": "127.0.0.1",
+    "nginx_acc_logs": "/opt/bitnami/apps/kong/server/logs/access.log",
+    "proxy_listen": [
+      "0.0.0.0:80",
+      "0.0.0.0:443 ssl"
+    ],
+    "client_ssl_cert_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.crt",
+    "ssl_cert_key_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.key",
+    "dns_no_sync": false,
+    "db_update_propagation": 5,
+    "nginx_err_logs": "/opt/bitnami/apps/kong/server/logs/error.log",
+    "cassandra_port": 9042,
+    "dns_order": [
+      "LAST",
+      "SRV",
+      "A",
+      "CNAME"
+    ],
+    "dns_error_ttl": 1,
+    "headers": [
+      "server_tokens",
+      "latency_tokens"
+    ],
+    "dns_stale_ttl": 4,
+    "nginx_optimizations": true,
+    "database": "cassandra",
+    "pg_database": "kong",
+    "nginx_worker_processes": "auto",
+    "lua_package_cpath": "",
+    "admin_acc_logs": "/opt/bitnami/apps/kong/server/logs/admin_access.log",
+    "lua_package_path": "./?.lua;./?/init.lua;",
+    "nginx_pid": "/opt/bitnami/apps/kong/server/pids/nginx.pid",
+    "upstream_keepalive": 60,
+    "cassandra_contact_points": [
+      "127.0.0.1"
+    ],
+    "client_ssl_cert_csr_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.csr",
+    "proxy_listeners": [
+      {
+        "ssl": false,
+        "ip": "0.0.0.0",
+        "proxy_protocol": false,
+        "port": 80,
+        "http2": false,
+        "listener": "0.0.0.0:80"
+      },
+      {
+        "ssl": true,
+        "ip": "0.0.0.0",
+        "proxy_protocol": false,
+        "port": 443,
+        "http2": false,
+        "listener": "0.0.0.0:443 ssl"
+      }
+    ],
+    "proxy_ssl_enabled": true,
+    "admin_access_log": "logs/admin_access.log",
+    "cassandra_schema_consensus_timeout": 10000,
+    "enabled_headers": {
+      "latency_tokens": true,
+      "X-Kong-Proxy-Latency": true,
+      "Via": true,
+      "server_tokens": true,
+      "Server": true,
+      "X-Kong-Upstream-Latency": true,
+      "X-Kong-Upstream-Status": false
+    },
+    "cassandra_ssl": false,
+    "ssl_cert_csr_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.csr",
+    "db_resurrect_ttl": 30,
+    "client_ssl": false,
+    "cassandra_consistency": "ONE",
+    "client_max_body_size": "0",
+    "admin_error_log": "logs/error.log",
+    "pg_ssl_verify": false,
+    "dns_not_found_ttl": 30,
+    "pg_ssl": false,
+    "db_update_frequency": 5,
+    "cassandra_repl_factor": 1,
+    "cassandra_repl_strategy": "SimpleStrategy",
+    "nginx_kong_conf": "/opt/bitnami/apps/kong/server/nginx-kong.conf",
+    "cassandra_lb_policy": "RoundRobin",
+    "nginx_http_directives": [
+      {
+        "value": "prometheus_metrics 5m",
+        "name": "lua_shared_dict"
+      }
+    ],
+    "admin_ssl_cert": "/opt/bitnami/apps/kong/server/ssl/admin-kong-default.crt",
+    "kong_env": "/opt/bitnami/apps/kong/server/.kong_env",
+    "real_ip_header": "X-Real-IP",
+    "dns_hostsfile": "/etc/hosts",
+    "admin_listeners": [
+      {
+        "ssl": false,
+        "ip": "127.0.0.1",
+        "proxy_protocol": false,
+        "port": 8001,
+        "http2": false,
+        "listener": "127.0.0.1:8001"
+      },
+      {
+        "ssl": true,
+        "ip": "127.0.0.1",
+        "proxy_protocol": false,
+        "port": 8444,
+        "http2": false,
+        "listener": "127.0.0.1:8444 ssl"
+      }
+    ],
+    "error_default_type": "text/plain",
+    "ssl_cert": "/opt/bitnami/apps/kong/server/ssl/kong-default.crt",
+    "db_cache_ttl": 3600,
+    "admin_ssl_cert_key_default": "/opt/bitnami/apps/kong/server/ssl/admin-kong-default.key",
+    "cassandra_ssl_verify": false,
+    "proxy_access_log": "logs/access.log",
+    "ssl_cipher_suite": "modern",
+    "real_ip_recursive": "off",
+    "proxy_error_log": "logs/error.log",
+    "client_ssl_cert_key_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.key",
+    "nginx_daemon": "on",
+    "anonymous_reports": true,
+    "cassandra_timeout": 5000,
+    "nginx_proxy_directives": {},
+    "pg_port": 5432,
+    "log_level": "notice",
+    "client_body_buffer_size": "8k",
+    "ssl_ciphers": "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256",
+    "lua_socket_pool_size": 30,
+    "admin_ssl_cert_default": "/opt/bitnami/apps/kong/server/ssl/admin-kong-default.crt",
+    "cassandra_keyspace": "bitnami_kong",
+    "ssl_cert_default": "/opt/bitnami/apps/kong/server/ssl/kong-default.crt",
+    "nginx_conf": "/opt/bitnami/apps/kong/server/nginx.conf",
+    "admin_listen": [
+      "127.0.0.1:8001",
+      "127.0.0.1:8444 ssl"
+    ]
+  },
+  "version": "0.14.1",
+  "node_id": "7aac7417-40ac-426e-9b42-9f8cf4e56026",
+  "lua_version": "LuaJIT 2.1.0-beta3",
+  "prng_seeds": {
+    "pid: 2331": 191239192120,
+    "pid: 2332": 214860234107
+  },
+  "timers": {
+    "pending": 4,
+    "running": 0
+  },
+  "hostname": "kong-app"
+}
+```
