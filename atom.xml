@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-17T12:54:53+09:00</updated>
+  <updated>2018-10-26T12:36:30+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,1091 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[API アグリゲーション: Kong]]></title>
+    <link href="http://momota.github.io/blog/2018/10/26/kong/"/>
+    <updated>2018-10-26T11:55:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/26/kong</id>
+    <content type="html"><![CDATA[<p><img src="http://momota.github.io/images/20181026_kong/kong-logo.png" alt="kong-logo" /></p>
+
+<h2>Kong の概要</h2>
+
+<ul>
+<li>Kong は、オープンソースの API ゲートウェイソフトウェア</li>
+<li>低レイテンシー、スケーラブルなアーキテクチャ</li>
+<li>フロントはNginx、バックエンド DB は PostgreSQL or Cassandra で構成される</li>
+<li>複数のマイクロサービス (API) をアグリゲーションし、以下のような機能を統合的に提供する
+
+<ul>
+<li>認証
+
+<ul>
+<li>Basic 認証</li>
+<li>API キー</li>
+<li>OAuth2</li>
+<li>JWT</li>
+<li>HMAC</li>
+<li>LDAP</li>
+</ul>
+</li>
+<li>セキュリティ
+
+<ul>
+<li>ACL</li>
+<li>CORS</li>
+<li>IP制限</li>
+<li>ボット検出</li>
+<li>SSL</li>
+</ul>
+</li>
+<li>トラフィック制御
+
+<ul>
+<li>レート制限</li>
+<li>応答速度制限</li>
+<li>リクエストサイズ制限</li>
+</ul>
+</li>
+<li>変換
+
+<ul>
+<li>リクエスト変換</li>
+<li>レスポンス変換</li>
+<li>Correlation ID</li>
+</ul>
+</li>
+<li>ロギング
+
+<ul>
+<li>TCP、UDP、HTTP、ファイル、Syslog、StatsD、Loggly</li>
+</ul>
+</li>
+<li>分析
+
+<ul>
+<li>Datadog、Galileo、Runscope</li>
+</ul>
+</li>
+<li>ロードバランシング</li>
+<li>サーキットブレーカー</li>
+</ul>
+</li>
+</ul>
+
+
+<p>最近はあまり流行っていないらしく、Web 上の記事が古かったので、使い方に関するメモ。といってもほぼチュートリアル通り。</p>
+
+<p>古いなと感じたのは、たとえば、マイクロサービスの流行りを受けてか、api という概念が service に置き換えられている感じだった。</p>
+
+<ul>
+<li>昔: <a href="http://kong-server:8001/apis">http://kong-server:8001/apis</a></li>
+<li>今: <a href="http://kong-server:8001/services">http://kong-server:8001/services</a></li>
+</ul>
+
+
+<h2>環境</h2>
+
+<ul>
+<li>Azure</li>
+<li>Kong: 0.14.1</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>インストール</h2>
+
+<p>Docker や Vagrant など様々な形で提供されているので、略。</p>
+
+<ul>
+<li><a href="https://konghq.com/install/">Installations &ndash; KongHQ</a></li>
+</ul>
+
+
+<h2>Service の設定</h2>
+
+<p>kong に API を追加するためには、まず Service を追加する必要がある。
+Service は、Kong が管理する上流の API およびマイクロサービスを参照するための名前。</p>
+
+<p>ここでは、<a href="https://mockbin.com/">Mockbin API</a> を利用する。
+Mockbin は「echo」タイプの Web サービスで、リクエストをレスポンスとして返すサービス。</p>
+
+<p>Service には、route を追加する必要がある。
+Route は、Kongにリクエストが到達したあとに、バックエンドの service 郡に対するリクエスト送信方法を指定する。1つの service に複数の route を含めることができる。</p>
+
+<p>Service と route を設定したら、Kong 経由の API リクエストが可能になる。</p>
+
+<p>これらの設定は、<a href="https://docs.konghq.com/0.14.x/admin-api/">RESTful Admin API</a> を利用する。
+(デフォルトでは、TCP ポート <code>:8001</code> で公開されている)</p>
+
+<h3>Admin APIを使った service 追加</h3>
+
+<p><a href="https://mockbin.com/">Mockbin API</a> を指す、service <code>example-service</code> を追加する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/services/ --data <span class="s2">&quot;name=example-service&quot;</span> --data <span class="s2">&quot;url=http://mockbin.org&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:00:25 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 259
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;host&quot;</span>: <span class="s2">&quot;mockbin.org&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540288825,
+</span><span class='line'>  <span class="s2">&quot;connect_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;85a5f745-2e9f-4f6e-b093-fce81476d374&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;example-service&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;read_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;port&quot;</span>: 80,
+</span><span class='line'>  <span class="s2">&quot;path&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540288825,
+</span><span class='line'>  <span class="s2">&quot;retries&quot;</span>: 5,
+</span><span class='line'>  <span class="s2">&quot;write_timeout&quot;</span>: 60000
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Route の追加</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/services/example-service/routes --data <span class="s2">&quot;hosts[]=example.com&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:02:16 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 290
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540288936,
+</span><span class='line'>  <span class="s2">&quot;strip_path&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;hosts&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;example.com&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;preserve_host&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>  <span class="s2">&quot;regex_priority&quot;</span>: 0,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540288936,
+</span><span class='line'>  <span class="s2">&quot;paths&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;service&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;85a5f745-2e9f-4f6e-b093-fce81476d374&quot;</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;methods&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;protocols&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;https&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;e984a73b-6d17-4e1a-85bf-3ace25905a33&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これにより、Kong は service を認識し、リクエストをプロキシできる準備が整った。</p>
+
+<h3>Kong を経由してリクエスト転送</h3>
+
+<p>Kong はデフォルトで、TCP ポート <code>:8000</code> で API 利用者のリクエストを受け付ける。
+HTTP レスポンス <code>200 OK</code> が返ってきており、Kong 経由で Mockbin のレスポンスが返っている。
+Kong は、HTTP ヘッダ <code>Host: &lt;given host&gt;</code> でどうフォワーディングするかを認識する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET --url http://localhost:8000/ --header <span class="s1">&#39;Host: example.com&#39;</span>
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Type: text/html; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Content-Length: 10750
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Server: openresty/1.13.6.2
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:03:23 GMT
+</span><span class='line'>Etag: W/<span class="s2">&quot;29fe-zRGDbSTAzeA2BElashPm2g&quot;</span>
+</span><span class='line'>Vary: Accept-Encoding
+</span><span class='line'>Via: kong/0.14.1
+</span><span class='line'>X-Kong-Upstream-Status: 200
+</span><span class='line'>X-Kong-Upstream-Latency: 290
+</span><span class='line'>X-Kong-Proxy-Latency: 992
+</span><span class='line'>Kong-Request-ID: 9e23d34d93d3b9afb7ac4c23b954a528
+</span><span class='line'>
+</span><span class='line'>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span>&gt;&lt;title&gt;Mockbin by Mashape&lt;/title&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/static/main.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js&quot;</span>&gt;&lt;/script&gt;&lt;meta http-equiv<span class="o">=</span><span class="s2">&quot;X-UA-Compatible&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;IE=edge&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;robots&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;index,follow&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:creator&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:image:src&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:card&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;summary_large_image&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:site&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:domain&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;mockbin.org&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;canonical&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:type&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;website&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:site_name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;227304446&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;576641408&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;shortcut icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;icon&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;image/x-icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/style.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;google-site-verification&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww&quot;</span>&gt;&lt;/head&gt;&lt;body&gt;&lt;header&gt;&lt;nav <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar navbar-default&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-header&quot;</span>&gt;&lt;button <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> data-toggle<span class="o">=</span><span class="s2">&quot;collapse&quot;</span> data-target<span class="o">=</span><span class="s2">&quot;#navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-toggle collapsed&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;/button&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-brand logo&quot;</span>&gt;&lt;span&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;logo fa fa-terminal&quot;</span>&gt;&lt;/span&gt; mockbin&lt;/a&gt; &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-muted&quot;</span>&gt;by &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com&quot;</span>&gt;Mashape&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;collapse navbar-collapse&quot;</span>&gt;&lt;ul <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;nav navbar-nav navbar-right&quot;</span>&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Docs&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://github.com/Mashape/mockbin&quot;</span>&gt;Github&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/header&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;home&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;showcase&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;h1&gt;Mockbin&lt;/h1&gt;&lt;p <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-lg-offset-2 col-lg-8 lead&quot;</span>&gt;Mockbin allows you to generate &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;custom endpoints&lt;/a&gt; to <span class="nb">test</span>, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn-toolbar&quot;</span>&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span>&gt;View Sample Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-success&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;#example&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary hidden-xs&quot;</span>&gt;Send a Request&lt;/a&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-center&quot;</span>&gt;Feature Highlights&lt;/h2&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;row features&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-md-6&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/friendly.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;Mock Custom Endpoints&lt;/h4&gt;&lt;p&gt;Mock custom endpoints using any &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://ahmadnassri.github.io/har-resources/&quot;</span> <span class="nv">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span>&gt;HTTP Archive <span class="o">(</span>HAR<span class="o">)</span>&lt;/a&gt; response object &lt;em&gt;<span class="o">(</span>can be used as webhooks, api mocks, or anything you want!<span class="o">)</span>&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Learn More &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;fa fa-angle-right&quot;</span>&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/formats.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;JSON, XML, YAML, HTML&lt;/h4&gt;&lt;p&gt;Don<span class="s1">&#39;t like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#content-negotiation&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/history.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Log and Inspect Calls&lt;/h4&gt;&lt;p&gt;Log and inspect incoming calls to your custom endpoints &lt;em&gt;(get detailed view to how clients are calling your api/webhook)&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;col-md-6&quot;&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/mock.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Custom HTTP Method&lt;/h4&gt;&lt;p&gt;No longer are you limited to &lt;code&gt;GET&lt;/code&gt; &amp;amp; &lt;code&gt;POST&lt;/code&gt;, Mockbin accepts all standard Methods and allows method overriding&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#http-methods&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/inspect.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;CORS Headers&lt;/h4&gt;&lt;p&gt;Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/har.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;HTTP Archive (HAR)&lt;/h4&gt;&lt;p&gt;Mockbin relies on the popular &lt;a href=&quot;https://ahmadnassri.github.io/har-resources/&quot; target=&quot;_blank&quot;&gt;HTTP Archive (HAR)&lt;/a&gt; format to create mock endpoints (Bins), import data and describe HTTP call logs.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 class=&quot;text-center&quot;&gt;Test using your preferred language:&lt;/h2&gt;&lt;iframe id=&quot;example&quot; src=&quot;https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;amp;targets=all&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; marginheight=&quot;0&quot; marginwidth=&quot;0&quot; width=&quot;100%&quot; height=&quot;500&quot; seamless class=&quot;embed&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;/div&gt;&lt;footer class=&quot;hidden-xs&quot;&gt;&lt;nav class=&quot;navbar navbar-default navbar-fixed-bottom&quot;&gt;&lt;div class=&quot;container&quot;&gt;&lt;div class=&quot;navbar-text&quot;&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-star&quot; data-count-href=&quot;/Mashape/mockbin/stargazers&quot; data-count-api=&quot;/repos/Mashape/mockbin#stargazers_count&quot; class=&quot;github-button&quot;&gt;Star&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-eye&quot; data-count-href=&quot;/Mashape/mockbin/watchers&quot; data-count-api=&quot;/repos/Mashape/mockbin#subscribers_count&quot; class=&quot;github-button&quot;&gt;Watch&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin/issues&quot; data-icon=&quot;octicon-issue-opened&quot; data-count-api=&quot;/repos/Mashape/mockbin#open_issues_count&quot; class=&quot;github-button&quot;&gt;Issue&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;nav navbar-right navbar-text hidden-xs&quot;&gt;&lt;a href=&quot;https://twitter.com/share&quot; data-url=&quot;http://mockbin.org&quot; data-via=&quot;Mashape&quot; data-related=&quot;Mashape&quot; data-hashtags=&quot;Mock, Test, Track, HTTP&quot; data-dnt=&quot;true&quot; class=&quot;twitter-share-button&quot;&gt;Tweet&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/footer&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;twitter-wjs&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;github-bjs&quot; src=&quot;https://buttons.github.io/buttons.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; src=&quot;//mashape.github.io/notification-bar/embed.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot;&gt;!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&amp;&amp;console.error&amp;&amp;console.error(&quot;Segment snippet included twice.&quot;);else{analytics.invoked=!0;analytics.methods=[&quot;trackSubmit&quot;,&quot;trackClick&quot;,&quot;trackLink&quot;,&quot;trackForm&quot;,&quot;pageview&quot;,&quot;identify&quot;,&quot;group&quot;,&quot;track&quot;,&quot;ready&quot;,&quot;alias&quot;,&quot;page&quot;,&quot;once&quot;,&quot;off&quot;,&quot;on&quot;];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t&lt;analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement(&quot;script&quot;);e.type=&quot;text/javascript&quot;;e.async=!0;e.src=(&quot;https:&quot;===document.location.protocol?&quot;https://&quot;:&quot;http://&quot;)+&quot;cdn.segment.com/analytics.js/v1/&quot;+t+&quot;/analytics.min.js&quot;;var n=document.getElementsByTagName(&quot;script&quot;)[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION=&quot;3.0.1&quot;;</span>
+</span><span class='line'><span class="s1">  analytics.load(&#39;</span>tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU<span class="err">&#39;</span><span class="o">)</span>;
+</span><span class='line'>  analytics.page<span class="o">()</span>
+</span><span class='line'><span class="o">}}()</span>;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Service の一覧</h3>
+
+<p>登録した service の一覧は、<a href="http://localhost:8001/services/">http://localhost:8001/services/</a> に GET リクエストを投げる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8001/services/
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Date: Wed, 24 Oct 2018 06:46:28 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 282
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;next&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;data&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="o">{</span>
+</span><span class='line'>      <span class="s2">&quot;host&quot;</span>: <span class="s2">&quot;mockbin.org&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;created_at&quot;</span>: 1540288825,
+</span><span class='line'>      <span class="s2">&quot;connect_timeout&quot;</span>: 60000,
+</span><span class='line'>      <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;85a5f745-2e9f-4f6e-b093-fce81476d374&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;example-service&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;read_timeout&quot;</span>: 60000,
+</span><span class='line'>      <span class="s2">&quot;port&quot;</span>: 80,
+</span><span class='line'>      <span class="s2">&quot;path&quot;</span>: null,
+</span><span class='line'>      <span class="s2">&quot;updated_at&quot;</span>: 1540288825,
+</span><span class='line'>      <span class="s2">&quot;retries&quot;</span>: 5,
+</span><span class='line'>      <span class="s2">&quot;write_timeout&quot;</span>: 60000
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>プラグインの有効化</h2>
+
+<p>Kong はプラグインにより拡張できる。
+ここでは、<a href="https://docs.konghq.com/hub/kong-inc/key-auth/">key-auth plugin</a> を service に追加する。
+これまでの設定では、すべてのリクエストが上流サービスに流れる。
+key-auth プラグインを設定することにより、適切な API キーを持つリクエストのみがプロキシされる。</p>
+
+<h3>key-auth プラグインの設定</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/services/example-service/plugins/ --data <span class="s1">&#39;name=key-auth&#39;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:05:50 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 276
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540289149992,
+</span><span class='line'>  <span class="s2">&quot;config&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;key_in_body&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;run_on_preflight&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;anonymous&quot;</span>: <span class="s2">&quot;&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;hide_credentials&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;key_names&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;apikey&quot;</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;7aadeb9d-cbc1-4480-9ea1-6771e85b9bfb&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;service_id&quot;</span>: <span class="s2">&quot;85a5f745-2e9f-4f6e-b093-fce81476d374&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;key-auth&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;enabled&quot;</span>: <span class="nb">true</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>key-auth プラグインは、<code>config.key_names</code> パラメータを受け付ける。
+デフォルトは <code>['apikey']</code> になる。</p>
+
+<h3>プラグイン設定の検証</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET --url http://localhost:8000/ --header <span class="s1">&#39;Host: example.com&#39;</span>
+</span><span class='line'>HTTP/1.1 401 Unauthorized
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:06:21 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>WWW-Authenticate: Key <span class="nv">realm</span><span class="o">=</span><span class="s2">&quot;kong&quot;</span>
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 41
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;No API key found in request&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>必要な <code>apikey</code> ヘッダーまたはパラメータを指定していないため、応答は401 Unauthorized になる。</p>
+
+<h2>Consumer の登録</h2>
+
+<p>Kong インスタンスに consumer (APIの利用者) を追加する方法を学習します。
+Consumer は API を使用する個人に関連付けられ、追跡、アクセス管理などに使用できる。</p>
+
+<h3>RESTful APIを利用した consumer の登録</h3>
+
+<p><code>Jason</code> という名のユーザを追加する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/consumers/ --data <span class="s1">&#39;username=Jason&#39;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:13:39 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 106
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;custom_id&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540289619,
+</span><span class='line'>  <span class="s2">&quot;username&quot;</span>: <span class="s2">&quot;Jason&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;a05abe3c-c397-45c6-b032-742505bce425&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Consumer へのキークレデンシャルの発行</h3>
+
+<p><code>Jason</code> に対して、キーを作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/consumers/Jason/key-auth/ --data <span class="s1">&#39;key=hogehogehogehoge&#39;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:15:41 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 151
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;21eae9cb-74a3-4130-b4f2-71e2406e0187&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540289741055,
+</span><span class='line'>  <span class="s2">&quot;key&quot;</span>: <span class="s2">&quot;hogehogehogehoge&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;consumer_id&quot;</span>: <span class="s2">&quot;a05abe3c-c397-45c6-b032-742505bce425&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>クレデンシャルが有効なことを検証</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8000 --header <span class="s2">&quot;Host: example.com&quot;</span> --header <span class="s2">&quot;apikey: hogehogehogehoge&quot;</span>
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Type: text/html; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Content-Length: 10750
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Server: openresty/1.13.6.2
+</span><span class='line'>Date: Tue, 23 Oct 2018 10:17:34 GMT
+</span><span class='line'>Etag: W/<span class="s2">&quot;29fe-zRGDbSTAzeA2BElashPm2g&quot;</span>
+</span><span class='line'>Vary: Accept-Encoding
+</span><span class='line'>Via: kong/0.14.1
+</span><span class='line'>X-Kong-Upstream-Status: 200
+</span><span class='line'>X-Kong-Upstream-Latency: 296
+</span><span class='line'>X-Kong-Proxy-Latency: 470
+</span><span class='line'>Kong-Request-ID: 592552e61fb104c1a9d9c188882c31cf
+</span><span class='line'>
+</span><span class='line'>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span>&gt;&lt;title&gt;Mockbin by Mashape&lt;/title&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/static/main.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js&quot;</span>&gt;&lt;/script&gt;&lt;meta http-equiv<span class="o">=</span><span class="s2">&quot;X-UA-Compatible&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;IE=edge&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;robots&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;index,follow&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:creator&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:image:src&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:card&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;summary_large_image&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:site&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:domain&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;mockbin.org&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;canonical&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:type&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;website&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:site_name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;227304446&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;576641408&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;shortcut icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;icon&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;image/x-icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/style.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;google-site-verification&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww&quot;</span>&gt;&lt;/head&gt;&lt;body&gt;&lt;header&gt;&lt;nav <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar navbar-default&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-header&quot;</span>&gt;&lt;button <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> data-toggle<span class="o">=</span><span class="s2">&quot;collapse&quot;</span> data-target<span class="o">=</span><span class="s2">&quot;#navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-toggle collapsed&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;/button&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-brand logo&quot;</span>&gt;&lt;span&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;logo fa fa-terminal&quot;</span>&gt;&lt;/span&gt; mockbin&lt;/a&gt; &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-muted&quot;</span>&gt;by &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com&quot;</span>&gt;Mashape&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;collapse navbar-collapse&quot;</span>&gt;&lt;ul <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;nav navbar-nav navbar-right&quot;</span>&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Docs&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://github.com/Mashape/mockbin&quot;</span>&gt;Github&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/header&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;home&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;showcase&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;h1&gt;Mockbin&lt;/h1&gt;&lt;p <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-lg-offset-2 col-lg-8 lead&quot;</span>&gt;Mockbin allows you to generate &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;custom endpoints&lt;/a&gt; to <span class="nb">test</span>, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn-toolbar&quot;</span>&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span>&gt;View Sample Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-success&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;#example&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary hidden-xs&quot;</span>&gt;Send a Request&lt;/a&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-center&quot;</span>&gt;Feature Highlights&lt;/h2&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;row features&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-md-6&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/friendly.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;Mock Custom Endpoints&lt;/h4&gt;&lt;p&gt;Mock custom endpoints using any &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://ahmadnassri.github.io/har-resources/&quot;</span> <span class="nv">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span>&gt;HTTP Archive <span class="o">(</span>HAR<span class="o">)</span>&lt;/a&gt; response object &lt;em&gt;<span class="o">(</span>can be used as webhooks, api mocks, or anything you want!<span class="o">)</span>&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Learn More &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;fa fa-angle-right&quot;</span>&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/formats.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;JSON, XML, YAML, HTML&lt;/h4&gt;&lt;p&gt;Don<span class="s1">&#39;t like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#content-negotiation&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/history.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Log and Inspect Calls&lt;/h4&gt;&lt;p&gt;Log and inspect incoming calls to your custom endpoints &lt;em&gt;(get detailed view to how clients are calling your api/webhook)&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;col-md-6&quot;&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/mock.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Custom HTTP Method&lt;/h4&gt;&lt;p&gt;No longer are you limited to &lt;code&gt;GET&lt;/code&gt; &amp;amp; &lt;code&gt;POST&lt;/code&gt;, Mockbin accepts all standard Methods and allows method overriding&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#http-methods&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/inspect.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;CORS Headers&lt;/h4&gt;&lt;p&gt;Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/har.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;HTTP Archive (HAR)&lt;/h4&gt;&lt;p&gt;Mockbin relies on the popular &lt;a href=&quot;https://ahmadnassri.github.io/har-resources/&quot; target=&quot;_blank&quot;&gt;HTTP Archive (HAR)&lt;/a&gt; format to create mock endpoints (Bins), import data and describe HTTP call logs.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 class=&quot;text-center&quot;&gt;Test using your preferred language:&lt;/h2&gt;&lt;iframe id=&quot;example&quot; src=&quot;https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;amp;targets=all&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; marginheight=&quot;0&quot; marginwidth=&quot;0&quot; width=&quot;100%&quot; height=&quot;500&quot; seamless class=&quot;embed&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;/div&gt;&lt;footer class=&quot;hidden-xs&quot;&gt;&lt;nav class=&quot;navbar navbar-default navbar-fixed-bottom&quot;&gt;&lt;div class=&quot;container&quot;&gt;&lt;div class=&quot;navbar-text&quot;&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-star&quot; data-count-href=&quot;/Mashape/mockbin/stargazers&quot; data-count-api=&quot;/repos/Mashape/mockbin#stargazers_count&quot; class=&quot;github-button&quot;&gt;Star&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-eye&quot; data-count-href=&quot;/Mashape/mockbin/watchers&quot; data-count-api=&quot;/repos/Mashape/mockbin#subscribers_count&quot; class=&quot;github-button&quot;&gt;Watch&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin/issues&quot; data-icon=&quot;octicon-issue-opened&quot; data-count-api=&quot;/repos/Mashape/mockbin#open_issues_count&quot; class=&quot;github-button&quot;&gt;Issue&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;nav navbar-right navbar-text hidden-xs&quot;&gt;&lt;a href=&quot;https://twitter.com/share&quot; data-url=&quot;http://mockbin.org&quot; data-via=&quot;Mashape&quot; data-related=&quot;Mashape&quot; data-hashtags=&quot;Mock, Test, Track, HTTP&quot; data-dnt=&quot;true&quot; class=&quot;twitter-share-button&quot;&gt;Tweet&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/footer&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;twitter-wjs&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;github-bjs&quot; src=&quot;https://buttons.github.io/buttons.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; src=&quot;//mashape.github.io/notification-bar/embed.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot;&gt;!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&amp;&amp;console.error&amp;&amp;console.error(&quot;Segment snippet included twice.&quot;);else{analytics.invoked=!0;analytics.methods=[&quot;trackSubmit&quot;,&quot;trackClick&quot;,&quot;trackLink&quot;,&quot;trackForm&quot;,&quot;pageview&quot;,&quot;identify&quot;,&quot;group&quot;,&quot;track&quot;,&quot;ready&quot;,&quot;alias&quot;,&quot;page&quot;,&quot;once&quot;,&quot;off&quot;,&quot;on&quot;];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t&lt;analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement(&quot;script&quot;);e.type=&quot;text/javascript&quot;;e.async=!0;e.src=(&quot;https:&quot;===document.location.protocol?&quot;https://&quot;:&quot;http://&quot;)+&quot;cdn.segment.com/analytics.js/v1/&quot;+t+&quot;/analytics.min.js&quot;;var n=document.getElementsByTagName(&quot;script&quot;)[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION=&quot;3.0.1&quot;;</span>
+</span><span class='line'><span class="s1">  analytics.load(&#39;</span>tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU<span class="err">&#39;</span><span class="o">)</span>;
+</span><span class='line'>  analytics.page<span class="o">()</span>
+</span><span class='line'><span class="o">}}()</span>;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>kong 設定</h2>
+
+<p>Kong の設定も RESTful API で確認できる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+<span class='line-number'>192</span>
+<span class='line-number'>193</span>
+<span class='line-number'>194</span>
+<span class='line-number'>195</span>
+<span class='line-number'>196</span>
+<span class='line-number'>197</span>
+<span class='line-number'>198</span>
+<span class='line-number'>199</span>
+<span class='line-number'>200</span>
+<span class='line-number'>201</span>
+<span class='line-number'>202</span>
+<span class='line-number'>203</span>
+<span class='line-number'>204</span>
+<span class='line-number'>205</span>
+<span class='line-number'>206</span>
+<span class='line-number'>207</span>
+<span class='line-number'>208</span>
+<span class='line-number'>209</span>
+<span class='line-number'>210</span>
+<span class='line-number'>211</span>
+<span class='line-number'>212</span>
+<span class='line-number'>213</span>
+<span class='line-number'>214</span>
+<span class='line-number'>215</span>
+<span class='line-number'>216</span>
+<span class='line-number'>217</span>
+<span class='line-number'>218</span>
+<span class='line-number'>219</span>
+<span class='line-number'>220</span>
+<span class='line-number'>221</span>
+<span class='line-number'>222</span>
+<span class='line-number'>223</span>
+<span class='line-number'>224</span>
+<span class='line-number'>225</span>
+<span class='line-number'>226</span>
+<span class='line-number'>227</span>
+<span class='line-number'>228</span>
+<span class='line-number'>229</span>
+<span class='line-number'>230</span>
+<span class='line-number'>231</span>
+<span class='line-number'>232</span>
+<span class='line-number'>233</span>
+<span class='line-number'>234</span>
+<span class='line-number'>235</span>
+<span class='line-number'>236</span>
+<span class='line-number'>237</span>
+<span class='line-number'>238</span>
+<span class='line-number'>239</span>
+<span class='line-number'>240</span>
+<span class='line-number'>241</span>
+<span class='line-number'>242</span>
+<span class='line-number'>243</span>
+<span class='line-number'>244</span>
+<span class='line-number'>245</span>
+<span class='line-number'>246</span>
+<span class='line-number'>247</span>
+<span class='line-number'>248</span>
+<span class='line-number'>249</span>
+<span class='line-number'>250</span>
+<span class='line-number'>251</span>
+<span class='line-number'>252</span>
+<span class='line-number'>253</span>
+<span class='line-number'>254</span>
+<span class='line-number'>255</span>
+<span class='line-number'>256</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8001
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Date: Wed, 24 Oct 2018 06:31:51 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 5968
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;plugins&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;enabled_in_cluster&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;key-auth&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;available_on_server&quot;</span>: <span class="o">{</span>
+</span><span class='line'>      <span class="s2">&quot;response-transformer&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;oauth2&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;acl&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;correlation-id&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;pre-function&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;jwt&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;cors&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;ip-restriction&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;basic-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;key-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;rate-limiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-transformer&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;http-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;file-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;hmac-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;ldap-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;datadog&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;tcp-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;zipkin&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;post-function&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-size-limiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;bot-detection&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;syslog&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;loggly&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;azure-functions&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;udp-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;response-ratelimiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;aws-lambda&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;statsd&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;prometheus&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-termination&quot;</span>: <span class="nb">true</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;tagline&quot;</span>: <span class="s2">&quot;Welcome to kong&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;configuration&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;plugins&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;bundled&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_enabled&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;lua_ssl_verify_depth&quot;</span>: 1,
+</span><span class='line'>    <span class="s2">&quot;trusted_ips&quot;</span>: <span class="o">{}</span>,
+</span><span class='line'>    <span class="s2">&quot;prefix&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;loaded_plugins&quot;</span>: <span class="o">{</span>
+</span><span class='line'>      <span class="s2">&quot;response-transformer&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-termination&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;prometheus&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;ip-restriction&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;pre-function&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;jwt&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;cors&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;statsd&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;basic-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;key-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;ldap-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;aws-lambda&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;http-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;response-ratelimiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;hmac-auth&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-size-limiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;datadog&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;tcp-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;zipkin&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;post-function&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;bot-detection&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;acl&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;loggly&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;syslog&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;azure-functions&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;udp-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;file-log&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;request-transformer&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;correlation-id&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;rate-limiting&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;oauth2&quot;</span>: <span class="nb">true</span>
+</span><span class='line'>    <span class="o">}</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_username&quot;</span>: <span class="s2">&quot;bn_kong&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_cert_csr_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/admin-kong-default.csr&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cert_key&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.key&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_cert_key&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/admin-kong-default.key&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_resolver&quot;</span>: <span class="o">{}</span>,
+</span><span class='line'>    <span class="s2">&quot;pg_user&quot;</span>: <span class="s2">&quot;kong&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;mem_cache_size&quot;</span>: <span class="s2">&quot;128m&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_data_centers&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;dc1:2&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;dc2:3&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_admin_directives&quot;</span>: <span class="o">{}</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_password&quot;</span>: <span class="s2">&quot;******&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;custom_plugins&quot;</span>: <span class="o">{}</span>,
+</span><span class='line'>    <span class="s2">&quot;pg_host&quot;</span>: <span class="s2">&quot;127.0.0.1&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_acc_logs&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/logs/access.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;proxy_listen&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;0.0.0.0:80&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;0.0.0.0:443 ssl&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;client_ssl_cert_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.crt&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cert_key_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.key&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_no_sync&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;db_update_propagation&quot;</span>: 5,
+</span><span class='line'>    <span class="s2">&quot;nginx_err_logs&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/logs/error.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_port&quot;</span>: 9042,
+</span><span class='line'>    <span class="s2">&quot;dns_order&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;LAST&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;SRV&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;A&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;CNAME&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_error_ttl&quot;</span>: 1,
+</span><span class='line'>    <span class="s2">&quot;headers&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;server_tokens&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;latency_tokens&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_stale_ttl&quot;</span>: 4,
+</span><span class='line'>    <span class="s2">&quot;nginx_optimizations&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;database&quot;</span>: <span class="s2">&quot;cassandra&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;pg_database&quot;</span>: <span class="s2">&quot;kong&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_worker_processes&quot;</span>: <span class="s2">&quot;auto&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;lua_package_cpath&quot;</span>: <span class="s2">&quot;&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_acc_logs&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/logs/admin_access.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;lua_package_path&quot;</span>: <span class="s2">&quot;./?.lua;./?/init.lua;&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_pid&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/pids/nginx.pid&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;upstream_keepalive&quot;</span>: 60,
+</span><span class='line'>    <span class="s2">&quot;cassandra_contact_points&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;127.0.0.1&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;client_ssl_cert_csr_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.csr&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;proxy_listeners&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;ssl&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;ip&quot;</span>: <span class="s2">&quot;0.0.0.0&quot;</span>,
+</span><span class='line'>        <span class="s2">&quot;proxy_protocol&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;port&quot;</span>: 80,
+</span><span class='line'>        <span class="s2">&quot;http2&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;listener&quot;</span>: <span class="s2">&quot;0.0.0.0:80&quot;</span>
+</span><span class='line'>      <span class="o">}</span>,
+</span><span class='line'>      <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;ssl&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>        <span class="s2">&quot;ip&quot;</span>: <span class="s2">&quot;0.0.0.0&quot;</span>,
+</span><span class='line'>        <span class="s2">&quot;proxy_protocol&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;port&quot;</span>: 443,
+</span><span class='line'>        <span class="s2">&quot;http2&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;listener&quot;</span>: <span class="s2">&quot;0.0.0.0:443 ssl&quot;</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;proxy_ssl_enabled&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_access_log&quot;</span>: <span class="s2">&quot;logs/admin_access.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_schema_consensus_timeout&quot;</span>: 10000,
+</span><span class='line'>    <span class="s2">&quot;enabled_headers&quot;</span>: <span class="o">{</span>
+</span><span class='line'>      <span class="s2">&quot;latency_tokens&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;X-Kong-Proxy-Latency&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;Via&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;server_tokens&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;Server&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;X-Kong-Upstream-Latency&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>      <span class="s2">&quot;X-Kong-Upstream-Status&quot;</span>: <span class="nb">false</span>
+</span><span class='line'>    <span class="o">}</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_ssl&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cert_csr_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.csr&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;db_resurrect_ttl&quot;</span>: 30,
+</span><span class='line'>    <span class="s2">&quot;client_ssl&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_consistency&quot;</span>: <span class="s2">&quot;ONE&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;client_max_body_size&quot;</span>: <span class="s2">&quot;0&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_error_log&quot;</span>: <span class="s2">&quot;logs/error.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;pg_ssl_verify&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_not_found_ttl&quot;</span>: 30,
+</span><span class='line'>    <span class="s2">&quot;pg_ssl&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;db_update_frequency&quot;</span>: 5,
+</span><span class='line'>    <span class="s2">&quot;cassandra_repl_factor&quot;</span>: 1,
+</span><span class='line'>    <span class="s2">&quot;cassandra_repl_strategy&quot;</span>: <span class="s2">&quot;SimpleStrategy&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_kong_conf&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/nginx-kong.conf&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_lb_policy&quot;</span>: <span class="s2">&quot;RoundRobin&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_http_directives&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;value&quot;</span>: <span class="s2">&quot;prometheus_metrics 5m&quot;</span>,
+</span><span class='line'>        <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;lua_shared_dict&quot;</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_cert&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/admin-kong-default.crt&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;kong_env&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/.kong_env&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;real_ip_header&quot;</span>: <span class="s2">&quot;X-Real-IP&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;dns_hostsfile&quot;</span>: <span class="s2">&quot;/etc/hosts&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_listeners&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;ssl&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;ip&quot;</span>: <span class="s2">&quot;127.0.0.1&quot;</span>,
+</span><span class='line'>        <span class="s2">&quot;proxy_protocol&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;port&quot;</span>: 8001,
+</span><span class='line'>        <span class="s2">&quot;http2&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;listener&quot;</span>: <span class="s2">&quot;127.0.0.1:8001&quot;</span>
+</span><span class='line'>      <span class="o">}</span>,
+</span><span class='line'>      <span class="o">{</span>
+</span><span class='line'>        <span class="s2">&quot;ssl&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>        <span class="s2">&quot;ip&quot;</span>: <span class="s2">&quot;127.0.0.1&quot;</span>,
+</span><span class='line'>        <span class="s2">&quot;proxy_protocol&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;port&quot;</span>: 8444,
+</span><span class='line'>        <span class="s2">&quot;http2&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>        <span class="s2">&quot;listener&quot;</span>: <span class="s2">&quot;127.0.0.1:8444 ssl&quot;</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;error_default_type&quot;</span>: <span class="s2">&quot;text/plain&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cert&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.crt&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;db_cache_ttl&quot;</span>: 3600,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_cert_key_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/admin-kong-default.key&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_ssl_verify&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;proxy_access_log&quot;</span>: <span class="s2">&quot;logs/access.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cipher_suite&quot;</span>: <span class="s2">&quot;modern&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;real_ip_recursive&quot;</span>: <span class="s2">&quot;off&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;proxy_error_log&quot;</span>: <span class="s2">&quot;logs/error.log&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;client_ssl_cert_key_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.key&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_daemon&quot;</span>: <span class="s2">&quot;on&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;anonymous_reports&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_timeout&quot;</span>: 5000,
+</span><span class='line'>    <span class="s2">&quot;nginx_proxy_directives&quot;</span>: <span class="o">{}</span>,
+</span><span class='line'>    <span class="s2">&quot;pg_port&quot;</span>: 5432,
+</span><span class='line'>    <span class="s2">&quot;log_level&quot;</span>: <span class="s2">&quot;notice&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;client_body_buffer_size&quot;</span>: <span class="s2">&quot;8k&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_ciphers&quot;</span>: <span class="s2">&quot;ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;lua_socket_pool_size&quot;</span>: 30,
+</span><span class='line'>    <span class="s2">&quot;admin_ssl_cert_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/admin-kong-default.crt&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;cassandra_keyspace&quot;</span>: <span class="s2">&quot;bitnami_kong&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;ssl_cert_default&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/ssl/kong-default.crt&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;nginx_conf&quot;</span>: <span class="s2">&quot;/opt/bitnami/apps/kong/server/nginx.conf&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;admin_listen&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;127.0.0.1:8001&quot;</span>,
+</span><span class='line'>      <span class="s2">&quot;127.0.0.1:8444 ssl&quot;</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;version&quot;</span>: <span class="s2">&quot;0.14.1&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;node_id&quot;</span>: <span class="s2">&quot;7aac7417-40ac-426e-9b42-9f8cf4e56026&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;lua_version&quot;</span>: <span class="s2">&quot;LuaJIT 2.1.0-beta3&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;prng_seeds&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;pid: 2331&quot;</span>: 191239192120,
+</span><span class='line'>    <span class="s2">&quot;pid: 2332&quot;</span>: 214860234107
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;timers&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;pending&quot;</span>: 4,
+</span><span class='line'>    <span class="s2">&quot;running&quot;</span>: 0
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;hostname&quot;</span>: <span class="s2">&quot;kong-app&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Windows + Chrome Headless mode + Ruby + Selenium]]></title>
@@ -6514,747 +7599,6 @@ Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[rails じゃなくても ActiveRecord を使う]]></title>
-    <link href="http://momota.github.io/blog/2014/05/10/activerecord/"/>
-    <updated>2014-05-10T14:54:00+09:00</updated>
-    <id>http://momota.github.io/blog/2014/05/10/activerecord</id>
-    <content type="html"><![CDATA[<p>rails には挫折したおれが、rails アプリケーション以外で ActiveRecord を使うようになった件について。</p>
-
-<p>ActiveRecord は O/Rマッパーで RDB のテーブルエントリをオブジェクトとして扱えるようにするやつ。1インスタンスが、テーブルの1レコードに相当する。
-Ruby on Rails 標準で、モデル層で使われる。</p>
-
-<p>環境は以下。</p>
-
-<ul>
-<li>Mac OSX</li>
-<li>ruby 2.1.1p76</li>
-<li>MySQL mysqld5.6.17</li>
-</ul>
-
-
-<p>最終的なディレクトリ構成は以下のようになる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>.
-</span><span class='line'>├── Gemfile
-</span><span class='line'>├── Gemfile.lock
-</span><span class='line'>├── README.md
-</span><span class='line'>├── Rakefile
-</span><span class='line'>├── app
-</span><span class='line'>│   └── models
-</span><span class='line'>│       └── hoges.rb
-</span><span class='line'>├── app.rb
-</span><span class='line'>├── config
-</span><span class='line'>│   └── database.yml
-</span><span class='line'>├── db
-</span><span class='line'>│   └── migrate
-</span><span class='line'>│       └── 20140510_create_hoges.rb
-</span><span class='line'>├── log
-</span><span class='line'>│   ├── database.log
-</span><span class='line'>│   └── trace.log
-</span><span class='line'>└── vendor
-</span><span class='line'>    └── bundle
-</span><span class='line'>            └── <span class="o">(</span>略<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="https://github.com/momota/activerecord_sample">https://github.com/momota/activerecord_sample</a></li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>前準備</h2>
-
-<h3>ruby</h3>
-
-<p>rbenv で ruby 2.1.1 をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 2.1.1
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>2.1.1
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span><span class='line'><span class="nv">$ </span>ruby -v
-</span><span class='line'>ruby 2.1.1p76 <span class="o">(</span>2014-02-24 revision 45161<span class="o">)</span> <span class="o">[</span>x86_64-darwin13.0<span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>gem</h3>
-
-<p>bundler で gem をインストールする。
-まず、bundler をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundle
-</span><span class='line'><span class="nv">$ </span>bundle -v
-</span><span class='line'>Bundler version 1.6.2
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下の <code>Gemfile</code> をつくって<code>bundle install --path vendor/bundle</code> して gem をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;https://rubygems.org&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;activerecord&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rake&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;mysql2&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;pry&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>mysql2</code> はDBアダプタ。MySQLと接続するために必要。</p>
-
-<p><code>pry</code> はなくてもよい。<code>irb</code> の便利バージョン。</p>
-
-<h3>mysql</h3>
-
-<p>homebrew でインストールした。</p>
-
-<p><code>my.cnf</code>はよしなに。</p>
-
-<p><code>create database</code> とか <code>grant</code> でユーザやデータベースなどはあらかじめ作っておく。</p>
-
-<h2>create table: rake タスクを使ってテーブルを作成する</h2>
-
-<p><code>rake</code> (makeみたいなもん) でテーブルを作成する。(マイグレーション)</p>
-
-<p>マイグレーションは、SQLを使わずにデータベースのテーブルやカラムなどの構造を変更できる仕組みで、移行と解釈するとややこしい。データベース移行をしやすくする仕組み、くらいに捉えておくとよい。</p>
-
-<h3>マイグレーション用ファイルを作成する</h3>
-
-<p><code>db/migrate</code> ディレクトリを作ってマイグレーション用ファイルを作る。</p>
-
-<p>ここでは hoges テーブルを作ることにする。
-マイグレーション用ファイルには、テーブル定義を書く。ここでは <code>db/migrate/20140510_create_hoges.rb</code> を作成する。</p>
-
-<p>このファイル名が大事で <code>20140510</code> の部分がバージョンとして管理される。<code>schema_migrations</code> テーブルが自動生成され、そこで管理される。また、マイグレーション用ファイル中に class 名を<code>CreateHoges</code> のようにキャメルケースで定義した場合は、ファイル名は <code>VERSION_create_hoge.rb</code> のようにスネークケースとして命名する必要がある。ファイル名がこの命名規約に反するとマイグレーションがこける。</p>
-
-<p>rails文化の「設定より規約」(CoC: Convention over Configuration)ってやつですね。</p>
-
-<p><code>ActiveRecord::Migration</code> を継承したクラス <code>Createhoges</code> を定義する。
-シンボル <code>:hoges</code> がテーブル名。カラム定義は見ての通りだと思う。
-主キーは自動的に <code>id</code> というカラム名で生成されるので書かない。(書くとエラーになる)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateHoges</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">up</span>
-</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:hoges</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
-</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>  <span class="ss">:name</span>
-</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>  <span class="ss">:url</span>
-</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>  <span class="c1"># =&gt; これでcreated_atとupdated_atカラムが定義される</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">down</span>
-</span><span class='line'>    <span class="n">drop_table</span> <span class="ss">:hoges</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>書き方の詳細は、<a href="http://guides.rubyonrails.org/migrations.html">Active Record Migrations</a> を見れば良いと思う。</p>
-
-<h3>データベース接続情報を yaml に書き出す</h3>
-
-<p>MySQL への接続情報(DBユーザ名とかパスワードとか使うDB名とか)を yaml ファイルに書き出しておく。めんどくさい、かつ、使い捨てのコードならハードコーディングしといてもOK。</p>
-
-<p>ここでは、以下の内容で <code>config/database.yml</code> を作成した。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">db:</span>
-</span><span class='line'><span class="x">  production:</span>
-</span><span class='line'><span class="x">    adapter:  mysql2</span>
-</span><span class='line'><span class="x">    host:     localhost</span>
-</span><span class='line'><span class="x">    username: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_USERNAME&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">    password: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_PASSWORD&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">    database: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DATABASE_NAME&#39;</span><span class="o">]</span><span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'>
-</span><span class='line'><span class="x">  development:</span>
-</span><span class='line'><span class="x">    adapter:  mysql2</span>
-</span><span class='line'><span class="x">    host:     localhost</span>
-</span><span class='line'><span class="x">    username: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_USERNAME&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">    password: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_PASSWORD&#39;</span><span class="o">]</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">    database: </span><span class="cp">&lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;DEV_DATABASE_NAME&#39;</span><span class="o">]</span><span class="cp">%&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>パスワードなどの秘匿情報は環境変数から読み込むようにする。(ここではERB形式で書いた)
-パスワードをべた書きしといて、間違えて github とかで公開しちゃうと大変なので。</p>
-
-<p><code>~/.zshrc</code> とか <code>~/.bashrc</code> にあらかじめ作っておいたデータベース名とかユーザ名を以下のように足して <code>source ~/.zshrc</code> で読み込めばいいと思う。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_NAME</span><span class="o">=</span><span class="s2">&quot;hoge_db&quot;</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_USERNAME</span><span class="o">=</span><span class="s2">&quot;hoge_user&quot;</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">DEV_DATABASE_PASSWORD</span><span class="o">=</span><span class="s2">&quot;hoge_password&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Rakefile をつくって rakeタスクを実行する</h3>
-
-<p>以下の内容で <code>Rakefile</code> を作る。
-DB接続用の設定や環境指定(development/production) やバージョン指定の設定を書いてます。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;active_record&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;erb&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;logger&quot;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:migrate</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Migrate database&quot;</span>
-</span><span class='line'><span class="n">task</span> <span class="ss">:migrate</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
-</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Migrator</span><span class="o">.</span><span class="n">migrate</span><span class="p">(</span><span class="s1">&#39;db/migrate&#39;</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;VERSION&quot;</span><span class="o">]</span> <span class="p">?</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;VERSION&quot;</span><span class="o">].</span><span class="n">to_i</span> <span class="p">:</span> <span class="kp">nil</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">task</span> <span class="ss">:environment</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">db_conf</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="no">ERB</span><span class="o">.</span><span class="n">new</span><span class="p">(</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;./config/database.yml&quot;</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">result</span> <span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># `rake ENV=development`/`rake ENV=production`で切り替え可能</span>
-</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span><span class="p">(</span> <span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db&quot;</span><span class="o">][</span><span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;ENV&quot;</span><span class="o">]]</span> <span class="p">)</span>
-</span><span class='line'>  <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="no">Logger</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;log/database.log&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以下を参考。</p>
-
-<ul>
-<li><a href="http://qiita.com/foloinfo/items/6ecfe3c5fd1b56f1dceb">非Rails AppでActiveRecord::Migrationを使う + Rakeでバージョン管理する</a></li>
-</ul>
-
-
-<h3>rake タスクを実行する</h3>
-
-<p>まずは rake タスクの確認。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake -T
-</span><span class='line'>rake migrate  <span class="c"># Migrate database</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>開発環境設定で実行する。(ENV=development)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># debug 用に--traceオプションをつけ、標準エラーをlog/trace.txtへリダイレクト。</span>
-</span><span class='line'><span class="c"># bundle exec rake ENV=development でもOK</span>
-</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake <span class="nv">ENV</span><span class="o">=</span>development --trace 2&gt; log/trace.txt
-</span><span class='line'><span class="o">==</span> 20140510 CreateHoges: <span class="nv">migrating</span> <span class="o">============================================</span>
-</span><span class='line'>-- create_table<span class="o">(</span>:hoges<span class="o">)</span>
-</span><span class='line'>   -&gt; 0.1159s
-</span><span class='line'><span class="o">==</span> 20140510 CreateHoges: migrated <span class="o">(</span>0.1160s<span class="o">)</span> <span class="o">===================================</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>問題なければテーブルが作成されているはず。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; show tables;
-</span><span class='line'>+--------------------------+
-</span><span class='line'>| Tables_in_dev_********** |
-</span><span class='line'>+--------------------------+
-</span><span class='line'>| hoges                    |
-</span><span class='line'>| schema_migrations        |
-</span><span class='line'>+--------------------------+
-</span><span class='line'>2 rows in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>mysql&gt; desc schema_migrations;
-</span><span class='line'>+---------+--------------+------+-----+---------+-------+
-</span><span class='line'>| Field   | Type         | Null | Key | Default | Extra |
-</span><span class='line'>+---------+--------------+------+-----+---------+-------+
-</span><span class='line'>| version | varchar<span class="o">(</span>255<span class="o">)</span> | NO   | PRI | NULL    |       |
-</span><span class='line'>+---------+--------------+------+-----+---------+-------+
-</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>mysql&gt; <span class="k">select</span> * from schema_migrations;
-</span><span class='line'>+----------+
-</span><span class='line'>| version  |
-</span><span class='line'>+----------+
-</span><span class='line'>| 20140510 |
-</span><span class='line'>+----------+
-</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>mysql&gt; desc hoges;
-</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
-</span><span class='line'>| Field      | Type         | Null | Key | Default | Extra          |
-</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
-</span><span class='line'>| id         | int<span class="o">(</span>11<span class="o">)</span>      | NO   | PRI | NULL    | auto_increment |
-</span><span class='line'>| name       | varchar<span class="o">(</span>255<span class="o">)</span> | YES  |     | NULL    |                |
-</span><span class='line'>| url        | varchar<span class="o">(</span>255<span class="o">)</span> | YES  |     | NULL    |                |
-</span><span class='line'>| created_at | datetime     | YES  |     | NULL    |                |
-</span><span class='line'>| updated_at | datetime     | YES  |     | NULL    |                |
-</span><span class='line'>+------------+--------------+------+-----+---------+----------------+
-</span><span class='line'>5 rows in <span class="nb">set</span> <span class="o">(</span>0.01 sec<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
-</span><span class='line'>Empty <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>CRUD 操作について</h2>
-
-<p>ActiveRecordを使って CRUD 操作する。(insert/select/update/delete)</p>
-
-<p>ActiveRecord では、<code>ActiveRecord::Base</code> を継承したクラスがDBの1テーブルに対応し、そのクラスの属性がテーブルの各カラムに対応する。
-このクラスのことを一般的に「モデル」と呼ぶ。
-Rails では、Rails アプリを生成した段階で MVC 別にディレクトリが生成されるので、<code>app/models</code> 以下にこの <code>ActiveRecord::Base</code> 継承クラスを作る。
-今回は Rails ではないのでそれに従う必要はない。が、モデルが増えた場合を考慮すると <code>app/models</code> 以下に整理できておいたほうがコードの可読性とかメンテナンスはしやすそうなので、<code>app/models/hoges.rb</code> ファイルを作ることにする。
-Rails って理にかなっているんだな。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Hoges</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この <code>Hoges</code> は対応するテーブル名にあわせる。これもCoC。
-レコードを単数形で扱うため、テーブル名を複数形にすることが多いみたい。</p>
-
-<h3>Create: テーブルへ insert する</h3>
-
-<p>CRUD の C。</p>
-
-<p><code>app.rb</code> をつくる。</p>
-
-<p>モデルを <code>new</code> して属性値をセットしてあげればOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;active_record&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;erb&quot;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./app/models/hoges&quot;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">db_conf</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="no">ERB</span><span class="o">.</span><span class="n">new</span><span class="p">(</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;./config/database.yml&quot;</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">result</span> <span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 開発用DB接続パラメータ読み込み, 接続する</span>
-</span><span class='line'><span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">establish_connection</span><span class="p">(</span><span class="n">db_conf</span><span class="o">[</span><span class="s2">&quot;db&quot;</span><span class="o">][</span><span class="s2">&quot;development&quot;</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">test_name</span> <span class="o">=</span> <span class="s2">&quot;momota.txt&quot;</span>
-</span><span class='line'><span class="n">test_url</span>  <span class="o">=</span> <span class="s2">&quot;http://momota.github.io/&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">hoge</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">h</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">test_name</span>
-</span><span class='line'>  <span class="n">h</span><span class="o">.</span><span class="n">url</span>  <span class="o">=</span> <span class="n">test_url</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nb">p</span> <span class="n">hoge</span>
-</span><span class='line'><span class="n">hoge</span><span class="o">.</span><span class="n">save</span>
-</span><span class='line'><span class="nb">p</span> <span class="n">hoge</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>なお、<code>save</code> しないと insert されない。</p>
-
-<p>こんな感じで生成時にハッシュを渡してもOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoge</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">test_name</span><span class="p">,</span> <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="n">test_url</span><span class="p">)</span>
-</span><span class='line'><span class="n">hoge</span><span class="o">.</span><span class="n">save</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>それでは実行してみる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
-</span><span class='line'><span class="c">#&lt;Hoges id: nil, name: &quot;momota.txt&quot;, url: &quot;http://momota.github.io/&quot;, created_at: nil, updated_at: nil&gt;</span>
-</span><span class='line'><span class="c">#&lt;Hoges id: 1, name: &quot;momota.txt&quot;, url: &quot;http://momota.github.io/&quot;, created_at: &quot;2014-05-10 23:50:46&quot;, updated_at: &quot;2014-05-10 23:50:46&quot;&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記から、saveしないと <code>id</code> や <code>created_at</code> などの値が空なので insert されていないことが分かる。</p>
-
-<p>実際にテーブルの内容を見てみよう。ちゃんと insert されている。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
-</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
-</span><span class='line'>| id | name       | url                      | created_at          | updated_at          |
-</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
-</span><span class='line'>|  1 | momota.txt | http://momota.github.io/ | 2014-05-10 23:50:46 | 2014-05-10 23:50:46 |
-</span><span class='line'>+----+------------+--------------------------+---------------------+---------------------+
-</span><span class='line'>1 row in <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Read: レコードを select する</h3>
-
-<p>CRUD の R。</p>
-
-<p>主キーで select する場合は、<code>find</code> メソッドを使う。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これは以下の SQL と同じ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">hoges</span> <span class="k">where</span> <span class="n">hoges</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">LIMIT</span> <span class="mi">1</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>主キー以外だと、<code>find_by</code> メソッドを使う。</p>
-
-<p>該当するレコードがなければ <code>nil</code> が返ってくる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;momota.txt&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これは以下のような書き方もできる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;momota.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">take</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これらは以下の SQL と同じ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">hoges</span> <span class="k">where</span> <span class="n">hoges</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="ss">&quot;momota.txt&quot;</span> <span class="k">LIMIT</span> <span class="mi">1</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>find_by</code> メソッドを使ってレコードが存在しないときにだけ insert するように <code>app.rb</code> を書き変えてみよう。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">-hoge = Hoges.new { |h|</span>
-</span><span class='line'><span class="gd">-  h.name = test_name</span>
-</span><span class='line'><span class="gd">-  h.url  = test_url</span>
-</span><span class='line'><span class="gd">-}</span>
-</span><span class='line'><span class="gd">-p hoge</span>
-</span><span class='line'><span class="gd">-hoge.save</span>
-</span><span class='line'><span class="gd">-p hoge</span>
-</span><span class='line'><span class="gi">+rec = Hoges.find_by url: test_url</span>
-</span><span class='line'><span class="gi">+unless rec</span>
-</span><span class='line'><span class="gi">+  hoge = Hoges.new { |h|</span>
-</span><span class='line'><span class="gi">+    h.name = test_name</span>
-</span><span class='line'><span class="gi">+    h.url  = test_url</span>
-</span><span class='line'><span class="gi">+  }</span>
-</span><span class='line'><span class="gi">+  hoge.save</span>
-</span><span class='line'><span class="gi">+  puts &quot;すでにデータは insert 済みなのでここには入らない&quot;</span>
-</span><span class='line'><span class="gi">+end</span>
-</span><span class='line'>
-</span><span class='line'><span class="gi">+p rec</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実行すると最終行の <code>p rec</code> が呼ばれていることが分かる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
-</span><span class='line'>&lt;Hoges id: 1, name: <span class="s2">&quot;momota.txt&quot;</span>, url: <span class="s2">&quot;http://momota.github.io/&quot;</span>, created_at: <span class="s2">&quot;2014-05-10 23:50:46&quot;</span>, updated_at: <span class="s2">&quot;2014-05-10 23:50:46&quot;</span>&gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>find_or_create_by</code> メソッドによりさらにスマートな書き方ができる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gd">-rec = Hoges.find_by url: test_url</span>
-</span><span class='line'><span class="gd">-unless rec</span>
-</span><span class='line'><span class="gd">-  hoge = Hoges.new { |h|</span>
-</span><span class='line'><span class="gd">-    h.name = test_name</span>
-</span><span class='line'><span class="gd">-    h.url  = test_url</span>
-</span><span class='line'><span class="gd">-  }</span>
-</span><span class='line'><span class="gd">-  hoge.save</span>
-</span><span class='line'><span class="gi">+rec = Hoges.find_or_create_by( url: test_url ) do |h|</span>
-</span><span class='line'><span class="gi">+  h.name = test_name</span>
-</span><span class='line'>  puts &quot;すでにデータは insert 済みなのでここには入らない&quot;
-</span><span class='line'>end
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>その他いろいろと以下のページが参考になる。</p>
-
-<ul>
-<li><a href="http://edgeguides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a></li>
-</ul>
-
-
-<h3>Update: レコードを update する</h3>
-
-<p>CRUD の U。</p>
-
-<p>これはオブジェクトの属性を更新して <code>save</code> するだけ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">changed_name</span> <span class="o">=</span> <span class="s2">&quot;momota.log&quot;</span>
-</span><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span>
-</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">changed_name</span>
-</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">save</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Delete: レコードを delete する</h3>
-
-<p>CRUD の D。</p>
-
-<p>これも簡単でモデルオブジェクトから <code>destroy</code> or <code>delete</code> メソッドを呼ぶだけ。<code>save</code> は不要。</p>
-
-<p><code>delete</code> はレコードの削除のみなので高速。<code>destroy</code> はレコードとオブジェクトも削除してくれるが、<code>delete</code> に比べて低速。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
-</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">destroy</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>where</code> で複数のレコードをひっかけて全部削除したい場合は、<code>destroy_all</code> or <code>delete_all</code> メソッドを呼ぶ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">destroy_all</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>find_by</code> してからでもOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_by</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span>
-</span><span class='line'><span class="n">hoges</span><span class="o">.</span><span class="n">destroy_all</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>app.rb</code> を書き換えてみる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">rec</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
-</span><span class='line'><span class="o">+</span><span class="n">hoges</span> <span class="o">=</span> <span class="no">Hoges</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span> <span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">h</span><span class="o">|</span>
-</span><span class='line'>   <span class="n">h</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">test_name</span>
-</span><span class='line'><span class="o">-</span>  <span class="nb">puts</span> <span class="s2">&quot;すでにデータは insert 済みなのでここには入らない&quot;</span>
-</span><span class='line'> <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">-</span><span class="nb">p</span> <span class="n">rec</span>
-</span><span class='line'><span class="o">+</span><span class="nb">puts</span> <span class="s2">&quot;[before delete]record count: </span><span class="si">#{</span><span class="no">Hoges</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="o">+</span><span class="no">Hoges</span><span class="o">.</span><span class="n">delete_all</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span> <span class="n">test_url</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>実行すると、確かにレコードが削除されている。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>ruby app.rb
-</span><span class='line'><span class="o">[</span>before delete<span class="o">]</span>record count: 1
-</span><span class='line'><span class="o">[</span>after delete<span class="o">]</span> record count: 0
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>sqlでも確認できる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mysql&gt; <span class="k">select</span> * from hoges;
-</span><span class='line'>Empty <span class="nb">set</span> <span class="o">(</span>0.00 sec<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>
