@@ -9,10 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="Kong の概要 Kong は、オープンソースの API ゲートウェイソフトウェア
-低レイテンシー、スケーラブルなアーキテクチャ
-フロントはNginx、バックエンド DB は PostgreSQL or Cassandra で構成される
-複数のマイクロサービス (API) をアグリゲーションし、 &hellip;">
+  <meta name="description" content="Kong を利用して、各 API に対して上記のようなアクセスを制御する。 Consumer aaa は API a に対してアクセスできる。しかし、API b にはアクセスできない。
+Consumer bbb は API b に対してアクセスできる。しかし、API a にはアクセスできない。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +81,91 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/10/29/acl-on-kong/">Kong でアクセス制御</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-10-29T14:02:00+09:00" pubdate data-updated="true">2018-10-29</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/20181029_acl-on-kong/kong-diag.png" alt="kong diagram" /></p>
+
+<p>Kong を利用して、各 API に対して上記のようなアクセスを制御する。</p>
+
+<ul>
+<li>Consumer <code>aaa</code> は API a に対してアクセスできる。しかし、API b にはアクセスできない。</li>
+<li>Consumer <code>bbb</code> は API b に対してアクセスできる。しかし、API a にはアクセスできない。</li>
+</ul>
+
+
+<p>Kong のプラグイン <code>key-auth</code> と <code>acl</code> により実装する。</p>
+
+<p>各設定をまとめると以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>ユーザ </th>
+<th> service </th>
+<th> route (kong path) </th>
+<th> api key   </th>
+<th> consumer </th>
+<th> group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aaa    </td>
+<td> aaa-api </td>
+<td> /aaa              </td>
+<td> aaaaaaaaa </td>
+<td> aaa      </td>
+<td> aaa-group</td>
+</tr>
+<tr>
+<td>bbb    </td>
+<td> bbb-api </td>
+<td> /bbb              </td>
+<td> bbbbbbbbb </td>
+<td> bbb      </td>
+<td> bbb-group</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/10/29/acl-on-kong/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -646,78 +729,6 @@ Excel マクロのすごい版みたいな感覚。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/10/ansible-mac/">Ansible で MacBook Pro をセットアップ</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-08-10T15:15:00+09:00" pubdate data-updated="true">2016-08-10</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理ツール ansible を使ってセットアップした。</p>
-
-<p><img src="/images/20160810_macbookpro.jpg" alt="macbook pro" /></p>
-
-<p>t-wada さんのエントリ <a href="http://t-wada.hatenablog.jp/entry/mac-provisioning-by-ansible">Mac の開発環境構築を自動化する (2015 年初旬編) &ndash; t-wadaのブログ変更する</a>
-を見れば事足りると思われるので、本稿は自分用のメモ(t-wada さんのを少しだけカスタマイズ &amp; 補足)。</p>
-
-<p>実行環境は以下。</p>
-
-<table>
-<thead>
-<tr>
-<th>what    </th>
-<th> version</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>laptop  </td>
-<td> MacBook Pro (Retina 13-inch, Early 2015)</td>
-</tr>
-<tr>
-<td>OS      </td>
-<td> OS X El Capitan 10.11.6</td>
-</tr>
-<tr>
-<td>ansible </td>
-<td> 2.1.1.0</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/08/10/ansible-mac/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -733,6 +744,10 @@ Excel マクロのすごい版みたいな感覚。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/10/29/acl-on-kong/">kong でアクセス制御</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a>
       </li>
     
@@ -746,10 +761,6 @@ Excel マクロのすごい版みたいな感覚。</p>
     
       <li class="post">
         <a href="/blog/2018/06/25/apps-script/">Google Apps Script でサーバレスな為替レート取得クローラをつくる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト</a>
       </li>
     
   </ul>

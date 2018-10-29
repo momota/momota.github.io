@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-26T12:36:30+09:00</updated>
+  <updated>2018-10-29T14:15:25+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,902 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[kong でアクセス制御]]></title>
+    <link href="http://momota.github.io/blog/2018/10/29/acl-on-kong/"/>
+    <updated>2018-10-29T14:02:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/29/acl-on-kong</id>
+    <content type="html"><![CDATA[<p><img src="http://momota.github.io/images/20181029_acl-on-kong/kong-diag.png" alt="kong diagram" /></p>
+
+<p>Kong を利用して、各 API に対して上記のようなアクセスを制御する。</p>
+
+<ul>
+<li>Consumer <code>aaa</code> は API a に対してアクセスできる。しかし、API b にはアクセスできない。</li>
+<li>Consumer <code>bbb</code> は API b に対してアクセスできる。しかし、API a にはアクセスできない。</li>
+</ul>
+
+
+<p>Kong のプラグイン <code>key-auth</code> と <code>acl</code> により実装する。</p>
+
+<p>各設定をまとめると以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>ユーザ </th>
+<th> service </th>
+<th> route (kong path) </th>
+<th> api key   </th>
+<th> consumer </th>
+<th> group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aaa    </td>
+<td> aaa-api </td>
+<td> /aaa              </td>
+<td> aaaaaaaaa </td>
+<td> aaa      </td>
+<td> aaa-group</td>
+</tr>
+<tr>
+<td>bbb    </td>
+<td> bbb-api </td>
+<td> /bbb              </td>
+<td> bbbbbbbbb </td>
+<td> bbb      </td>
+<td> bbb-group</td>
+</tr>
+</tbody>
+</table>
+
+
+<!-- more -->
+
+
+<h2>Service の設定</h2>
+
+<p>API a の service を定義する。</p>
+
+<p>Service 名は <code>aaa-api</code>, 実体は mockbin.org。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST --url http://localhost:8001/services <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;name=aaa-api&quot;</span> <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;url=http://mockbin.org&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 06:47:50 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 251
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;host&quot;</span>: <span class="s2">&quot;mockbin.org&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540536470,
+</span><span class='line'>  <span class="s2">&quot;connect_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;b371024b-cebf-4065-a1bf-58ed9aad8dce&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;aaa-api&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;read_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;port&quot;</span>: 80,
+</span><span class='line'>  <span class="s2">&quot;path&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540536470,
+</span><span class='line'>  <span class="s2">&quot;retries&quot;</span>: 5,
+</span><span class='line'>  <span class="s2">&quot;write_timeout&quot;</span>: 60000
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>API b の service を定義する。</p>
+
+<p>Service 名は <code>bbb-api</code>, 実体は www.gaitameonline.com。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/ <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;name=bbb-api&quot;</span> <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;url=https://www.gaitameonline.com/rateaj/getrate&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:08:42 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 278
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;host&quot;</span>: <span class="s2">&quot;www.gaitameonline.com&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540537722,
+</span><span class='line'>  <span class="s2">&quot;connect_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;1d85e93c-8bc7-46f8-afed-a864ea8e0340&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;protocol&quot;</span>: <span class="s2">&quot;https&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;bbb-api&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;read_timeout&quot;</span>: 60000,
+</span><span class='line'>  <span class="s2">&quot;port&quot;</span>: 443,
+</span><span class='line'>  <span class="s2">&quot;path&quot;</span>: <span class="s2">&quot;/rateaj/getrate&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540537722,
+</span><span class='line'>  <span class="s2">&quot;retries&quot;</span>: 5,
+</span><span class='line'>  <span class="s2">&quot;write_timeout&quot;</span>: 60000
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Route の定義</h2>
+
+<p>API a に route を設定する。</p>
+
+<p>Consumer <code>aaa</code> には、Kong の <code>/aaa</code> という PATH を公開したいので、<code>paths[]=/aaa</code> を定義する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/aaa-api/routes <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;paths[]=/aaa&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 06:55:40 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 284
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540536940,
+</span><span class='line'>  <span class="s2">&quot;strip_path&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;hosts&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;preserve_host&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>  <span class="s2">&quot;regex_priority&quot;</span>: 0,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540536940,
+</span><span class='line'>  <span class="s2">&quot;paths&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;/aaa&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;service&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;b371024b-cebf-4065-a1bf-58ed9aad8dce&quot;</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;methods&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;protocols&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;https&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;8ecba70c-41c8-4152-b2c1-5caaca7e42ac&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>API b にも同様に route を設定する。
+Consumer <code>bbb</code> に、Kong の <code>/bbb</code> という PATHを公開する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/bbb-api/routes <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;paths[]=/bbb&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:12:23 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 284
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540537943,
+</span><span class='line'>  <span class="s2">&quot;strip_path&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>  <span class="s2">&quot;hosts&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;preserve_host&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>  <span class="s2">&quot;regex_priority&quot;</span>: 0,
+</span><span class='line'>  <span class="s2">&quot;updated_at&quot;</span>: 1540537943,
+</span><span class='line'>  <span class="s2">&quot;paths&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;/bbb&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;service&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;1d85e93c-8bc7-46f8-afed-a864ea8e0340&quot;</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;methods&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;protocols&quot;</span>: <span class="o">[</span>
+</span><span class='line'>    <span class="s2">&quot;http&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;https&quot;</span>
+</span><span class='line'>  <span class="o">]</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;6bea20ce-39c3-48ad-a912-948b33764453&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここまでで、以下のようなプロキシ設定ができた</p>
+
+<table>
+<thead>
+<tr>
+<th>アクセス先                </th>
+<th> プロキシ先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://localhost:8000/aaa">http://localhost:8000/aaa</a> </td>
+<td> <a href="http://mockbin.org">http://mockbin.org</a></td>
+</tr>
+<tr>
+<td><a href="http://localhost:8000/bbb">http://localhost:8000/bbb</a> </td>
+<td> <a href="https://www.gaitameonline.com/rateaj/getrate">https://www.gaitameonline.com/rateaj/getrate</a></td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>key-auth プラグインによる API キー認証設定</h2>
+
+<p>key-auth プラグインを有効化し、API キーがない場合はアクセス拒否する。</p>
+
+<p>各 service に対して有効化する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/aaa-api/plugins --data <span class="s2">&quot;name=key-auth&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:15:31 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 276
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540538131449,
+</span><span class='line'>  <span class="s2">&quot;config&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;key_in_body&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;run_on_preflight&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;anonymous&quot;</span>: <span class="s2">&quot;&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;hide_credentials&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;key_names&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;apikey&quot;</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;d54ca015-295b-4c5a-a8bf-718f05a80d3c&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;service_id&quot;</span>: <span class="s2">&quot;b371024b-cebf-4065-a1bf-58ed9aad8dce&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;key-auth&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;enabled&quot;</span>: <span class="nb">true</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/bbb-api/plugins --data <span class="s2">&quot;name=key-auth&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:16:19 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 276
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540538179280,
+</span><span class='line'>  <span class="s2">&quot;config&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;key_in_body&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;run_on_preflight&quot;</span>: <span class="nb">true</span>,
+</span><span class='line'>    <span class="s2">&quot;anonymous&quot;</span>: <span class="s2">&quot;&quot;</span>,
+</span><span class='line'>    <span class="s2">&quot;hide_credentials&quot;</span>: <span class="nb">false</span>,
+</span><span class='line'>    <span class="s2">&quot;key_names&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;apikey&quot;</span>
+</span><span class='line'>    <span class="o">]</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;dd6fbb6c-29dd-47ad-b4b1-ac5f82065b20&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;service_id&quot;</span>: <span class="s2">&quot;1d85e93c-8bc7-46f8-afed-a864ea8e0340&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;key-auth&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;enabled&quot;</span>: <span class="nb">true</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>API キーがないとアクセスできないことを検証する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8000/aaa
+</span><span class='line'>HTTP/1.1 401 Unauthorized
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:16:35 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>WWW-Authenticate: Key <span class="nv">realm</span><span class="o">=</span><span class="s2">&quot;kong&quot;</span>
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 41
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;No API key found in request&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8000/bbb
+</span><span class='line'>HTTP/1.1 401 Unauthorized
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:17:05 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>WWW-Authenticate: Key <span class="nv">realm</span><span class="o">=</span><span class="s2">&quot;kong&quot;</span>
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 41
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;No API key found in request&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Consumer の定義</h2>
+
+<p>Consumer <code>aaa</code> と <code>bbb</code> を作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;username=aaa&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:18:35 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 104
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;custom_id&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540432512,
+</span><span class='line'>  <span class="s2">&quot;username&quot;</span>: <span class="s2">&quot;aaa&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;3cb5f512-ad07-4f27-9aed-4ddff00a020e&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;username=bbb&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:18:40 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 104
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;custom_id&quot;</span>: null,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540538320,
+</span><span class='line'>  <span class="s2">&quot;username&quot;</span>: <span class="s2">&quot;bbb&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;9f8e8674-8d0d-43c9-8c58-59331949e0bd&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>各 Consumer に API キーを発行する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers/aaa/key-auth --data <span class="s2">&quot;key=aaaaaaaaa&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:22:12 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 144
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;c3c822ba-b676-48fe-b0ec-cf2507ec37d6&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540538532052,
+</span><span class='line'>  <span class="s2">&quot;key&quot;</span>: <span class="s2">&quot;aaaaaaaaa&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;consumer_id&quot;</span>: <span class="s2">&quot;3cb5f512-ad07-4f27-9aed-4ddff00a020e&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers/bbb/key-auth --data <span class="s2">&quot;key=bbbbbbbbb&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:22:30 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 144
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;2102cddb-8b79-4c6d-bd77-a942430a0bb4&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540538550275,
+</span><span class='line'>  <span class="s2">&quot;key&quot;</span>: <span class="s2">&quot;bbbbbbbbb&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;consumer_id&quot;</span>: <span class="s2">&quot;9f8e8674-8d0d-43c9-8c58-59331949e0bd&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上の設定で、API キーがあれば API a, API b にはアクセスできるようになった。
+しかし、Consumer <code>aaa</code> の API キーで、API a および API b の双方にアクセスできる。
+Consumer <code>bbb</code> も双方の API にアクセスできる。</p>
+
+<p>アクセス制御するために、ACL プラグインを利用する。</p>
+
+<h2>acl プラグインの有効化</h2>
+
+<p>acl プラグインを利用することで、service や route 単位のアクセス制御が可能になる。
+Consumer をグループに所属させ、グループ単位にアクセス許可する (<code>config.whitelist</code> に許可するグループを定義する) か、アクセス拒否する(<code>config.blacklist</code> に拒否するグループを定義する)。</p>
+
+<p>ここでは、consumer <code>aaa</code> をグループ <code>aaa-group</code> へ、consumer <code>bbb</code> を <code>bbb-group</code> へ所属させ、各サービスへ許可設定をする。</p>
+
+<p>まずは、各サービスに対して、acl プラグインを有効化する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/aaa-api/plugins <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;name=acl&quot;</span> <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;config.whitelist=aaa-group&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:41:16 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 217
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540539676065,
+</span><span class='line'>  <span class="s2">&quot;config&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;whitelist&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;acl-group&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;hide_groups_header&quot;</span>: <span class="nb">false</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;8625c0cf-ad86-4416-b3f9-08cfb4224fe4&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;service_id&quot;</span>: <span class="s2">&quot;b371024b-cebf-4065-a1bf-58ed9aad8dce&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;acl&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;enabled&quot;</span>: <span class="nb">true</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/services/bbb-api/plugins <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;name=acl&quot;</span> <span class="se">\</span>
+</span><span class='line'>&gt; --data <span class="s2">&quot;config.whitelist=bbb-group&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:41:52 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 217
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540539712346,
+</span><span class='line'>  <span class="s2">&quot;config&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;whitelist&quot;</span>: <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;bbb-group&quot;</span>
+</span><span class='line'>    <span class="o">]</span>,
+</span><span class='line'>    <span class="s2">&quot;hide_groups_header&quot;</span>: <span class="nb">false</span>
+</span><span class='line'>  <span class="o">}</span>,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;d01dfc1e-5a60-4cf5-a8d5-a4d2dd974a4a&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;service_id&quot;</span>: <span class="s2">&quot;1d85e93c-8bc7-46f8-afed-a864ea8e0340&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;acl&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;enabled&quot;</span>: <span class="nb">true</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>各 consumer にグループを設定する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers/aaa/acls --data <span class="s2">&quot;group=aaa-group&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:49:50 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 146
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;group&quot;</span>: <span class="s2">&quot;aaa-group&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540540190325,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;32928438-8d23-4efe-b457-d735be430f7e&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;consumer_id&quot;</span>: <span class="s2">&quot;3cb5f512-ad07-4f27-9aed-4ddff00a020e&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>curl -i -X POST http://localhost:8001/consumers/bbb/acls --data <span class="s2">&quot;group=bbb-group&quot;</span>
+</span><span class='line'>HTTP/1.1 201 Created
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:50:09 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Access-Control-Allow-Origin: *
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 146
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;group&quot;</span>: <span class="s2">&quot;bbb-group&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;created_at&quot;</span>: 1540540209260,
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;32db4c2b-2c2e-4f20-b869-d9e784fd8a6b&quot;</span>,
+</span><span class='line'>  <span class="s2">&quot;consumer_id&quot;</span>: <span class="s2">&quot;9f8e8674-8d0d-43c9-8c58-59331949e0bd&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Consumer <code>aaa</code> が API a にはアクセスでき、API b にはアクセスできないことを検証する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8000/aaa --header <span class="s2">&quot;apikey:aaaaaaaaa&quot;</span>
+</span><span class='line'>HTTP/1.1 200 OK
+</span><span class='line'>Content-Type: text/html; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Content-Length: 10750
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Server: openresty/1.13.6.2
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:52:40 GMT
+</span><span class='line'>Etag: W/<span class="s2">&quot;29fe-zRGDbSTAzeA2BElashPm2g&quot;</span>
+</span><span class='line'>Vary: Accept-Encoding
+</span><span class='line'>Via: kong/0.14.1
+</span><span class='line'>X-Kong-Upstream-Status: 200
+</span><span class='line'>X-Kong-Upstream-Latency: 288
+</span><span class='line'>X-Kong-Proxy-Latency: 587
+</span><span class='line'>Kong-Request-ID: b85769d55d4927681238e50b07b6ba8c
+</span><span class='line'>
+</span><span class='line'>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span>&gt;&lt;title&gt;Mockbin by Mashape&lt;/title&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/static/main.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js&quot;</span>&gt;&lt;/script&gt;&lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span> <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js&quot;</span>&gt;&lt;/script&gt;&lt;meta http-equiv<span class="o">=</span><span class="s2">&quot;X-UA-Compatible&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;IE=edge&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;robots&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;index,follow&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:title&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;author&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:creator&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@Mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:description&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs. Made with Love by Mashape.&quot;</span>&gt;&lt;meta <span class="nv">itemprop</span><span class="o">=</span><span class="s2">&quot;image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:image&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:image:src&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;https://mockbin.org/public/share.png&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:card&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;summary_large_image&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:site&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;@mashape&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:domain&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;mockbin.org&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;canonical&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;twitter:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:url&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;http://mockbin.org/&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:type&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;website&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;og:site_name&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;Mockbin by Mashape&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;227304446&quot;</span>&gt;&lt;meta <span class="nv">property</span><span class="o">=</span><span class="s2">&quot;fb:admins&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;576641408&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;shortcut icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;icon&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;image/x-icon&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/favicon.ico&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;link <span class="nv">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span> <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/public/style.css&quot;</span> <span class="nv">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>&gt;&lt;meta <span class="nv">name</span><span class="o">=</span><span class="s2">&quot;google-site-verification&quot;</span> <span class="nv">content</span><span class="o">=</span><span class="s2">&quot;OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww&quot;</span>&gt;&lt;/head&gt;&lt;body&gt;&lt;header&gt;&lt;nav <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar navbar-default&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-header&quot;</span>&gt;&lt;button <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> data-toggle<span class="o">=</span><span class="s2">&quot;collapse&quot;</span> data-target<span class="o">=</span><span class="s2">&quot;#navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-toggle collapsed&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;icon-bar&quot;</span>&gt;&lt;/span&gt;&lt;/button&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;navbar-brand logo&quot;</span>&gt;&lt;span&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>&gt;&lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;logo fa fa-terminal&quot;</span>&gt;&lt;/span&gt; mockbin&lt;/a&gt; &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-muted&quot;</span>&gt;by &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://www.mashape.com&quot;</span>&gt;Mashape&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">id</span><span class="o">=</span><span class="s2">&quot;navbar&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;collapse navbar-collapse&quot;</span>&gt;&lt;ul <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;nav navbar-nav navbar-right&quot;</span>&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Docs&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://github.com/Mashape/mockbin&quot;</span>&gt;Github&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/header&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;home&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;showcase&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;h1&gt;Mockbin&lt;/h1&gt;&lt;p <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-lg-offset-2 col-lg-8 lead&quot;</span>&gt;Mockbin allows you to generate &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span>&gt;custom endpoints&lt;/a&gt; to <span class="nb">test</span>, mock, and track HTTP requests &amp;amp; responses between libraries, sockets and APIs.&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;container&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn-toolbar&quot;</span>&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span>&gt;View Sample Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/bin/create&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-success&quot;</span>&gt;Create Bin&lt;/a&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;#example&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary hidden-xs&quot;</span>&gt;Send a Request&lt;/a&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;text-center&quot;</span>&gt;Feature Highlights&lt;/h2&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;row features&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;col-md-6&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/friendly.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;Mock Custom Endpoints&lt;/h4&gt;&lt;p&gt;Mock custom endpoints using any &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://ahmadnassri.github.io/har-resources/&quot;</span> <span class="nv">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span>&gt;HTTP Archive <span class="o">(</span>HAR<span class="o">)</span>&lt;/a&gt; response object &lt;em&gt;<span class="o">(</span>can be used as webhooks, api mocks, or anything you want!<span class="o">)</span>&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;/docs&quot;</span>&gt;Learn More &lt;span <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;fa fa-angle-right&quot;</span>&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media&quot;</span>&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-left&quot;</span>&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;/public/formats.png&quot;</span> <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-object&quot;</span>&gt;&lt;/div&gt;&lt;div <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-body&quot;</span>&gt;&lt;h4 <span class="nv">class</span><span class="o">=</span><span class="s2">&quot;media-heading&quot;</span>&gt;JSON, XML, YAML, HTML&lt;/h4&gt;&lt;p&gt;Don<span class="s1">&#39;t like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#content-negotiation&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/history.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Log and Inspect Calls&lt;/h4&gt;&lt;p&gt;Log and inspect incoming calls to your custom endpoints &lt;em&gt;(get detailed view to how clients are calling your api/webhook)&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;col-md-6&quot;&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/mock.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;Custom HTTP Method&lt;/h4&gt;&lt;p&gt;No longer are you limited to &lt;code&gt;GET&lt;/code&gt; &amp;amp; &lt;code&gt;POST&lt;/code&gt;, Mockbin accepts all standard Methods and allows method overriding&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs#http-methods&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/inspect.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;CORS Headers&lt;/h4&gt;&lt;p&gt;Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;media&quot;&gt;&lt;div class=&quot;media-left&quot;&gt;&lt;img src=&quot;/public/har.png&quot; class=&quot;media-object&quot;&gt;&lt;/div&gt;&lt;div class=&quot;media-body&quot;&gt;&lt;h4 class=&quot;media-heading&quot;&gt;HTTP Archive (HAR)&lt;/h4&gt;&lt;p&gt;Mockbin relies on the popular &lt;a href=&quot;https://ahmadnassri.github.io/har-resources/&quot; target=&quot;_blank&quot;&gt;HTTP Archive (HAR)&lt;/a&gt; format to create mock endpoints (Bins), import data and describe HTTP call logs.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/docs&quot;&gt;Learn More &lt;span class=&quot;fa fa-angle-right&quot;&gt;&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;hr&gt;&lt;h2 class=&quot;text-center&quot;&gt;Test using your preferred language:&lt;/h2&gt;&lt;iframe id=&quot;example&quot; src=&quot;https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;amp;targets=all&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; marginheight=&quot;0&quot; marginwidth=&quot;0&quot; width=&quot;100%&quot; height=&quot;500&quot; seamless class=&quot;embed&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;&lt;/div&gt;&lt;footer class=&quot;hidden-xs&quot;&gt;&lt;nav class=&quot;navbar navbar-default navbar-fixed-bottom&quot;&gt;&lt;div class=&quot;container&quot;&gt;&lt;div class=&quot;navbar-text&quot;&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-star&quot; data-count-href=&quot;/Mashape/mockbin/stargazers&quot; data-count-api=&quot;/repos/Mashape/mockbin#stargazers_count&quot; class=&quot;github-button&quot;&gt;Star&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin&quot; data-icon=&quot;octicon-eye&quot; data-count-href=&quot;/Mashape/mockbin/watchers&quot; data-count-api=&quot;/repos/Mashape/mockbin#subscribers_count&quot; class=&quot;github-button&quot;&gt;Watch&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;a href=&quot;https://github.com/Mashape/mockbin/issues&quot; data-icon=&quot;octicon-issue-opened&quot; data-count-api=&quot;/repos/Mashape/mockbin#open_issues_count&quot; class=&quot;github-button&quot;&gt;Issue&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;nav navbar-right navbar-text hidden-xs&quot;&gt;&lt;a href=&quot;https://twitter.com/share&quot; data-url=&quot;http://mockbin.org&quot; data-via=&quot;Mashape&quot; data-related=&quot;Mashape&quot; data-hashtags=&quot;Mock, Test, Track, HTTP&quot; data-dnt=&quot;true&quot; class=&quot;twitter-share-button&quot;&gt;Tweet&lt;/a&gt;&lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/nav&gt;&lt;/footer&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;twitter-wjs&quot; src=&quot;https://platform.twitter.com/widgets.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; id=&quot;github-bjs&quot; src=&quot;https://buttons.github.io/buttons.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; src=&quot;//mashape.github.io/notification-bar/embed.js&quot; async defer&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot;&gt;!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&amp;&amp;console.error&amp;&amp;console.error(&quot;Segment snippet included twice.&quot;);else{analytics.invoked=!0;analytics.methods=[&quot;trackSubmit&quot;,&quot;trackClick&quot;,&quot;trackLink&quot;,&quot;trackForm&quot;,&quot;pageview&quot;,&quot;identify&quot;,&quot;group&quot;,&quot;track&quot;,&quot;ready&quot;,&quot;alias&quot;,&quot;page&quot;,&quot;once&quot;,&quot;off&quot;,&quot;on&quot;];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t&lt;analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement(&quot;script&quot;);e.type=&quot;text/javascript&quot;;e.async=!0;e.src=(&quot;https:&quot;===document.location.protocol?&quot;https://&quot;:&quot;http://&quot;)+&quot;cdn.segment.com/analytics.js/v1/&quot;+t+&quot;/analytics.min.js&quot;;var n=document.getElementsByTagName(&quot;script&quot;)[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION=&quot;3.0.1&quot;;</span>
+</span><span class='line'><span class="s1">  analytics.load(&#39;</span>tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU<span class="err">&#39;</span><span class="o">)</span>;
+</span><span class='line'>  analytics.page<span class="o">()</span>
+</span><span class='line'><span class="o">}}()</span>;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -i -X GET http://localhost:8000/bbb --header <span class="s2">&quot;apikey: aaaaaaaaa&quot;</span>
+</span><span class='line'>HTTP/1.1 403 Forbidden
+</span><span class='line'>Date: Fri, 26 Oct 2018 07:53:19 GMT
+</span><span class='line'>Content-Type: application/json; <span class="nv">charset</span><span class="o">=</span>utf-8
+</span><span class='line'>Connection: keep-alive
+</span><span class='line'>Server: kong/0.14.1
+</span><span class='line'>Content-Length: 46
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>  <span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;You cannot consume this service&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アクセス制御が効いていることを確認できた。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[API アグリゲーション: Kong]]></title>
@@ -7450,156 +8346,6 @@ Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">
 <p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
 
 <p><img src="http://momota.github.io/images/20150111_lita/slack_lita.png" alt="lita java" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[初めてのteraterm macro]]></title>
-    <link href="http://momota.github.io/blog/2014/05/20/teraterm-macro/"/>
-    <updated>2014-05-20T01:17:00+09:00</updated>
-    <id>http://momota.github.io/blog/2014/05/20/teraterm-macro</id>
-    <content type="html"><![CDATA[<p>先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。</p>
-
-<p>通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
-892J のpingは、リピート回数に上限があるので、上限回数を超えた時に再度pingコマンドを叩く必要があった。
-人間がpingの終わりを観察して終わったことを確認して再度実行するのは「ないわーーー」なので初めてのテラタームマクロを書いた。</p>
-
-<!-- more -->
-
-
-<p>pingが終わったら、打ち直す的な単純な処理だったら、意外と簡単に書けるので好き嫌いせず書いてみるのも悪くないと思った。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
-</span><span class='line'>; Cisco ルータのpingリピート回数に上限があるので、上限回数を超えた時に
-</span><span class='line'>; 再度pingを実行するマクロ
-</span><span class='line'>; 拡張pingを実行するため、enableモードで本マクロを読み込むこと
-</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
-</span><span class='line'>LOOP_LIMIT <span class="p">=</span> <span class="m">1000</span>
-</span><span class='line'>
-</span><span class='line'>sendln
-</span><span class='line'><span class="k">for</span> <span class="k">i</span> <span class="m">1</span> LOOP_LIMIT
-</span><span class='line'>  <span class="k">call</span> ping
-</span><span class='line'>next
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">:</span>ping
-</span><span class='line'>  wait <span class="s1">&#39;YOUR-ROUTER#&#39;</span>
-</span><span class='line'>  sendln <span class="s1">&#39;ping vrf VR-NAME TARGET-IP repeat 10000 timeout 1&#39;</span>
-</span><span class='line'><span class="k">return</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>linux/unix環境だとshell scriptでやったほうが手っ取り早いけど、ネットワーク機器みたいな特殊な環境だとteraterm macroみたいなのが便利なんだなといまさらながら思った。</p>
-
-<p>意外に楽しくなってきたので、もっと書きたくなってきた。</p>
-
-<p>Juniperの情報取得については、改行区切りの複数のコマンドをコピペで流し込むと出力結果の途中に入力コマンドが入り込んでしまう。プロンプトが返ってくるのを待ってから1行ずつコマンドを実行すれば本事象は回避できるので、そのようなteraterm macroを利用しているが、その中身が自分好みではなかったので書き換えてみた。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
-</span><span class='line'>; commandlist.txt から<span class="m">1</span>行ずつコマンドを読み込み、実行する
-</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
-</span><span class='line'>sendln
-</span><span class='line'>
-</span><span class='line'>commandlist <span class="p">=</span> <span class="s1">&#39;./commandlist.txt&#39;</span>
-</span><span class='line'>fileopen filehandle commandlist <span class="m">0</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">while</span> <span class="m">1</span>
-</span><span class='line'>  filereadln filehandle command
-</span><span class='line'>  <span class="k">if</span> result <span class="p">=</span> <span class="m">1</span> <span class="k">break</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">call</span> wait_prompt
-</span><span class='line'>  sendln command
-</span><span class='line'><span class="k">endwhile</span>
-</span><span class='line'>
-</span><span class='line'>fileclose filehandle
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>; <span class="p">----------------------------------------------------------------------</span>
-</span><span class='line'>; Juniper のプロンプトを待つサブルーチン
-</span><span class='line'><span class="p">:</span>wait_prompt
-</span><span class='line'>  wait <span class="s1">&#39;@YOUR-HOSTNAME&gt;&#39;</span>
-</span><span class='line'><span class="k">return</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上記、<code>.ttl</code> ファイルと同じところに <code>commandlist.txt</code> を置く。
-<code>commandlist.txt</code> には実行したいコマンドを改行区切りで列挙する以下はEXシリーズのコマンド例。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'>show system uptime <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show <span class="k">version</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show configuration <span class="p">|</span> <span class="nb">display</span> <span class="k">set</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show chassis environment <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show chassis routing<span class="p">-</span>engine <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show virtual<span class="p">-</span>chassis <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show virtual<span class="p">-</span>chassis vc<span class="p">-</span>port <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show ethernet<span class="p">-</span>switching table brief <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show arp <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show lacp interfaces <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show route <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show vlans detail <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show interfaces <span class="nb">terse</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show firewall <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span><span class='line'>show log <span class="k">messages</span> <span class="p">|</span> no<span class="p">-</span><span class="nb">more</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   

@@ -9,8 +9,7 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="ネットワークエンジニアのみなさん、こんにちは。 ネットワークエンジニアのための junos.vim の cisco バージョンです。 cisco の configuration をカラーリングする vim プラグイン
-momota/cisco.vim を作ったのでご活用下さい。 対象は、cisco &hellip;">
+  <meta name="description" content="MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理ツール ansible を使ってセットアップした。 t-wada さんのエントリ Mac の開発環境構築を自動化する (2015 年初旬編) &ndash; t-wadaのブログ変更する &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +80,78 @@ momota/cisco.vim を作ったのでご活用下さい。 対象は、cisco &hell
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/08/10/ansible-mac/">Ansible で MacBook Pro をセットアップ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-08-10T15:15:00+09:00" pubdate data-updated="true">2016-08-10</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MacBook Pro 2700/13.3 MF839J/A を購入したので (わーい) 、構成管理ツール ansible を使ってセットアップした。</p>
+
+<p><img src="/images/20160810_macbookpro.jpg" alt="macbook pro" /></p>
+
+<p>t-wada さんのエントリ <a href="http://t-wada.hatenablog.jp/entry/mac-provisioning-by-ansible">Mac の開発環境構築を自動化する (2015 年初旬編) &ndash; t-wadaのブログ変更する</a>
+を見れば事足りると思われるので、本稿は自分用のメモ(t-wada さんのを少しだけカスタマイズ &amp; 補足)。</p>
+
+<p>実行環境は以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>what    </th>
+<th> version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>laptop  </td>
+<td> MacBook Pro (Retina 13-inch, Early 2015)</td>
+</tr>
+<tr>
+<td>OS      </td>
+<td> OS X El Capitan 10.11.6</td>
+</tr>
+<tr>
+<td>ansible </td>
+<td> 2.1.1.0</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/08/10/ansible-mac/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -621,51 +692,6 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/20/teraterm-macro/">初めてのteraterm Macro</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-20T01:17:00+09:00" pubdate data-updated="true">2014-05-20</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>先週末の5/17、teraterm マクロを初めて書いたので記念パピコ。</p>
-
-<p>通信断時間の計測のため、わけあって急遽Cisco ルータ (892J) から継続pingを実行する必要があった。
-892J のpingは、リピート回数に上限があるので、上限回数を超えた時に再度pingコマンドを叩く必要があった。
-人間がpingの終わりを観察して終わったことを確認して再度実行するのは「ないわーーー」なので初めてのテラタームマクロを書いた。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/05/20/teraterm-macro/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -683,6 +709,10 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/10/29/acl-on-kong/">kong でアクセス制御</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a>
       </li>
     
@@ -696,10 +726,6 @@ js (coffee script) よりも ruby のほうがとっつきやすかったので�
     
       <li class="post">
         <a href="/blog/2018/06/25/apps-script/">Google Apps Script でサーバレスな為替レート取得クローラをつくる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト</a>
       </li>
     
   </ul>

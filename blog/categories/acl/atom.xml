@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: acl | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/acl/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2018-10-29T14:15:25+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[kong でアクセス制御]]></title>
+    <link href="http://momota.github.io/blog/2018/10/29/acl-on-kong/"/>
+    <updated>2018-10-29T14:02:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/10/29/acl-on-kong</id>
+    <content type="html"><![CDATA[<p><img src="/images/20181029_acl-on-kong/kong-diag.png" alt="kong diagram" /></p>
+
+<p>Kong を利用して、各 API に対して上記のようなアクセスを制御する。</p>
+
+<ul>
+<li>Consumer <code>aaa</code> は API a に対してアクセスできる。しかし、API b にはアクセスできない。</li>
+<li>Consumer <code>bbb</code> は API b に対してアクセスできる。しかし、API a にはアクセスできない。</li>
+</ul>
+
+
+<p>Kong のプラグイン <code>key-auth</code> と <code>acl</code> により実装する。</p>
+
+<p>各設定をまとめると以下。</p>
+
+<table>
+<thead>
+<tr>
+<th>ユーザ </th>
+<th> service </th>
+<th> route (kong path) </th>
+<th> api key   </th>
+<th> consumer </th>
+<th> group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aaa    </td>
+<td> aaa-api </td>
+<td> /aaa              </td>
+<td> aaaaaaaaa </td>
+<td> aaa      </td>
+<td> aaa-group</td>
+</tr>
+<tr>
+<td>bbb    </td>
+<td> bbb-api </td>
+<td> /bbb              </td>
+<td> bbbbbbbbb </td>
+<td> bbb      </td>
+<td> bbb-group</td>
+</tr>
+</tbody>
+</table>
+
+
+<!-- more -->
+
+
+<h2>Service の設定</h2>
+
+<p>API a の service を定義する。</p>
+
+<p>Service 名は <code>aaa-api</code>, 実体は mockbin.org。</p>
+
+<p>```sh
+$ curl -i -X POST &mdash;url <a href="http://localhost:8001/services">http://localhost:8001/services</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;name=aaa-api&rdquo; \
+&mdash;data &ldquo;url=<a href="http://mockbin.org">http://mockbin.org</a>&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 06:47:50 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 251</p></blockquote>
+
+<p>{
+  &ldquo;host&rdquo;: &ldquo;mockbin.org&rdquo;,
+  &ldquo;created_at&rdquo;: 1540536470,
+  &ldquo;connect_timeout&rdquo;: 60000,
+  &ldquo;id&rdquo;: &ldquo;b371024b-cebf-4065-a1bf-58ed9aad8dce&rdquo;,
+  &ldquo;protocol&rdquo;: &ldquo;http&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;aaa-api&rdquo;,
+  &ldquo;read_timeout&rdquo;: 60000,
+  &ldquo;port&rdquo;: 80,
+  &ldquo;path&rdquo;: null,
+  &ldquo;updated_at&rdquo;: 1540536470,
+  &ldquo;retries&rdquo;: 5,
+  &ldquo;write_timeout&rdquo;: 60000
+}
+```</p>
+
+<p>API b の service を定義する。</p>
+
+<p>Service 名は <code>bbb-api</code>, 実体は www.gaitameonline.com。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/services/">http://localhost:8001/services/</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;name=bbb-api&rdquo; \
+&mdash;data &ldquo;url=<a href="https://www.gaitameonline.com/rateaj/getrate">https://www.gaitameonline.com/rateaj/getrate</a>&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:08:42 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 278</p></blockquote>
+
+<p>{
+  &ldquo;host&rdquo;: &ldquo;www.gaitameonline.com&rdquo;,
+  &ldquo;created_at&rdquo;: 1540537722,
+  &ldquo;connect_timeout&rdquo;: 60000,
+  &ldquo;id&rdquo;: &ldquo;1d85e93c-8bc7-46f8-afed-a864ea8e0340&rdquo;,
+  &ldquo;protocol&rdquo;: &ldquo;https&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;bbb-api&rdquo;,
+  &ldquo;read_timeout&rdquo;: 60000,
+  &ldquo;port&rdquo;: 443,
+  &ldquo;path&rdquo;: &ldquo;/rateaj/getrate&rdquo;,
+  &ldquo;updated_at&rdquo;: 1540537722,
+  &ldquo;retries&rdquo;: 5,
+  &ldquo;write_timeout&rdquo;: 60000
+}
+```</p>
+
+<h2>Route の定義</h2>
+
+<p>API a に route を設定する。</p>
+
+<p>Consumer <code>aaa</code> には、Kong の <code>/aaa</code> という PATH を公開したいので、<code>paths[]=/aaa</code> を定義する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/services/aaa-api/routes">http://localhost:8001/services/aaa-api/routes</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;paths[]=/aaa&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 06:55:40 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 284</p></blockquote>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540536940,
+  &ldquo;strip_path&rdquo;: true,
+  &ldquo;hosts&rdquo;: null,
+  &ldquo;preserve_host&rdquo;: false,
+  &ldquo;regex_priority&rdquo;: 0,
+  &ldquo;updated_at&rdquo;: 1540536940,
+  &ldquo;paths&rdquo;: [</p>
+
+<pre><code>"/aaa"
+</code></pre>
+
+<p>  ],
+  &ldquo;service&rdquo;: {</p>
+
+<pre><code>"id": "b371024b-cebf-4065-a1bf-58ed9aad8dce"
+</code></pre>
+
+<p>  },
+  &ldquo;methods&rdquo;: null,
+  &ldquo;protocols&rdquo;: [</p>
+
+<pre><code>"http",
+"https"
+</code></pre>
+
+<p>  ],
+  &ldquo;id&rdquo;: &ldquo;8ecba70c-41c8-4152-b2c1-5caaca7e42ac&rdquo;
+}
+```</p>
+
+<p>API b にも同様に route を設定する。
+Consumer <code>bbb</code> に、Kong の <code>/bbb</code> という PATHを公開する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/services/bbb-api/routes">http://localhost:8001/services/bbb-api/routes</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;paths[]=/bbb&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:12:23 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 284</p></blockquote>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540537943,
+  &ldquo;strip_path&rdquo;: true,
+  &ldquo;hosts&rdquo;: null,
+  &ldquo;preserve_host&rdquo;: false,
+  &ldquo;regex_priority&rdquo;: 0,
+  &ldquo;updated_at&rdquo;: 1540537943,
+  &ldquo;paths&rdquo;: [</p>
+
+<pre><code>"/bbb"
+</code></pre>
+
+<p>  ],
+  &ldquo;service&rdquo;: {</p>
+
+<pre><code>"id": "1d85e93c-8bc7-46f8-afed-a864ea8e0340"
+</code></pre>
+
+<p>  },
+  &ldquo;methods&rdquo;: null,
+  &ldquo;protocols&rdquo;: [</p>
+
+<pre><code>"http",
+"https"
+</code></pre>
+
+<p>  ],
+  &ldquo;id&rdquo;: &ldquo;6bea20ce-39c3-48ad-a912-948b33764453&rdquo;
+}
+```</p>
+
+<p>ここまでで、以下のようなプロキシ設定ができた</p>
+
+<table>
+<thead>
+<tr>
+<th>アクセス先                </th>
+<th> プロキシ先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://localhost:8000/aaa">http://localhost:8000/aaa</a> </td>
+<td> <a href="http://mockbin.org">http://mockbin.org</a></td>
+</tr>
+<tr>
+<td><a href="http://localhost:8000/bbb">http://localhost:8000/bbb</a> </td>
+<td> <a href="https://www.gaitameonline.com/rateaj/getrate">https://www.gaitameonline.com/rateaj/getrate</a></td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>key-auth プラグインによる API キー認証設定</h2>
+
+<p>key-auth プラグインを有効化し、API キーがない場合はアクセス拒否する。</p>
+
+<p>各 service に対して有効化する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/services/aaa-api/plugins">http://localhost:8001/services/aaa-api/plugins</a> &mdash;data &ldquo;name=key-auth&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:15:31 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 276</p>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540538131449,
+  &ldquo;config&rdquo;: {</p>
+
+<pre><code>"key_in_body": false,
+"run_on_preflight": true,
+"anonymous": "",
+"hide_credentials": false,
+"key_names": [
+  "apikey"
+]
+</code></pre>
+
+<p>  },
+  &ldquo;id&rdquo;: &ldquo;d54ca015-295b-4c5a-a8bf-718f05a80d3c&rdquo;,
+  &ldquo;service_id&rdquo;: &ldquo;b371024b-cebf-4065-a1bf-58ed9aad8dce&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;key-auth&rdquo;,
+  &ldquo;enabled&rdquo;: true
+}</p>
+
+<p>$ curl -i -X POST <a href="http://localhost:8001/services/bbb-api/plugins">http://localhost:8001/services/bbb-api/plugins</a> &mdash;data &ldquo;name=key-auth&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:16:19 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 276</p>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540538179280,
+  &ldquo;config&rdquo;: {</p>
+
+<pre><code>"key_in_body": false,
+"run_on_preflight": true,
+"anonymous": "",
+"hide_credentials": false,
+"key_names": [
+  "apikey"
+]
+</code></pre>
+
+<p>  },
+  &ldquo;id&rdquo;: &ldquo;dd6fbb6c-29dd-47ad-b4b1-ac5f82065b20&rdquo;,
+  &ldquo;service_id&rdquo;: &ldquo;1d85e93c-8bc7-46f8-afed-a864ea8e0340&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;key-auth&rdquo;,
+  &ldquo;enabled&rdquo;: true
+}
+```</p>
+
+<p>API キーがないとアクセスできないことを検証する。</p>
+
+<p>```sh
+$ curl -i -X GET <a href="http://localhost:8000/aaa">http://localhost:8000/aaa</a>
+HTTP/1.1 401 Unauthorized
+Date: Fri, 26 Oct 2018 07:16:35 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+WWW-Authenticate: Key realm=&ldquo;kong&rdquo;
+Server: kong/0.14.1
+Content-Length: 41</p>
+
+<p>{
+  &ldquo;message&rdquo;: &ldquo;No API key found in request&rdquo;
+}</p>
+
+<p>$ curl -i -X GET <a href="http://localhost:8000/bbb">http://localhost:8000/bbb</a>
+HTTP/1.1 401 Unauthorized
+Date: Fri, 26 Oct 2018 07:17:05 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+WWW-Authenticate: Key realm=&ldquo;kong&rdquo;
+Server: kong/0.14.1
+Content-Length: 41</p>
+
+<p>{
+  &ldquo;message&rdquo;: &ldquo;No API key found in request&rdquo;
+}
+```</p>
+
+<h2>Consumer の定義</h2>
+
+<p>Consumer <code>aaa</code> と <code>bbb</code> を作成する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/consumers">http://localhost:8001/consumers</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;username=aaa&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:18:35 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 104</p></blockquote>
+
+<p>{
+  &ldquo;custom_id&rdquo;: null,
+  &ldquo;created_at&rdquo;: 1540432512,
+  &ldquo;username&rdquo;: &ldquo;aaa&rdquo;,
+  &ldquo;id&rdquo;: &ldquo;3cb5f512-ad07-4f27-9aed-4ddff00a020e&rdquo;
+}</p>
+
+<p>$ curl -i -X POST <a href="http://localhost:8001/consumers">http://localhost:8001/consumers</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;username=bbb&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:18:40 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 104</p></blockquote>
+
+<p>{
+  &ldquo;custom_id&rdquo;: null,
+  &ldquo;created_at&rdquo;: 1540538320,
+  &ldquo;username&rdquo;: &ldquo;bbb&rdquo;,
+  &ldquo;id&rdquo;: &ldquo;9f8e8674-8d0d-43c9-8c58-59331949e0bd&rdquo;
+}
+```</p>
+
+<p>各 Consumer に API キーを発行する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/consumers/aaa/key-auth">http://localhost:8001/consumers/aaa/key-auth</a> &mdash;data &ldquo;key=aaaaaaaaa&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:22:12 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 144</p>
+
+<p>{
+  &ldquo;id&rdquo;: &ldquo;c3c822ba-b676-48fe-b0ec-cf2507ec37d6&rdquo;,
+  &ldquo;created_at&rdquo;: 1540538532052,
+  &ldquo;key&rdquo;: &ldquo;aaaaaaaaa&rdquo;,
+  &ldquo;consumer_id&rdquo;: &ldquo;3cb5f512-ad07-4f27-9aed-4ddff00a020e&rdquo;
+}</p>
+
+<p>$ curl -i -X POST <a href="http://localhost:8001/consumers/bbb/key-auth">http://localhost:8001/consumers/bbb/key-auth</a> &mdash;data &ldquo;key=bbbbbbbbb&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:22:30 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 144</p>
+
+<p>{
+  &ldquo;id&rdquo;: &ldquo;2102cddb-8b79-4c6d-bd77-a942430a0bb4&rdquo;,
+  &ldquo;created_at&rdquo;: 1540538550275,
+  &ldquo;key&rdquo;: &ldquo;bbbbbbbbb&rdquo;,
+  &ldquo;consumer_id&rdquo;: &ldquo;9f8e8674-8d0d-43c9-8c58-59331949e0bd&rdquo;
+}
+```</p>
+
+<p>以上の設定で、API キーがあれば API a, API b にはアクセスできるようになった。
+しかし、Consumer <code>aaa</code> の API キーで、API a および API b の双方にアクセスできる。
+Consumer <code>bbb</code> も双方の API にアクセスできる。</p>
+
+<p>アクセス制御するために、ACL プラグインを利用する。</p>
+
+<h2>acl プラグインの有効化</h2>
+
+<p>acl プラグインを利用することで、service や route 単位のアクセス制御が可能になる。
+Consumer をグループに所属させ、グループ単位にアクセス許可する (<code>config.whitelist</code> に許可するグループを定義する) か、アクセス拒否する(<code>config.blacklist</code> に拒否するグループを定義する)。</p>
+
+<p>ここでは、consumer <code>aaa</code> をグループ <code>aaa-group</code> へ、consumer <code>bbb</code> を <code>bbb-group</code> へ所属させ、各サービスへ許可設定をする。</p>
+
+<p>まずは、各サービスに対して、acl プラグインを有効化する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/services/aaa-api/plugins">http://localhost:8001/services/aaa-api/plugins</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;name=acl&rdquo; \
+&mdash;data &ldquo;config.whitelist=aaa-group&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:41:16 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 217</p></blockquote>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540539676065,
+  &ldquo;config&rdquo;: {</p>
+
+<pre><code>"whitelist": [
+  "acl-group"
+],
+"hide_groups_header": false
+</code></pre>
+
+<p>  },
+  &ldquo;id&rdquo;: &ldquo;8625c0cf-ad86-4416-b3f9-08cfb4224fe4&rdquo;,
+  &ldquo;service_id&rdquo;: &ldquo;b371024b-cebf-4065-a1bf-58ed9aad8dce&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;acl&rdquo;,
+  &ldquo;enabled&rdquo;: true
+}</p>
+
+<p>$ curl -i -X POST <a href="http://localhost:8001/services/bbb-api/plugins">http://localhost:8001/services/bbb-api/plugins</a> \</p>
+
+<blockquote><p>&mdash;data &ldquo;name=acl&rdquo; \
+&mdash;data &ldquo;config.whitelist=bbb-group&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:41:52 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 217</p></blockquote>
+
+<p>{
+  &ldquo;created_at&rdquo;: 1540539712346,
+  &ldquo;config&rdquo;: {</p>
+
+<pre><code>"whitelist": [
+  "bbb-group"
+],
+"hide_groups_header": false
+</code></pre>
+
+<p>  },
+  &ldquo;id&rdquo;: &ldquo;d01dfc1e-5a60-4cf5-a8d5-a4d2dd974a4a&rdquo;,
+  &ldquo;service_id&rdquo;: &ldquo;1d85e93c-8bc7-46f8-afed-a864ea8e0340&rdquo;,
+  &ldquo;name&rdquo;: &ldquo;acl&rdquo;,
+  &ldquo;enabled&rdquo;: true
+}
+```</p>
+
+<p>各 consumer にグループを設定する。</p>
+
+<p>```sh
+$ curl -i -X POST <a href="http://localhost:8001/consumers/aaa/acls">http://localhost:8001/consumers/aaa/acls</a> &mdash;data &ldquo;group=aaa-group&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:49:50 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 146</p>
+
+<p>{
+  &ldquo;group&rdquo;: &ldquo;aaa-group&rdquo;,
+  &ldquo;created_at&rdquo;: 1540540190325,
+  &ldquo;id&rdquo;: &ldquo;32928438-8d23-4efe-b457-d735be430f7e&rdquo;,
+  &ldquo;consumer_id&rdquo;: &ldquo;3cb5f512-ad07-4f27-9aed-4ddff00a020e&rdquo;
+}</p>
+
+<p>$ curl -i -X POST <a href="http://localhost:8001/consumers/bbb/acls">http://localhost:8001/consumers/bbb/acls</a> &mdash;data &ldquo;group=bbb-group&rdquo;
+HTTP/1.1 201 Created
+Date: Fri, 26 Oct 2018 07:50:09 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Server: kong/0.14.1
+Content-Length: 146</p>
+
+<p>{
+  &ldquo;group&rdquo;: &ldquo;bbb-group&rdquo;,
+  &ldquo;created_at&rdquo;: 1540540209260,
+  &ldquo;id&rdquo;: &ldquo;32db4c2b-2c2e-4f20-b869-d9e784fd8a6b&rdquo;,
+  &ldquo;consumer_id&rdquo;: &ldquo;9f8e8674-8d0d-43c9-8c58-59331949e0bd&rdquo;
+}
+```</p>
+
+<p>Consumer <code>aaa</code> が API a にはアクセスでき、API b にはアクセスできないことを検証する。</p>
+
+<p>```sh
+$ curl -i -X GET <a href="http://localhost:8000/aaa">http://localhost:8000/aaa</a> &mdash;header &ldquo;apikey:aaaaaaaaa&rdquo;
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 10750
+Connection: keep-alive
+Server: openresty/1.13.6.2
+Date: Fri, 26 Oct 2018 07:52:40 GMT
+Etag: W/&ldquo;29fe-zRGDbSTAzeA2BElashPm2g&rdquo;
+Vary: Accept-Encoding
+Via: kong/0.14.1
+X-Kong-Upstream-Status: 200
+X-Kong-Upstream-Latency: 288
+X-Kong-Proxy-Latency: 587
+Kong-Request-ID: b85769d55d4927681238e50b07b6ba8c</p>
+
+<p>&lt;!DOCTYPE html><html><head><meta charset="utf-8"><title>Mockbin by Mashape</title><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css" media="all"><link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css" media="all"><link rel="stylesheet" type="text/css" href="http://momota.github.io/static/main.css" media="all"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="robots" content="index,follow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta itemprop="name" content="Mockbin by Mashape"><meta property="og:title" content="Mockbin by Mashape"><meta name="twitter:title" content="Mockbin by Mashape"><link rel="author" href="https://www.mashape.com/"><meta name="author" content="Mashape"><meta name="twitter:creator" content="@Mashape"><meta name="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta property="og:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta name="twitter:description" content="Mockbin allows you to generate custom endpoints to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs. Made with Love by Mashape."><meta itemprop="image" content="https://mockbin.org/public/share.png"><meta property="og:image" content="https://mockbin.org/public/share.png"><meta name="twitter:image:src" content="https://mockbin.org/public/share.png"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@mashape"><meta name="twitter:domain" content="mockbin.org"><link rel="canonical" href="http://mockbin.org/"><meta name="twitter:url" content="http://mockbin.org/"><meta property="og:url" content="http://mockbin.org/"><meta property="og:type" content="website"><meta property="og:site_name" content="Mockbin by Mashape"><meta property="fb:admins" content="227304446"><meta property="fb:admins" content="576641408"><link rel="shortcut icon" href="http://momota.github.io/public/favicon.ico"><link rel="icon" type="image/x-icon" href="http://momota.github.io/public/favicon.ico"><link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,800,700,600,300|Source+Code+Pro:200,300,400,500,600,700,900" media="all"><link rel="stylesheet" type="text/css" href="http://momota.github.io/public/style.css" media="all"><meta name="google-site-verification" content="OIx3DxcNRJ_Kyd7hAtGRhZnggKpv6DRWutY7Ih9R3Ww"></head><body><header><nav class="navbar navbar-default"><div class="container"><div class="navbar-header"><button type="button" data-toggle="collapse" data-target="#navbar" class="navbar-toggle collapsed"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><div class="navbar-brand logo"><span><a href="http://momota.github.io/"><span class="logo fa fa-terminal"></span> mockbin</a> <span class="text-muted">by <a href="https://www.mashape.com">Mashape</a></span></span></div></div><div id="navbar" class="collapse navbar-collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://momota.github.io/docs">Docs</a></li><li><a href="http://momota.github.io/bin/create">Create Bin</a></li><li><a href="https://github.com/Mashape/mockbin">Github</a></li></ul></div></div></nav></header><div class="home"><div class="showcase"><div class="container"><h1>Mockbin</h1><p class="col-lg-offset-2 col-lg-8 lead">Mockbin allows you to generate <a href="http://momota.github.io/bin/create">custom endpoints</a> to test, mock, and track HTTP requests &amp; responses between libraries, sockets and APIs.</p></div></div><div class="container"><div class="btn-toolbar"><a href="http://momota.github.io/bin/bbe7f656-12d6-4877-9fa8-5cd61f9522a9/view" class="btn btn-primary">View Sample Bin</a><a href="http://momota.github.io/bin/create" class="btn btn-success">Create Bin</a><a href="#example" class="btn btn-primary hidden-xs">Send a Request</a></div><hr><h2 class="text-center">Feature Highlights</h2><div class="row features"><div class="col-md-6"><div class="media"><div class="media-left"><img src="http://momota.github.io/public/friendly.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Mock Custom Endpoints</h4><p>Mock custom endpoints using any <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> response object <em>(can be used as webhooks, api mocks, or anything you want!)</em></p><p><a href="http://momota.github.io/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="http://momota.github.io/public/formats.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">JSON, XML, YAML, HTML</h4><p>Don&rsquo;t like JSON? No problem! Mockbin supports output in JSON, YAML and XML, as well as an HTML view for in-browser testing</p><p><a href="http://momota.github.io/docs#content-negotiation">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="http://momota.github.io/public/history.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Log and Inspect Calls</h4><p>Log and inspect incoming calls to your custom endpoints <em>(get detailed view to how clients are calling your api/webhook)</em></p><p><a href="http://momota.github.io/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div><div class="col-md-6"><div class="media"><div class="media-left"><img src="http://momota.github.io/public/mock.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">Custom HTTP Method</h4><p>No longer are you limited to <code>GET</code> &amp; <code>POST</code>, Mockbin accepts all standard Methods and allows method overriding</p><p><a href="http://momota.github.io/docs#http-methods">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="http://momota.github.io/public/inspect.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">CORS Headers</h4><p>Debug your front-end JavaScript HTTP calls from any domain, Mockbin will dynamically generate Cross-Origin resource sharing headers</p><p><a href="http://momota.github.io/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div><div class="media"><div class="media-left"><img src="http://momota.github.io/public/har.png" class="media-object"></div><div class="media-body"><h4 class="media-heading">HTTP Archive (HAR)</h4><p>Mockbin relies on the popular <a href="https://ahmadnassri.github.io/har-resources/" target="_blank">HTTP Archive (HAR)</a> format to create mock endpoints (Bins), import data and describe HTTP call logs.</p><p><a href="http://momota.github.io/docs">Learn More <span class="fa fa-angle-right"></span></a></p></div></div></div></div><hr><h2 class="text-center">Test using your preferred language:</h2><iframe id="example" src="https://api.apiembed.com/?source=http://mockbin.org/public/samples/request.json&amp;targets=all" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" height="500" seamless class="embed"></iframe></div></div><footer class="hidden-xs"><nav class="navbar navbar-default navbar-fixed-bottom"><div class="container"><div class="navbar-text"><a href="https://github.com/Mashape/mockbin" data-icon="octicon-star" data-count-href="/Mashape/mockbin/stargazers" data-count-api="/repos/Mashape/mockbin#stargazers_count" class="github-button">Star</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin" data-icon="octicon-eye" data-count-href="/Mashape/mockbin/watchers" data-count-api="/repos/Mashape/mockbin#subscribers_count" class="github-button">Watch</a><span>&nbsp;</span><a href="https://github.com/Mashape/mockbin/issues" data-icon="octicon-issue-opened" data-count-api="/repos/Mashape/mockbin#open_issues_count" class="github-button">Issue</a></div><div class="nav navbar-right navbar-text hidden-xs"><a href="https://twitter.com/share" data-url="http://mockbin.org" data-via="Mashape" data-related="Mashape" data-hashtags="Mock, Test, Track, HTTP" data-dnt="true" class="twitter-share-button">Tweet</a><span>&nbsp;</span></div></div></nav></footer><script type="text/javascript" id="twitter-wjs" src="https://platform.twitter.com/widgets.js" async defer></script><script type="text/javascript" id="github-bjs" src="https://buttons.github.io/buttons.js" async defer></script><script type="text/javascript" src="http://momota.github.io//mashape.github.io/notification-bar/embed.js" async defer></script><script type="text/javascript">!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&amp;&amp;console.error&amp;&amp;console.error(&ldquo;Segment snippet included twice.&rdquo;);else{analytics.invoked=!0;analytics.methods=[&ldquo;trackSubmit&rdquo;,&ldquo;trackClick&rdquo;,&ldquo;trackLink&rdquo;,&ldquo;trackForm&rdquo;,&ldquo;pageview&rdquo;,&ldquo;identify&rdquo;,&ldquo;group&rdquo;,&ldquo;track&rdquo;,&ldquo;ready&rdquo;,&ldquo;alias&rdquo;,&ldquo;page&rdquo;,&ldquo;once&rdquo;,&ldquo;off&rdquo;,&ldquo;on&rdquo;];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t&lt;analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement(&ldquo;script&rdquo;);e.type=&ldquo;text/javascript&rdquo;;e.async=!0;e.src=(&ldquo;<a href="https:">https:</a>&rdquo;===document.location.protocol?&ldquo;<a href="https://">https://</a>&rdquo;:&ldquo;<a href="http://">http://</a>&rdquo;)+&ldquo;cdn.segment.com/analytics.js/v1/&rdquo;+t+&ldquo;/analytics.min.js&rdquo;;var n=document.getElementsByTagName(&ldquo;script&rdquo;)[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION=&ldquo;3.0.1&rdquo;;
+  analytics.load(&lsquo;tUiM2iBCz991uF4rDF0a4WSr6NEjiVuU&rsquo;);
+  analytics.page()
+}}();</script></body></html>
+```</p>
+
+<p>```sh
+$ curl -i -X GET <a href="http://localhost:8000/bbb">http://localhost:8000/bbb</a> &mdash;header &ldquo;apikey: aaaaaaaaa&rdquo;
+HTTP/1.1 403 Forbidden
+Date: Fri, 26 Oct 2018 07:53:19 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Server: kong/0.14.1
+Content-Length: 46</p>
+
+<p>{
+  &ldquo;message&rdquo;: &ldquo;You cannot consume this service&rdquo;
+}
+```</p>
+
+<p>アクセス制御が効いていることを確認できた。</p>
+]]></content>
+  </entry>
+  
+</feed>
