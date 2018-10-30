@@ -488,3 +488,7 @@ Content-Length: 46
 ```
 
 アクセス制御が効いていることを確認できた。
+
+## 関連
+
+- [API アグリゲーション： Kong - momota.txt](http://momota.github.io/blog/2018/10/26/kong/)

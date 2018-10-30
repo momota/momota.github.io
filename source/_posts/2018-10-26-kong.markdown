@@ -609,3 +609,9 @@ Content-Length: 5968
   "hostname": "kong-app"
 }
 ```
+
+
+## 関連
+
+- [kong でアクセス制御 - momota.txt](http://momota.github.io/blog/2018/10/29/acl-on-kong/)
+
