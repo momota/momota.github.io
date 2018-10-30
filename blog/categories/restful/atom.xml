@@ -4,7 +4,7 @@
   <title><![CDATA[Category: restful | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/restful/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-29T14:15:25+09:00</updated>
+  <updated>2018-10-30T14:50:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -576,6 +576,13 @@ Content-Length: 46</p>
 ```</p>
 
 <p>アクセス制御が効いていることを確認できた。</p>
+
+<h2>関連</h2>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/10/26/kong/">API アグリゲーション： Kong &ndash; momota.txt</a></li>
+</ul>
+
 ]]></content>
   </entry>
   
@@ -1246,6 +1253,13 @@ Content-Length: 5968</p>
   &ldquo;hostname&rdquo;: &ldquo;kong-app&rdquo;
 }
 ```</p>
+
+<h2>関連</h2>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/10/29/acl-on-kong/">kong でアクセス制御 &ndash; momota.txt</a></li>
+</ul>
+
 ]]></content>
   </entry>
   

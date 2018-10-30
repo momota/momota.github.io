@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-29T14:15:25+09:00</updated>
+  <updated>2018-10-30T14:50:45+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -906,6 +906,13 @@ Consumer をグループに所属させ、グループ単位にアクセス許�
 
 
 <p>アクセス制御が効いていることを確認できた。</p>
+
+<h2>関連</h2>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/10/26/kong/">API アグリゲーション： Kong &ndash; momota.txt</a></li>
+</ul>
+
 ]]></content>
   </entry>
   
@@ -1990,6 +1997,13 @@ Consumer は API を使用する個人に関連付けられ、追跡、アクセ
 </span><span class='line'>  <span class="s2">&quot;hostname&quot;</span>: <span class="s2">&quot;kong-app&quot;</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<h2>関連</h2>
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/10/29/acl-on-kong/">kong でアクセス制御 &ndash; momota.txt</a></li>
+</ul>
 
 ]]></content>
   </entry>
