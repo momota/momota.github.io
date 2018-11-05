@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: faas | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/faas/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2018-11-05T21:29:33+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[serverless framework による AWS Lambda ローカル開発]]></title>
+    <link href="http://momota.github.io/blog/2018/11/05/serverless-framework/"/>
+    <updated>2018-11-05T20:11:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/11/05/serverless-framework</id>
+    <content type="html"><![CDATA[<p><img src="/images/20181105_serverless-framework/serverless-framework-logo.png" alt="serverless framework logo" /></p>
+
+<p><a href="https://serverless.com/">Serverless Framework</a> を使うことにより、FaaS (AWS Lambda, GCP Cloud Functions, Azure functions, など) の開発をローカルで実施できる。
+ローカル環境で自分の好きなエディタ・IDEで開発やテストが可能になるし、デプロイも容易になる。</p>
+
+<p>AWS には AWS SAM もあるが、他のクラウドプロバイダでも開発物やノウハウが使い回せることが期待できるので、3rd パーティ製の Serverless Framework を選ぶ。</p>
+
+<p>本稿では、Serverless Framework の導入と、Hello Worldアプリ (AWS Lambda) のデプロイについて書く。</p>
+
+<h2>環境</h2>
+
+<p><code>sh
+$ cat /etc/lsb-release
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=18.04
+DISTRIB_CODENAME=bionic
+DISTRIB_DESCRIPTION="Ubuntu 18.04.3 LTS"
+</code></p>
+
+<!-- more -->
+
+
+<h2>Serverless framework のインストール</h2>
+
+<p>まず Node.js (v6.5.0以降) と npm をインストールする。</p>
+
+<p>```sh
+$ sudo apt-get update</p>
+
+<p>$ sudo apt-get install nodejs
+$ nodejs &mdash;version
+v8,10,0</p>
+
+<p>$ sudo apt-get install npm
+$ npm &mdash;version
+3.5.2
+```</p>
+
+<p>npm で serverless framework をインストールする。</p>
+
+<p><code>sh
+$ sudo npm install -g serverless
+$ serverless --version
+1.32.0
+</code></p>
+
+<h2>AWS アクセスキーを設定する</h2>
+
+<ol>
+<li>AWSアカウントを作り、マネージドコンソールからIAMページにアクセスする</li>
+<li>ペインのユーザをクリックし、「ユーザを追加」をクリックする
+
+<ul>
+<li>適切なユーザ名を入力する</li>
+<li>アクセスの種類の、「プログラムによるアクセス」にチェックをいれ、次へ</li>
+<li>アクセス許可の設定は、「既存のポリシーを直接アタッチ」で、「AdministratorAccess」を選択し、次へ</li>
+<li>レビューして、問題なければ作成する</li>
+</ul>
+</li>
+<li>アクセスキーIDとシークレットアクセスキーをコピーする</li>
+<li>Serverless framework に設定する
+```sh
+
+<h1>パターン1: 環境変数に設定</h1>
+
+<p>$ export AWS_ACCESS_KEY_ID=&lt;your-key-here>
+$ export AWS_SECRET_ACCESS_KEY=&lt;your-secret-key-here></p></li>
+</ol>
+
+
+<h1>パターン2: serverless config credentials コマンドで設定</h1>
+
+<p>$ serverless config credentials &mdash;provider aws &mdash;key &lt;your-key-here> &mdash;secret &lt;your-secret-key-here></p>
+
+<h1>=> ~/.aws/credentials が生成される</h1>
+
+<p>```</p>
+
+<h2>Serverless framework で Hello World</h2>
+
+<p>まず、作業ディレクトリの作成と、<code>package.json</code> を作成する。</p>
+
+<p><code>sh
+$ mkdir my-express-application &amp;&amp; cd my-express-application
+$ npm init -f
+</code></p>
+
+<p>いくつかのライブラリをインストールする。</p>
+
+<p><code>sh
+$ npm install --save express serverless-http
+</code></p>
+
+<p>アプリケーションを <code>index.js</code> に書く。</p>
+
+<p>```javascript
+const serverless = require(&lsquo;serverless-http&rsquo;);
+const express = require(&lsquo;express&rsquo;);
+const app = express();</p>
+
+<p>app.get(&lsquo;/&rsquo;, function (req, res) {
+  res.send(JSON.stringify({</p>
+
+<pre><code>id: '00001',
+message: 'Hello World!',
+</code></pre>
+
+<p>  }));
+});</p>
+
+<p>module.exports.handler = serverless(app);
+```</p>
+
+<p>これはルートパス <code>/</code> にアクセスがあった場合に、 <code>{ id: '00001', message: 'Hello World!' }</code> を返す単純なアプリ。</p>
+
+<p>これをデプロイするため、以下の <code>serverless.yml</code> を作成する。</p>
+
+<p>```yaml
+service: my-express-application</p>
+
+<p>provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: ap-northeast-1</p>
+
+<p>functions:
+  app:
+  handler: index.handler
+  events:</p>
+
+<pre><code>- http: ANY /
+- http: 'ANY {proxy+}'
+</code></pre>
+
+<p>```</p>
+
+<p>関数をデプロイする。</p>
+
+<p><code>sh
+$ serverless deploy
+...snip...
+Service Information
+service: my-express-application
+stage: dev
+region: ap-northeast-1
+stack: my-express-application-dev
+api keys:
+  None
+endpoints:
+  ANY - https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+  ANY - https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev/{proxy+}
+functions:
+  app: my-express-application-dev-app
+</code></p>
+
+<p>数分後にデプロイが完了し、<code>endpoints</code> の情報が出力される。
+この URL へアクセスし、動作確認する。</p>
+
+<p><code>sh
+$ curl -X GET https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+{"id":"00001","message":"Hello World!"}
+</code></p>
+
+<p>アプリケーションで定義した JSON が返ってくる。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://serverless.com/framework/docs/providers/aws/guide/quick-start/">Serverless Framework &ndash; AWS Lambda Guide &ndash; Quick Start</a></li>
+<li><a href="https://serverless.com/framework/docs/providers/aws/guide/credentials/">Serverless Framework &ndash; AWS Lambda Guide &ndash; Credentials</a></li>
+<li><a href="https://serverless.com/blog/serverless-express-rest-api/">Deploy a REST API using Serverless, Express and Node.js</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

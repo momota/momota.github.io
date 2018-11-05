@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="Kong を利用して、各 API に対して上記のようなアクセスを制御する。 Consumer aaa は API a に対してアクセスできる。しかし、API b にはアクセスできない。
-Consumer bbb は API b に対してアクセスできる。しかし、API a にはアクセスできない。 &hellip;">
+  <meta name="description" content="Serverless Framework を使うことにより、FaaS (AWS Lambda, GCP Cloud Functions, Azure functions, など) の開発をローカルで実施できる。
+ローカル環境で自分の好きなエディタ・IDEで開発やテストが可能になるし、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,71 @@ Consumer bbb は API b に対してアクセスできる。しかし、API a に
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/11/05/serverless-framework/">Serverless Framework による AWS Lambda ローカル開発</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-11-05T20:11:00+09:00" pubdate data-updated="true">2018-11-05</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/20181105_serverless-framework/serverless-framework-logo.png" alt="serverless framework logo" /></p>
+
+<p><a href="https://serverless.com/">Serverless Framework</a> を使うことにより、FaaS (AWS Lambda, GCP Cloud Functions, Azure functions, など) の開発をローカルで実施できる。
+ローカル環境で自分の好きなエディタ・IDEで開発やテストが可能になるし、デプロイも容易になる。</p>
+
+<p>AWS には AWS SAM もあるが、他のクラウドプロバイダでも開発物やノウハウが使い回せることが期待できるので、3rd パーティ製の Serverless Framework を選ぶ。</p>
+
+<p>本稿では、Serverless Framework の導入と、Hello Worldアプリ (AWS Lambda) のデプロイについて書く。</p>
+
+<h2>環境</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat /etc/lsb-release
+</span><span class='line'><span class="nv">DISTRIB_ID</span><span class="o">=</span>Ubuntu
+</span><span class='line'><span class="nv">DISTRIB_RELEASE</span><span class="o">=</span>18.04
+</span><span class='line'><span class="nv">DISTRIB_CODENAME</span><span class="o">=</span>bionic
+</span><span class='line'><span class="nv">DISTRIB_DESCRIPTION</span><span class="o">=</span><span class="s2">&quot;Ubuntu 18.04.3 LTS&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/11/05/serverless-framework/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -659,76 +724,6 @@ Excel マクロのすごい版みたいな感覚。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/19/ansible-abc/">Ansible ABC</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-08-19T08:22:00+09:00" pubdate data-updated="true">2016-08-19</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>チーム内での Ansible 勉強会の資料を公開。</p>
-
-<p><img src="/images/20160818_ansible-logo.png" alt="ansible logo" /></p>
-
-<p>公式サイトは以下。</p>
-
-<ul>
-<li><a href="http://www.ansible.com">http://www.ansible.com</a></li>
-<li><a href="http://docs.ansible.com">http://docs.ansible.com</a></li>
-</ul>
-
-
-<p>前提知識としては、以下。知っていたほうが理解が早い。</p>
-
-<ul>
-<li>unix コマンド</li>
-<li>YAML
-
-<ul>
-<li><a href="http://blog.n-z.jp/blog/2014-06-21-ansible-yaml.html">ansible使いのためのYAML入門 &ndash; @znz blog</a></li>
-</ul>
-</li>
-</ul>
-
-
-<p>公式から引用すると、Ansible は <strong>simple IT automation engine</strong>。</p>
-
-<blockquote><p>Ansible is a radically <strong>simple IT automation engine</strong> that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs.</p>
-
-<p>&mdash;&ndash;    <a href="https://www.ansible.com/how-ansible-works">How Ansible Works</a> より</p></blockquote>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/08/19/ansible-abc/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -744,6 +739,10 @@ Excel マクロのすごい版みたいな感覚。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/10/29/acl-on-kong/">kong でアクセス制御</a>
       </li>
     
@@ -757,10 +756,6 @@ Excel マクロのすごい版みたいな感覚。</p>
     
       <li class="post">
         <a href="/blog/2018/10/11/dockerize-flask-app/">Flask アプリ (チャットボット) のコンテナ化</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/06/25/apps-script/">Google Apps Script でサーバレスな為替レート取得クローラをつくる</a>
       </li>
     
   </ul>

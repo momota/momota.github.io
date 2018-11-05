@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-10-30T14:50:45+09:00</updated>
+  <updated>2018-11-05T21:29:33+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,249 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[serverless framework による AWS Lambda ローカル開発]]></title>
+    <link href="http://momota.github.io/blog/2018/11/05/serverless-framework/"/>
+    <updated>2018-11-05T20:11:00+09:00</updated>
+    <id>http://momota.github.io/blog/2018/11/05/serverless-framework</id>
+    <content type="html"><![CDATA[<p><img src="http://momota.github.io/images/20181105_serverless-framework/serverless-framework-logo.png" alt="serverless framework logo" /></p>
+
+<p><a href="https://serverless.com/">Serverless Framework</a> を使うことにより、FaaS (AWS Lambda, GCP Cloud Functions, Azure functions, など) の開発をローカルで実施できる。
+ローカル環境で自分の好きなエディタ・IDEで開発やテストが可能になるし、デプロイも容易になる。</p>
+
+<p>AWS には AWS SAM もあるが、他のクラウドプロバイダでも開発物やノウハウが使い回せることが期待できるので、3rd パーティ製の Serverless Framework を選ぶ。</p>
+
+<p>本稿では、Serverless Framework の導入と、Hello Worldアプリ (AWS Lambda) のデプロイについて書く。</p>
+
+<h2>環境</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat /etc/lsb-release
+</span><span class='line'><span class="nv">DISTRIB_ID</span><span class="o">=</span>Ubuntu
+</span><span class='line'><span class="nv">DISTRIB_RELEASE</span><span class="o">=</span>18.04
+</span><span class='line'><span class="nv">DISTRIB_CODENAME</span><span class="o">=</span>bionic
+</span><span class='line'><span class="nv">DISTRIB_DESCRIPTION</span><span class="o">=</span><span class="s2">&quot;Ubuntu 18.04.3 LTS&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<h2>Serverless framework のインストール</h2>
+
+<p>まず Node.js (v6.5.0以降) と npm をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get update
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install nodejs
+</span><span class='line'><span class="nv">$ </span>nodejs --version
+</span><span class='line'>v8,10,0
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install npm
+</span><span class='line'><span class="nv">$ </span>npm --version
+</span><span class='line'>3.5.2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>npm で serverless framework をインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo npm install -g serverless
+</span><span class='line'><span class="nv">$ </span>serverless --version
+</span><span class='line'>1.32.0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>AWS アクセスキーを設定する</h2>
+
+<ol>
+<li>AWSアカウントを作り、マネージドコンソールからIAMページにアクセスする</li>
+<li>ペインのユーザをクリックし、「ユーザを追加」をクリックする
+
+<ul>
+<li>適切なユーザ名を入力する</li>
+<li>アクセスの種類の、「プログラムによるアクセス」にチェックをいれ、次へ</li>
+<li>アクセス許可の設定は、「既存のポリシーを直接アタッチ」で、「AdministratorAccess」を選択し、次へ</li>
+<li>レビューして、問題なければ作成する</li>
+</ul>
+</li>
+<li>アクセスキーIDとシークレットアクセスキーをコピーする</li>
+<li>Serverless framework に設定する</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># パターン1: 環境変数に設定</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">export </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>&lt;your-key-here&gt;
+</span><span class='line'><span class="nv">$ </span><span class="nb">export </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>&lt;your-secret-key-here&gt;
+</span><span class='line'>
+</span><span class='line'><span class="c"># パターン2: serverless config credentials コマンドで設定</span>
+</span><span class='line'><span class="nv">$ </span>serverless config credentials --provider aws --key &lt;your-key-here&gt; --secret &lt;your-secret-key-here&gt;
+</span><span class='line'><span class="c"># =&gt; ~/.aws/credentials が生成される</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Serverless framework で Hello World</h2>
+
+<p>まず、作業ディレクトリの作成と、<code>package.json</code> を作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mkdir my-express-application <span class="o">&amp;&amp;</span> <span class="nb">cd </span>my-express-application
+</span><span class='line'><span class="nv">$ </span>npm init -f
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>いくつかのライブラリをインストールする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>npm install --save express serverless-http
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アプリケーションを <code>index.js</code> に書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">const</span> <span class="nx">serverless</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;serverless-http&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kr">const</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kr">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">id</span><span class="o">:</span> <span class="s1">&#39;00001&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">message</span><span class="o">:</span> <span class="s1">&#39;Hello World!&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}));</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">.</span><span class="nx">handler</span> <span class="o">=</span> <span class="nx">serverless</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これはルートパス <code>/</code> にアクセスがあった場合に、 <code>{ id: '00001', message: 'Hello World!' }</code> を返す単純なアプリ。</p>
+
+<p>これをデプロイするため、以下の <code>serverless.yml</code> を作成する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">service</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-express-application</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">provider</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">aws</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">runtime</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nodejs8.10</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">stage</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dev</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">region</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ap-northeast-1</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">functions</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">handler</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">index.handler</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">events</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ANY /</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="s">&#39;ANY</span><span class="nv"> </span><span class="s">{proxy+}&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>関数をデプロイする。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>serverless deploy
+</span><span class='line'>...snip...
+</span><span class='line'>Service Information
+</span><span class='line'>service: my-express-application
+</span><span class='line'>stage: dev
+</span><span class='line'>region: ap-northeast-1
+</span><span class='line'>stack: my-express-application-dev
+</span><span class='line'>api keys:
+</span><span class='line'>  None
+</span><span class='line'>endpoints:
+</span><span class='line'>  ANY - https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+</span><span class='line'>  ANY - https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev/<span class="o">{</span>proxy+<span class="o">}</span>
+</span><span class='line'>functions:
+</span><span class='line'>  app: my-express-application-dev-app
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>数分後にデプロイが完了し、<code>endpoints</code> の情報が出力される。
+この URL へアクセスし、動作確認する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -X GET https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+</span><span class='line'><span class="o">{</span><span class="s2">&quot;id&quot;</span>:<span class="s2">&quot;00001&quot;</span>,<span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Hello World!&quot;</span><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>アプリケーションで定義した JSON が返ってくる。</p>
+
+<h2>参考</h2>
+
+<ul>
+<li><a href="https://serverless.com/framework/docs/providers/aws/guide/quick-start/">Serverless Framework &ndash; AWS Lambda Guide &ndash; Quick Start</a></li>
+<li><a href="https://serverless.com/framework/docs/providers/aws/guide/credentials/">Serverless Framework &ndash; AWS Lambda Guide &ndash; Credentials</a></li>
+<li><a href="https://serverless.com/blog/serverless-express-rest-api/">Deploy a REST API using Serverless, Express and Node.js</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[kong でアクセス制御]]></title>
@@ -8030,336 +8273,6 @@ USB デバイスを最優先にしておく。</p>
 <p>インストールイメージを焼いた USB メモリを刺したままノート PC を起動してみて「CentOSをインストール？それともお試しインストール？」みたいな画面が出てくる。
 お試しインストールしてみて、キーボードやタッチパッドが使えることを確認する。
 確認ができたら再起動し、インストールする。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[lita で Slack Bot (on heroku) をつくる]]></title>
-    <link href="http://momota.github.io/blog/2015/01/11/lita/"/>
-    <updated>2015-01-11T21:36:00+09:00</updated>
-    <id>http://momota.github.io/blog/2015/01/11/lita</id>
-    <content type="html"><![CDATA[<p><img src="https://www.lita.io/assets/lita-94f070fbb79e8ec62cc7a21ca39f8448.png" alt="lita" /></p>
-
-<p>チャットツール <a href="https://slack.com/">slack</a> に常駐する bot をつくったので、そのときの導入メモ。
-bot 開発には <a href="https://www.lita.io/">lita</a> を利用した。lita は Ruby で書かれた chat bot フレームワーク。hubot にインスパイアされて開発されたようだ。
-js (coffee script) よりも ruby のほうがとっつきやすかったので採用した。</p>
-
-<p>環境は、ubuntu 14.04, ruby 2.1.5, lita 4.0.4.</p>
-
-<p>ゆくゆくは、<a href="http://www.amazon.co.jp/gp/product/B00H91KK26/ref=as_li_ss_tl?ie=UTF8&amp;camp=247&amp;creative=7399&amp;creativeASIN=B00H91KK26&amp;linkCode=as2&amp;tag=mmtmkt-22">iRKit</a> とか使って家電と連携したりしたい。</p>
-
-<!-- more  -->
-
-
-<p><img src="http://momota.github.io/images/20150111_lita/lita.png" alt="network" /></p>
-
-<p>今回の構成図を上記に示す。</p>
-
-<h2>1. 事前準備: もろもろインストールする</h2>
-
-<h3>1.1 lita をインストール</h3>
-
-<p>lita は gem でインストールできる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install lita
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>1.2 redis をインストール</h3>
-
-<p>lita はデータ永続化ストレージとして redis を使うことが前提となっている。
-つまり、ローカル環境で lita を実行するには(開発するには)、redis が必要なため、redis をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get update
-</span><span class='line'><span class="nv">$ </span>sudo apt-get install redis-server
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>redis を起動する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo service redis-server start
-</span><span class='line'><span class="nv">$ </span>sudo service redis-server status
-</span><span class='line'><span class="c">#=&gt; redis の起動状態確認</span>
-</span><span class='line'><span class="c">#=&gt; ps aux | grep redis とかで確認してもいい</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2. lita プロジェクト作成、起動</h2>
-
-<p>lita プロジェクト&#8221;sample&#8221;を作成する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>lita new sample
-</span><span class='line'><span class="c">#=&gt; sample ディレクトリが生成される</span>
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>sample
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ruby のバージョンを rbenv で指定しておく。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>2.1.5
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span><span class='line'><span class="nv">$ </span>ruby -v
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>bundler でインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>lita start</code> で lita をローカル環境で起動してみる。
-<code>lita help</code> で返ってくればOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>lita start
-</span><span class='line'>Type <span class="s2">&quot;exit&quot;</span> or <span class="s2">&quot;quit&quot;</span> to end the session.
-</span><span class='line'>Lita &gt; lita info
-</span><span class='line'>Lita 4.0.4 - https://www.lita.io/
-</span><span class='line'>Redis 2.8.4 - Memory used: 414.04K
-</span><span class='line'>Lita &gt; lita <span class="nb">help</span>
-</span><span class='line'>Lita: <span class="nb">help</span> - Lists <span class="nb">help </span>information <span class="k">for </span>terms and <span class="nb">command </span>the robot will respond to.
-</span><span class='line'>Lita: <span class="nb">help </span>COMMAND - Lists <span class="nb">help </span>information <span class="k">for </span>terms or commands that begin with COMMAND.
-</span><span class='line'>Lita: info - Replies with the current version of Lita.
-</span><span class='line'>Lita &gt; <span class="nb">exit</span>
-</span><span class='line'><span class="nv">$ </span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="https://www.lita.io/plugins">lita プラグイン</a> もたくさんあるので、適当に <code>Gemfile</code> に追加して <code>bundle install</code> するとよい。</p>
-
-<h2>3. herokuへデプロイして Slack と連携する</h2>
-
-<p>lita bot を heroku へデプロイする。
-また、アダプタ <a href="https://github.com/kenjij/lita-slack">lita-slack</a> を利用して Slack と連携する。</p>
-
-<h3>3.1 事前準備</h3>
-
-<p>heroku へのデプロイは、git push して行うので、git でバージョン管理を開始する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git init
-</span><span class='line'><span class="nv">$ </span>git add .
-</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;first commit&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>heroku で ruby バージョンを指定するには、<code>Gemfile</code>で<code>ruby "VERSION"</code>と記述する。
-また、Slack と連携するため、<code>lita-slack</code> アダプタもインストールする。
-この時点で、<code>Gemfile</code>は以下の通り。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;https://rubygems.org&quot;</span>
-</span><span class='line'><span class="n">ruby</span> <span class="s2">&quot;2.1.5&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita-slack&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>bundler でインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install --path vendor/bundle
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>slack とつなげたり、Redis To Go を利用するために、<code>lita_config.rb</code> を以下のように修正する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Lita</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span>      <span class="o">=</span> <span class="s2">&quot;lita&quot;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:info</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># アダプタの指定。Slack とつなげるので、:slack と修正する</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">adapter</span>   <span class="o">=</span> <span class="ss">:slack</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Slack のAPIキーを指定する</span>
-</span><span class='line'>  <span class="c1"># 後述する heoku コマンドで heroku の環境変数を設定する</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">slack</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;SLACK_API_KEY&quot;</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># heroku の redis アドオン Redis To Go 関連の設定</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">redis</span><span class="o">[</span><span class="ss">:url</span><span class="o">]</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;REDISTOGO_URL&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">http</span><span class="o">.</span><span class="n">port</span>   <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;PORT&quot;</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>heroku でのアプリケーション起動には foreman でのアプリケーション起動が必要となる。
-以下の <code>Procfile</code> を作成する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">web</span><span class="p">:</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">lita</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3.2 heroku の設定</h3>
-
-<p>新規に heroku アプリケーションを作成する。
-ここでは、<code>lita-sample</code> という名前にした。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku apps:create lita-sample
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>heroku の redis アドオン Redis To Go をアプリケーションへ追加する。
-事前に heroku へクレジットカードの登録が必要。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku addons:add redistogo --app lita-sample
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>heroku の環境変数を設定する。
-設定するのは、Slack APIキーのみでOK。
-Slack API キーは、<a href="https://YOUR-DOMAIN.slack.com/services/new/lita">https://YOUR-DOMAIN.slack.com/services/new/lita</a> から Integration の設定をしたら入手可能。</p>
-
-<p><code>REDISTOGO_URL</code> などは、アドオン追加時に自動で設定されている。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>heroku config:set <span class="nv">SLACK_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-slack-api-key&quot;</span>
-</span><span class='line'><span class="nv">$ </span>heroku config
-</span><span class='line'><span class="c">#=&gt; heroku 上で設定されている環境変数が出力されるので正しく設定されているか確認する</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3.3 heroku へデプロイする</h3>
-
-<p>git commit して git push してあげる。
-そうすると heoku アプリケーションが起動する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;make it better&quot;</span>
-</span><span class='line'><span class="nv">$ </span>git push heroku master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Slack に lita さんが見えるはずなので 適当なチャンネルに招待して <code>@lita help</code> とか声をかけると答えてくれる。</p>
-
-<h3>3.4 heroku アプリケーションをたたき起こす</h3>
-
-<p>heroku を無料で使う 1 web dyno (webサーバインスタンス) のときは、1時間アクセスがないとアプリケーションがスリープする。つまり、せっかくデプロイした bot も眠ってしまうため、定期的にhttpアクセスさせてたたき起こしておく。
-なお、<code>lita-cron</code> で bot に定期的に投稿させてもだめだったので、heroku アプリケーションへの http アクセスが必要なもよう。</p>
-
-<p>定期的な http アクセスには <a href="http://uptimerobot.com/">Uptime Robot</a> を利用した。</p>
-
-<h2>4. handler 作成</h2>
-
-<p>以下のように handler のひな形を生成する。
-<code>lita-</code> というプレフィックスが自動で付与される。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mkdir handlers
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>handlers
-</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>lita hello_handler
-</span><span class='line'><span class="c">#=&gt; lita-hello_handler ディレクトリが生成される</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>handlers/lita-hello_handler/lib/lita/handlers/hello_hundler.rb</code> を修正する。
-<code>route</code> で正規表現にマッチした場合の処理へルーティングする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Lita</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Handlers</span>
-</span><span class='line'>    <span class="k">class</span> <span class="nc">HelloHandler</span> <span class="o">&lt;</span> <span class="no">Handler</span>
-</span><span class='line'>      <span class="n">route</span> <span class="sr">/^java\s+(.+)/</span><span class="p">,</span> <span class="ss">:with_java</span><span class="p">,</span> <span class="ss">help</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;java TEXT&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;reply back with java.&quot;</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">def</span> <span class="nf">with_java</span><span class="p">(</span> <span class="n">response</span> <span class="p">)</span>
-</span><span class='line'>        <span class="n">word</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">matches</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="mi">0</span><span class="o">]</span>
-</span><span class='line'>        <span class="n">response</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="s2">&quot;!!! </span><span class="si">#{</span><span class="n">word</span><span class="si">}</span><span class="s2"> とジャバ !!!&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="no">Lita</span><span class="o">.</span><span class="n">register_handler</span><span class="p">(</span><span class="no">HelloHandler</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>Gemfile</code> に以下を追記し、 <code>bundle install</code> する。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;lita-hello_handler&quot;</span><span class="p">,</span> <span class="ss">path</span><span class="p">:</span> <span class="s2">&quot;handlers/lita-hello_handler&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>commit して再度 heroku へ push してデプロイする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git commit -a -m <span class="s2">&quot;make it better&quot;</span>
-</span><span class='line'><span class="nv">$ </span>git push heroku master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>slack 上で <code>@lita java あなた</code> とかつぶやくとサイコーにジャバな気分になる。</p>
-
-<p><img src="http://momota.github.io/images/20150111_lita/slack_lita.png" alt="lita java" /></p>
 ]]></content>
   </entry>
   
