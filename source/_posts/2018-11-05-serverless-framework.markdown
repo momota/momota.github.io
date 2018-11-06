@@ -124,10 +124,10 @@ provider:
 
 functions:
   app:
-  handler: index.handler
-  events:
-    - http: ANY /
-    - http: 'ANY {proxy+}'
+    handler: index.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
 ```
 
 関数をデプロイする。
