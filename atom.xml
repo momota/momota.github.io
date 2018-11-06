@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-11-05T21:29:33+09:00</updated>
+  <updated>2018-11-06T20:05:49+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -193,10 +193,10 @@
 </span><span class='line'>
 </span><span class='line'><span class="l-Scalar-Plain">functions</span><span class="p-Indicator">:</span>
 </span><span class='line'>  <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">handler</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">index.handler</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">events</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ANY /</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="s">&#39;ANY</span><span class="nv"> </span><span class="s">{proxy+}&#39;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">handler</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">index.handler</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">events</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ANY /</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="s">&#39;ANY</span><span class="nv"> </span><span class="s">{proxy+}&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

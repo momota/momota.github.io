@@ -4,7 +4,7 @@
   <title><![CDATA[Category: serverless-framework | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/serverless-framework/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-11-05T21:29:33+09:00</updated>
+  <updated>2018-11-06T20:05:49+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -145,12 +145,12 @@ service: my-express-application</p>
   region: ap-northeast-1</p>
 
 <p>functions:
-  app:
-  handler: index.handler
-  events:</p>
+  app:</p>
 
-<pre><code>- http: ANY /
-- http: 'ANY {proxy+}'
+<pre><code>handler: index.handler
+events:
+  - http: ANY /
+  - http: 'ANY {proxy+}'
 </code></pre>
 
 <p>```</p>
