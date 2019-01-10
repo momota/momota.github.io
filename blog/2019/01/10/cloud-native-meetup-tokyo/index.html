@@ -1,0 +1,859 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>[参加レポート]Cloud Native Meetup Tokyo #6 - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="2019/01/09(水)、渋谷で行われたCloud Native Meetup Tokyo #6 KubeCon + CNCon Recap &ndash; connpass への参加レポート。
+ハッシュタグ #cloudnativejp
+転職しちゃったIさんとNさんに再会できてうれしかった。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">[参加レポート]Cloud Native Meetup Tokyo #6</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-01-10T10:09:00+09:00" pubdate data-updated="true">2019-01-10</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><img src="/images/20190110_cloud-native-meetup-tokyo/cnmt-logo.png" alt="Cloud Native Meetup Tokyo logo" /></p>
+
+<ul>
+<li>2019/01/09(水)、渋谷で行われた<a href="https://cloudnative.connpass.com/event/113478/">Cloud Native Meetup Tokyo #6 KubeCon + CNCon Recap &ndash; connpass</a> への参加レポート。</li>
+<li><a href="https://twitter.com/hashtag/cloudnativejp?src=hash">ハッシュタグ #cloudnativejp</a></li>
+<li>転職しちゃったIさんとNさんに再会できてうれしかった。お酒ごちそうさまでした。</li>
+</ul>
+
+
+<h2>Cortex の話をKubeConで聞きたかった話</h2>
+
+<ul>
+<li>Shinya Uemura <a href="https://twitter.com/uesyn">@uesyn</a> (KDDI &amp; Creationline)</li>
+<li><a href="https://speakerdeck.com/uesyn/cortexfalsehua-wokubecondewen-kitakatutatuteiuhua">Cortexの話をKubeConで聞きたかったっていう話 &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<p><img src="/images/20190110_cloud-native-meetup-tokyo/Cortex.png" alt="cortex" /></p>
+
+<ul>
+<li>PrometheusのローカルストレージはLong-term Storageではない
+
+<ul>
+<li>レプリケーション機能がなかったりやクラスター化されていない</li>
+</ul>
+</li>
+<li>Cortex
+
+<ul>
+<li>Prometheusのメトリクスの長期保管のためのストレージ</li>
+</ul>
+</li>
+<li>Frontend
+
+<ul>
+<li>Cortexに含まれていないため、自分で実装する必要がある</li>
+</ul>
+</li>
+<li>Distributor
+
+<ul>
+<li>Prometheusから送信された時系列データを処理する</li>
+<li>複数のIngesterに並列でサンプルを送信する
+
+<ul>
+<li>分散ハッシュテーブルを活用</li>
+<li>コンシステントハッシュテーブル</li>
+</ul>
+</li>
+<li>ステートレスな設計</li>
+</ul>
+</li>
+<li>Ingester
+
+<ul>
+<li>時系列データを長期ストレージバックエンドへ書き込む
+
+<ul>
+<li>数時間分のデータを圧縮し、チャンクとしてバックエンドストレージへ保管</li>
+</ul>
+</li>
+<li>過去12時間のデータを保持しておく</li>
+</ul>
+</li>
+<li>Chunk store
+
+<ul>
+<li>2種類のデータストア
+
+<ul>
+<li>Chunkとしてまとめられた時系列データを保存</li>
+<li>Chunkのための転置インデックスを保存</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Query Frontend
+
+<ul>
+<li>テナントからのReadリクエストをいい感じにQuerierに流してくれる
+
+<ul>
+<li>テナントごとのキューイングなど</li>
+</ul>
+</li>
+<li>オプションのサービスなので省略可能</li>
+</ul>
+</li>
+<li>Querier
+
+<ul>
+<li>クライアントからのPromQLクエリを処理</li>
+<li>取得する時系列データへのアクセスの抽象化</li>
+</ul>
+</li>
+<li>Ruler
+
+<ul>
+<li>Alertingのためのルールを実行してアラートをAlert managerに送信</li>
+<li>CortexのインストールにはAlertmanagerも含まれる</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>マルチテナント対応</h3>
+
+<ul>
+<li>リクエストに含まれるヘッダ内のIDでテナントを判断</li>
+<li>テナントIDごとにPrometheusのメトリクスを分割して保存可能</li>
+<li>Cortex自体に認証認可の機能は含まれず、実装が必要</li>
+<li>Headerに埋め込むテナントID: X-Scope-OrgIDで識別</li>
+</ul>
+
+
+<h3>Cortexをk8s上で動かそう</h3>
+
+<ul>
+<li>つらい
+
+<ul>
+<li>リリースブランチがない、タグもない</li>
+<li>Masterから…</li>
+<li>公式の入門ドキュメントがない</li>
+<li>For Developerに記載されたとおりに動かしても動かない</li>
+<li>Frontendの実装が必要</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>手順</h3>
+
+<ol>
+<li>make</li>
+<li>k8sディレクトリ内のマニフェストのimageを上記へ置換</li>
+<li>一部マニフェスト内のargumentが間違っている部分を修正</li>
+<li><code>kubectl create -f ./k8s</code></li>
+<li><code>kubectl port-forward svc/nginx 9999:80</code></li>
+<li><code>curl http://127.0.0.1:9999/api/prom/api/v1/query?query=up</code></li>
+</ol>
+
+
+<h3>まとめと今後</h3>
+
+<ul>
+<li>まとめ
+
+<ul>
+<li>cortexの歴史と概要</li>
+<li>取りあえず動く手順</li>
+</ul>
+</li>
+<li>今後
+
+<ul>
+<li>本物のDynamoDB、S3への接続</li>
+<li>負荷テスト</li>
+<li>Ruler, table-manager, schemaの調査</li>
+<li>似たような設計のLokiの調査</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>KubeCon + CNConに見るetcdの未来</h2>
+
+<ul>
+<li>Akihiro Ikezoe <a href="https://twitter.com/zoetro">@zoetro</a> (Cybozu)
+
+<ul>
+<li>CybozuはVMからコンテナへどんどん移行中</li>
+</ul>
+</li>
+<li><a href="https://speakerdeck.com/zoetrope/kubecon-plus-cnconnijian-ruetcdfalsewei-lai">KubeCon+CNConに見るetcdの未来 &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<p><img src="/images/20190110_cloud-native-meetup-tokyo/etcd.jpg" alt="etcd" /></p>
+
+<h3>etcd</h3>
+
+<ul>
+<li>現Red hat社 (旧CoreOS社) が華髪する分散キーバリューストア</li>
+<li>High Available</li>
+<li>Strong Consistency Model</li>
+<li>Raftによる分散合意</li>
+<li>Transaction, Watch, Lease</li>
+</ul>
+
+
+<h3>etcdの未来</h3>
+
+<ul>
+<li>CoreOSがRed Hatに買収され、Red HatもIBMに買収される予定</li>
+<li>Container Linux: Fedora CoreOSが後継</li>
+<li>etcdがCNCFプロジェクトに
+
+<ul>
+<li>Red Hat社からCNCFへ寄贈</li>
+<li>もともと開発者は外部が多かったので開発体制に大きな変化はなさそう</li>
+<li>今後は使いやすさや安定性、性能の向上</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>新機能</h3>
+
+<ol>
+<li>Raft Learner
+
+<ul>
+<li>Raft: etcdの分散合意アルゴリズム
+
+<ul>
+<li>ネットワーク分断などの障害が発生しても、データの不整合を発生させないことを保証する</li>
+</ul>
+</li>
+<li>現状の問題点
+
+<ul>
+<li>クラスタに新しいメンバを追加したときに、データ同期に時間がかかる</li>
+<li>データ同期中はI/O負荷が高い</li>
+<li>データ同期中にネットワーク分断が発生すると、クラスタ崩壊が発生する</li>
+<li>起動パラメータをミスっていると、故障したメンバーがクラスタへ追加されてしまう</li>
+</ul>
+</li>
+<li>Raft Learner
+
+<ul>
+<li>データ同期中はLearner状態に</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Cluster init
+
+<ul>
+<li>etcdは起動オプションがたくさんある (リッスンするアドレスやメンバーごとに名前など)</li>
+</ul>
+</li>
+</ol>
+
+
+<h3>etcdadm</h3>
+
+<ul>
+<li>etcdの運用は大変
+
+<ul>
+<li>HA構成、証明書管理、クラスタが崩壊しないようにメンバを追加。削除</li>
+</ul>
+</li>
+<li>運用を自動化するツールが必要となる: etcdadm
+
+<ul>
+<li>実機やVM向けのetcdクラスタ運用自動化ツール</li>
+<li>k8s向けに特化
+
+<ul>
+<li>メンバーの追加削除</li>
+<li>バックアップとリストア (DR)</li>
+<li>アップグレード・ダウングレード</li>
+<li>証明書の管理</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>トラブルシューティング</h3>
+
+<ul>
+<li>デバッグのアプローチ
+
+<ul>
+<li>etcd起動確認</li>
+<li>ディスクスペースが空いているか？</li>
+<li>リクエストに時間がかかっていないか？</li>
+</ul>
+</li>
+<li>ツール
+
+<ul>
+<li>etcdctl</li>
+<li>auger</li>
+<li>etcd-dump-logs</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>QA形式のセッション: Deep Dive</h3>
+
+<ul>
+<li>なぜデータサイズに制限があるのか？
+
+<ul>
+<li>デフォルトで2GBの制限がある</li>
+<li>データベースファイルをmmapするため、データ量分のメモリが必要</li>
+</ul>
+</li>
+<li>なぜコンパクションが必要なのか？
+
+<ul>
+<li>キーごとの履歴を保持している</li>
+<li>古い履歴を削除しないと、データ容量が増えリストア時間も憎愛する</li>
+</ul>
+</li>
+<li>なぜI/Oレイテンシに敏感なのか
+
+<ul>
+<li>定期的にリーダーからフォロワーにハートビートを送信して、分散合意のメタデータをファイルに保存している</li>
+<li>ファイル書き込みが遅いとハートビートがタイム・アウトする</li>
+<li>できるだけSSDを使うべき</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>まとめ</h3>
+
+<ul>
+<li>etcdはk8sを始めいろいろなところで使われていてなくてはならない存在</li>
+<li>CNCFに加わったことで今後のメンテナンスは安心感</li>
+<li>運用者向けの新機能が多数</li>
+</ul>
+
+
+<h2>Monitoring Kubernetes Audit Log by Falco</h2>
+
+<ul>
+<li>Makoto Hasegawa <a href="https://twitter.com/makocchi">@makocchi</a> (CyberAgent)</li>
+<li><a href="https://speakerdeck.com/makocchi/kubecon2018-recap-falco-deep-dive">kubecon2018_recap_falco_deep_dive &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<p><img src="/images/20190110_cloud-native-meetup-tokyo/falco.png" alt="falco" /></p>
+
+<h3>Falco</h3>
+
+<ul>
+<li>Container Native Runtime Security</li>
+<li>コンテナ環境のセキュリティをモニタリングしてくれるOSS</li>
+<li>主にsysdigが開発</li>
+<li>モニタリングをするだけで一切に処理をブロックしたりすることはない</li>
+</ul>
+
+
+<h3>仕組み</h3>
+
+<ul>
+<li>Falco Rules</li>
+<li>Falco Engine</li>
+<li><p>Kernel module / sysdig libraries</p></li>
+<li><p>Falcoを実行するとDKMSによってmoduleがbuild&amp;installされる</p></li>
+<li><code>lsmod | grep falco</code></li>
+<li>Rule をyamlで記述することでモニタリングするイベントを定義する</li>
+</ul>
+
+
+<h3>Notify</h3>
+
+<ul>
+<li>Falcoには検知した際にプログラムを実行する仕組みがある
+
+<ul>
+<li>外部へのWebhookとか可能 (Slack連携)</li>
+</ul>
+</li>
+<li><code>falco.yaml</code> の設定</li>
+<li><a href="https://medium.com/@makocchi/falco-with-kubernetes-ja-1e2c045b3840">Kubernetes に Falco を展開してアプリケーションの挙動をモニタリングする ? makocchi ? Medium</a></li>
+</ul>
+
+
+<h3>k8sのaudit logをモニタリング</h3>
+
+<ul>
+<li>k8s APIサーバに対する呼び出しを時系列でログに記録することが可能</li>
+<li>K8Sでaudit loggingを有効にする必要がある</li>
+<li>GKEではdefaultで有効</li>
+<li>webhookの設定とpolicyはfalcoのrepositoryにサンプルが用意されている</li>
+<li>audit policyはrbacに近い設定で定義可能</li>
+<li>audit logを元にrbacのmanifestを自動生成してくれるツールも存在する</li>
+</ul>
+
+
+<h3>インストール</h3>
+
+<ul>
+<li>docker runでもOK</li>
+<li>Helmのchartがあるのでそれが楽</li>
+</ul>
+
+
+<h2>KubeCon + CloudNativeCon 2018 NA Recap Vitess</h2>
+
+<ul>
+<li>Yutaka Ichikawa @cyberblack28 (APC)</li>
+<li><a href="https://speakerdeck.com/cyberblack28/kubecon-plus-cloudnativecon-2018-na-recap-vitess">KubeCon + CloudNativeCon 2018 NA Recap Vitess &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<p><img src="/images/20190110_cloud-native-meetup-tokyo/vitess.png" alt="vitess" /></p>
+
+<h3>サマリ</h3>
+
+<ul>
+<li>MySQL cloud-native nirvana
+
+<ul>
+<li>MySQL基盤は複雑</li>
+<li>MySQLクラウドネイティブ解脱への道のり</li>
+<li>k8sでMySQLの管理</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Vitess</h3>
+
+<ul>
+<li>MySQLをシャーディングによってスケールを実現するクラウドネイティブなデータベースクラスタシステム</li>
+<li>Youtubeにより開発、Go製</li>
+<li>Slackが20%がVitessへ移行中</li>
+<li>jd.com: 10,000+テーブル on k8s</li>
+<li>アーキテクチャ
+
+<ul>
+<li>vttabletがサイドカー。クエリの置換、重複除去など</li>
+<li>vtgate: アプリからのクエリをvttabletにルーティング、結果をクライアントへ返すプロキシ</li>
+</ul>
+</li>
+<li>Vitessシャーディング
+
+<ul>
+<li>垂直: テーブルごとに複数データベースに分けて格納</li>
+<li>水平: 1つのテーブルを複数</li>
+</ul>
+</li>
+<li>k8sとの相性が良い</li>
+</ul>
+
+
+<h3>事例</h3>
+
+<ul>
+<li>HubSpot: インバウンドマーケティングの統合サービスアプリケーションおよびサービス
+
+<ul>
+<li>AWS (EC2 * 2500規模) → GCP (k8s + Vitess)</li>
+<li>選定理由
+
+<ul>
+<li>シャーディング機能</li>
+<li>k8sとの親和性</li>
+<li>OSS</li>
+<li>クラウドネイティブ</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>まとめ</h3>
+
+<ul>
+<li>YouTubeの実績は強い</li>
+<li>プロダクション利用が徐々に増えている</li>
+<li>k8sとの親和性が高い</li>
+<li>設計・運用のチューニングは必要</li>
+<li>マネージドサービスとしてVitess as a Serviceなるものが生まれそう!?</li>
+</ul>
+
+
+<h2>Prometheusの今後</h2>
+
+<ul>
+<li>Yoshi Shota <a href="https://twitter.com/yosshi_">@yosshi_</a> (NTT Communications)</li>
+<li><a href="https://speakerdeck.com/yosshi_/prometheusfalsejin-hou">Prometheusの今後.pdf &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<p><img src="/images/20190110_cloud-native-meetup-tokyo/prometheus.jpg" alt="prometheus" /></p>
+
+<h3>Prometheusの課題</h3>
+
+<ul>
+<li>長期保管の機能がない
+
+<ul>
+<li>保管機能を延ばすと性能の劣化がある</li>
+</ul>
+</li>
+<li><p>デフォルトで冗長機能がない</p></li>
+<li><p>長期保管: Third party adapterの利用</p>
+
+<ul>
+<li>Cortex</li>
+<li>M3DB: Uber製</li>
+</ul>
+</li>
+<li>Thanos/Cortex/M3</li>
+</ul>
+
+
+<h3>Thanos</h3>
+
+<ul>
+<li>複数のPrometheusを横断してメトリクスの収集を可能にする</li>
+<li>無制限にログを保管する</li>
+<li><p>上記を応答時間を犠牲にすることなく実現</p></li>
+<li><p>Querier</p>
+
+<ul>
+<li>Querier がSIdecar経由でPrometheusから時系列データを取得</li>
+</ul>
+</li>
+<li>Sidecar → Object Storage</li>
+<li>Store</li>
+<li>Compactor: 圧縮とダウンサンプリングを行う</li>
+<li><p>Ruler: 通知用</p></li>
+<li><p>2019年1月時点ではGCSのみ対応</p></li>
+</ul>
+
+
+<h3>Loki</h3>
+
+<ul>
+<li>ログの収集と可視化ツール</li>
+<li>メトリクスだけではインシデントの全容の半分しかわからない</li>
+<li>メトリクスとログの参照時の切替コストを最小限に抑える</li>
+<li>Prometheusを参考にラベルを活用した時系列にデータを格納</li>
+<li>アーキテクチャはCortexと同じ
+
+<ul>
+<li>ソースコードもCortexを使いまわし…</li>
+</ul>
+</li>
+<li>まだAlpha版</li>
+</ul>
+
+
+<h3>監視の目指すとこ</h3>
+
+<ul>
+<li>Alert → Dashboard → Adhoc Query → Log Aggregation → Distribute Tracing</li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-01-10T10:09:00+09:00" pubdate data-updated="true">2019-01-10</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cncf/'>cncf</a>, <a class='category' href='/blog/categories/cortex/'>cortex</a>, <a class='category' href='/blog/categories/etcd/'>etcd</a>, <a class='category' href='/blog/categories/falco/'>falco</a>, <a class='category' href='/blog/categories/loki/'>loki</a>, <a class='category' href='/blog/categories/prometheus/'>prometheus</a>, <a class='category' href='/blog/categories/vitess/'>vitess</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/" data-via="momota" data-counturl="http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/11/05/serverless-framework/" title="Previous Post: serverless framework による AWS Lambda ローカル開発">&laquo; serverless framework による AWS Lambda ローカル開発</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/01/10/cloud-native-meetup-tokyo/">[参加レポート]Cloud Native Meetup Tokyo #6</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/29/acl-on-kong/">kong でアクセス制御</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless mode + Ruby + Selenium</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/';
+        var disqus_url = 'http://momota.github.io/blog/2019/01/10/cloud-native-meetup-tokyo/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

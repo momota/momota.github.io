@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ansible | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/ansible/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2018-11-06T20:05:49+09:00</updated>
+  <updated>2019-01-10T11:08:25+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -609,7 +609,7 @@ notify:
 
 <p>リモートのコマンド結果 (標準出力)に対して、一行ずつ処理するタスクが以下。</p>
 
-<p>
+<p>{% raw %}
 ```yaml
 &ndash; name: &ldquo;リモートのコマンド結果を使ったループの例&rdquo;
   shell: /usr/bin/something
@@ -620,13 +620,13 @@ notify:
 shell: /usr/bin/something_else &mdash;param {{ item }}
 with_items: &ldquo;{{ command_result.stdout_lines }}&rdquo;
 ```
-</li>
+{% endraw %}</li>
 </ul>
 
 
 <p>こんな感じで直接リストを書いてもOK。</p>
 
-<p>
+<p>{% raw %}
 ```yaml
 &ndash; name: &ldquo;リストからパッケージをインストールしていく&rdquo;
   yum: name={{ item }} state=latest
@@ -639,7 +639,7 @@ with_items: &ldquo;{{ command_result.stdout_lines }}&rdquo;
 </code></pre>
 
 <p>```
-</p>
+{% endraw %}</p>
 
 <h1>playbook のサンプル</h1>
 
@@ -1086,7 +1086,7 @@ $ ansible some-host -m setup
 &ldquo;ansible_virtualization_type&rdquo;: &ldquo;VMware&rdquo;
 ```</p>
 
-<p>たとえば、IPアドレスは <code>{{ ansible_eth0["ipv4"]["address"] }}</code> のように、Playbook の中で変数として
+<p>たとえば、IPアドレスは {% raw %}<code>{{ ansible_eth0["ipv4"]["address"] }}</code> {% endraw %}のように、Playbook の中で変数として
 扱うことができる。</p>
 
 <p>その他、<code>facter</code> や <code>ohai</code> がリモートホストにインストールされていればそれらも利用可能。
@@ -1597,7 +1597,7 @@ private_vars/ を追加しておく。</p>
 
 <ul>
 <li>name: add the user &ldquo;guest&rdquo;
-user: name=guest shell=/bin/bash password=
+user: name=guest shell=/bin/bash password={{ guest_password }}
 become: yes
 become_method: sudo
 ```</li>
