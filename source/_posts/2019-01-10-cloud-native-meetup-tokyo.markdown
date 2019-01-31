@@ -13,6 +13,7 @@ categories: cncf prometheus cortex etcd falco vitess loki
 - 転職しちゃったIさんとNさんに再会できてうれしかった。お酒ごちそうさまでした。
 
 
+<!-- more -->
 
 ## Cortex の話をKubeConで聞きたかった話
 
