@@ -4,7 +4,7 @@
   <title><![CDATA[Category: prometheus | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/prometheus/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-01-10T11:08:25+09:00</updated>
+  <updated>2019-01-31T10:47:06+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -25,6 +25,9 @@
 <li><a href="https://twitter.com/hashtag/cloudnativejp?src=hash">ハッシュタグ #cloudnativejp</a></li>
 <li>転職しちゃったIさんとNさんに再会できてうれしかった。お酒ごちそうさまでした。</li>
 </ul>
+
+
+<!-- more -->
 
 
 <h2>Cortex の話をKubeConで聞きたかった話</h2>
