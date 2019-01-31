@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: android | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/android/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2019-01-31T11:49:29+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[参加レポート]GDG-Tokyo New Year Party 2019]]></title>
+    <link href="http://momota.github.io/blog/2019/01/31/gdg-tokyo/"/>
+    <updated>2019-01-31T10:51:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/01/31/gdg-tokyo</id>
+    <content type="html"><![CDATA[<p><img src="/images/20190131_gdg-tokyo/gdg.png" alt="GDF-Tokyo New Year Party logo" /></p>
+
+<ul>
+<li>2019/01/30(水)、六本木で行われた<a href="https://gdg-tokyo.connpass.com/event/113178/">GDG Tokyo New Year Party 2019 &ndash; connpass</a> への参加レポート。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h3>How to start Android Dev</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/wasabeef_jp">@wasabeef_jp さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/wasabeef/jp-how-to-start-android-dev">［JP］ How to start Android Dev &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>IDE (Build tool)</h4>
+
+<ul>
+<li>Android Studio
+
+<ul>
+<li>Layout Editor</li>
+<li>MotionLayout: Motion editor</li>
+<li>Emulator: 数年前に比べると高機能・高速化</li>
+</ul>
+</li>
+<li>Gradle
+
+<ul>
+<li>ビルド自動化</li>
+<li>Android開発におけるスタンダード</li>
+<li>DSL (デフォルトGroovy DSL)
+
+<ul>
+<li>Kotlin DSL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Java / Kotlin
+
+<ul>
+<li>近年はKotlinが主流
+
+<ul>
+<li>Libraryを作るときはJavaで作ることが多い</li>
+</ul>
+</li>
+<li>Java 8: 最新のJavaは使えない
+
+<ul>
+<li>D8 toolsによって今後変わりそう</li>
+</ul>
+</li>
+<li>Kotlin 1.3
+
+<ul>
+<li>Coroutines: 軽量スレッド</li>
+<li>Null-safety</li>
+<li>Extention functions</li>
+<li>Lambda + Inline functions、など</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Architecture</h4>
+
+<ul>
+<li>MVVM
+
+<ul>
+<li>Google推奨でAACと相性がいい</li>
+</ul>
+</li>
+<li>Flux
+
+<ul>
+<li>日本で数件の事例あり</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Jetpack</h4>
+
+<ul>
+<li>KTX
+
+<ul>
+<li>Core</li>
+<li>Fragment</li>
+<li>Lifecycle</li>
+</ul>
+</li>
+<li>Lifecycles
+
+<ul>
+<li>バックグラウンド状態、フォアグラウンド状態、電源状態…</li>
+<li>ライフサイクルを知りたいとき
+
+<ul>
+<li>動画の開始停止</li>
+<li>画面閉じたときの終了処理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ViewModel (+ LiveData)
+
+<ul>
+<li>Activity/ViewModelはそれぞれ異なるライフサイクルがあるが、ViewModelのほうが長生きする</li>
+<li>ViewModel
+
+<ul>
+<li>Activityの画面回転・破棄のデータ保持</li>
+<li>Fragments感のデータ共有</li>
+<li>永続化ではない</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Navigation
+
+<ul>
+<li>Fragment Transactionの簡易化
+
+<ul>
+<li>アニメーション</li>
+</ul>
+</li>
+<li>ディープリンク</li>
+<li>Navigation Editor</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>DI</h4>
+
+<ul>
+<li>Dagger
+
+<ul>
+<li>Java</li>
+</ul>
+</li>
+<li>Koin</li>
+<li>Kodein</li>
+</ul>
+
+
+<h4>Networking</h4>
+
+<ul>
+<li>Retrofit</li>
+</ul>
+
+
+<h4>Testing</h4>
+
+<ul>
+<li>Unit Test
+
+<ul>
+<li>Instrument Test: 実機テスト</li>
+<li>Local Test (Robolectric): CIとの相性がいい</li>
+<li>Firebase Test Lab</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>CI</h4>
+
+<ul>
+<li>bitrise
+
+<ul>
+<li>モバイル向け</li>
+</ul>
+</li>
+<li>CircleCI
+
+<ul>
+<li>高機能</li>
+<li>メモリ不足で落ちる場合がある</li>
+</ul>
+</li>
+<li>Danger
+
+<ul>
+<li>コードレビューの自動化をCI上で</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Flutter</h4>
+
+<ul>
+<li>Google製</li>
+<li>Hot reload</li>
+<li>ウィジェットがたくさん</li>
+</ul>
+
+
+<h3>Cloud Functionsから始めるFirebase</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/d_date">Daiki Matsudate(@d_date)さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/d_date/cloud-functionskarashi-merufirebase-4568e784-5bf3-4611-90a4-2f8632b3aa78">Cloud Functionsから始めるFirebase &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>Firebase</h4>
+
+<ul>
+<li>mBaaS
+
+<ul>
+<li>アプリ開発を容易に</li>
+<li>アプリ品質向上</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Cloud Functions for Firebase</h4>
+
+<ul>
+<li>コードをクラウドにプッシュするとFirebaseのサービスのアクションをトリガーに動く</li>
+</ul>
+
+
+<h4>Admin API</h4>
+
+<ul>
+<li>CLIで特権環境からFirebaseを操作できる</li>
+</ul>
+
+
+<h4>ユースケース</h4>
+
+<ul>
+<li>(Twitterなどの)フォロワーが追加されたら通知する</li>
+<li>メッセージのサニタイズする</li>
+<li>画像をストレージにアップロード後、サムネイル化し格納し直し</li>
+<li>URL Shorter</li>
+<li>Firestoreの全文検索: Firestoreアップデート時にalgoliaにインデックスを貼る</li>
+<li>Remote Config</li>
+<li><a href="https://github.com/firebase/functions-samples">firebase/functions-samples： Collection of sample apps showcasing popular use cases using Cloud Functions for Firebase</a> にいろいろとサンプルがある</li>
+</ul>
+
+
+<h4>GCP</h4>
+
+<ul>
+<li>GCP FunctionsはGo 1.11に対応</li>
+</ul>
+
+
+<h3>Starting Google Kubernetes Engine 2019</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/sakajunquality">sakajunquality(@sakajunquality)さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/sakajunquality/starting-google-kubernetes-engine-2019">Starting Google Kubernetes Engine 2019 &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>What&rsquo;s k8s?</h4>
+
+<ul>
+<li>Borgベースのコンテナプラットフォーム</li>
+<li>Microservicesプラットフォーム</li>
+<li>Goベース</li>
+<li>CNCFプロジェクトの「Graduated」ステージ</li>
+</ul>
+
+
+<h4>K8s マネージドサービス</h4>
+
+<ul>
+<li>GKE</li>
+<li>EKS</li>
+<li>AKS</li>
+<li>IKS</li>
+<li>などなどたくさんある…</li>
+</ul>
+
+
+<h4>Why GKE?</h4>
+
+<ul>
+<li>すでにGCPを使っている</li>
+<li>k8sはむずかしい</li>
+<li>GCP独自の機能</li>
+</ul>
+
+
+<h4>Already Using GCP?</h4>
+
+<p>GCPでk8sを使うには以下のパターンがある</p>
+
+<ul>
+<li>AppEngine (Flexible) → 柔軟性がない</li>
+<li>Compute Engine →  信頼性 (可用性) がない、作り込むとしても大変</li>
+<li>Kubernetes Engine: Flexible + Reliable</li>
+</ul>
+
+
+<h4>k8sは難しい</h4>
+
+<ul>
+<li><a href="https://github.com/kelseyhightower/kubernetes-the-hard-way">kelseyhightower/kubernetes-the-hard-way： Bootstrap Kubernetes the hard way on Google Cloud Platform. No scripts.</a></li>
+<li>k8s は構築も、維持も、管理も大変
+
+<ul>
+<li>Boosting</li>
+<li>High Availability</li>
+<li>Version Updates</li>
+</ul>
+</li>
+<li>簡単にクラスタをつくるならフルマネージドのGKE</li>
+</ul>
+
+
+<h4>GKEはフルマネージドサービス</h4>
+
+<ul>
+<li>コントロールプレーンとワーカーノードが両方フルマネージド</li>
+<li>リージョン・ゾーンレベルの可用性</li>
+<li>Auto-Repair / Auto-Update</li>
+<li>VPCネイティブ</li>
+</ul>
+
+
+<h4>GCP特有機能</h4>
+
+<ul>
+<li>Networking
+
+<ul>
+<li>Cloud Load Balancing: L4. L7</li>
+<li>Cloud Armor: L3-L7カスタムルールを作れるWAF</li>
+<li>Cloud CDN: グローバルCDN</li>
+</ul>
+</li>
+<li>CI/CD
+
+<ul>
+<li>Cloud Build: フルマネージドCI、ネイティブDockerをサポート</li>
+<li>Container Registry: Docker レジストリ。脆弱性診断が可能</li>
+<li>Cloud Source Repository: プライベートGitリポジトリ。検索が強い。Githubからミラー可能。</li>
+<li>GitOpsの概念</li>
+</ul>
+</li>
+<li>Monitoring
+
+<ul>
+<li>Stackdriver Monitoring: フルスタックの監視スイート</li>
+<li>Stackdriver Logging: フルマネージドログプラットフォーム。GKEはfluentdがプリインストール</li>
+</ul>
+</li>
+<li>Integrations
+
+<ul>
+<li>Cloud Pub/Sub</li>
+<li>Cloud Functions</li>
+<li>Cloud IAP</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>GKE Update</h4>
+
+<ul>
+<li>Private Cluster + Cloud Nat
+
+<ul>
+<li>Private Clusterは、プライベートIPだけを持てる</li>
+<li>Cloud Natは、フルマネージドNat-Gateway</li>
+</ul>
+</li>
+<li>NEG /Container-Native Load Balancing
+
+<ul>
+<li>Network Endpoint Groupを使うとLB～Pod間のトラフィック制御をiptablesを使わずにできる</li>
+</ul>
+</li>
+<li>Node Auto-Provisioning
+
+<ul>
+<li>Cluster Autoscalerが新しいノードプールを作成・削除してくれる</li>
+</ul>
+</li>
+<li>Binary Authorization
+
+<ul>
+<li>信頼できるイメージのみをGKEへデプロイできる</li>
+<li>チェックボックスにチェックを入れるだけで有効化可能</li>
+</ul>
+</li>
+<li>Istio
+
+<ul>
+<li>1クリックでIstioをデプロイ可能</li>
+<li>既存クラスタにも適用可能</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>How to start?</h4>
+
+<ul>
+<li><code>$ gcloud container clusters create MY_CLUSTER</code></li>
+<li>本を読む
+
+<ul>
+<li>中井さんのプログラマのための Google Cloud Platform 入門</li>
+<li>Docker/Kubernetes 実践コンテナ開発入門</li>
+<li>青山さんのKubernetes完全ガイド</li>
+</ul>
+</li>
+<li>ハンズオン
+
+<ul>
+<li>Quick Start</li>
+<li>QwickLabs</li>
+<li>Coursera</li>
+<li>sakajunquality&rsquo;s hands-on</li>
+</ul>
+</li>
+<li>オンラインドキュメント
+
+<ul>
+<li>GKE document</li>
+<li>Kubernetes document</li>
+<li>Youtubeもある</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Web in 2019 What’s coming?</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/laco2net">Suguru Inatomi / lacolaco(@laco2net)さん</a></li>
+<li>資料: <a href="https://docs.google.com/presentation/d/e/2PACX-1vRXfgnXlYSQ5Q3ImC1DQoub0L_5NUrha9yW3MLcDnFbn1A-mdEXZF11wzzadDF2yKoUnroZ46tMwUl3/pub?start=false&amp;loop=false&amp;delayms=3000&amp;slide=id.p">20190130 &ndash; Web in 2019 What’s coming? &ndash; Google Slides</a></li>
+</ul>
+
+
+<h4>ES 2019 (WIP)</h4>
+
+<ul>
+<li><a href="https://qiita.com/tonkotsuboy_com/items/07f8ef98abf89250b90c">JavaScriptの次の仕様ES2019でほぼ確実に追加される新機能まとめ &ndash; Qiita</a></li>
+</ul>
+
+
+<h4>Web Components / Polymer</h4>
+
+<ul>
+<li>Polymerの追加開発がなくなった (メンテナンス状態)</li>
+<li>lit
+
+<ul>
+<li>lit-html / lit-element</li>
+</ul>
+</li>
+<li>Web ComponentsのBrowser supports Update
+
+<ul>
+<li>Firefox がサポート</li>
+<li>EdgeがChromiumへ移行なので、移行後はEdgeでもwebcomponentsが使える</li>
+</ul>
+</li>
+<li>CSS Shadow parts
+
+<ul>
+<li>Shadow DOM内にPartsを定義</li>
+<li>外側のCSSから上書きできる</li>
+</ul>
+</li>
+<li>Constructable Stylesheets
+
+<ul>
+<li>CSSStyleSheet()のオブジェクトを作成可能</li>
+</ul>
+</li>
+<li>HTML Modules
+
+<ul>
+<li>Edgeチームから提案</li>
+<li>.htm (モジュールファイル) をインポート可能</li>
+</ul>
+</li>
+<li>Class Public Fields</li>
+</ul>
+
+
+<h4>Angular Updates</h4>
+
+<ul>
+<li>Community
+
+<ul>
+<li>成長中</li>
+<li>Angular docsへの訪問者は1.5M に迫る</li>
+<li>日本コミュニティ (ドキュメント翻訳など) も10,000MAUに到達</li>
+</ul>
+</li>
+<li>Core updates
+
+<ul>
+<li>半年に1回メジャーアップデート</li>
+<li>メジャーバージョンアップしてもそんなに大きな変化はなし</li>
+</ul>
+</li>
+<li>Angular Bazel
+
+<ul>
+<li>Bazel (ビルドツール) をAngularでもサポート</li>
+</ul>
+</li>
+<li>Ivy roadmap
+
+<ul>
+<li>次世代の内部リファクタリング</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

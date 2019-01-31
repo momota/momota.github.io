@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="MySQL 5.7 のパフォーマンスチューニングについて、調べてたのでまとめる。 // 結構な文量になってしまった… 大きく、2つのアプローチがある。 DBチューニング システム変数 (my.cnf) のチューニング
-全体最適 アプリ (SQL) チューニング 個別最適 まあ、地道に、計測→ &hellip;">
+  <meta name="description" content="BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
+最近、会社 PC を Windows 10 にアップデートしたので使うようになった。 BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,67 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/05/25/bitlocker/">Windows ログイン時に、Cドライブ以外のBitLockerを解除する</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2018-05-25T17:23:00+09:00" pubdate data-updated="true">2018-05-25</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>BitLocker は Windows 10 Professional/Enterprise に標準搭載されているディスク暗号化機能。
+最近、会社 PC を Windows 10 にアップデートしたので使うようになった。</p>
+
+<p>BitLocker は OS ログイン前に C ドライブの暗号化を解除しろ、とパスワード入力を求めてくる。
+ただし、その後、OS ログインしても、C ドライブ以外 (たとえば、D ドライブ) は暗号化されたままとなっており、いちいち当該ドライブへアクセスしてパスワード入力して暗号化を解除する必要があった。
+また、暗号化解除前に D ドライブ上のファイルへアクセスするとエラーが起きてしまい、大変うざったい。</p>
+
+<p>そこで、OS ログイン時に自動的に C ドライブ以外のディスク暗号化解除するために PowerShell とバッチを書いてスタートアッププログラムに登録した話を書く。</p>
+
+<p>セキュリティクラスタには怒られるのかもしれないが、OS に管理者権限ユーザでログインできている時点でもういろいろ見れて当たり前やろ、という思想。</p>
+
+<p>全体の流れは以下。</p>
+
+<ol>
+<li>BitLocker 解除用の PowerShell を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をタスクスケジューラに登録する</li>
+<li>タスクを呼び出すバッチファイル trigger_unlock-bitLocker.cmd を書く</li>
+<li>バッチファイル unlock-bitLocker.cmd をスタートアッププログラムに登録してあげる</li>
+</ol>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/05/25/bitlocker/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -686,55 +747,6 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/01/29/octopress/">複数の環境で Octopress を使ってブログを書く</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2016-01-29T19:03:00+09:00" pubdate data-updated="true">2016-01-29</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近、自宅の Mac Mini が重くなってきたので、別環境でブログを書くべく環境を整備した。
-5年目選手くらいなので、そろそろ買い換えたいな…</p>
-
-<p>結論としては、以下を参考にやればOK。deploy のとこでちょいハマりしたのでメモ。</p>
-
-<ul>
-<li><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">Clone your Octopess to blog From Two Places</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/01/29/octopress/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -752,6 +764,10 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/01/31/gdg-tokyo/">[参加レポート]GDG-Tokyo New Year Party 2019</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/01/10/cloud-native-meetup-tokyo/">[参加レポート]Cloud Native Meetup Tokyo #6</a>
       </li>
     
@@ -765,10 +781,6 @@ IE や Chrome で使うには各 Selenium WebDriver が必要となる。</p>
     
       <li class="post">
         <a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless mode + Ruby + Selenium</a>
       </li>
     
   </ul>

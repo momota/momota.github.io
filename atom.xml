@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-01-31T10:45:58+09:00</updated>
+  <updated>2019-01-31T11:49:29+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,553 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[参加レポート]GDG-Tokyo New Year Party 2019]]></title>
+    <link href="http://momota.github.io/blog/2019/01/31/gdg-tokyo/"/>
+    <updated>2019-01-31T10:51:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/01/31/gdg-tokyo</id>
+    <content type="html"><![CDATA[<p><img src="http://momota.github.io/images/20190131_gdg-tokyo/gdg.png" alt="GDF-Tokyo New Year Party logo" /></p>
+
+<ul>
+<li>2019/01/30(水)、六本木で行われた<a href="https://gdg-tokyo.connpass.com/event/113178/">GDG Tokyo New Year Party 2019 &ndash; connpass</a> への参加レポート。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h3>How to start Android Dev</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/wasabeef_jp">@wasabeef_jp さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/wasabeef/jp-how-to-start-android-dev">［JP］ How to start Android Dev &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>IDE (Build tool)</h4>
+
+<ul>
+<li>Android Studio
+
+<ul>
+<li>Layout Editor</li>
+<li>MotionLayout: Motion editor</li>
+<li>Emulator: 数年前に比べると高機能・高速化</li>
+</ul>
+</li>
+<li>Gradle
+
+<ul>
+<li>ビルド自動化</li>
+<li>Android開発におけるスタンダード</li>
+<li>DSL (デフォルトGroovy DSL)
+
+<ul>
+<li>Kotlin DSL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Java / Kotlin
+
+<ul>
+<li>近年はKotlinが主流
+
+<ul>
+<li>Libraryを作るときはJavaで作ることが多い</li>
+</ul>
+</li>
+<li>Java 8: 最新のJavaは使えない
+
+<ul>
+<li>D8 toolsによって今後変わりそう</li>
+</ul>
+</li>
+<li>Kotlin 1.3
+
+<ul>
+<li>Coroutines: 軽量スレッド</li>
+<li>Null-safety</li>
+<li>Extention functions</li>
+<li>Lambda + Inline functions、など</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Architecture</h4>
+
+<ul>
+<li>MVVM
+
+<ul>
+<li>Google推奨でAACと相性がいい</li>
+</ul>
+</li>
+<li>Flux
+
+<ul>
+<li>日本で数件の事例あり</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Jetpack</h4>
+
+<ul>
+<li>KTX
+
+<ul>
+<li>Core</li>
+<li>Fragment</li>
+<li>Lifecycle</li>
+</ul>
+</li>
+<li>Lifecycles
+
+<ul>
+<li>バックグラウンド状態、フォアグラウンド状態、電源状態…</li>
+<li>ライフサイクルを知りたいとき
+
+<ul>
+<li>動画の開始停止</li>
+<li>画面閉じたときの終了処理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ViewModel (+ LiveData)
+
+<ul>
+<li>Activity/ViewModelはそれぞれ異なるライフサイクルがあるが、ViewModelのほうが長生きする</li>
+<li>ViewModel
+
+<ul>
+<li>Activityの画面回転・破棄のデータ保持</li>
+<li>Fragments感のデータ共有</li>
+<li>永続化ではない</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Navigation
+
+<ul>
+<li>Fragment Transactionの簡易化
+
+<ul>
+<li>アニメーション</li>
+</ul>
+</li>
+<li>ディープリンク</li>
+<li>Navigation Editor</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>DI</h4>
+
+<ul>
+<li>Dagger
+
+<ul>
+<li>Java</li>
+</ul>
+</li>
+<li>Koin</li>
+<li>Kodein</li>
+</ul>
+
+
+<h4>Networking</h4>
+
+<ul>
+<li>Retrofit</li>
+</ul>
+
+
+<h4>Testing</h4>
+
+<ul>
+<li>Unit Test
+
+<ul>
+<li>Instrument Test: 実機テスト</li>
+<li>Local Test (Robolectric): CIとの相性がいい</li>
+<li>Firebase Test Lab</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>CI</h4>
+
+<ul>
+<li>bitrise
+
+<ul>
+<li>モバイル向け</li>
+</ul>
+</li>
+<li>CircleCI
+
+<ul>
+<li>高機能</li>
+<li>メモリ不足で落ちる場合がある</li>
+</ul>
+</li>
+<li>Danger
+
+<ul>
+<li>コードレビューの自動化をCI上で</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Flutter</h4>
+
+<ul>
+<li>Google製</li>
+<li>Hot reload</li>
+<li>ウィジェットがたくさん</li>
+</ul>
+
+
+<h3>Cloud Functionsから始めるFirebase</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/d_date">Daiki Matsudate(@d_date)さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/d_date/cloud-functionskarashi-merufirebase-4568e784-5bf3-4611-90a4-2f8632b3aa78">Cloud Functionsから始めるFirebase &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>Firebase</h4>
+
+<ul>
+<li>mBaaS
+
+<ul>
+<li>アプリ開発を容易に</li>
+<li>アプリ品質向上</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Cloud Functions for Firebase</h4>
+
+<ul>
+<li>コードをクラウドにプッシュするとFirebaseのサービスのアクションをトリガーに動く</li>
+</ul>
+
+
+<h4>Admin API</h4>
+
+<ul>
+<li>CLIで特権環境からFirebaseを操作できる</li>
+</ul>
+
+
+<h4>ユースケース</h4>
+
+<ul>
+<li>(Twitterなどの)フォロワーが追加されたら通知する</li>
+<li>メッセージのサニタイズする</li>
+<li>画像をストレージにアップロード後、サムネイル化し格納し直し</li>
+<li>URL Shorter</li>
+<li>Firestoreの全文検索: Firestoreアップデート時にalgoliaにインデックスを貼る</li>
+<li>Remote Config</li>
+<li><a href="https://github.com/firebase/functions-samples">firebase/functions-samples： Collection of sample apps showcasing popular use cases using Cloud Functions for Firebase</a> にいろいろとサンプルがある</li>
+</ul>
+
+
+<h4>GCP</h4>
+
+<ul>
+<li>GCP FunctionsはGo 1.11に対応</li>
+</ul>
+
+
+<h3>Starting Google Kubernetes Engine 2019</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/sakajunquality">sakajunquality(@sakajunquality)さん</a></li>
+<li>資料: <a href="https://speakerdeck.com/sakajunquality/starting-google-kubernetes-engine-2019">Starting Google Kubernetes Engine 2019 &ndash; Speaker Deck</a></li>
+</ul>
+
+
+<h4>What&rsquo;s k8s?</h4>
+
+<ul>
+<li>Borgベースのコンテナプラットフォーム</li>
+<li>Microservicesプラットフォーム</li>
+<li>Goベース</li>
+<li>CNCFプロジェクトの「Graduated」ステージ</li>
+</ul>
+
+
+<h4>K8s マネージドサービス</h4>
+
+<ul>
+<li>GKE</li>
+<li>EKS</li>
+<li>AKS</li>
+<li>IKS</li>
+<li>などなどたくさんある…</li>
+</ul>
+
+
+<h4>Why GKE?</h4>
+
+<ul>
+<li>すでにGCPを使っている</li>
+<li>k8sはむずかしい</li>
+<li>GCP独自の機能</li>
+</ul>
+
+
+<h4>Already Using GCP?</h4>
+
+<p>GCPでk8sを使うには以下のパターンがある</p>
+
+<ul>
+<li>AppEngine (Flexible) → 柔軟性がない</li>
+<li>Compute Engine →  信頼性 (可用性) がない、作り込むとしても大変</li>
+<li>Kubernetes Engine: Flexible + Reliable</li>
+</ul>
+
+
+<h4>k8sは難しい</h4>
+
+<ul>
+<li><a href="https://github.com/kelseyhightower/kubernetes-the-hard-way">kelseyhightower/kubernetes-the-hard-way： Bootstrap Kubernetes the hard way on Google Cloud Platform. No scripts.</a></li>
+<li>k8s は構築も、維持も、管理も大変
+
+<ul>
+<li>Boosting</li>
+<li>High Availability</li>
+<li>Version Updates</li>
+</ul>
+</li>
+<li>簡単にクラスタをつくるならフルマネージドのGKE</li>
+</ul>
+
+
+<h4>GKEはフルマネージドサービス</h4>
+
+<ul>
+<li>コントロールプレーンとワーカーノードが両方フルマネージド</li>
+<li>リージョン・ゾーンレベルの可用性</li>
+<li>Auto-Repair / Auto-Update</li>
+<li>VPCネイティブ</li>
+</ul>
+
+
+<h4>GCP特有機能</h4>
+
+<ul>
+<li>Networking
+
+<ul>
+<li>Cloud Load Balancing: L4. L7</li>
+<li>Cloud Armor: L3-L7カスタムルールを作れるWAF</li>
+<li>Cloud CDN: グローバルCDN</li>
+</ul>
+</li>
+<li>CI/CD
+
+<ul>
+<li>Cloud Build: フルマネージドCI、ネイティブDockerをサポート</li>
+<li>Container Registry: Docker レジストリ。脆弱性診断が可能</li>
+<li>Cloud Source Repository: プライベートGitリポジトリ。検索が強い。Githubからミラー可能。</li>
+<li>GitOpsの概念</li>
+</ul>
+</li>
+<li>Monitoring
+
+<ul>
+<li>Stackdriver Monitoring: フルスタックの監視スイート</li>
+<li>Stackdriver Logging: フルマネージドログプラットフォーム。GKEはfluentdがプリインストール</li>
+</ul>
+</li>
+<li>Integrations
+
+<ul>
+<li>Cloud Pub/Sub</li>
+<li>Cloud Functions</li>
+<li>Cloud IAP</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>GKE Update</h4>
+
+<ul>
+<li>Private Cluster + Cloud Nat
+
+<ul>
+<li>Private Clusterは、プライベートIPだけを持てる</li>
+<li>Cloud Natは、フルマネージドNat-Gateway</li>
+</ul>
+</li>
+<li>NEG /Container-Native Load Balancing
+
+<ul>
+<li>Network Endpoint Groupを使うとLB～Pod間のトラフィック制御をiptablesを使わずにできる</li>
+</ul>
+</li>
+<li>Node Auto-Provisioning
+
+<ul>
+<li>Cluster Autoscalerが新しいノードプールを作成・削除してくれる</li>
+</ul>
+</li>
+<li>Binary Authorization
+
+<ul>
+<li>信頼できるイメージのみをGKEへデプロイできる</li>
+<li>チェックボックスにチェックを入れるだけで有効化可能</li>
+</ul>
+</li>
+<li>Istio
+
+<ul>
+<li>1クリックでIstioをデプロイ可能</li>
+<li>既存クラスタにも適用可能</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>How to start?</h4>
+
+<ul>
+<li><code>$ gcloud container clusters create MY_CLUSTER</code></li>
+<li>本を読む
+
+<ul>
+<li>中井さんのプログラマのための Google Cloud Platform 入門</li>
+<li>Docker/Kubernetes 実践コンテナ開発入門</li>
+<li>青山さんのKubernetes完全ガイド</li>
+</ul>
+</li>
+<li>ハンズオン
+
+<ul>
+<li>Quick Start</li>
+<li>QwickLabs</li>
+<li>Coursera</li>
+<li>sakajunquality&rsquo;s hands-on</li>
+</ul>
+</li>
+<li>オンラインドキュメント
+
+<ul>
+<li>GKE document</li>
+<li>Kubernetes document</li>
+<li>Youtubeもある</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Web in 2019 What’s coming?</h3>
+
+<ul>
+<li>発表者: <a href="https://twitter.com/laco2net">Suguru Inatomi / lacolaco(@laco2net)さん</a></li>
+<li>資料: <a href="https://docs.google.com/presentation/d/e/2PACX-1vRXfgnXlYSQ5Q3ImC1DQoub0L_5NUrha9yW3MLcDnFbn1A-mdEXZF11wzzadDF2yKoUnroZ46tMwUl3/pub?start=false&amp;loop=false&amp;delayms=3000&amp;slide=id.p">20190130 &ndash; Web in 2019 What’s coming? &ndash; Google Slides</a></li>
+</ul>
+
+
+<h4>ES 2019 (WIP)</h4>
+
+<ul>
+<li><a href="https://qiita.com/tonkotsuboy_com/items/07f8ef98abf89250b90c">JavaScriptの次の仕様ES2019でほぼ確実に追加される新機能まとめ &ndash; Qiita</a></li>
+</ul>
+
+
+<h4>Web Components / Polymer</h4>
+
+<ul>
+<li>Polymerの追加開発がなくなった (メンテナンス状態)</li>
+<li>lit
+
+<ul>
+<li>lit-html / lit-element</li>
+</ul>
+</li>
+<li>Web ComponentsのBrowser supports Update
+
+<ul>
+<li>Firefox がサポート</li>
+<li>EdgeがChromiumへ移行なので、移行後はEdgeでもwebcomponentsが使える</li>
+</ul>
+</li>
+<li>CSS Shadow parts
+
+<ul>
+<li>Shadow DOM内にPartsを定義</li>
+<li>外側のCSSから上書きできる</li>
+</ul>
+</li>
+<li>Constructable Stylesheets
+
+<ul>
+<li>CSSStyleSheet()のオブジェクトを作成可能</li>
+</ul>
+</li>
+<li>HTML Modules
+
+<ul>
+<li>Edgeチームから提案</li>
+<li>.htm (モジュールファイル) をインポート可能</li>
+</ul>
+</li>
+<li>Class Public Fields</li>
+</ul>
+
+
+<h4>Angular Updates</h4>
+
+<ul>
+<li>Community
+
+<ul>
+<li>成長中</li>
+<li>Angular docsへの訪問者は1.5M に迫る</li>
+<li>日本コミュニティ (ドキュメント翻訳など) も10,000MAUに到達</li>
+</ul>
+</li>
+<li>Core updates
+
+<ul>
+<li>半年に1回メジャーアップデート</li>
+<li>メジャーバージョンアップしてもそんなに大きな変化はなし</li>
+</ul>
+</li>
+<li>Angular Bazel
+
+<ul>
+<li>Bazel (ビルドツール) をAngularでもサポート</li>
+</ul>
+</li>
+<li>Ivy roadmap
+
+<ul>
+<li>次世代の内部リファクタリング</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[参加レポート]Cloud Native Meetup Tokyo #6]]></title>
@@ -8579,168 +9126,6 @@ rbenv のような関連ツールまで 1 セットで記述するのが良い�
 
 <p>中身の説明は、体力が切れたので割愛。
 詳細は、<a href="https://github.com/momota/laptop-build">momota/laptop-build</a> を参照。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[複数の環境で octopress を使ってブログを書く]]></title>
-    <link href="http://momota.github.io/blog/2016/01/29/octopress/"/>
-    <updated>2016-01-29T19:03:00+09:00</updated>
-    <id>http://momota.github.io/blog/2016/01/29/octopress</id>
-    <content type="html"><![CDATA[<p>最近、自宅の Mac Mini が重くなってきたので、別環境でブログを書くべく環境を整備した。
-5年目選手くらいなので、そろそろ買い換えたいな…</p>
-
-<p>結論としては、以下を参考にやればOK。deploy のとこでちょいハマりしたのでメモ。</p>
-
-<ul>
-<li><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">Clone your Octopess to blog From Two Places</a></li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>1. 新しいマシンで git cloneする</h2>
-
-<p>octopress のレポジトリは、<code>source</code> と <code>master</code> の 2 つのブランチがある。</p>
-
-<p><code>source</code> はその名の通り、編集する markdown ファイルや scss ファイルなどを管
-理するブランチ。</p>
-
-<p><code>master</code> は、公開用のHTMLファイルなどを管理するブランチ。<code>rake generate</code> で
-生成されるファイル群を管理するブランチ。</p>
-
-<p>まずは、任意の場所で <code>source</code> ブランチをクローンする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone -b <span class="nb">source </span>https://github.com/YOU/YOU.github.io.git blog
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>次に、<code>master</code> ブランチを <code>_deploy</code> というディレクトリ名でクローンする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd </span>blog
-</span><span class='line'><span class="nv">$ </span>git clone https://github.com/YOU/YOU.github.io.git _deploy
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>2. インストールする</h2>
-
-<p>octopress をビルドするため、bundler をインストールする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>gem install bundler
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>別の環境とシェアするので、 rbenv で ruby バージョンを合わせておく。
-シェアしなければ octopress が動くバージョンで <code>.ruby-version</code> を上書けばよいと思う。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install X.X.X-pXXX
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>X.X.X-pXXX
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ビルドする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>bundle install
-</span><span class='line'><span class="nv">$ </span>rake setup_github_pages
-</span><span class='line'>Enter the <span class="nb">read</span>/write url <span class="k">for </span>your repository
-</span><span class='line'><span class="o">(</span>For example, <span class="err">&#39;</span>git@github.com:your_username/your_username.github.com<span class="o">)</span>:
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>自分の github pages のやつを入力すればOK。</p>
-
-<h2>3. お試しポストしてみる</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rake new_post<span class="se">\[</span><span class="s1">&#39;test&#39;</span><span class="se">\]</span>
-</span><span class='line'><span class="c">#=&gt; source/_post/YYYY-MM-DD-test.markdown が生成される</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span><span class="nb">source</span>/_post/YYYY-MM-DD-test.markdown
-</span><span class='line'><span class="c">#=&gt; 記事を編集する</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>rake generate
-</span><span class='line'><span class="nv">$ </span>rake preview
-</span><span class='line'><span class="c">#=&gt; http://localhost:4000/にアクセスして記事が生成できていることを確認する</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>rake deploy
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>自分の場合、<code>rake deploy</code> でコケた。
-<code>git push</code> するところでコケたようだ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'> ! <span class="o">[</span>rejected<span class="o">]</span>        master -&gt; master <span class="o">(</span>non-fast-forward<span class="o">)</span>
-</span><span class='line'> error: failed to push some refs to <span class="s1">&#39;*******************&#39;</span>
-</span><span class='line'> hint: Updates were rejected because the tip of your current branch is behind
-</span><span class='line'> hint: its remote counterpart. Merge the remote changes <span class="o">(</span>e.g. <span class="s1">&#39;git pull&#39;</span><span class="o">)</span>
-</span><span class='line'> hint: before pushing again.
-</span><span class='line'> hint: See the <span class="s1">&#39;Note about fast-forwards&#39;</span> in <span class="s1">&#39;git push --help&#39;</span> <span class="k">for </span>details.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>認証プロキシを通してる環境だったので、そのせいかなーと疑ったけどちがった。
-単純に <code>master</code> ブランチが conflict してるだけだった。</p>
-
-<p><code>git pull</code> して解決した。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd </span>_deploy
-</span><span class='line'><span class="nv">$ </span>git pull origin master
-</span><span class='line'><span class="c">#=&gt; master ブランチを pull</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ../
-</span><span class='line'><span class="nv">$ </span>rake deploy
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>あとは、<code>source</code> のほうもcommitしておく。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git add .
-</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;posted&quot;</span>
-</span><span class='line'><span class="nv">$ </span>git push origin sorce
-</span><span class='line'><span class="c">#=&gt; source ブランチも更新する</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   

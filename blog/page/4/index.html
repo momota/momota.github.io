@@ -9,9 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="sinatra は ruby の web アプリケーションフレームワーク。rails よりもシンプルで柔軟なプログラムが可能となる。つまり、しかれた rails に乗り切れない人のためのフレームワーク。
-本稿では以下について書く。 sinatra インストール
-hello world &hellip;">
+  <meta name="description" content="前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き 今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
+また、bootstrap3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +81,78 @@ hello world &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/22/sinatra/">Rails から外れた僕らは Sinatra で I Did It My Way (2)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-22T06:15:00+09:00" pubdate data-updated="true">2013-09-22</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="http://www.sinatrarb.com/images/logo.png" alt="sinatra" /></p>
+
+<p><a href="http://momota.github.io/blog/2013/09/16/sinatra/">前回の &ldquo;sinatra で rails から外れた僕らは sinatra で i did it my way&rdquo; の続き</a></p>
+
+<p>今回は、mongodb を使って簡単な sinatra web アプリケーションをつくってみる。
+また、bootstrap3 で簡単に見た目を綺麗にしてみる。</p>
+
+<hr />
+
+<ul>
+<li><a href="http://momota.github.io/blog/2013/09/16/sinatra/">rails から外れた僕らは sinatra で i did it my way (1)</a>
+
+<ul>
+<li>sinatra の基本 (ルーティング、ヘルパー、フィルター、テンプレートエンジンなど)</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/22/sinatra/">rails から外れた僕らは sinatra で i did it my way (2)</a>
+
+<ul>
+<li>sinatra で MongoDB を使ったデータ永続化</li>
+<li>HTTP POSTへの対応</li>
+<li>Bootstrap でのお化粧</li>
+</ul>
+</li>
+<li><a href="http://momota.github.io/blog/2013/09/23/sinatra/">rails から外れた僕らは sinatra で i did it my way (3)</a>
+
+<ul>
+<li>sinatra の heroku へのデプロイ</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/09/22/sinatra/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -570,66 +641,9 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/08/19/octopress/">Octopressでblog</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-19T23:40:00+09:00" pubdate data-updated="true">2013-08-19</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>流れ</h1>
-
-<ol>
-<li>github pages用リポジトリ作成</li>
-<li>octopressコードをローカルにclone</li>
-<li>関連gemをインストール</li>
-<li>新規記事をpostする</li>
-<li>記事とソースをgithubへデプロイする</li>
-</ol>
-
-
-<h1>環境</h1>
-
-<ul>
-<li>mac os x 10.8.4</li>
-<li>git version 1.7.9.6 (Apple Git-31.1)</li>
-<li>zsh</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/08/19/octopress/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/5/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -642,6 +656,10 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/01/31/gdg-tokyo/">[参加レポート]GDG-Tokyo New Year Party 2019</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2019/01/10/cloud-native-meetup-tokyo/">[参加レポート]Cloud Native Meetup Tokyo #6</a>
@@ -657,10 +675,6 @@ rbenvにより、あるディレクトリ以下のrubyバージョンを任意�
     
       <li class="post">
         <a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless mode + Ruby + Selenium</a>
       </li>
     
   </ul>
