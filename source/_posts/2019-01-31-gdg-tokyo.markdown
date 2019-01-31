@@ -1,0 +1,301 @@
+---
+layout: post
+title: "[参加レポート]GDG-Tokyo New Year Party 2019"
+date: 2019-01-31 10:51
+comments: true
+categories: google android firebase gcp kubernetes javascript angular
+---
+
+![GDF-Tokyo New Year Party logo](/images/20190131_gdg-tokyo/gdg.png)
+
+- 2019/01/30(水)、六本木で行われた[GDG Tokyo New Year Party 2019 - connpass](https://gdg-tokyo.connpass.com/event/113178/) への参加レポート。
+
+
+<!-- more -->
+
+
+### How to start Android Dev
+
+- 発表者: [@wasabeef_jp さん](https://twitter.com/wasabeef_jp)
+- 資料: [［JP］ How to start Android Dev - Speaker Deck](https://speakerdeck.com/wasabeef/jp-how-to-start-android-dev)
+
+
+#### IDE (Build tool)
+
+- Android Studio
+  - Layout Editor
+  - MotionLayout: Motion editor
+  - Emulator: 数年前に比べると高機能・高速化
+- Gradle
+  - ビルド自動化
+  - Android開発におけるスタンダード
+  - DSL (デフォルトGroovy DSL)
+    - Kotlin DSL
+- Java / Kotlin
+  - 近年はKotlinが主流
+    - Libraryを作るときはJavaで作ることが多い
+  - Java 8: 最新のJavaは使えない
+    - D8 toolsによって今後変わりそう
+  - Kotlin 1.3
+    - Coroutines: 軽量スレッド
+    - Null-safety
+    - Extention functions
+    - Lambda + Inline functions、など
+
+
+
+#### Architecture
+
+- MVVM
+  - Google推奨でAACと相性がいい
+- Flux
+  - 日本で数件の事例あり
+
+
+
+#### Jetpack
+
+- KTX
+  - Core
+  - Fragment
+  - Lifecycle
+- Lifecycles
+  - バックグラウンド状態、フォアグラウンド状態、電源状態…
+  - ライフサイクルを知りたいとき
+    - 動画の開始停止
+    - 画面閉じたときの終了処理
+- ViewModel (+ LiveData)
+  - Activity/ViewModelはそれぞれ異なるライフサイクルがあるが、ViewModelのほうが長生きする
+  - ViewModel
+    - Activityの画面回転・破棄のデータ保持
+    - Fragments感のデータ共有
+    - 永続化ではない
+- Navigation
+  - Fragment Transactionの簡易化
+    - アニメーション
+  - ディープリンク
+  - Navigation Editor
+
+
+#### DI
+
+- Dagger
+  - Java
+- Koin
+- Kodein
+
+#### Networking
+
+- Retrofit
+
+#### Testing
+
+- Unit Test
+  - Instrument Test: 実機テスト
+  - Local Test (Robolectric): CIとの相性がいい
+  - Firebase Test Lab
+
+#### CI
+
+- bitrise
+  - モバイル向け
+- CircleCI
+  - 高機能
+  - メモリ不足で落ちる場合がある
+- Danger
+  - コードレビューの自動化をCI上で
+
+
+#### Flutter
+
+- Google製
+- Hot reload
+- ウィジェットがたくさん
+
+
+
+### Cloud Functionsから始めるFirebase
+
+- 発表者: [Daiki Matsudate(@d_date)さん](https://twitter.com/d_date)
+- 資料: [Cloud Functionsから始めるFirebase - Speaker Deck](https://speakerdeck.com/d_date/cloud-functionskarashi-merufirebase-4568e784-5bf3-4611-90a4-2f8632b3aa78)
+
+
+#### Firebase
+
+- mBaaS
+  - アプリ開発を容易に
+  - アプリ品質向上
+
+#### Cloud Functions for Firebase
+
+- コードをクラウドにプッシュするとFirebaseのサービスのアクションをトリガーに動く
+
+#### Admin API
+
+- CLIで特権環境からFirebaseを操作できる
+
+#### ユースケース
+
+- (Twitterなどの)フォロワーが追加されたら通知する
+- メッセージのサニタイズする
+- 画像をストレージにアップロード後、サムネイル化し格納し直し
+- URL Shorter
+- Firestoreの全文検索: Firestoreアップデート時にalgoliaにインデックスを貼る
+- Remote Config
+- [firebase/functions-samples： Collection of sample apps showcasing popular use cases using Cloud Functions for Firebase](https://github.com/firebase/functions-samples) にいろいろとサンプルがある
+
+#### GCP
+
+- GCP FunctionsはGo 1.11に対応
+
+
+### Starting Google Kubernetes Engine 2019
+
+- 発表者: [sakajunquality(@sakajunquality)さん](https://twitter.com/sakajunquality)
+- 資料: [Starting Google Kubernetes Engine 2019 - Speaker Deck](https://speakerdeck.com/sakajunquality/starting-google-kubernetes-engine-2019)
+
+
+
+#### What's k8s?
+
+- Borgベースのコンテナプラットフォーム
+- Microservicesプラットフォーム
+- Goベース
+- CNCFプロジェクトの「Graduated」ステージ
+
+#### K8s マネージドサービス
+
+- GKE
+- EKS
+- AKS
+- IKS
+- などなどたくさんある…
+
+#### Why GKE?
+
+- すでにGCPを使っている
+- k8sはむずかしい
+- GCP独自の機能
+
+
+#### Already Using GCP?
+
+GCPでk8sを使うには以下のパターンがある
+
+- AppEngine (Flexible) → 柔軟性がない
+- Compute Engine →  信頼性 (可用性) がない、作り込むとしても大変
+- Kubernetes Engine: Flexible + Reliable
+
+#### k8sは難しい
+
+- [kelseyhightower/kubernetes-the-hard-way： Bootstrap Kubernetes the hard way on Google Cloud Platform. No scripts.](https://github.com/kelseyhightower/kubernetes-the-hard-way)
+- k8s は構築も、維持も、管理も大変
+  - Boosting
+  - High Availability
+  - Version Updates
+- 簡単にクラスタをつくるならフルマネージドのGKE
+
+#### GKEはフルマネージドサービス
+
+- コントロールプレーンとワーカーノードが両方フルマネージド
+- リージョン・ゾーンレベルの可用性
+- Auto-Repair / Auto-Update
+- VPCネイティブ
+
+
+#### GCP特有機能
+
+- Networking
+  - Cloud Load Balancing: L4. L7
+  - Cloud Armor: L3-L7カスタムルールを作れるWAF
+  - Cloud CDN: グローバルCDN
+- CI/CD
+  - Cloud Build: フルマネージドCI、ネイティブDockerをサポート
+  - Container Registry: Docker レジストリ。脆弱性診断が可能
+  - Cloud Source Repository: プライベートGitリポジトリ。検索が強い。Githubからミラー可能。
+  - GitOpsの概念
+- Monitoring
+  - Stackdriver Monitoring: フルスタックの監視スイート
+  - Stackdriver Logging: フルマネージドログプラットフォーム。GKEはfluentdがプリインストール
+- Integrations
+  - Cloud Pub/Sub
+  - Cloud Functions
+  - Cloud IAP
+
+#### GKE Update
+
+- Private Cluster + Cloud Nat
+  - Private Clusterは、プライベートIPだけを持てる
+  - Cloud Natは、フルマネージドNat-Gateway
+- NEG /Container-Native Load Balancing
+  - Network Endpoint Groupを使うとLB～Pod間のトラフィック制御をiptablesを使わずにできる
+- Node Auto-Provisioning
+  - Cluster Autoscalerが新しいノードプールを作成・削除してくれる
+- Binary Authorization
+  - 信頼できるイメージのみをGKEへデプロイできる
+  - チェックボックスにチェックを入れるだけで有効化可能
+- Istio
+  - 1クリックでIstioをデプロイ可能
+  - 既存クラスタにも適用可能
+
+#### How to start?
+
+- `$ gcloud container clusters create MY_CLUSTER`
+- 本を読む
+  - 中井さんのプログラマのための Google Cloud Platform 入門
+  - Docker/Kubernetes 実践コンテナ開発入門
+  - 青山さんのKubernetes完全ガイド
+- ハンズオン
+  - Quick Start
+  - QwickLabs
+  - Coursera
+  - sakajunquality's hands-on
+- オンラインドキュメント
+  - GKE document
+  - Kubernetes document
+  - Youtubeもある
+
+
+
+### Web in 2019 What’s coming?
+
+- 発表者: [Suguru Inatomi / lacolaco(@laco2net)さん](https://twitter.com/laco2net)
+- 資料: [20190130 - Web in 2019 What’s coming? - Google Slides](https://docs.google.com/presentation/d/e/2PACX-1vRXfgnXlYSQ5Q3ImC1DQoub0L_5NUrha9yW3MLcDnFbn1A-mdEXZF11wzzadDF2yKoUnroZ46tMwUl3/pub?start=false&loop=false&delayms=3000&slide=id.p)
+
+
+#### ES 2019 (WIP)
+
+- [JavaScriptの次の仕様ES2019でほぼ確実に追加される新機能まとめ - Qiita](https://qiita.com/tonkotsuboy_com/items/07f8ef98abf89250b90c)
+
+#### Web Components / Polymer
+
+- Polymerの追加開発がなくなった (メンテナンス状態)
+- lit
+  - lit-html / lit-element
+- Web ComponentsのBrowser supports Update
+  - Firefox がサポート
+  - EdgeがChromiumへ移行なので、移行後はEdgeでもwebcomponentsが使える
+- CSS Shadow parts
+  - Shadow DOM内にPartsを定義
+  - 外側のCSSから上書きできる
+- Constructable Stylesheets
+  - CSSStyleSheet()のオブジェクトを作成可能
+- HTML Modules
+  - Edgeチームから提案
+  - .htm (モジュールファイル) をインポート可能
+- Class Public Fields
+
+#### Angular Updates
+
+- Community
+  - 成長中
+  - Angular docsへの訪問者は1.5M に迫る
+  - 日本コミュニティ (ドキュメント翻訳など) も10,000MAUに到達
+- Core updates
+  - 半年に1回メジャーアップデート
+  - メジャーバージョンアップしてもそんなに大きな変化はなし
+- Angular Bazel
+  - Bazel (ビルドツール) をAngularでもサポート
+- Ivy roadmap
+  - 次世代の内部リファクタリング
+
