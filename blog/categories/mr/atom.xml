@@ -1,0 +1,1360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mr | momota.txt]]></title>
+  <link href="http://momota.github.io/blog/categories/mr/atom.xml" rel="self"/>
+  <link href="http://momota.github.io/"/>
+  <updated>2019-02-15T21:37:17+09:00</updated>
+  <id>http://momota.github.io/</id>
+  <author>
+    <name><![CDATA[momota]]></name>
+    <email><![CDATA[makoto.momota@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[参加レポート]Developers Summit 2019]]></title>
+    <link href="http://momota.github.io/blog/2019/02/15/devsumi/"/>
+    <updated>2019-02-15T21:21:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/02/15/devsumi</id>
+    <content type="html"><![CDATA[<p><img src="/images/20190214_devsumi/devsumi_logo.png" alt="devsumi logo" /></p>
+
+<ul>
+<li>2019/02/14(木)～02/15(金)、目黒で行われた<a href="https://event.shoeisha.jp/devsumi/20190214">Developers Summit 2019</a>への参加レポート。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>2/14(木)</h1>
+
+<h2>イノベーションを支えるアマゾン文化</h2>
+
+<ul>
+<li>AWS 西谷 圭介さん</li>
+<li><a href="https://twitter.com/Keisuke69">Keisuke Nishitani(@Keisuke69)さん | Twitter</a></li>
+</ul>
+
+
+<h3>The culture of innovation</h3>
+
+<ul>
+<li>ジェフ・ベゾス「イノベーションはクリエイティビティを開放する」</li>
+<li>Amazon: 地球上で最もお客様を大切にする企業であること
+
+<ul>
+<li>お客様の生活を楽にする</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Our culture of Innovation</h3>
+
+<ul>
+<li>Customer Obsession: お客様への執心
+
+<ul>
+<li>Always work BACKWORDS from the customer: 常にお客様を起点に行動する</li>
+</ul>
+</li>
+<li>Long Term Thinking: 顧客重視と長期的視点
+
+<ul>
+<li>1997年の株主へのレターで「お客様への徹底的なフォーカス」と「長期的視点での投資を継続」と言及</li>
+<li>Amazon Flex: ライドシェアドライバーを集めるシェアリングサービス</li>
+</ul>
+</li>
+<li>If you want to be inventive, you have to be willing to fail
+
+<ul>
+<li>Kindle: 初代Kindleは大抵の本より重くださかった</li>
+<li>Amazonはさまざまな領域でイノベーションを起こし続けている
+
+<ul>
+<li>配送センターのロボット、ドローン</li>
+<li>Amazon Go</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>You have to be willing to be misunderstood for a long time</li>
+</ul>
+
+
+<h3>イノベーションのための組織づくり</h3>
+
+<ul>
+<li>メカニズム
+
+<ul>
+<li>Working Backwards &ndash; PR and FAQs
+
+<ul>
+<li>Press Release
+
+<ul>
+<li>主題、副題、サマリ、課題、解決、引用、使い方、ユーザからの声の引用、次のアクション</li>
+<li>PRがDecisionを後押しする</li>
+<li>内部で何度もレビューして成熟させていく</li>
+</ul>
+</li>
+<li>FAQ
+
+<ul>
+<li>具体的なアイデアとデータを提供するFAQの準備</li>
+<li>顧客とステークホルダー両方のFAQを含める</li>
+<li>聞かれたら嫌なハードな質問を含める</li>
+<li>質問を集めるためにもPRは早めにシェアする</li>
+</ul>
+</li>
+<li>User Manual</li>
+<li>The 5 Questions
+
+<ul>
+<li>顧客は誰か</li>
+<li>顧客の機会・課題はなにか</li>
+<li>最も顧客の利益に成るものは</li>
+<li>どう顧客のニーズやウォンツを知るのか</li>
+<li>UX</li>
+</ul>
+</li>
+<li>Visuals
+
+<ul>
+<li>ラフアイデア</li>
+</ul>
+</li>
+<li>(参考) 6 pager / 1 pager
+
+<ul>
+<li>アマゾンでは会議でのプレゼンテーションツールの利用はほとんどない
+
+<ul>
+<li>プレゼンは話し手の話術に依存する</li>
+<li>聞き手にとって捉え方が変わってしまう恐れがある</li>
+</ul>
+</li>
+<li>会議は6 pager と呼ばれる形式のレポートで行われ、最初の数分は 6 pager を静かに読むことから始まる</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>アーキテクチャー
+
+<ul>
+<li>Self-service Platform without Gatekeeper を重視</li>
+<li>2001年頃、アプリは巨大なモノリスだった。2001-2009からDvelopment transformation</li>
+<li>マイクロサービス化
+
+<ul>
+<li>単一目的のサービス</li>
+<li>お互いブラックボックス</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>カルチャー
+
+<ul>
+<li>社員一人ひとりがリーダーであり、そう振る舞うことが求められる</li>
+<li>Our Leadership Principles: <a href="https://www.amazon.jobs/principles">https://www.amazon.jobs/principles</a>
+
+<ul>
+<li>Customer Obsession
+
+<ul>
+<li>すべてお客様から</li>
+</ul>
+</li>
+<li>Ownership
+
+<ul>
+<li>長期的な視野</li>
+<li>DevOps: 開発・テスト・運用
+
+<ul>
+<li>テスト重視: Automate Everything! (テスト自動化、CI)</li>
+<li>運用重視: Automate Everything!</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Dive Deep / Learn and Be Curious
+
+<ul>
+<li>Root cause analysis</li>
+<li>運用: 5whys</li>
+<li>Brownbag session</li>
+</ul>
+</li>
+<li>Frugality
+
+<ul>
+<li>倹約</li>
+<li>お客様にとって重要でないことにはお金を使わない</li>
+<li>発明を育てる源</li>
+<li>Door Desk: 社員のワークデスクはドア用の板に木の足を付けた簡素なものを利用 (創業時)</li>
+</ul>
+</li>
+<li>Think Big
+
+<ul>
+<li>お客様に貢献するために従来と異なる新たな視点を持つ</li>
+</ul>
+</li>
+<li>Bias for Action
+
+<ul>
+<li>スピード</li>
+<li>やり直しのきくことも多い</li>
+<li>過剰な分析をやめる</li>
+</ul>
+</li>
+<li>Hire and Develop the Best
+
+<ul>
+<li>高いバー</li>
+<li>カルチャーフィット (LP)</li>
+<li>メンタリング</li>
+<li>ピアフィードバック</li>
+</ul>
+</li>
+<li>Have Backbone; Disagree and Commit
+
+<ul>
+<li>経緯を持って異議</li>
+<li>安易に妥協しない</li>
+<li>決定には全面的コミット</li>
+</ul>
+</li>
+<li>Deliver Result
+
+<ul>
+<li>結果を出す</li>
+<li>あきらめない</li>
+</ul>
+</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>組織
+
+<ul>
+<li>2-Pizza Teams
+
+<ul>
+<li>チームを小さく</li>
+<li>作るものに対するすべてを負う
+
+<ul>
+<li>プロダクト計画の策定</li>
+<li>開発</li>
+<li>運用/カスタマーサポート</li>
+</ul>
+</li>
+<li>大きな組織の一部</li>
+</ul>
+</li>
+<li>You build it, you run it. in 2006</li>
+<li>QAはだれが？オンコールはだれが？ → Two-Pizza team</li>
+<li>すべてはサービスチームに存在し、自身の役割に集中する</li>
+<li>高い水準を維持する
+
+<ul>
+<li>チームには権限が与えられ、多くの自由が認められている</li>
+<li>オンボーディング/トレーニング</li>
+</ul>
+</li>
+<li>イテレーション</li>
+<li>Minimum Viable Product</li>
+<li>Everyday is still Day One
+
+<ul>
+<li>毎日が最初の一日 (一歩)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>GitHub Actionsはどのような未来を描くのか : コンテナ技術が開くワークフローのOSS化</h2>
+
+<ul>
+<li>Takafumi Ikedaさん</li>
+<li><p><a href="https://twitter.com/ikeike443">Takafumi Ikeda(@ikeike443)さん | Twitter</a></p></li>
+<li><p>2008年にGithub社創業</p></li>
+<li>Pull Requestの登場。OSSから始まり大きなムーブメントとなった</li>
+<li>ソフトウェア開発にはさまざまな障壁がある</li>
+<li>便利なツール・ライブラリ・テクノロジー・ベンダがたくさんあふれている
+<img src="https://landscape.cncf.io/images/landscape.png" alt="Interactive landscape at cncf.io" /></li>
+<li>Github Actionsでソフトウェア開発に関する課題を解決したい
+
+<ul>
+<li>ワークフローはモジュラー化されるべき → Github Actionsの誕生</li>
+<li>コンテナをActionと呼ぶ
+
+<ul>
+<li>Actionの実態はDockerfile</li>
+</ul>
+</li>
+<li>ワークフローはHashicorp のHCLで記述可能。ビジュアルエディタもある。</li>
+<li>26のイベントに対応</li>
+<li>まとめ
+
+<ul>
+<li>コンテナ技術ベース</li>
+<li>ワークフロー as Code</li>
+<li>ワークフローのモジュラー化、再利用</li>
+<li>Pull Requestに続く進化の触媒</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>現状の仕様、制限など</h3>
+
+<ul>
+<li>詳細はヘルプドキュメント参照</li>
+<li>ワークフローの実行時間はMAX 58分</li>
+<li>ワークフロー1つに付きアクションは100個まで呼び出し可能</li>
+<li>1ファイル内に複数ワークフローを定義可能だが、並列実行されるのは1リポあたり2つまで</li>
+<li>アクションは他のワークフローをトリガーできない</li>
+<li>APIコールは1リポジトリあたりトータルで1000回/時間まで</li>
+<li>プロダクションのSecretを格納したないこと (ベータ中はログにそのまま出ます)</li>
+<li>ActionはDockerfileなのでDockerでできることはたいていできるが、制限あり</li>
+<li>Action実行環境について
+
+<ul>
+<li>1vCPU、3.75GB RAM</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>デモ</h3>
+
+<ul>
+<li><a href="https://github.com/actions/example-aws">actions/example-aws： Example Workflow to deploy a static website to an existing Amazon EKS cluster</a></li>
+</ul>
+
+
+<h3>便利なActions</h3>
+
+<ul>
+<li>各種クラウドActions
+
+<ul>
+<li>GCP, AWS, Azure, Heroku</li>
+</ul>
+</li>
+<li>actions/bin以下に基本的なものを提供</li>
+<li>HTTPiesラッパー</li>
+<li>ラブン地名からIssueを探し出してクロスリンク</li>
+<li>マージ済みブランチ削除</li>
+</ul>
+
+
+<h3>リソース</h3>
+
+<ul>
+<li>github.com/actions</li>
+<li>github marketplace</li>
+<li>sdras/awsome-actions</li>
+<li>community forum</li>
+</ul>
+
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="https://github.blog/jp/2018-10-24-action-demos/">GitHub Actions： みなさんが開発し、GitHubで実行 &ndash; The GitHub Blog &ndash; Japan</a></li>
+</ul>
+
+
+<h2>GCPに恋してHashiCorpを愛して起業したエンジニアのお話</h2>
+
+<ul>
+<li>長谷川 祐介さん</li>
+</ul>
+
+
+<h3>HahiCorp Stack</h3>
+
+<ul>
+<li>HashiCorp Suite
+
+<ul>
+<li>Nomad</li>
+<li>Vault、…</li>
+</ul>
+</li>
+<li>Terraform: あらゆるパブリッククラウドやクラウドサービスのプロビジョニングをCode化
+
+<ul>
+<li>Enterprise版: TF構成ファイルのロールバックとバージョンコントロール、監査ログ、CIとの統合、チームマネジメント、TF Versionの管理簡易化、SentinelによるPolicy検証</li>
+<li>Firewall</li>
+<li>DNS</li>
+<li>Load Balancer</li>
+<li>いわゆる依存関係についてBackupと再現性も含め非常に便利</li>
+</ul>
+</li>
+<li>Vault
+
+<ul>
+<li>Secure Secret Storage</li>
+<li>Dynamic Secret</li>
+<li>Data Encryption</li>
+<li>Lease &amp; Renewal</li>
+<li>Revocation</li>
+<li>Enterprise版: Read Replica, Performance</li>
+<li>Grasysでの活用方法
+
+<ul>
+<li>GCPとAWSのLinuxUserのSSH Keyの共有と管理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Consul
+
+<ul>
+<li>Service Discovery</li>
+<li>Health Check</li>
+<li>KVS</li>
+<li>Configration consul-template連携</li>
+<li>オーケストレーション</li>
+<li>Grasysでの活用方法
+
+<ul>
+<li>システムセントラルとして利用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Nomad
+
+<ul>
+<li>スケジューラ: K8sの薄いやつ</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>システムに対する考え方</h3>
+
+<ul>
+<li>運用設計重視</li>
+<li><p>継続的改善</p></li>
+<li><p>運用コスト削減</p></li>
+<li>更新の容易さ</li>
+<li>障害復旧性</li>
+<li>安定性向上</li>
+</ul>
+
+
+<h3>Grasys Stack</h3>
+
+<ul>
+<li>beatsを多用</li>
+</ul>
+
+
+<h3>GCPのススメ</h3>
+
+<ul>
+<li>Global Launchが多い</li>
+<li>更にNetwork要件が厳しいものが多い</li>
+<li>世界中の場所を含めた通信事業者の品質</li>
+<li>全部ひっくるめて管理することは不可能</li>
+<li>これらをすべてGoogleにおまかせ</li>
+</ul>
+
+
+<h3>起業について、大事なこと</h3>
+
+<ul>
+<li>何を守り、何を捨てるかを決め、よく考え、よく相談する</li>
+<li>変化に対応する</li>
+<li>金は道具、使い方を考える</li>
+<li>自分のやりたいことを持ち続け、あきらめない</li>
+<li>一人の時間は大切、いつでもいける自分が心地よい場所を作っておく</li>
+<li>ときどき振り返り、確認をする</li>
+<li>迷ったときの嫁の言葉は強烈! 嫁は旦那の直感をよく知っている</li>
+<li>欲は大切!</li>
+<li>褒められたときは全力で喜べ!</li>
+<li><strong>恵比寿でIT社長やってももてない</strong></li>
+</ul>
+
+
+<h2>Cloud Native時代における Docker / Kubernetes による開発</h2>
+
+<ul>
+<li>青山 真也さん</li>
+<li><a href="https://twitter.com/amsy810">MasayaAoyama（青山 真也）(@amsy810)さん | Twitter</a></li>
+<li><p>発表資料: <a href="https://speakerdeck.com/masayaaoyama/devsumi2019-amsy810-k8s">Cloud Native時代における Docker / Kubernetes による開発 developers Summit 2019 at 02/14 / devsumi2019_amsy810_k8s &ndash; Speaker Deck</a></p></li>
+<li><p>Cloud Native</p>
+
+<ul>
+<li>疎結合なシステム</li>
+<li>復元力がある</li>
+<li>管理しや牛</li>
+<li>可観測である</li>
+<li>堅牢な自動化により、頻繁かつ期待通りに最小限の労力で大きな変更が可能</li>
+</ul>
+</li>
+<li><p>Cloud Native Ecosystem</p>
+
+<ul>
+<li>k8sを中心としたOSS</li>
+</ul>
+</li>
+<li><p>Cloud Nativeに適したアーキテクチャ? 大規模な開発に適したアーキテクチャ?</p>
+
+<ul>
+<li>マイクロサービスアーキテクチャ
+
+<ul>
+<li>マイクロサービスごとに技術選定可能</li>
+<li>大規模な開発を加速させる</li>
+<li>デプロイが容易</li>
+<li>スケーリングが容易</li>
+<li>障害が全体に波及しづらい</li>
+</ul>
+</li>
+<li>500+ microservices: 管理がつらくなっていく</li>
+<li>サービスメッシュアーキテクチャ
+
+<ul>
+<li>従来アプリケーション側で制御していた機能を分離、開発者はアプリケーションロジックに集中可能</li>
+<li>プロキシを必ず通るので、マイクロサービス間のモニタリングが可能</li>
+<li>他にも以下のようなことが実現可能
+
+<ul>
+<li>Traffic Shifting (ex: Canary release)</li>
+<li>Circuit Break</li>
+<li>Fault Injection</li>
+<li>Rate Limit</li>
+<li>Retry</li>
+<li>mTLS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Container
+
+<ul>
+<li>System ContainerとApplication Containerがある。DockerはApplication Container。</li>
+<li>コンテナで起動するプロセスは1つにする</li>
+<li>一時的なコンテナを作成するようにする (Immutable Insfrastructure)</li>
+<li>VMに比べて
+
+<ul>
+<li>イメージ化が容易</li>
+<li>起動が拘束</li>
+<li>オーバヘッドが少ない</li>
+<li>機能ごとに分離 (1機能 = 1プロセス)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>複数のコンテナの管理をどうするか: Container Orchestration Engine: k8s
+
+<ul>
+<li>複数のDockerホストの管理</li>
+<li>コンテナのスケジューリング</li>
+<li>スケーリング/オートスケーリング</li>
+<li>ローリングアップデート</li>
+<li>コンテナの死活監視</li>
+<li>障害時のセルフヒーリング</li>
+<li>サービスディスカバリ</li>
+<li>ロードバランシング</li>
+<li>データや機密情報の管理</li>
+</ul>
+</li>
+<li>CNCFとStandardization: k8sは完成度が高かったのと中立だったので流行った</li>
+<li>Kubernetesがもたらすもの
+
+<ul>
+<li>Declarative Code and APIs
+
+<ul>
+<li>すべてYAMLで宣言的に記述してAPIに登録: Infrastructure as Code</li>
+</ul>
+</li>
+<li>Self Healing
+
+<ul>
+<li>ReplicaSetとSelf-Healing
+
+<ul>
+<li>ReplicaSetではコンテナのReplica数を維持し続ける</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Automation &amp; Immutable Infrastructure
+
+<ul>
+<li>ReplicaSetとRolling Update (Automation)
+
+<ul>
+<li>ロードバランサからの除外</li>
+<li>コンテナイメージのアップデート</li>
+<li>ロードバランサへの追加</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>k8sはフレームワークと分散システム
+
+<ul>
+<li>分散システムとしてのk8s
+
+<ul>
+<li>Control Loop
+
+<ul>
+<li>現在の状態を観測</li>
+<li>現在の状態と理想状態を比較</li>
+<li>差分に対処する処理を実施</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Custom Resource Definition
+
+<ul>
+<li>AWS/GCP/Acureのマネージドサービスインスタンスの作成が可能</li>
+<li>k8s上にNatsクラスタのQueueクラスタを展開可能</li>
+<li>Controllerは、KubebuilderやOperator Frameworkなどにより比較的容易に作成可能</li>
+</ul>
+</li>
+<li>拡張: Knative, Kubeflow, Operator Framework</li>
+</ul>
+</li>
+<li>CI/CD
+
+<ul>
+<li>GitOps
+
+<ul>
+<li>MasterやStagingなどのブランチごとに、コンテナレジストリとマニフェストレポジトリを用意</li>
+<li>PRによる差分チェックが可能</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>イギリスの銀行 Monzo Bankでk8s + Linkerdを採用</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>APIを活用したフォントの使い方 ～MR（Mixed Reality）の実例紹介</h2>
+
+<ul>
+<li>相川 晴俊さん</li>
+<li>堀尾 風仁さん</li>
+</ul>
+
+
+<h3>フォント紹介</h3>
+
+<ul>
+<li>UD Font
+
+<ul>
+<li>文字のかたちがわかりやすいことにこだわったフォント</li>
+</ul>
+</li>
+<li>フォントのデザインは、手書きから始まる。65.2mmの方眼紙に1文字ずつ書いて、500文字くらい作る。一日20文字くらい。新人フォントデザイナーはこれから始めて3年くらい続ける。営業含め、入社時研修でやらされる。</li>
+<li>「永」という文字をまず作る。「永」には書に必要な技法8種がすべて含まれているから。</li>
+</ul>
+
+
+<h3>フォント製品</h3>
+
+<ul>
+<li>MORISAWA PASSPORT
+
+<ul>
+<li>書籍、漫画、映画テロップ</li>
+<li>組込み用フォントライセンス
+
+<ul>
+<li>スマホ: AQUOS zero: 新ゴ</li>
+<li>ゲーム: Shadowverse: 解ミン月</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Typesquare
+
+<ul>
+<li>サブセット配信: JavaScriptとフォントをTypesquareから配信
+
+<ul>
+<li>必要な分だけ配信することでネットワークやサーバ負荷の軽減</li>
+</ul>
+</li>
+<li>Galaxy Mobile Japan公式サイトで採用</li>
+<li>サムスン電子ジャパン</li>
+<li>必要なフォントを必要な文字だけAPIから取得する: パフォーマンス重視</li>
+</ul>
+</li>
+<li>Webサイト以外でも使えないの？ (アプリ、ゲームなど)という欲がMRにつながっていく</li>
+</ul>
+
+
+<h3>MR</h3>
+
+<ul>
+<li>Kobe Digital Labo</li>
+</ul>
+
+
+<h4>なぜ今、Font×MRに取り組んでいるか</h4>
+
+<ul>
+<li>ポスト・スマホを考える
+
+<ul>
+<li>紙 → PC → Mobile → ？</li>
+<li>デジタルがディスプレイが解き放たれる未来</li>
+<li>Mixed Reality</li>
+</ul>
+</li>
+<li>注目のMRデバイスはHololens</li>
+<li>文字が圧倒的に見づらい
+
+<ul>
+<li>透過型ディスプレイなのでアプリケーション起動場所によって背景が変わる</li>
+<li>視野角が狭い</li>
+</ul>
+</li>
+<li>共同研究テーマ
+
+<ul>
+<li>フォントの視認性とデザイン性</li>
+<li>フォントの変化によって生じるUXの違い</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>事例</h4>
+
+<ul>
+<li>営業シーン: 購買体験
+
+<ul>
+<li>Display Assistant: 商品の説明をホログラム表示</li>
+<li>自転車を買いに行って、店員に説明されても、説明のパーツと実物がつながらない。パンフレットを渡されてもたいてい読まない</li>
+<li>MRで現物の自転車に商品説明ホログラムをマッピング</li>
+</ul>
+</li>
+<li><p>広告デザイン業務: デザインツール</p>
+
+<ul>
+<li>Creative Design X: 看板広告デザインの支援ツール
+
+<ul>
+<li>広告パターンの切替</li>
+<li>フォントの切替</li>
+<li>現地の雰囲気を感じながら、広告の検証が可能</li>
+<li>複数のHololensで視野共有: クライアントとデザイナーで同じ看板を見ながら議論が可能</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>どのフォントが見やすいかユーザ調査(3種)。一般的にはスマートグラスで明朝体は字が潰れるので避けられる。</p>
+
+<ul>
+<li>見やすさ
+
+<ol>
+<li>UD新ゴ (60%)</li>
+<li>黎ミン (25%)</li>
+<li>メイリオ (15%)</li>
+</ol>
+</li>
+<li>どのフォントが好きか
+
+<ol>
+<li>UD新ゴ (50%)</li>
+<li>黎ミン (30%)</li>
+<li>メイリオ (20%)</li>
+</ol>
+</li>
+<li>黎ミンは、ボールドにしたとき、横線も太くなる。(普通は横線は太くならない)</li>
+<li>メイリオはゴシック体なのに見やすさ、好感度が低い</li>
+</ul>
+</li>
+<li><p>ブランディングはフォントで決まる</p></li>
+</ul>
+
+
+<h4>MR開発</h4>
+
+<ul>
+<li>Illustratorなどから画像出力 (書体データも)</li>
+<li>画像を組み込み、Unity上で開発</li>
+<li>UWP出力し、Visual Studioでビルド</li>
+<li><p>Hololensへインストール</p></li>
+<li><p>毎回illustratorを起動し、修正も大変だった→TypeSquare APIの利用</p></li>
+</ul>
+
+
+<h4>MR開発</h4>
+
+<ul>
+<li>フォントにこだわると顧客の反応もよい</li>
+<li>顧客満足度向上→案件化率UP</li>
+<li>エンジニアこそフォントにこだわれ</li>
+</ul>
+
+
+<h2>ヤフー株式会社におけるフロントエンドの取り組み</h2>
+
+<ul>
+<li>向井 咲人さん</li>
+<li>森本 恭平さん</li>
+<li><p>平山 涼也さん</p></li>
+<li><p>発表資料: <a href="https://www.slideshare.net/techblogyahoo/devsumi2019-14b6-devsumib-131748750">ヤフー株式会社におけるフロントエンドの取り組み #devsumi #devsumiB</a></p></li>
+<li>参考資料: <a href="https://techblog.yahoo.co.jp/advent-calendar-2018/yahoo-frontend/">ヤフー株式会社におけるWebフロントエンドの技術選定 &ndash; Yahoo! JAPAN Tech Blog</a></li>
+</ul>
+
+
+<h3>メディアカンパニー</h3>
+
+<ul>
+<li>広告入稿管理のフロントエンド。</li>
+<li>Yahoo!ディスプレイアドネットワーク、スポンサードサーチ、Twitter広告を担当</li>
+<li>jQuery+PHPからReact + Redux + TypeScript + Node.jsのモダンなフロントエンドへ刷新中
+
+<ul>
+<li>その他、Redux-Form, Sass, Webpackなど</li>
+</ul>
+</li>
+<li>大規模開発の課題
+
+<ul>
+<li>刷新を進めながらも、ビジネス要件の機能開発を進めなければならない</li>
+<li>並行して3～4個の機能開発が進む</li>
+<li>コードレビューの時間が爆増</li>
+<li>どんどん増えていく開発メンバー</li>
+<li>コードの足並みが揃わない</li>
+</ul>
+</li>
+<li>課題への立ち向かい方
+
+<ul>
+<li>規約の導入
+
+<ul>
+<li>LintやPrittierを導入し、コーディング規約を設けた</li>
+<li>上記でカバーできない部分のコーディングガイドをGitBookで作成
+
+<ul>
+<li>規約追加時にはPRレビューを出すことで全員に見てもらえる</li>
+</ul>
+</li>
+<li>Dangerの導入: PRを出すときに行うことを自動化
+
+<ul>
+<li>レビューメンバーの自動アサインやラベル紐づけなど</li>
+</ul>
+</li>
+<li>TypeScriptの導入
+
+<ul>
+<li>静的型付けによりｍコンパイル時にエラーが出る</li>
+<li>機能修正時に漏れがなく、バグを事前に防げている</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Atomic Designの導入
+
+<ul>
+<li>コンポーネントの粒度を揃える</li>
+<li>Atoms, Molecules, Organismsという共通言語を作る</li>
+<li>レビューの際に指摘をしやすいように</li>
+</ul>
+</li>
+<li>コンポーネントガイドの導入
+
+<ul>
+<li>コンポーネントの見える化: Storybook、docz</li>
+<li>新規メンバーの再開発を防ぐ</li>
+<li>コンポーネント有無の確認による既存メンバー、新規メンバーのコミュニケーションコスト削減</li>
+</ul>
+</li>
+<li>Redux層の分割
+
+<ul>
+<li>ファイル構成にre-ducksを採用</li>
+<li>Reduxのデータ層にDomain層、UI層を設ける (App層も追加予定)</li>
+</ul>
+</li>
+<li>日々素振りを続けて課題に挑む
+
+<ul>
+<li>この先、まだ未知な課題も出てくる。</li>
+<li>日々の素振りを続けて、課題に挑める状況を作り出す。</li>
+<li>チーム勉強会などのインプット・アウトプットの習慣づけ</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>コマースカンパニー</h3>
+
+<ul>
+<li>YahooショッピングではABテストを回しまくっている</li>
+<li>企画 (1週間)→制作(1週間) → 開発 (2週間)</li>
+<li>上記サイクルの並列度が高い。つらい。</li>
+<li>工数削減したい</li>
+<li>UIをアップデートしやすくしたい</li>
+<li>UIパーツ集を社内限定でnpmパッケージを公開</li>
+<li>完成したらどんな未来が待っているか
+
+<ul>
+<li>デザイナーが内政したUIパーツ集を使える</li>
+<li>エンジニアも気軽にABテストのデザインが作れる</li>
+<li>簡単なデザインならモックすらいらない</li>
+<li>デザイナーは「デザインリサーチ」に時間をかけられる</li>
+<li>いい結果のデザインをパッケージに反映できる</li>
+<li>数字によって証明された室の高いデザインで全出面を統一できる</li>
+<li>作り途中なのでどこまで効果があるかは不明…</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Webフロント技術室</h3>
+
+<ul>
+<li>サービス区切りの組織→縦の組織</li>
+<li>その縦の組織に特化したほうが成長も早いし、効率も良い</li>
+<li>ただし、個別最適化されてしまう
+
+<ul>
+<li>リソースがないところは、モダン化されない可能性</li>
+<li>人材流動ができなくなる</li>
+<li>エースが転職してナレッジが会社に残らない</li>
+<li>ヤフーのWebフロントエンドが見えなくなる</li>
+</ul>
+</li>
+<li><p>ある程度全社的な判断や横断的な視点の組織が必要となる</p></li>
+<li><p>どういうメンバーで挑むか</p>
+
+<ul>
+<li>デザイナーとエンジニアの混合チーム</li>
+<li>コマースチームとメディアチームの混合</li>
+</ul>
+</li>
+<li>CTO直轄の組織なのでCTOとの距離が近い</li>
+</ul>
+
+
+<h4>半年間なにをやったか</h4>
+
+<ul>
+<li>よく使われているライブラリの効率化</li>
+<li>統一したパフォーマンスの計測方法の検討</li>
+<li>ヤフーのWebフロントエンドの健康状態の把握
+
+<ul>
+<li>全サービスにFE環境を手入力してもらって情報収集</li>
+<li>統一感がないことを状況把握できた</li>
+</ul>
+</li>
+<li>適切な技術選定とその技術の浸透
+
+<ul>
+<li>全社視点での技術選定</li>
+<li>なぜフレームワークではないか
+
+<ul>
+<li>JSｈあエンジニア・デザイナー両方書く</li>
+<li>React+Reduxなどを実装できない可能性がある</li>
+<li>リソースもまちまちなのに、突発的なリニューアルを余儀なくされる可能性がある</li>
+<li>リリースがある場合など、ビジネスを止めることに成る</li>
+<li>現状バラバラすぎる</li>
+<li>フレームワークの統一は現実的ではなかった</li>
+</ul>
+</li>
+<li>スタイルを選ばなかった理由
+
+<ul>
+<li>CSS in JS系はチームによっては効率が悪い場合がある</li>
+<li>エンジニア+デザイナー混合のため</li>
+<li>Webpack周りの設定など苦しみを生むくらいならPostCSSである必要もない</li>
+<li>Gulp+Sassはアクではない</li>
+</ul>
+</li>
+<li>影響を抑えられ、全社にメリットのある技術: TypeScript
+
+<ul>
+<li>MS製。2017年からGoogleの標準に。</li>
+<li>特徴
+
+<ul>
+<li>静的型付け
+
+<ul>
+<li>大きなバグを防げる</li>
+<li>IDEとの連携によるリアルタイムチェック</li>
+</ul>
+</li>
+<li>JSとの互換性
+
+<ul>
+<li>JSｔお互換性</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>TypeScript布教にあたっての課題
+
+<ul>
+<li>スキルの差の問題</li>
+<li>始める苦しみをいかにして取り除くか</li>
+<li>ドキュメントの整備</li>
+<li>サポート体制の構築</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>【第2部ハンズオン】GCPをさわりまくれ！スペシャリストに聞きまくれ！大QWIKLABS大会</h2>
+
+<ul>
+<li>無料のQiklabsクレジットが配られて、GCPクエストを自習</li>
+<li>電源あり、wifiあり環境。お菓子がいっぱい出た。</li>
+<li>GCPのソリューションアーキテクトっぽい人がいっぱいいて、質問し放題だった。(が、するようなつまづき方はしなかった)</li>
+</ul>
+
+
+<h1>2/15(金)</h1>
+
+<h2>ドラゴンクエストXを支える失敗事例</h2>
+
+<ul>
+<li>青山 公士さん
+
+<ul>
+<li>ドラゴンクエストXを支える技術の著者</li>
+<li>ドラゴンクエストXオンラインプロデューサ (責任者)</li>
+<li>キングボンビーの生みの親というか、プログラマー
+
+<ul>
+<li>あくまで生みの親はさくまあきらさん</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>オンラインサービス (オンラインゲーム) はリリース後の運用・運営が本番
+
+<ul>
+<li>リリースは完了ではない。オフラインゲームはリリースで完了、手を加えられないのであきらめも付く。</li>
+<li>お客様からのフィードバックが対応の始まり</li>
+<li>良い設計・実装: 要望への対応が柔軟、不具合が出づらい、不具合が出ても修正しやすい</li>
+<li>重要なのは運営・運用経験</li>
+<li>他者の事例を共有することは重要</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>ドラクエXとは</h3>
+
+<ul>
+<li>オンラインゲーム</li>
+<li>6年半くらい経つ</li>
+<li>MMORPG: 大規模多人数参加型オンラインゲーム</li>
+<li>構成
+
+<ul>
+<li>クライアント: 見た目上の本体
+
+<ul>
+<li>バリデーションロジックくらいを置く</li>
+</ul>
+</li>
+<li>ゲームサーバ: 真の本体
+
+<ul>
+<li>ゲームロジックは勝手にいじられないように、サーバ上で処理</li>
+</ul>
+</li>
+<li>ゲームDB: 世界のデータ</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>開発ポリシー</h3>
+
+<ul>
+<li><p>開発初期から運営・運用が重要という想定</p>
+
+<ul>
+<li>運営: 仕掛け(攻め) → 柔軟性が重要
+
+<ul>
+<li>機能拡張、期間限定イベント</li>
+</ul>
+</li>
+<li>運用: 保守 (守り) → 継続性が重要
+
+<ul>
+<li>不具合修正・障害対応</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>例えば、ロジックは一箇所に集約すべし、など</p></li>
+</ul>
+
+
+<h3>失敗事例 (3つ)</h3>
+
+<h4>キラージャグリングの音が鳴り続ける</h4>
+
+<ul>
+<li>不具合の内容
+
+<ul>
+<li>ある更新から突然演出完了後も効果音が止まらずになり続ける</li>
+</ul>
+</li>
+<li>原因と対応
+
+<ul>
+<li>エフェクトは視覚効果を演出する</li>
+<li>ドラクエでは表示形状、速度、加速度など、各種パラメータが設定されたデータドリブンで開発</li>
+<li>アクション音やヒット音はデザイナー作成のデータで指定されたタイミングでC++が実行される</li>
+<li>アクション効果音の停止処理のあとに、ヒット音を鳴らす処理</li>
+<li>ヒット時とミス時の前段で停止処理がある</li>
+<li>ミス時に効果音を停止する改修を実施したら不具合が発生</li>
+<li>ミス時の効果音停止をC++で無効化したのが原因</li>
+<li>他にも同様の問題があるかも: ミス時は個別対応でFIX</li>
+</ul>
+</li>
+<li>得られた教訓
+
+<ul>
+<li>システム改修はBTSチケット(Redmine)に影響範囲を明記し、全影響範囲を再検証すべし</li>
+<li>影響範囲は極力せまくすべし</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>邪神の宮殿にてパーティが組めない</h4>
+
+<ul>
+<li>不具合の内容
+
+<ul>
+<li>同盟: オートマッチング</li>
+<li>6/10(土) 6:00の更新以降、参加希望者が多数いてもマッチングが成立しない場合がある</li>
+<li>マッチングに参加できる条件が設定されている</li>
+</ul>
+</li>
+<li>原因と対応
+
+<ul>
+<li>条件はプランナー作成のデータで設定される
+
+<ul>
+<li>問題になりそうなデータはなかった</li>
+</ul>
+</li>
+<li>暫定べた書きしたものを本格対応の更新し忘れ、1年後に発火してしまった</li>
+<li>プログラム (雰囲気こんな感じ)
+<code>
+if (6/10(土) 6:00以降 &amp;&amp; ある獄) {
+マッチング処理
+}
+</code></li>
+</ul>
+</li>
+<li>得られた教訓
+
+<ul>
+<li>暫定対応は本格対応まで完了し、BTSシステムで管理すべし</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>釣り老師に話すと、ビッグサイズやキングサイズなのにノーマルサイズと判定される</h4>
+
+<ul>
+<li>不具合の内容
+
+<ul>
+<li>魚には大きさがある</li>
+<li>オウムガイも釣れる</li>
+<li>魚を釣ったあと釣り老師に話すとサイズに見合った報酬をもらえる</li>
+</ul>
+</li>
+<li>原因と対応
+
+<ul>
+<li>大きさとサイズの分類は魚ごとに設定</li>
+<li>オウムガイは1023mm以上がビッグ、それ未満がノーマル</li>
+<li>C++ではmm単位の情報をintで扱い、Luaではmおよびmmをdoubleで扱う: 浮動小数点の丸め処理の誤差</li>
+<li>誤差補正処理は入っていた
+
+<ul>
+<li>補正処理が不十分だった</li>
+</ul>
+</li>
+<li>行動ログから全戻しした</li>
+</ul>
+</li>
+<li>得られた教訓
+
+<ul>
+<li>表面化していない不具合は存在する前提で対応すべし</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>振り返り</h4>
+
+<ul>
+<li>リリース後の改修は要注意
+
+<ul>
+<li>影響範囲を考慮</li>
+<li>BTSチケットに登録</li>
+<li>確実にチケットクローズするまで</li>
+<li>ドラクエX開発チームは運営中に出た問題に対して、「どうすれば事前に防げたか」を検討しパターン別にまとめている</li>
+<li>BTSチケットに登録していないパターンが一番多い: 開発担当者が軽く考える案件が問題になりやすい
+
+<ul>
+<li>10万くらいチケットがある (タスクチケット含む)</li>
+<li>以前のBTSにも10万くらいあったので、計20万チケットくらい</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Q&amp;A</h3>
+
+<p>Q: 開発体制・人数は？</p>
+
+<p>A: 秘密(人事から止められている)。スタッフロールから想像して。</p>
+
+<p>Q: 修正の影響範囲の特定の仕方は？</p>
+
+<p>A: あまりよくない答えだが、個別・経験値に依存している。</p>
+
+<p>Q: チケット登録がなかなか浸透しない理由は？</p>
+
+<p>A: 開発者がチケット登録するまでもないと思っちゃう。リファクタリングのつもりで軽く対応しちゃうときにバグが埋め込まれてしまう。油断、おごりがある。</p>
+
+<p>Q: 運用以降が本番、というところのモチベーション維持に関しては？</p>
+
+<p>A: 実際、飽きたと言って抜けちゃう人もいる。チーム内で異動させたりする。</p>
+
+<h2>IBM Q &ndash; 量子コンピューターの最前線</h2>
+
+<ul>
+<li><p>小野寺 民也さん</p></li>
+<li><p>そもそも量子とは</p>
+
+<ul>
+<li>とても小さな世界</li>
+<li>物理法則 (ニュートン力学)では表すことができない</li>
+<li>量子と波の性質を併せ持つ</li>
+<li>量子重ね合わせ</li>
+<li>量子もつれ</li>
+</ul>
+</li>
+<li>CRDS-FY2019-SP-04, みんなの量子コンピュータ: <a href="https://www.jst.go.jp/crds/report/report01/CRDS-FY2018-SP-04.html">（戦略プロポーザル）みんなの量子コンピューター　～情報・数理・電子工学と拓く新しい量子アプリ～／CRDS-FY2018-SP-04</a> の図2.2 量子ビット実現手法の比較
+
+<ul>
+<li>超電導回路</li>
+<li>イオントラップ</li>
+</ul>
+</li>
+<li>量子プログラミング: 量子回路を組立てていくこと</li>
+<li>Exponential growth (指数的増大): 2<sup>n</sup>
+
+<ul>
+<li>2<sup>27</sup> ～ 世界一のスパコン(IBM) 1億4千万並列 ～ 2<sup>28</sup></li>
+</ul>
+</li>
+<li>万能量子コンピュータ
+
+<ul>
+<li><a href="https://quantumexperience.ng.bluemix.net/qx/devices">IBM Q Experience</a></li>
+<li>現状、小規模</li>
+<li>近似 (Noisy)</li>
+<li>5量子ビット～20量子ビットが現状の量子コンピュータ</li>
+<li>量子状態を保つ時間も短いので、量子計算をその時間内に納めなければならないという制約がある</li>
+</ul>
+</li>
+<li>有望なアプリケーション領域
+
+<ul>
+<li>量子化学</li>
+<li>機械学習</li>
+<li>最適化</li>
+</ul>
+</li>
+<li>IBM Q
+
+<ul>
+<li>IBM Qシステム</li>
+<li>QISKitオープンソースSDK
+
+<ul>
+<li><a href="https://qiskit.org/aqua">Qiskit Aqua | Algorithms for near-term quantum applications</a></li>
+</ul>
+</li>
+<li>IBM Qネットワーク</li>
+</ul>
+</li>
+<li>CES2019にも出展: <a href="https://www.youtube.com/watch?v=LAA0-vjTaNY&amp;feature=youtu.be">The World’s First Integrated Quantum Computing System &ndash; YouTube</a></li>
+<li>量子力学だけでなく、冷凍機、Microwave工学などの周辺技術も大切。</li>
+</ul>
+
+
+<h3>参考</h3>
+
+<ul>
+<li><a href="https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/index.html">IBM Quantum Computing で計算してみよう</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
