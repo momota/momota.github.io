@@ -9,6 +9,7 @@ categories: github hashicorp kubernetes mr quantum-computing
 ![devsumi logo](/images/20190214_devsumi/devsumi_logo.png)
 
 - 2019/02/14(木)～02/15(金)、目黒で行われた[Developers Summit 2019](https://event.shoeisha.jp/devsumi/20190214)への参加レポート。
+- CodeZineさんが発表資料をまとめてくれている > [デブサミ2019、講演関連資料まとめ：CodeZine（コードジン）](https://codezine.jp/article/detail/11383)
 
 
 <!-- more -->
@@ -57,11 +58,11 @@ categories: github hashicorp kubernetes mr quantum-computing
       - 質問を集めるためにもPRは早めにシェアする
     - User Manual
     - The 5 Questions
-      - 顧客は誰か
-      - 顧客の機会・課題はなにか
-      - 最も顧客の利益に成るものは
-      - どう顧客のニーズやウォンツを知るのか
-      - UX
+      1. 顧客は誰か
+      2. 顧客の機会・課題はなにか
+      3. 最も顧客の利益に成るものは
+      4. どう顧客のニーズやウォンツを知るのか
+      5. UX
     - Visuals
       - ラフアイデア
     - (参考) 6 pager / 1 pager
@@ -137,6 +138,7 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 - Takafumi Ikedaさん
 - [Takafumi Ikeda(@ikeike443)さん | Twitter](https://twitter.com/ikeike443)
+- 発表資料: [GitHub Actionsはどのような未来を描くのか - Speaker Deck](https://speakerdeck.com/ikeike443/github-actionshadofalseyounawei-lai-womiao-kufalseka)
 
 - 2008年にGithub社創業
 - Pull Requestの登場。OSSから始まり大きなムーブメントとなった
@@ -148,7 +150,13 @@ categories: github hashicorp kubernetes mr quantum-computing
   - コンテナをActionと呼ぶ
     - Actionの実態はDockerfile
   - ワークフローはHashicorp のHCLで記述可能。ビジュアルエディタもある。
-  - 26のイベントに対応
+    - 26のイベントに対応
+      - Repository Dispatch: 外から任意にトリガーできるイベント。長いジョブなどを外部で実行、OKならこのイベントを発火、などの使い方が可能
+      - gollum (wiki)
+      - Vulnerability
+      - Project関連
+      - Issue / Label / Milestone 関連
+      - その他
   - まとめ
     - コンテナ技術ベース
     - ワークフロー as Code
@@ -175,17 +183,24 @@ categories: github hashicorp kubernetes mr quantum-computing
 ### 便利なActions
 
 - 各種クラウドActions
-  - GCP, AWS, Azure, Heroku
-- actions/bin以下に基本的なものを提供
-- HTTPiesラッパー
-- ラブン地名からIssueを探し出してクロスリンク
-- マージ済みブランチ削除
+  - GCP, AWS, Azure, Herokuに対応。
+- https://github.com/actions/bin 以下に基本的なものを提供
+  - bats
+  - curl
+  - debug
+  - filter
+  - sh
+  - shellcheck
+- HTTP client: HTTPiesラッパー。Marketplace で入手可能。
+- Add an issue reference: ブランチ名からIssueを探し出してクロスリンク
+- All in one project: Issue / PR を常に Project へ追加
+- Delete Merged branch: マージ済みブランチ削除。Probot app / Actions どちらでも利用可能
 
 ### リソース
 
-- github.com/actions
+- https://github.com/actions
 - github marketplace
-- sdras/awsome-actions
+- https://github.com/sdras/awsome-actions
 - community forum
 
 ### 参考
@@ -228,11 +243,14 @@ categories: github hashicorp kubernetes mr quantum-computing
     - システムセントラルとして利用
 - Nomad
   - スケジューラ: K8sの薄いやつ
+  - Grasysでは利用していない
 
 ### システムに対する考え方
 
 - 運用設計重視
 - 継続的改善
+
+上記の考え方なので、以下も大事
 
 - 運用コスト削減
 - 更新の容易さ
@@ -276,7 +294,7 @@ categories: github hashicorp kubernetes mr quantum-computing
 - Cloud Native
   - 疎結合なシステム
   - 復元力がある
-  - 管理しや牛
+  - 管理しやすい
   - 可観測である
   - 堅牢な自動化により、頻繁かつ期待通りに最小限の労力で大きな変更が可能
 - Cloud Native Ecosystem
@@ -289,7 +307,7 @@ categories: github hashicorp kubernetes mr quantum-computing
     - デプロイが容易
     - スケーリングが容易
     - 障害が全体に波及しづらい
-  - 500+ microservices: 管理がつらくなっていく
+  - 500+ microservices: 大規模なシステムのマイクロサービス間を可視化するとデス・スターのようになる。個別マイクロサービスの管理がつらくなっていく。
   - サービスメッシュアーキテクチャ
     - 従来アプリケーション側で制御していた機能を分離、開発者はアプリケーションロジックに集中可能
     - プロキシを必ず通るので、マイクロサービス間のモニタリングが可能
@@ -562,6 +580,8 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 ## 【第2部ハンズオン】GCPをさわりまくれ！スペシャリストに聞きまくれ！大QWIKLABS大会
 
+![GCP cookies](/images/20190214_devsumi/gcp_cookies.jpg)
+
 - 無料のQiklabsクレジットが配られて、GCPクエストを自習
 - 電源あり、wifiあり環境。お菓子がいっぱい出た。
 - GCPのソリューションアーキテクトっぽい人がいっぱいいて、質問し放題だった。(が、するようなつまづき方はしなかった)
@@ -732,3 +752,7 @@ A: 実際、飽きたと言って抜けちゃう人もいる。チーム内で�
 ### 参考
 
 - [IBM Quantum Computing で計算してみよう](https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/index.html)
+
+
+午後は打ち合わせがあったので午前中までの参加だった。
+
