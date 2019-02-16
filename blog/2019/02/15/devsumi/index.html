@@ -9,8 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="2019/02/14(木)～02/15(金)、目黒で行われたDevelopers Summit 2019への参加レポート。 2/14(木) イノベーションを支えるアマゾン文化 AWS 西谷 圭介さん
-Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
+  <meta name="description" content="2019/02/14(木)～02/15(金)、目黒で行われたDevelopers Summit 2019への参加レポート。
+CodeZineさんが発表資料をまとめてくれている > デブサミ2019、講演関連資料まとめ：CodeZine（コードジン） 2/14(木) &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -111,6 +111,7 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 
 <ul>
 <li>2019/02/14(木)～02/15(金)、目黒で行われた<a href="https://event.shoeisha.jp/devsumi/20190214">Developers Summit 2019</a>への参加レポート。</li>
+<li>CodeZineさんが発表資料をまとめてくれている > <a href="https://codezine.jp/article/detail/11383">デブサミ2019、講演関連資料まとめ：CodeZine（コードジン）</a></li>
 </ul>
 
 
@@ -202,13 +203,13 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <li>User Manual</li>
 <li>The 5 Questions
 
-<ul>
+<ol>
 <li>顧客は誰か</li>
 <li>顧客の機会・課題はなにか</li>
 <li>最も顧客の利益に成るものは</li>
 <li>どう顧客のニーズやウォンツを知るのか</li>
 <li>UX</li>
-</ul>
+</ol>
 </li>
 <li>Visuals
 
@@ -378,7 +379,8 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 
 <ul>
 <li>Takafumi Ikedaさん</li>
-<li><p><a href="https://twitter.com/ikeike443">Takafumi Ikeda(@ikeike443)さん | Twitter</a></p></li>
+<li><a href="https://twitter.com/ikeike443">Takafumi Ikeda(@ikeike443)さん | Twitter</a></li>
+<li><p>発表資料: <a href="https://speakerdeck.com/ikeike443/github-actionshadofalseyounawei-lai-womiao-kufalseka">GitHub Actionsはどのような未来を描くのか &ndash; Speaker Deck</a></p></li>
 <li><p>2008年にGithub社創業</p></li>
 <li>Pull Requestの登場。OSSから始まり大きなムーブメントとなった</li>
 <li>ソフトウェア開発にはさまざまな障壁がある</li>
@@ -394,8 +396,22 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <li>Actionの実態はDockerfile</li>
 </ul>
 </li>
-<li>ワークフローはHashicorp のHCLで記述可能。ビジュアルエディタもある。</li>
-<li>26のイベントに対応</li>
+<li>ワークフローはHashicorp のHCLで記述可能。ビジュアルエディタもある。
+
+<ul>
+<li>26のイベントに対応
+
+<ul>
+<li>Repository Dispatch: 外から任意にトリガーできるイベント。長いジョブなどを外部で実行、OKならこのイベントを発火、などの使い方が可能</li>
+<li>gollum (wiki)</li>
+<li>Vulnerability</li>
+<li>Project関連</li>
+<li>Issue / Label / Milestone 関連</li>
+<li>その他</li>
+</ul>
+</li>
+</ul>
+</li>
 <li>まとめ
 
 <ul>
@@ -443,22 +459,33 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <li>各種クラウドActions
 
 <ul>
-<li>GCP, AWS, Azure, Heroku</li>
+<li>GCP, AWS, Azure, Herokuに対応。</li>
 </ul>
 </li>
-<li>actions/bin以下に基本的なものを提供</li>
-<li>HTTPiesラッパー</li>
-<li>ラブン地名からIssueを探し出してクロスリンク</li>
-<li>マージ済みブランチ削除</li>
+<li><a href="https://github.com/actions/bin">https://github.com/actions/bin</a> 以下に基本的なものを提供
+
+<ul>
+<li>bats</li>
+<li>curl</li>
+<li>debug</li>
+<li>filter</li>
+<li>sh</li>
+<li>shellcheck</li>
+</ul>
+</li>
+<li>HTTP client: HTTPiesラッパー。Marketplace で入手可能。</li>
+<li>Add an issue reference: ブランチ名からIssueを探し出してクロスリンク</li>
+<li>All in one project: Issue / PR を常に Project へ追加</li>
+<li>Delete Merged branch: マージ済みブランチ削除。Probot app / Actions どちらでも利用可能</li>
 </ul>
 
 
 <h3>リソース</h3>
 
 <ul>
-<li>github.com/actions</li>
+<li><a href="https://github.com/actions">https://github.com/actions</a></li>
 <li>github marketplace</li>
-<li>sdras/awsome-actions</li>
+<li><a href="https://github.com/sdras/awsome-actions">https://github.com/sdras/awsome-actions</a></li>
 <li>community forum</li>
 </ul>
 
@@ -534,6 +561,7 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 
 <ul>
 <li>スケジューラ: K8sの薄いやつ</li>
+<li>Grasysでは利用していない</li>
 </ul>
 </li>
 </ul>
@@ -543,8 +571,14 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 
 <ul>
 <li>運用設計重視</li>
-<li><p>継続的改善</p></li>
-<li><p>運用コスト削減</p></li>
+<li>継続的改善</li>
+</ul>
+
+
+<p>上記の考え方なので、以下も大事</p>
+
+<ul>
+<li>運用コスト削減</li>
 <li>更新の容易さ</li>
 <li>障害復旧性</li>
 <li>安定性向上</li>
@@ -596,7 +630,7 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <ul>
 <li>疎結合なシステム</li>
 <li>復元力がある</li>
-<li>管理しや牛</li>
+<li>管理しやすい</li>
 <li>可観測である</li>
 <li>堅牢な自動化により、頻繁かつ期待通りに最小限の労力で大きな変更が可能</li>
 </ul>
@@ -620,7 +654,7 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <li>障害が全体に波及しづらい</li>
 </ul>
 </li>
-<li>500+ microservices: 管理がつらくなっていく</li>
+<li>500+ microservices: 大規模なシステムのマイクロサービス間を可視化するとデス・スターのようになる。個別マイクロサービスの管理がつらくなっていく。</li>
 <li>サービスメッシュアーキテクチャ
 
 <ul>
@@ -1137,6 +1171,8 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 
 <h2>【第2部ハンズオン】GCPをさわりまくれ！スペシャリストに聞きまくれ！大QWIKLABS大会</h2>
 
+<p><img src="/images/20190214_devsumi/gcp_cookies.jpg" alt="GCP cookies" /></p>
+
 <ul>
 <li>無料のQiklabsクレジットが配られて、GCPクエストを自習</li>
 <li>電源あり、wifiあり環境。お菓子がいっぱい出た。</li>
@@ -1450,6 +1486,8 @@ Keisuke Nishitani(@Keisuke69)さん | Twitter The &hellip;">
 <li><a href="https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/index.html">IBM Quantum Computing で計算してみよう</a></li>
 </ul>
 
+
+<p>午後は打ち合わせがあったので午前中までの参加だった。</p>
 </div>
 
 
