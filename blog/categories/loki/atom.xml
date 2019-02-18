@@ -4,7 +4,7 @@
   <title><![CDATA[Category: loki | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/loki/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-02-18T11:06:14+09:00</updated>
+  <updated>2019-02-18T11:15:07+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -31,6 +31,9 @@
 
 
 <h2>Cortex の話をKubeConで聞きたかった話</h2>
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="4a9465edea0547d2b2afce66746c0085" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
 
 <ul>
 <li>Shinya Uemura <a href="https://twitter.com/uesyn">@uesyn</a> (KDDI &amp; Creationline)</li>
@@ -187,6 +190,9 @@
 
 
 <h2>KubeCon + CNConに見るetcdの未来</h2>
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="73ffb953ab4d47b0bc2b4a54cabd569c" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
 
 <ul>
 <li>Akihiro Ikezoe <a href="https://twitter.com/zoetro">@zoetro</a> (Cybozu)
@@ -354,6 +360,9 @@
 
 <h2>Monitoring Kubernetes Audit Log by Falco</h2>
 
+<script async class="speakerdeck-embed" data-slide="1" data-id="285589e4ce164fa78335af3234ae96cb" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
+
 <ul>
 <li>Makoto Hasegawa <a href="https://twitter.com/makocchi">@makocchi</a> (CyberAgent)</li>
 <li><a href="https://speakerdeck.com/makocchi/kubecon2018-recap-falco-deep-dive">kubecon2018_recap_falco_deep_dive &ndash; Speaker Deck</a></li>
@@ -419,6 +428,9 @@
 
 
 <h2>KubeCon + CloudNativeCon 2018 NA Recap Vitess</h2>
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="c4a298b954df4a008c4f90e5719526e2" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
 
 <ul>
 <li>Yutaka Ichikawa @cyberblack28 (APC)</li>
@@ -500,6 +512,9 @@
 
 
 <h2>Prometheusの今後</h2>
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="0d8e8156c5df44f99953e097e0ab5389" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
 
 <ul>
 <li>Yoshi Shota <a href="https://twitter.com/yosshi_">@yosshi_</a> (NTT Communications)</li>
