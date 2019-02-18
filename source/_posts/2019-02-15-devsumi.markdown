@@ -45,6 +45,7 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 ### イノベーションのための組織づくり
 
+
 - メカニズム
   - Working Backwards - PR and FAQs
     - Press Release
@@ -135,6 +136,8 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 
 ## GitHub Actionsはどのような未来を描くのか : コンテナ技術が開くワークフローのOSS化
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="0c63161e473e435ea921b37af23488f6" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
 
 - Takafumi Ikedaさん
 - [Takafumi Ikeda(@ikeike443)さん | Twitter](https://twitter.com/ikeike443)
@@ -285,6 +288,8 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 
 ## Cloud Native時代における Docker / Kubernetes による開発
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="8a5f6ba5eb1b4506bc0dead39fab0766" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
 
 - 青山 真也さん
 - [MasayaAoyama（青山 真也）(@amsy810)さん | Twitter](https://twitter.com/amsy810)
@@ -460,6 +465,8 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 
 ## ヤフー株式会社におけるフロントエンドの取り組み
+
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/gm44OplSwyg9IZ" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/techblogyahoo/devsumi2019-14b6-devsumib-131748750" title="ヤフー株式会社におけるフロントエンドの取り組み #devsumi #devsumiB" target="_blank">ヤフー株式会社におけるフロントエンドの取り組み #devsumi #devsumiB</a> </strong> from <strong><a href="https://www.slideshare.net/techblogyahoo" target="_blank">Yahoo!デベロッパーネットワーク</a></strong> </div>
 
 - 向井 咲人さん
 - 森本 恭平さん
