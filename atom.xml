@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-02-18T10:48:08+09:00</updated>
+  <updated>2019-02-18T11:06:14+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -1430,6 +1430,9 @@
 
 <h3>How to start Android Dev</h3>
 
+<script async class="speakerdeck-embed" data-slide="1" data-id="5e83e4faafc34fb6a4dcacdb633f47ea" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
+
 <ul>
 <li>発表者: <a href="https://twitter.com/wasabeef_jp">@wasabeef_jp さん</a></li>
 <li>資料: <a href="https://speakerdeck.com/wasabeef/jp-how-to-start-android-dev">［JP］ How to start Android Dev &ndash; Speaker Deck</a></li>
@@ -1632,6 +1635,9 @@
 
 <h3>Cloud Functionsから始めるFirebase</h3>
 
+<script async class="speakerdeck-embed" data-slide="1" data-id="161fd22794824e868465f92f2ecee8c5" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
+
 <ul>
 <li>発表者: <a href="https://twitter.com/d_date">Daiki Matsudate(@d_date)さん</a></li>
 <li>資料: <a href="https://speakerdeck.com/d_date/cloud-functionskarashi-merufirebase-4568e784-5bf3-4611-90a4-2f8632b3aa78">Cloud Functionsから始めるFirebase &ndash; Speaker Deck</a></li>
@@ -1686,6 +1692,9 @@
 
 
 <h3>Starting Google Kubernetes Engine 2019</h3>
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="4d31ff24e0cc4e79b5275dbaba4a49f3" data-ratio="1.77777777777778" src="http://momota.github.io//speakerdeck.com/assets/embed.js"></script>
+
 
 <ul>
 <li>発表者: <a href="https://twitter.com/sakajunquality">sakajunquality(@sakajunquality)さん</a></li>
