@@ -17,6 +17,8 @@ categories: cncf prometheus cortex etcd falco vitess loki
 
 ## Cortex の話をKubeConで聞きたかった話
 
+<script async class="speakerdeck-embed" data-slide="1" data-id="4a9465edea0547d2b2afce66746c0085" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
+
 - Shinya Uemura [@uesyn](https://twitter.com/uesyn) (KDDI & Creationline)
 - [Cortexの話をKubeConで聞きたかったっていう話 - Speaker Deck](https://speakerdeck.com/uesyn/cortexfalsehua-wokubecondewen-kitakatutatuteiuhua)
 
@@ -93,6 +95,8 @@ categories: cncf prometheus cortex etcd falco vitess loki
 
 
 ## KubeCon + CNConに見るetcdの未来
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="73ffb953ab4d47b0bc2b4a54cabd569c" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
 
 - Akihiro Ikezoe [@zoetro](https://twitter.com/zoetro) (Cybozu)
   - CybozuはVMからコンテナへどんどん移行中
@@ -179,6 +183,8 @@ categories: cncf prometheus cortex etcd falco vitess loki
 
 ## Monitoring Kubernetes Audit Log by Falco
 
+<script async class="speakerdeck-embed" data-slide="1" data-id="285589e4ce164fa78335af3234ae96cb" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
+
 - Makoto Hasegawa [@makocchi](https://twitter.com/makocchi) (CyberAgent)
 - [kubecon2018_recap_falco_deep_dive - Speaker Deck](https://speakerdeck.com/makocchi/kubecon2018-recap-falco-deep-dive)
 
@@ -226,6 +232,8 @@ categories: cncf prometheus cortex etcd falco vitess loki
 
 
 ## KubeCon + CloudNativeCon 2018 NA Recap Vitess
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="c4a298b954df4a008c4f90e5719526e2" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
 
 - Yutaka Ichikawa @cyberblack28 (APC)
 - [KubeCon + CloudNativeCon 2018 NA Recap Vitess - Speaker Deck](https://speakerdeck.com/cyberblack28/kubecon-plus-cloudnativecon-2018-na-recap-vitess)
@@ -276,6 +284,9 @@ categories: cncf prometheus cortex etcd falco vitess loki
 
 
 ## Prometheusの今後
+
+<script async class="speakerdeck-embed" data-slide="1" data-id="0d8e8156c5df44f99953e097e0ab5389" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
+
 
 - Yoshi Shota [@yosshi_](https://twitter.com/yosshi_) (NTT Communications)
 - [Prometheusの今後.pdf - Speaker Deck](https://speakerdeck.com/yosshi_/prometheusfalsejin-hou)
