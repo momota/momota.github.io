@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mac | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-02-18T11:15:07+09:00</updated>
+  <updated>2019-02-25T18:50:47+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -495,7 +495,7 @@ private_vars/ を追加しておく。</p>
 
 <ul>
 <li>name: add the user &ldquo;guest&rdquo;
-user: name=guest shell=/bin/bash password={{ guest_password }}
+user: name=guest shell=/bin/bash password=
 become: yes
 become_method: sudo
 ```</li>
