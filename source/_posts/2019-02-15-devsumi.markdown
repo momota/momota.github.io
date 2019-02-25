@@ -599,6 +599,9 @@ categories: github hashicorp kubernetes mr quantum-computing
 
 ## ドラゴンクエストXを支える失敗事例
 
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/gghca2nxC2xUeS" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/devsumi/15a1x" title="【15-A-1】ドラゴンクエストXを支える失敗事例" target="_blank">【15-A-1】ドラゴンクエストXを支える失敗事例</a> </strong> from <strong><a href="https://www.slideshare.net/devsumi" target="_blank">Developers Summit</a></strong> </div>
+
+
 - 青山 公士さん
   - ドラゴンクエストXを支える技術の著者
   - ドラゴンクエストXオンラインプロデューサ (責任者)
