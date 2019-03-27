@@ -4,7 +4,7 @@
   <title><![CDATA[Category: kubernetes | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/kubernetes/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-02-28T14:52:48+09:00</updated>
+  <updated>2019-03-27T14:42:42+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,874 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[参加レポート]Google Cloud Kubernetes Day]]></title>
+    <link href="http://momota.github.io/blog/2019/03/27/gc_k8sday/"/>
+    <updated>2019-03-27T13:42:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/03/27/gc_k8sday</id>
+    <content type="html"><![CDATA[<ul>
+<li>2019/03/26(火)、渋谷で行われた <a href="https://cloudplatformonline.com/2019-google-cloud-kubernetes-day-0326.html">Google Cloud Kubernetes Day</a> への参加レポート。</li>
+<li>会場の約半数が k8s をすでに利用、サービスメッシュは1割程度という感じで、プロダクション環境での採用をやっていかないとまずいという雰囲気だった。</li>
+<li>ハッシュタグ: <a href="https://twitter.com/hashtag/gc_k8sday">#gc_k8sday</a></li>
+<li>資料が公開されたらリンクを張ったりアップデートする予定。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>「Kubernetes/Container による開発」の導入難易度とメリット</h1>
+
+<ul>
+<li>株式会社サイバーエージェント　青山 真也 氏</li>
+<li><p><a href="https://twitter.com/amsy810">@amsy810</a></p></li>
+<li><p>サイバーエージェントとk8s</p>
+
+<ul>
+<li>2016年頃からk8sを採用</li>
+<li>GKEとオンプレの採用が多い (半々くらい)</li>
+<li>新規事業の多くがk8s/Containerを利用している</li>
+<li>レガシーシステムからコンテナへの移行も実施中</li>
+</ul>
+</li>
+<li>k8s
+
+<ul>
+<li>コンテナオーケストレーションシステムの一つ</li>
+<li>Borgベースなので、Googleの経験がk8sに引き継がれている</li>
+<li>現在はCNCFが中立的にホスト。コミュニティによって改良されている</li>
+</ul>
+</li>
+<li>オーケストレーションとは
+
+<ul>
+<li>プロビジョニングの一つ
+
+<ol>
+<li>ブートストラッピング: サーバの準備、OSのインストール
+
+<ul>
+<li>Terraform</li>
+</ul>
+</li>
+<li>コンフィグレーション: サーバのセットアップ、ミドルウェアのインストール、セットアップ
+
+<ul>
+<li>Chef, Ansible, Puppet, Salt</li>
+</ul>
+</li>
+<li>オーケストレーション: アプリケーションの配置
+
+<ul>
+<li>Fabric, Capistrano</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>イメージ化による高い再現性を保つようになってきた
+
+<ul>
+<li>Packer, Cloud Image, OpenStack Heat, CloudFormation</li>
+</ul>
+</li>
+<li>容易なイメージ化、軽量なイメージ、高速な起動と停止。特定クラウドへの依存がない。
+
+<ul>
+<li>Docker, k8s</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Cloud Nativeとは
+
+<ul>
+<li>疎結合なシステム</li>
+<li>復元力がある</li>
+<li>管理しやすい</li>
+<li>可観測である</li>
+<li>堅牢な自動化により、頻繁かつ期待通りに最小限の労力で大きな変更が可能</li>
+</ul>
+</li>
+<li>CNCF が Cloud Native の進め方をTRAIL MAPとして定義: <a href="https://github.com/cncf/landscape">cncf/landscape</a></li>
+</ul>
+
+
+<p><img src="/images/20190327_gc_k8sday/cncf-trail-map.png" alt="CNCF trail map" /></p>
+
+<h2>Containerization</h2>
+
+<p>レガシーシステムのマイグレーションもスタート地点はここから。実行環境込みのアプリケーションをSystemdに置き換えるイメージ</p>
+
+<ol>
+<li>容易なイメージかと再現性 by Docker
+
+<ul>
+<li>アプリケーションと実行環境のイメージ化: 再現性の高い環境</li>
+<li>ローカル環境でも同等の動作が保証される</li>
+</ul>
+</li>
+<li>軽量なイメージ by Docker
+
+<ul>
+<li>VMイメージと比べて軽量</li>
+<li>単一プロセスのみを可動させるため、軽量OSの選定もしやすい: Alpine</li>
+</ul>
+</li>
+<li>高速な起動と停止 by Docker
+
+<ul>
+<li>VMよりも起動停止が高速: プロセスの起動停止に相当</li>
+<li>高速なスケールアウトや障害時の復旧が可能</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>Orchestration</h2>
+
+<ol>
+<li>高い抽象度とクラウド非依存 by k8s
+
+<ul>
+<li>Load BalancerやStorageなども抽象化</li>
+<li>利用者から見るとクラウド固有の知識がほぼ不要 vs Terraform, OpenStack heat, AWS CloudFormation</li>
+<li>ベンダーニュートラルな実行基盤</li>
+<li>基本的にはポータビリティがある</li>
+</ul>
+</li>
+<li>宣言的なAPIとCode by k8s
+
+<ul>
+<li>構成情報はManifestsで宣言的に記述してAPIに登録: Infrastructure as Code</li>
+<li>Control LoopとReconciliation</li>
+</ul>
+</li>
+<li>洗練された自動化 by k8s
+
+<ul>
+<li>障害時のセルフヒーリング</li>
+<li>アプリケーションのアップグレード</li>
+<li>コンテナ単位のヘルスチェック</li>
+<li>コンテナ起動前の初期化処理</li>
+<li>コンテナ停止時のSIGNAL</li>
+<li>コンテナ開始直後、停止直前のフック</li>
+</ul>
+</li>
+<li>豊富なエコシステムと拡張性 by k8s
+
+<ul>
+<li><img src="/images/20190327_gc_k8sday/cncf-landscape.png" alt="CNCF landscape" /></li>
+<li>例) Managed Service via Kubernetes (Cloud SQL)</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>Cloud Nativeの難しさ</h2>
+
+<ol>
+<li>アプリケーションのアーキテクチャ
+
+<ul>
+<li>マイクロ/ミニサービスに適した技術</li>
+<li>いつでも停止できるようにSIGTERMのハンドリングは必須: ノードのアップグレード、コンテナイメージのアップデート</li>
+<li>Service Discovery経由で通信</li>
+<li>ネットワークに一部制約がある (Source IPが消失する、など)</li>
+</ul>
+</li>
+<li>セキュリティと分離性
+
+<ul>
+<li>仮想化の分離性: gVisorなどを利用する</li>
+<li>ネットワークの分離性</li>
+</ul>
+</li>
+<li>k8sの学習コスト
+
+<ul>
+<li>学習コストは小さくないものの懸念するほどではない</li>
+</ul>
+</li>
+<li>k8sクラスタの管理
+
+<ul>
+<li>GKEを利用することでだいぶ楽できる</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>マネージドk8sの選定基準</h2>
+
+<ul>
+<li>マネージドの範囲</li>
+<li>クラスタマネジメントの自動化機能</li>
+<li><p>k8sバージョンの追随スピード</p></li>
+<li><p>サイバーエージェントでは、アドテク分野やアベマTVなどいろいろなヘビーワークロードにもk8sで実装し、耐えうるシステムを構築</p></li>
+<li>ステートフル部分はマネージドサービスを利用する: Cloud SQL、BigQuery、…</li>
+</ul>
+
+
+<h1>コンテナ開発プラットフォームに GKE を選択すべき 7 つの理由</h1>
+
+<ul>
+<li>Google Cloud Japan　田中 宏樹氏、岩成 祐樹氏</li>
+</ul>
+
+
+<h2>Security</h2>
+
+<ul>
+<li>セキュリティがクラウドの長所に</li>
+<li>GCPでは、徹底的な防御がデフォルトでON
+
+<ul>
+<li>通信の暗号化</li>
+<li>ストレージの暗号化</li>
+<li>認証・認可</li>
+<li>ハードウェア</li>
+</ul>
+</li>
+<li>コンテナのセキュリティ
+
+<ul>
+<li>インフラストレクチャセキュリティ
+
+<ul>
+<li>インフラはコンテナを開発するのに安全か</li>
+<li>GKE: Use RBAC and IAM</li>
+<li>プライベートクラスタと承認済みネットワーク</li>
+<li>Cloud Armor: スケーラブルなDDoS対策</li>
+<li>BackendConfg</li>
+</ul>
+</li>
+<li>ソフトウェアサプライチェーン
+
+<ul>
+<li>作成したコンテナはビルド、デプロイして問題ないか</li>
+<li>CI/CDパイプラインは信頼できないデプロイを止めてくれない
+
+<ul>
+<li>イメージのメタデータ</li>
+<li>Binary Authorization: QAされたコードだけを実行</li>
+</ul>
+</li>
+<li>Container Registry: 脆弱性スキャン</li>
+<li>Binary Authorization: 信頼されたコンテナイメージのみをGKE上にデプロイすることを保証するセキュリティコントロール機能</li>
+</ul>
+</li>
+<li>ランタイムセキュリティ
+
+<ul>
+<li>作成したコンテナは実行して問題ないか</li>
+<li>Container Optimized OS: GCE, GKEで利用可能な軽量なイメージ
+
+<ul>
+<li>runcの脆弱性 CVE-2019-5736の影響を受けなかった</li>
+</ul>
+</li>
+<li>3rdパーティツールの利用: aqua. sysdig, stackrock&hellip;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Network</h2>
+
+<ul>
+<li>さまざまなGCPサービスとの統合</li>
+<li>Google Cloud Load Bakancing</li>
+<li>世界中のCloud CDNとLB</li>
+<li>Container Native Load Balancing
+
+<ul>
+<li>LBからVM(Node)を介さずPodへ直接トラフィックを転送</li>
+<li>Double-hop問題を解決</li>
+<li>レイテンシーとルーティング問題を解決</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Hybrid Cloud</h2>
+
+<ul>
+<li>ゴール: コードをどこでも実行できる環境を整える</li>
+<li>GKE On-prem
+
+<ul>
+<li>オンプレミスのクラスタをGoogle Cloud Consoleから一元的に管理</li>
+<li>クラスタ集中管理のメリット: GKEとGKE On-Premで同じツールを使ってクラスタの構築、構成、管理を実施</li>
+<li>同一のクラスタ環境</li>
+</ul>
+</li>
+<li>事例
+
+<ul>
+<li>メルカリ: オンプレミスからの移行</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Observability</h2>
+
+<ul>
+<li>ロギング
+
+<ul>
+<li>GCP内部の情報に加えて、GCPの外部で発生するログについても収集できる基盤が必要</li>
+</ul>
+</li>
+<li>モニタリング</li>
+<li>統合管理プラットフォーム
+
+<ul>
+<li>DevOpe/SRE</li>
+<li>Developer</li>
+<li>SecOps</li>
+</ul>
+</li>
+<li>Stackdriver: アプリケーション開発者と運用担当者にLoggingとMonitoring機能を提供する</li>
+<li>Stackdriver Kubernetes Monitoring
+
+<ul>
+<li>k8sのワークロードに最適化されたStackdriverのツール</li>
+</ul>
+</li>
+<li>work with Open Source: Prometheus</li>
+</ul>
+
+
+<h2>Contribution</h2>
+
+<ul>
+<li>Open source is free like a puppy</li>
+<li>GKE is going to ..
+
+<ul>
+<li>To be Reliable
+
+<ul>
+<li>Regional clusters</li>
+<li>Regional Persistent Disks</li>
+</ul>
+</li>
+<li>To be Scalable
+
+<ul>
+<li>HPA: 水平スケーリング</li>
+<li>VPA: Podの垂直スケーリング</li>
+<li>CA: Nodeの水平スケーリング</li>
+<li>Node Auto-Provisioning</li>
+</ul>
+</li>
+<li>To be Open
+
+<ul>
+<li>OSS Friendly ecosystem
+
+<ul>
+<li>Skaffold</li>
+<li>Kanico</li>
+<li>Knative</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>GKE を用いたレガシー システムからのリプレース事例</h1>
+
+<ul>
+<li>富士フイルム株式会社　小林 大助 氏</li>
+</ul>
+
+
+<h2>プロジェクト概要</h2>
+
+<ul>
+<li>FUJIFILM Prints &amp; Gifts
+
+<ul>
+<li><a href="https://pg-ja.fujifilm.com/photo-print">写真プリント | FUJIFILMプリント＆ギフト | 富士フイルムの公式ストア</a></li>
+<li><a href="https://fujifilmmall.jp/walldecor/?_ga=2.101125698.254826136.1553583454-463832683.1553583454">WALL DECOR（ウォールデコ）｜富士フイルム</a></li>
+</ul>
+</li>
+<li>レガシーシステム運用10年超え
+
+<ul>
+<li>保守・運用コスト大</li>
+<li>機能改善スピード低</li>
+</ul>
+</li>
+<li>ユーザの消費動向の変化
+
+<ul>
+<li>モノ消費からコト消費へ</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>GKE利用までの経緯</h2>
+
+<ul>
+<li>S→T→P→D→C→A
+
+<ul>
+<li>PDCAに加えて See + Think</li>
+<li>富士フィルムではSTを重視</li>
+</ul>
+</li>
+<li>モノリシックなアプリケーションにより影響範囲の見定めが難しい</li>
+<li>特に苦労しているのは季節イベント、キャンペーン
+
+<ul>
+<li>負荷量の変動に対してシステムが追随しにくい</li>
+<li>スケーラビリティを確保しやすい仕組みを最優先にする</li>
+<li>コンテナを利用</li>
+</ul>
+</li>
+<li>保守面を意識すれば、オーケストレーションツールは使いたい。課題が2つ
+
+<ul>
+<li>何が標準か
+
+<ul>
+<li>流行度</li>
+<li>[社内の]覇権争い</li>
+<li>仕様策定中</li>
+</ul>
+</li>
+<li>自分たちで運用できるか
+
+<ul>
+<li>使いこなせないと意味がない</li>
+<li>運用環境に耐えうるレベルか</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>k8sがデファクトスタンダードになった: 規格争いによる技術の陳腐化懸念が後退</li>
+<li>主要ベンダがk8sマネージドサービスを展開</li>
+<li>2018年1月時点で日本国内GAしているのはGoogeのみ</li>
+<li>動作安定性</li>
+</ul>
+
+
+<h2>取り組む上での課題: 組織面</h2>
+
+<ul>
+<li>周囲の理解
+
+<ul>
+<li>技術的優位性を説明できないといけない</li>
+<li>総論は賛成、各論は？</li>
+<li>リスクを背負えるか: 納期遵守のPrj</li>
+</ul>
+</li>
+<li>技術学習、解説資料作成、説明行脚</li>
+<li>現場レベルでは味方は多かった</li>
+<li>リスクに対しては、バックアッププランの準備、技術習得状況の説明、Googleエンジニアのバックアップ</li>
+</ul>
+
+
+<h2>取り組む上での課題: 開発面</h2>
+
+<ul>
+<li>技術習得: 独学とハンズオン</li>
+<li>事前調査</li>
+<li>運用: ログ出力やアラート関連は、メトリクスの書き方が困難だった</li>
+<li>設計・設定: マニフェストファイルの書き方、永続データの取扱いに関する適切なサービス選定がむずい</li>
+<li>基本設計: サービス分割はアトミックにすると障害復旧が難しいので、意味のある塊に</li>
+<li>商用利用に向けての課題: PaaSの特徴や仕様についてGoogleエンジニアのサポートを受けながら選定、確認を進める</li>
+<li>レガシーシステムとの連携: 基本は新システム側が全面降伏で対応</li>
+</ul>
+
+
+<h2>効果</h2>
+
+<ul>
+<li>スケーラビリティの確保はできた。ただし、今後悪化しないように管理していく必要がある</li>
+<li>保守運用コストは改善された
+
+<ul>
+<li>ランニングコスト 3/5</li>
+<li>導入8ヶ月でサービスダウンタイムなし。安定稼働中。</li>
+</ul>
+</li>
+<li>機能改善スピードは向上できた
+
+<ul>
+<li>対応速度が約2倍に</li>
+</ul>
+</li>
+<li>学習コストは小さくなかったが、リターンが大きかった</li>
+<li>アプリ開発に集中できる環境を整えることができた</li>
+<li>組織の壁は高い、乗り越えるには熱意が必要。仲間がいれば突破しやすい</li>
+<li>クラウドベンダエンジニアの協力は偉大</li>
+</ul>
+
+
+<h1>コンテナによる開発と運用の進化</h1>
+
+<ul>
+<li><p>Google Cloud Japan　篠原 一徳氏、村上 大河氏</p></li>
+<li><p>3つのポイント</p>
+
+<ul>
+<li>人 (ビジネス・技術)
+
+<ul>
+<li>CxO</li>
+<li>Manager</li>
+<li>Business</li>
+<li>Tech</li>
+</ul>
+</li>
+<li>プロセス
+
+<ul>
+<li>DevOps</li>
+<li>SRE</li>
+<li>Scrum (アジャイル開発)</li>
+<li>Waterfall</li>
+</ul>
+</li>
+<li>テクノロジー
+
+<ul>
+<li>クラウド</li>
+<li>マイクロサービスアーキテクチャ</li>
+<li>CI/CD</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>マイクロサービスとは
+
+<ul>
+<li>2014年にJames LewisとMartin Fowlerが提唱</li>
+<li>機能ごとに独立したアプリケーションに分割</li>
+<li>各サービスは単一の目的を持つ</li>
+<li>分散システム、サービス間は疎結合、軽量なAPIなどでやりとり</li>
+</ul>
+</li>
+<li>AsIs to ToBe: Monolith to Microservice
+
+<ul>
+<li>新規サービスからやる (新規機能から抜き出す)</li>
+<li>既存のサービスを部分的に置き換える
+
+<ul>
+<li>Domain (専門領域) を抜き出し、マイクロサービス化する</li>
+<li>チームも抜き出していくことが重要</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>マイクロサービス化を進めていくと、カオス化</li>
+<li>The problem
+
+<ul>
+<li>分散アーキテクチャへの移行により、今までのアーキテクチャ向けに最適化された方法では監視、管理、保護が困難</li>
+</ul>
+</li>
+<li>4 challenges of Microservices
+
+<ul>
+<li>プロセス内のコミュニケーションから、プロセス外コミュニケーションへの置き換え: RPC + APIゲートウェイ</li>
+<li>分散システム導入により複雑化するシステムの効率的な管理: サービスメッシュ</li>
+<li>マイクロサービス協会が引き起こすデータサイロの解決: データレイク</li>
+<li>アプリケーションコード以外のコーディングを少なくする: 自動化 (CI/CD)</li>
+</ul>
+</li>
+<li>課題と2つの実現方法
+
+<ul>
+<li>呼び出し先マイクロサービスのトラッキングが困難
+
+<ul>
+<li>REST API (HTTP1.1)
+
+<ul>
+<li>Open APIでメッセージフォーマットを定義</li>
+<li>互換性管理のためのガイドラインの作成を推奨</li>
+</ul>
+</li>
+<li>gRPC (HTTP2.0)
+
+<ul>
+<li>Protocol Buffersでメッセージフォーマットを定義</li>
+<li>Language Guideに従うと、下位互換性の担保が容易</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>バージョン管理ガイド
+
+<ul>
+<li><a href="https://cloudplatform-jp.googleblog.com/2017/07/versioning-APIs-at-Google.html">Google Cloud Platform Japan 公式ブログ： Google における API のバージョニング</a></li>
+<li>Google 内部のAPIバージョニング手法を公開</li>
+<li>Cloud Endpointで実現をサポート</li>
+</ul>
+</li>
+<li>API設計ガイド
+
+<ul>
+<li><a href="https://cloud.google.com/apis/design/">API 設計ガイド | Cloud API | Google Cloud</a></li>
+<li>Google内部のAPI設計のスタンダードを公開</li>
+<li>Cloud Endpointで簡単に実現</li>
+</ul>
+</li>
+<li>Cloud Endpointsによるマイクロサービスの実現
+
+<ul>
+<li>内部はgRPC、外部はRESTで公開も可能</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>サービスメッシュ
+
+<ul>
+<li>マイクロサービス環境において、サービスディスカバリ、トラフィックコントロール、認証・認可、メトリクス収集などの機能を担うソフトウェア</li>
+<li>アプリケーション自体に手を入れるのではなく、サイドカーで実現</li>
+<li>Istio: GoogleとIBMが中心に開発しているサービスメッシュ実装のOSS
+
+<ul>
+<li>ProxyとしてEnvoyを利用</li>
+<li>トラフィックコントロール
+
+<ul>
+<li>これまでトラフィックコントロールはインフラストラクチャと結びついていた</li>
+<li>トラフィックスプリッティング</li>
+</ul>
+</li>
+<li>セキュリティ
+
+<ul>
+<li>サービス間のセキュリティを強化</li>
+<li>RBAC</li>
+</ul>
+</li>
+<li>可観測性
+
+<ul>
+<li>Istioの監視
+
+<ul>
+<li>Mixer: テレメトリの収集</li>
+<li>Prometheus</li>
+<li>Grafana</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Istio on GCP</li>
+</ul>
+</li>
+<li>データレイク
+
+<ul>
+<li>マイクロサービスにより、データのサイロ化が進む</li>
+</ul>
+</li>
+<li>CSM (Managed Istio) の Alphaユーザを募集中: <a href="https://docs.google.com/forms/d/1Qhj4qViWgaSAf9KUfowWRdVS6OHwg9cgEdYX2xbpLeM/viewform?edit_requested=true">https://docs.google.com/forms/d/1Qhj4qViWgaSAf9KUfowWRdVS6OHwg9cgEdYX2xbpLeM/viewform?edit_requested=true</a></li>
+</ul>
+
+
+<h1>事例セッション： FreakOut の広告プロダクトでの GKE 活用事例と GKE 新機能の導入について</h1>
+
+<ul>
+<li><p>株式会社フリークアウト　西口 次郎 氏</p></li>
+<li><p>RED: Freakout DSP</p></li>
+<li>ASE: 位置情報マーケティングプラットフォーム</li>
+<li>RED for Publishers: アドネットワーク基盤</li>
+<li>LayApp: アプリエンゲージメントプラットフォーム</li>
+</ul>
+
+
+<h2>プロダクション環境でのGKE運用</h2>
+
+<ul>
+<li><a href="https://cloudplatform-jp.googleblog.com/2018/09/freakout-kubernetes-engine.html">Google Cloud Platform Japan 公式ブログ： 株式会社フリークアウトの導入事例： フルマネージドな Kubernetes Engine を駆使して、大規模アドプラットフォームをプレミアム メディア向けに提供</a></li>
+<li>GKE
+
+<ul>
+<li>サービスごとにクラスタを分割</li>
+<li>広告配信、UI、バッチ</li>
+<li>CronJobを利用</li>
+<li>カナリーリリース環境を用意</li>
+<li>Stackdriverを活用</li>
+</ul>
+</li>
+<li>Stackdriver
+
+<ul>
+<li>Monitoring
+
+<ul>
+<li>Prometheusと併用</li>
+</ul>
+</li>
+<li>Logging
+
+<ul>
+<li>コンテナのエラーログなどを集約</li>
+<li>アラート: Pub/Sub → Cloud Functions → Slack</li>
+</ul>
+</li>
+<li>Profiler
+
+<ul>
+<li>常に最新のコーdンのプロファイルを可視化、比較</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>BigQuery
+
+<ul>
+<li>すべてのアクセスログ、アプリケーションログを集約
+
+<ul>
+<li>数十億レコード/日</li>
+</ul>
+</li>
+<li>fluentd (Sidecar Container)からStreaming insert</li>
+<li>可視化はre:dash</li>
+<li>MySQLのマスタデータもインポートしている</li>
+</ul>
+</li>
+<li>Vulnerability scanning
+
+<ul>
+<li>GCRの機能</li>
+<li>Debian, Ubuntu, Alpineが対象</li>
+<li>過去30日間にpullされたイメージが対象</li>
+<li>脆弱性が見つかった際、Pub/SubにPublishされる (Cloud FunctionsでSlack通知)</li>
+</ul>
+</li>
+<li>kustomise
+
+<ul>
+<li>k8s のYAMLファイルのカスタマイズ</li>
+<li>kubectrlのサブコマンドとしてマージされた</li>
+<li>Production/Staging/Cannaryなど環境ごとの設定を上書き</li>
+</ul>
+</li>
+<li>Other tools
+
+<ul>
+<li>stern
+
+<ul>
+<li>複数のコンテナのログをすばやく確認できる</li>
+</ul>
+</li>
+<li>kubectx
+
+<ul>
+<li>クラスタ切り替え</li>
+<li>複数クラスタ/開発・本番環境の切り替えに</li>
+<li>ネームスペースの切り替えも可能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>GKEでのCI/CD</h2>
+
+<ul>
+<li>Github</li>
+<li>CircleCI</li>
+<li>Cloud Build</li>
+<li>Cloud Container Registry</li>
+<li>Cloud Pub/Sub: ビルド通知</li>
+<li>Cloud Functions: Slack通知</li>
+<li>Slack: エンジニア通知</li>
+</ul>
+
+
+<h3>CIのフロー</h3>
+
+<ol>
+<li>GithubへのPush</li>
+<li>テスト・ビルド
+
+<ul>
+<li>CircleCIでのテスト</li>
+<li>CloudBuildでのビルド</li>
+</ul>
+</li>
+<li>カナリアリリース</li>
+</ol>
+
+
+<h2>CDのフロー</h2>
+
+<ol>
+<li>GithubでPRをマージ</li>
+<li>ビルド&amp;デプロイ
+
+<ul>
+<li>docker build</li>
+<li>docker push</li>
+<li>kubectrl set image</li>
+</ul>
+</li>
+<li>notification
+
+<ul>
+<li>Pub/SubへのPublish</li>
+<li>Cloud FunctionsでSlackツウイ</li>
+</ul>
+</li>
+</ol>
+
+
+<h2>GKE 新機能の利用</h2>
+
+<ul>
+<li>VPC-native cluster (alias IP)</li>
+<li>Cloud NAT
+
+<ul>
+<li>マネージドNATサービス</li>
+<li>アウトバウンドアクセスのゲートウェイ</li>
+<li>外部アクセスするIPアドレスを限定する用途で使用
+
+<ul>
+<li>IPアドレスの事前登録が必須な外部API</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Network Endpoint Groups
+
+<ul>
+<li>コンテナネイティブの負荷分散</li>
+<li>Instance Groupはiptablesを介してPodへルーティングしていたが、Podへ直接ルーティング可能</li>
+<li>ネットワークパフォーマンス改善</li>
+</ul>
+</li>
+<li>BackendConfig Custom resource</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[参加レポート]Developers Summit 2019]]></title>
