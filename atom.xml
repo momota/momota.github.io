@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-03-27T14:42:42+09:00</updated>
+  <updated>2019-03-29T20:29:10+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[zshプラグイン: Incremental completion for zsh]]></title>
+    <link href="http://momota.github.io/blog/2019/03/29/incremental-completion-for-zsh/"/>
+    <updated>2019-03-29T20:12:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/03/29/incremental-completion-for-zsh</id>
+    <content type="html"><![CDATA[<p>zsh でインクリメンタルな補完を行うため、<a href="https://mimosa-pudica.net/zsh-incremental.html">Incremental completion on zsh</a> を導入した。</p>
+
+<p>こんな感じで便利。</p>
+
+<p><img src="http://momota.github.io/images/20190329_incremental-completion-for-zsh/incr-zsh.gif" alt="" /></p>
+
+<!-- more -->
+
+
+<p><a href="https://github.com/robbyrussell/oh-my-zsh">robbyrussell/oh-my-zsh</a> を導入している前提。</p>
+
+<p>カスタムスクリプトは <code>~/.oh-my-zsh/custom/</code> 以下に置けばログイン時にロードしてくれる。なので公式に書いてある <code>source incr*.zsh</code> を <code>.zshrc</code> へ書く必要はない。</p>
+
+<p>スクリプト名にバージョン名が入っているのが気持ち悪かったので、<code>incremental_completion_for_zsh.zsh</code> へ修正。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>curl -o  ~/.oh-my-zsh/custom/incremental_completion_for_zsh.zsh https://mimosa-pudica.net/src/incr-0.2.zsh
+</span><span class='line'>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+</span><span class='line'>                                 Dload  Upload   Total   Spent    Left  Speed
+</span><span class='line'>100  2631  100  2631    0     0   2386      0  0:00:01  0:00:01 --:--:--  2389
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>サジェストされるコマンド文字の色を控えめにしたかったので、以下の修正を加えた。
+(グリーンからグレーへ変更)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'><span class="gu">@@ -82,7 +82,7 @@</span>
+</span><span class='line'>                        BUFFER=&quot;$buffer_org&quot;
+</span><span class='line'>                        CURSOR=&quot;$cursor_org&quot;
+</span><span class='line'>                fi
+</span><span class='line'><span class="gd">-               echo -n &quot;\e[32m&quot;</span>
+</span><span class='line'><span class="gi">+               echo -n &quot;\e[1;30m&quot;</span>
+</span><span class='line'>        else
+</span><span class='line'>                zle -M &quot;&quot;
+</span><span class='line'>        fi
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[参加レポート]Google Cloud Kubernetes Day]]></title>
@@ -10236,579 +10293,6 @@ juniper config ファイルの先頭に以下行を追加して保存し vim で
 以下のように指摘してくれる。</p>
 
 <p><img src="http://momota.github.io/images/syntastic_ss.png" alt="syntastic_ss" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[seleniumノウハウ]]></title>
-    <link href="http://momota.github.io/blog/2016/05/28/selenium-know-how/"/>
-    <updated>2016-05-28T16:57:00+09:00</updated>
-    <id>http://momota.github.io/blog/2016/05/28/selenium-know-how</id>
-    <content type="html"><![CDATA[<p><img src="http://momota.github.io/images/selenium.png" alt="selenium" /></p>
-
-<p><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a> でも書いたが、
-selenium が便利すぎて、最近よくスクリプトを書くようになった。</p>
-
-<p>以下のようなノウハウが溜まってきたので、ここらで放出する。</p>
-
-<ul>
-<li>ウィンドウサイズのリサイズ</li>
-<li>ウィンドウ位置の移動</li>
-<li>スクリーンショットの取得</li>
-<li>要素セレクタメソッドの使い分け</li>
-<li>ドロップダウンリストの選択</li>
-<li>マウスオーバ (hover)</li>
-<li>フレーム移動</li>
-<li>ポップアップダイアログの扱い</li>
-<li>コード量を減らすためのモンキーパッチ</li>
-<li>よく採るプログラム構造</li>
-</ul>
-
-
-<p>インストール方法などは <a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a>
-を参照。</p>
-
-<p>selenium用スクリプト開発のノウハウというべきかコツといういべきかアレな感じだが、結局、
-スクレイピングと同様にHTML構造を理解することが必要なのでブラウザ付属の開発ツールが
-手離せない。</p>
-
-<ul>
-<li><a href="https://developer.mozilla.org/ja/docs/Tools">Firefox 開発ツール</a></li>
-<li><a href="https://developer.chrome.com/devtools">chrome devtools</a></li>
-</ul>
-
-
-<!-- more -->
-
-
-<p>これ以降のサンプルコードは以下を定義しているものとする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">driver</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ウィンドウサイズのリサイズ</h2>
-
-<p><code>driver.manage.window.resize_to</code>の引数にリサイズするサイズ情報(width, height)を渡す。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">width</span>  <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">height</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">resize_to</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>現在のサイズを取得して、相対的にリサイズしたい場合は以下のようにする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">size</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">width</span>  <span class="o">+=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">size</span><span class="o">.</span><span class="n">height</span> <span class="o">+=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ウィンドウ位置の移動</h2>
-
-<p><code>driver.manage.window.move_to</code>の引数に移動したい場所の座標情報(x, y)を渡す。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">x</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">y</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>現在のウィンドウ位置を取得して、相対的にリサイズしたい場合は以下のようにする。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pos</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span>
-</span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">pos</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="mi">100</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">manage</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">pos</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>スクリーンショットの取得</h2>
-
-<p>開いているページのスクリーンショットを撮りたい場合は、<code>driver.save_screenshot</code> に保存先のファイル名を指定するだけ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://www.google.co.jp/&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="s2">&quot;/path/to/save/screenshot.png&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ページ全体を撮りたいのに、frame 構造が邪魔をして、スクロールしなければ全体が撮れない場合がある。
-ちょっと、調べたところ <code>driver.execute_script("some script")</code> で javascript を利用してスクロールをしている人がいたり、
-<code>Selenium::WebDriver::Element.location_once_scrolled_into_view</code> を使ってスクロールしている人がいたり。
-どちらにしても、コンテンツ表示上の高さを取得して、1スクロール分の長さをデクリメントしていっているような処理。</p>
-
-<p>自分の場合は、めんどくさかったので、上述したリサイズ方法を使ってスクロールがいらないくらいウィンドウサイズを大きくして、
-スクリーンショットを撮るという荒業を繰り広げている。</p>
-
-<h2>要素セレクタメソッドの使い分け</h2>
-
-<p>要素セレクタメソッドは <code>find_element</code> と <code>find_elements</code> の2種類。
-そのメソッド名の単数形・複数形の通りなのだが、以下のような違いがある</p>
-
-<ul>
-<li><code>find_element</code>
-
-<ul>
-<li>指定した引数にマッチする最初の要素 (<code>WebDriver::Element</code>) を <strong>1つ</strong> 返す。</li>
-<li>マッチする要素がなければ例外 (<code>NoSuchElementError</code>) を投げる。</li>
-</ul>
-</li>
-<li><code>find_elements</code>
-
-<ul>
-<li>指定した引数にマッチする要素を詰めた配列 (<code>Array&lt;WebDriver::Element&gt;</code>) を返す。</li>
-<li>マッチする要素がなければ、空の配列 (<code>Array</code>) を返す。</li>
-</ul>
-</li>
-</ul>
-
-
-<p>テーブルの <code>&lt;tr&gt;</code> 要素やリストの <code>&lt;li&gt;</code> 要素に対してイテレーション処理するときには <code>find_elements</code> が便利。
-以下は、例。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># リストのリンクをクリックしていくイテレーションの例</span>
-</span><span class='line'><span class="n">elements</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="ss">:css</span><span class="p">,</span> <span class="s2">&quot;#some-list &gt; li&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">elements</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">link</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">link</span><span class="o">.</span><span class="n">click</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>要素セレクタメソッドの引数には、<code>find_element(:how, "what")</code> のように symbol と文字列を渡す。
-渡す引数は、<code>find_elements</code> も同じ。</p>
-
-<p>指定できるsymbolの種類は以下。</p>
-
-<table>
-<thead>
-<tr>
-<th>symbol             </th>
-<th> 対象</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>:class             </td>
-<td> クラス名 (属性名 class)</td>
-</tr>
-<tr>
-<td>:class_name        </td>
-<td> 上記 :class と同じ</td>
-</tr>
-<tr>
-<td>:id                </td>
-<td> ID (属性名 id)</td>
-</tr>
-<tr>
-<td>:link_text         </td>
-<td> <code>&lt;a&gt;</code> タグのテキスト</td>
-</tr>
-<tr>
-<td>:link              </td>
-<td> 上記 :link_text と同じ</td>
-</tr>
-<tr>
-<td>:partial_link_text </td>
-<td> <code>&lt;a&gt;</code> タグのテキストの部分文字列</td>
-</tr>
-<tr>
-<td>:name              </td>
-<td> name (属性名 name)</td>
-</tr>
-<tr>
-<td>:tag_name          </td>
-<td> タグ名</td>
-</tr>
-<tr>
-<td>:xpath             </td>
-<td> xpath で指定</td>
-</tr>
-<tr>
-<td>:css               </td>
-<td> css セレクタ で指定</td>
-</tr>
-</tbody>
-</table>
-
-
-<p><a href="http://www.rubydoc.info/gems/selenium-webdriver/0.0.28/Selenium/WebDriver/Find">参考 Module: Selenium::WebDriver::Find</a></p>
-
-<h2>ドロップダウンリストの選択</h2>
-
-<p>Selenium IDEでRubyコードの出力をしようとすると、ドロップダウンリストの選択をする処理部分がERRORに
-なってコメントアウトされることがある。(今のSelenium IDEバージョンでは大丈夫そう)</p>
-
-<p>ドロップダウンリストの選択は以下のように書けばOK。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">s</span> <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Support</span><span class="p">:</span><span class="ss">:Select</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:tag_name</span><span class="p">,</span> <span class="s2">&quot;select&quot;</span><span class="p">))</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:text</span><span class="p">,</span> <span class="s2">&quot;ほげほげ&quot;</span><span class="p">)</span>  <span class="c1"># 表示テキストで選択</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:value</span><span class="p">,</span> <span class="s2">&quot;value1&quot;</span><span class="p">)</span>   <span class="c1"># valueの値で選択</span>
-</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">select_by</span><span class="p">(</span><span class="ss">:index</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>          <span class="c1"># index(0, 1, 2, ...)で選択</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>マウスオーバ (hover)</h2>
-
-<p>例えば、ナビゲーションメニューなどが、通常時には折りたたまれていて、メニュー上にマウスオーバした場合に、
-子メニューが展開されるようなページがある。
-折りたたまれているときに、子メニューHTMLをロードできていないようなページのときは、ユーザ操作と同じように
-マウスオーバしてあげる必要がある。</p>
-
-<p>以下のようにマウスオーバしたい要素を指定して、<code>driver.mouse.move_to</code> を呼べば良い。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;menu&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>フレーム移動</h2>
-
-<p>frame や iframe 要素を使っているサイトで、そのフレーム内の要素に対して操作したい場合、当該フレームへ切り替える操作が必要となる。</p>
-
-<p>以下のようにスイッチしたいフレーム要素を指定して、<code>driver.switch_to.frame</code> を呼べば良い。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>フレームを移動してから、いったん最上位のフレームにに戻りたい場合は、以下。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">window_handle</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">frame</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;top-frame&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>ポップアップダイアログの扱い</h2>
-
-<p>「マジでこのページから移動する?」的なjavascriptによるポップアップダイアログを表示するページがある。
-このポップアップダイアログを強制的に閉じるには以下のようにする。</p>
-
-<p><code>.accept</code> ではい、<code>.dismiss</code>でいいえを押して閉じる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
-</span><span class='line'>  <span class="n">alert_box</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">alert</span>
-</span><span class='line'>  <span class="n">alert_box</span><span class="o">.</span><span class="n">accept</span>     <span class="c1"># 「はい」「OK」ボタンクリック</span>
-</span><span class='line'>  <span class="c1"># alert_box.dismiss  # 「いいえ」「cancel」ボタンクリック</span>
-</span><span class='line'><span class="k">rescue</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="ss">Error</span><span class="p">:</span><span class="ss">:NoSuchAlertError</span> <span class="o">=&gt;</span> <span class="n">e</span>
-</span><span class='line'>  <span class="c1"># ダイアログがポップアップしない場合、例外を投げるので、何もせずにスルー</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>コード量を減らすためのモンキーパッチ</h2>
-
-<p>たとえば、ログインなどの処理の際、フォームへ文字列を送る <code>send_keys</code> 前にいつも <code>.clear</code> しているので
-もう <code>send_keys</code> の中に <code>.clear</code> 処理を入れ込んでしまえと思った。</p>
-
-<p>また、<code>input</code> タグの値を取得するときは、<code>.attribute("value")</code> と長ったらしく書く必要があるので <code>.value</code>メソッドを
-定義してしまおうと思った。checkbox のチェック有無も同じく。</p>
-
-<p>そこで、<code>Selenium::WebDriver::Element</code> を拡張するため、以下のようなモンキーパッチを書く。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ElementExtension</span>
-</span><span class='line'>  <span class="n">refine</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">::</span><span class="no">Element</span> <span class="k">do</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">send_keys</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">clear</span>
-</span><span class='line'>      <span class="k">super</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">value</span>
-</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">checked?</span>
-</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;checked&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="kp">false</span> <span class="p">:</span> <span class="kp">true</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">url</span>
-</span><span class='line'>      <span class="n">attribute</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">using</span> <span class="no">ElementExtension</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>そうすると以下のようにコード量を減らせる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='diff'><span class='line'># たとえば、ログイン処理
-</span><span class='line'>user     = &quot;USER&quot;
-</span><span class='line'>password = &quot;PASSWORD&quot;
-</span><span class='line'>
-</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginuser&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginuser&quot;).send_keys(user)
-</span><span class='line'><span class="gd">- driver.find_element(:id, &quot;loginpass&quot;).clear</span>
-</span><span class='line'>driver.find_element(:id, &quot;loginpass&quot;).send_keys(password)
-</span><span class='line'>driver.find_element(:id, &quot;submit&quot;).click
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'># &lt;input&gt;の値を取得する処理
-</span><span class='line'><span class="gd">- hostname = driver.find_element(:id, &quot;hostname&quot;).attribute(&quot;value&quot;)</span>
-</span><span class='line'><span class="gi">+ hostname = driver.find_element(:id, &quot;hostname&quot;).value</span>
-</span><span class='line'>
-</span><span class='line'># チェックボックスがチェックされているかどうか
-</span><span class='line'>checkbox = driver.find_element(:id, &quot;some-checkbox&quot;)
-</span><span class='line'><span class="gd">- do_something if checkbox.attribute(&quot;checked&quot;).nil?</span>
-</span><span class='line'><span class="gi">+ do_something if checkbox.checked?</span>
-</span><span class='line'>
-</span><span class='line'># URLの取得
-</span><span class='line'><span class="gd">- url = driver.find_element(:tag_namem &quot;a&quot;).attribute(&quot;href&quot;)</span>
-</span><span class='line'><span class="gi">+ url = driver.find_element(:tag_namem &quot;a&quot;).url</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>モンキーパッチの書き方は以下を参考にした。</p>
-
-<ul>
-<li><a href="http://melborne.github.io/2013/08/30/monkey-patching-for-prudent-rubyists/">分別のあるRubyモンキーパッチャーになるために</a></li>
-</ul>
-
-
-<h2>よく採るプログラム構造</h2>
-
-<p>よく採るプログラム構造は以下。</p>
-
-<ul>
-<li>操作ターゲットとなるサイト単位にクラスを作る</li>
-<li>処理の内容にしたがって、メソッドを作る。以下の様な粒度。
-
-<ul>
-<li>サインイン</li>
-<li>リスト表示</li>
-<li>自動入力と申請</li>
-</ul>
-</li>
-<li>アカウント情報や入力データはYAMLファイルなどに書き出しておく</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># conding: utf-8</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'><span class="c1"># その他必要に応じてrequire</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Selenium::WebDriver::Element の拡張</span>
-</span><span class='line'><span class="k">module</span> <span class="nn">Elementextension</span>
-</span><span class='line'>  <span class="c1"># 上記モンキーパッチの章を参照</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="n">using</span> <span class="no">Elementextension</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 本体</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">SomeSite</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
-</span><span class='line'>    <span class="c1"># 初期化処理</span>
-</span><span class='line'>    <span class="c1"># 定数をセットしたり、webdriverを生成してアクセスしたり。</span>
-</span><span class='line'>    <span class="vi">@ss_dir</span>  <span class="o">=</span> <span class="s2">&quot;./screenshot/&quot;</span>
-</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="vi">@ss_dir</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="vi">@driver</span>  <span class="o">=</span> <span class="ss">Selenium</span><span class="p">:</span><span class="ss">:WebDriver</span><span class="o">.</span><span class="n">for</span> <span class="ss">:firefox</span>
-</span><span class='line'>    <span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;http://somesite.com&quot;</span>
-</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_url</span> <span class="o">+</span> <span class="s2">&quot;/index.html&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>    <span class="c1"># サインイン処理</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">do_something</span>
-</span><span class='line'>    <span class="c1"># やりたいことを書く</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">close</span>
-</span><span class='line'>    <span class="c1"># 終了時に実行する処理を書く</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="c1"># privat method を定義する</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">get_screenshot</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">now</span> <span class="o">=</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m%d%H%M%S&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="vi">@ss_dir</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">str</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">now</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
-</span><span class='line'><span class="c1"># main</span>
-</span><span class='line'><span class="c1"># ----------------------------------------------------------------------</span>
-</span><span class='line'><span class="k">if</span> <span class="bp">__FILE__</span> <span class="o">==</span> <span class="vg">$0</span>
-</span><span class='line'>  <span class="c1"># サインインに必要なアカウント情報はYAMLなどに書いておいて、それを読む</span>
-</span><span class='line'>  <span class="n">y</span>        <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s2">&quot;/path/to/yaml.yml&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">user</span>     <span class="o">=</span>  <span class="n">y</span><span class="o">[</span><span class="s2">&quot;account&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">password</span> <span class="o">=</span>  <span class="n">y</span><span class="o">[</span><span class="s2">&quot;account&quot;</span><span class="o">][</span><span class="s2">&quot;password&quot;</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">hoge</span> <span class="o">=</span> <span class="no">SomeSite</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">sign_in</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">do_something</span>
-</span><span class='line'>  <span class="n">hoge</span><span class="o">.</span><span class="n">close</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>関連</h2>
-
-<ul>
-<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化: Selenium と Ruby</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

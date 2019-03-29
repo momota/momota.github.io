@@ -4,7 +4,7 @@
   <title><![CDATA[Category: zsh | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/zsh/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-03-27T14:42:42+09:00</updated>
+  <updated>2019-03-29T20:29:10+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,62 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[zshプラグイン: Incremental completion for zsh]]></title>
+    <link href="http://momota.github.io/blog/2019/03/29/incremental-completion-for-zsh/"/>
+    <updated>2019-03-29T20:12:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/03/29/incremental-completion-for-zsh</id>
+    <content type="html"><![CDATA[<p>zsh でインクリメンタルな補完を行うため、<a href="https://mimosa-pudica.net/zsh-incremental.html">Incremental completion on zsh</a> を導入した。</p>
+
+<p>こんな感じで便利。</p>
+
+<p><img src="/images/20190329_incremental-completion-for-zsh/incr-zsh.gif" alt="" /></p>
+
+<!-- more -->
+
+
+<p><a href="https://github.com/robbyrussell/oh-my-zsh">robbyrussell/oh-my-zsh</a> を導入している前提。</p>
+
+<p>カスタムスクリプトは <code>~/.oh-my-zsh/custom/</code> 以下に置けばログイン時にロードしてくれる。なので公式に書いてある <code>source incr*.zsh</code> を <code>.zshrc</code> へ書く必要はない。</p>
+
+<p>スクリプト名にバージョン名が入っているのが気持ち悪かったので、<code>incremental_completion_for_zsh.zsh</code> へ修正。</p>
+
+<p>```sh
+$ curl -o  ~/.oh-my-zsh/custom/incremental_completion_for_zsh.zsh <a href="https://mimosa-pudica.net/src/incr-0.2.zsh">https://mimosa-pudica.net/src/incr-0.2.zsh</a>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
+
+<pre><code>                             Dload  Upload   Total   Spent    Left  Speed
+</code></pre>
+
+<p>100  2631  100  2631    0     0   2386      0  0:00:01  0:00:01 &mdash;:&mdash;:&mdash;  2389
+```</p>
+
+<p>サジェストされるコマンド文字の色を控えめにしたかったので、以下の修正を加えた。
+(グリーンからグレーへ変更)</p>
+
+<p>```diff
+@@ -82,7 +82,7 @@</p>
+
+<pre><code>                    BUFFER="$buffer_org"
+                    CURSOR="$cursor_org"
+            fi
+</code></pre>
+
+<ul>
+<li><pre><code>        echo -n "\e[32m"
+</code></pre></li>
+<li><pre><code>        echo -n "\e[1;30m"
+else
+        zle -M ""
+fi
+</code></pre>
+
+<p>```</p></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh)]]></title>
