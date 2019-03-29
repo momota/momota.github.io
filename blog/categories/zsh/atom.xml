@@ -4,7 +4,7 @@
   <title><![CDATA[Category: zsh | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/zsh/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-03-29T20:29:10+09:00</updated>
+  <updated>2019-03-29T22:47:01+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -29,19 +29,23 @@
 
 <p><a href="https://github.com/robbyrussell/oh-my-zsh">robbyrussell/oh-my-zsh</a> を導入している前提。</p>
 
-<p>カスタムスクリプトは <code>~/.oh-my-zsh/custom/</code> 以下に置けばログイン時にロードしてくれる。なので公式に書いてある <code>source incr*.zsh</code> を <code>.zshrc</code> へ書く必要はない。</p>
+<p>oh-my-zsh の導入に関しては、こちらの記事を参照: <a href="http://momota.github.io/blog/2013/09/07/oh-my-zsh/">zsh をログインシェルにしてワーク・ライフ・バランスを改善する (oh-my-zsh) &ndash; momota.txt</a></p>
 
-<p>スクリプト名にバージョン名が入っているのが気持ち悪かったので、<code>incremental_completion_for_zsh.zsh</code> へ修正。</p>
+<p>今回利用するカスタムスクリプトは <code>~/.oh-my-zsh/custom/</code> 以下に置けばログイン時にロードしてくれる。したがって、公式に書いてある <code>source incr*.zsh</code> を <code>.zshrc</code> へ書く必要はない。</p>
+
+<p>スクリプト名にバージョン名が入っているのが気持ち悪かったので、<code>incremental_completion_for_zsh.zsh</code> へ修正した。</p>
 
 <p>```sh
-$ curl -o  ~/.oh-my-zsh/custom/incremental_completion_for_zsh.zsh <a href="https://mimosa-pudica.net/src/incr-0.2.zsh">https://mimosa-pudica.net/src/incr-0.2.zsh</a>
+$ curl -o  ~/.oh-my-zsh/custom/incremental_completion_for_zsh.zsh \</p>
+
+<blockquote><p><a href="https://mimosa-pudica.net/src/incr-0.2.zsh">https://mimosa-pudica.net/src/incr-0.2.zsh</a>
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</p>
 
 <pre><code>                             Dload  Upload   Total   Spent    Left  Speed
 </code></pre>
 
 <p>100  2631  100  2631    0     0   2386      0  0:00:01  0:00:01 &mdash;:&mdash;:&mdash;  2389
-```</p>
+```</p></blockquote>
 
 <p>サジェストされるコマンド文字の色を控えめにしたかったので、以下の修正を加えた。
 (グリーンからグレーへ変更)</p>
