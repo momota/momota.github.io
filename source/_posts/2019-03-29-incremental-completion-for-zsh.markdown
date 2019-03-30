@@ -41,7 +41,7 @@ $ curl -o  ~/.oh-my-zsh/custom/incremental_completion_for_zsh.zsh \
                         CURSOR="$cursor_org"
                 fi
 -               echo -n "\e[32m"
-+               echo -n "\e[1;30m"
++               echo -n "\e[38;5;244m"
         else
                 zle -M ""
         fi
