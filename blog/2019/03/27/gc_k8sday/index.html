@@ -119,7 +119,7 @@
 <!-- more -->
 
 
-<h1>「Kubernetes/Container による開発」の導入難易度とメリット</h1>
+<h2>「Kubernetes/Container による開発」の導入難易度とメリット</h2>
 
 <ul>
 <li>株式会社サイバーエージェント　青山 真也 氏</li>
@@ -127,18 +127,27 @@
 <li><p>サイバーエージェントとk8s</p>
 
 <ul>
-<li>2016年頃からk8sを採用</li>
+<li>早いところでは2016年頃からk8sを採用</li>
 <li>GKEとオンプレの採用が多い (半々くらい)</li>
+<li>オンプレミスでは独自のk8s as a Service基盤を構築</li>
 <li>新規事業の多くがk8s/Containerを利用している</li>
 <li>レガシーシステムからコンテナへの移行も実施中</li>
+<li>事例
+
+<ul>
+<li><a href="https://speakerdeck.com/wappy100/legacy-to-container">レガシーシステムのコンテナ化に挑戦した話 / Legacy to Container &ndash; Speaker Deck</a></li>
+<li><a href="https://speakerdeck.com/chokkoyamada/midoruuea-webapurimadequan-tewohelmhua-sitasabisufalseyun-yong-shi-li">ミドルウェア〜Webアプリまで全てをHelm化したサービスの運用事例 &ndash; Speaker Deck</a></li>
+<li><a href="https://speakerdeck.com/masayaaoyama/saibaezientoniokerupuraibetokontenaji-pan-akewozhi-eruji-shu">サイバーエージェントにおけるプライベートコンテナ基盤AKEを支える技術 &ndash; Speaker Deck</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li>k8s
 
 <ul>
 <li>コンテナオーケストレーションシステムの一つ</li>
-<li>Borgベースなので、Googleの経験がk8sに引き継がれている</li>
-<li>現在はCNCFが中立的にホスト。コミュニティによって改良されている</li>
+<li>Google のクラスタマネージャ Borg ベースなので、Googleの経験がk8sに引き継がれている</li>
+<li>現在はCNCFが中立的にホスト。コミュニティによって改良されている。</li>
 </ul>
 </li>
 <li>オーケストレーションとは
@@ -197,7 +206,7 @@
 
 <p><img src="/images/20190327_gc_k8sday/cncf-trail-map.png" alt="CNCF trail map" /></p>
 
-<h2>Containerization</h2>
+<h3>Containerization</h3>
 
 <p>レガシーシステムのマイグレーションもスタート地点はここから。実行環境込みのアプリケーションをSystemdに置き換えるイメージ</p>
 
@@ -206,6 +215,7 @@
 
 <ul>
 <li>アプリケーションと実行環境のイメージ化: 再現性の高い環境</li>
+<li>OCI v1.0 によるポータビリティ</li>
 <li>ローカル環境でも同等の動作が保証される</li>
 </ul>
 </li>
@@ -226,7 +236,7 @@
 </ol>
 
 
-<h2>Orchestration</h2>
+<h3>Orchestration</h3>
 
 <ol>
 <li>高い抽象度とクラウド非依存 by k8s
@@ -241,15 +251,40 @@
 <li>宣言的なAPIとCode by k8s
 
 <ul>
-<li>構成情報はManifestsで宣言的に記述してAPIに登録: Infrastructure as Code</li>
-<li>Control LoopとReconciliation</li>
+<li>構成情報はManifestsで宣言的に記述してAPIに登録: Infrastructure as Code
+
+<ul>
+<li><code>$ kubectl apply -f manifest.yaml</code></li>
+</ul>
+</li>
+<li>Control LoopとReconciliation: 以下の処理を繰り替えす→ Control Loop
+
+<ol>
+<li>現在の状態を観測</li>
+<li>現在の状態と理想状態を比較</li>
+<li>差分に対する処理を実施 (Reconcilation)</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>洗練された自動化 by k8s
 
 <ul>
-<li>障害時のセルフヒーリング</li>
-<li>アプリケーションのアップグレード</li>
+<li>障害時のセルフヒーリング
+
+<ul>
+<li>ReplicaSet ではコンテナの Replica 数を維持し続ける</li>
+<li>障害などでコンテナが不足した場合は、別の Node 上で高速に起動</li>
+</ul>
+</li>
+<li>アプリケーションのアップグレード
+
+<ul>
+<li>ロードバランサからの除外</li>
+<li>コンテナイメージのアップデート</li>
+<li>ロードバランサへの追加</li>
+</ul>
+</li>
 <li>コンテナ単位のヘルスチェック</li>
 <li>コンテナ起動前の初期化処理</li>
 <li>コンテナ停止時のSIGNAL</li>
@@ -260,13 +295,191 @@
 
 <ul>
 <li><img src="/images/20190327_gc_k8sday/cncf-landscape.png" alt="CNCF landscape" /></li>
-<li>例) Managed Service via Kubernetes (Cloud SQL)</li>
+<li>例</li>
 </ul>
 </li>
 </ol>
 
 
-<h2>Cloud Nativeの難しさ</h2>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># MySQL Cluster on Kubernetes</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql.oracl.com/v1alpha1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Cluster</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">multiMaster</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">members</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># CI/CD on Kubernetes</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">argoproj.io/v1alpha1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Workflow</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">generateName</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">hello-world-</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">entrypoint</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">whalesay</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">templates</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">whalesay</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">container</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">docker/whalesay:latest</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">command</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">cowsay</span><span class="p-Indicator">]</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">args</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="s">&quot;hello</span><span class="nv"> </span><span class="s">world&quot;</span><span class="p-Indicator">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># Serverless on Kubernetes</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">serving.knative.dev/v1alpha1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Service</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">hello-world-go</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">namespace</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">default</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">runLatest</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">configuration</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">revisionTemplate</span><span class="p-Indicator">:</span>
+</span><span class='line'>        <span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>          <span class="l-Scalar-Plain">container</span><span class="p-Indicator">:</span>
+</span><span class='line'>            <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">docker.io/{username}/hello-world-go</span>
+</span><span class='line'>            <span class="l-Scalar-Plain">env</span><span class="p-Indicator">:</span>
+</span><span class='line'>            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">TARGET</span>
+</span><span class='line'>              <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span> <span class="s">&quot;Go</span><span class="nv"> </span><span class="s">sample</span><span class="nv"> </span><span class="s">v1&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># Service Mesh on Kubernetes</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">networking.istio.io/v1alpha3</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">VirtualService</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">reviews</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">hosts</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">reviews</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">route</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">destination</span><span class="p-Indicator">:</span>
+</span><span class='line'>        <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">reviews</span>
+</span><span class='line'>        <span class="l-Scalar-Plain">subnet</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">weight</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">50</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">destination</span><span class="p-Indicator">:</span>
+</span><span class='line'>        <span class="l-Scalar-Plain">host</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">reviews</span>
+</span><span class='line'>        <span class="l-Scalar-Plain">subnet</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v3</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">weight</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">50</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># Managed Service via Kubernetes (Cloud SQL)</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">servicecatalog.k8s.io/v1alpha1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ServiceInstance</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">db</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">clusterServiceClassExternalName</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cloud-sql-mysql</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">clusterServicePlanExternalName</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">beta</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">parameters</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">instanceId</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">sample-cloudsql</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">databaseVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">MYSQL_5_7</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">region</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">asia-northeast1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># YOUR FEATURES with Kubernetes</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">amsy.dev/v1beta1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">MyResource</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-resource</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">MasayaAoyama</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">replicas</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Cloud Nativeの難しさ</h3>
 
 <ol>
 <li>アプリケーションのアーキテクチャ
@@ -281,8 +494,19 @@
 <li>セキュリティと分離性
 
 <ul>
-<li>仮想化の分離性: gVisorなどを利用する</li>
-<li>ネットワークの分離性</li>
+<li>仮想化の分離性
+
+<ul>
+<li>runC (標準の Docker) では Kernel を共有</li>
+<li>gVisorなど分離性の高い Container Runtime を利用する</li>
+</ul>
+</li>
+<li>ネットワークの分離性
+
+<ul>
+<li>Network Policy を利用できない環境ではコンテナ間の通信は筒抜け</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>k8sの学習コスト
@@ -291,38 +515,59 @@
 <li>学習コストは小さくないものの懸念するほどではない</li>
 </ul>
 </li>
-<li>k8sクラスタの管理
+<li>k8sクラスタの運用
 
 <ul>
-<li>GKEを利用することでだいぶ楽できる</li>
+<li>一番つらいのは k8s クラスタの管理
+
+<ul>
+<li>etcd のバックアップ</li>
+<li>Kubernetes Master のスケールアップ</li>
+<li>Kubernetes バージョンのアップグレード</li>
+<li>Kubernetes クラスタのオートスケール</li>
+<li>障害時のノード復旧</li>
+<li>コンテナランタイム (Docker/ runC) の管理</li>
+<li>OS (Kernel) の管理、など</li>
+</ul>
+</li>
+<li>マネージド Kubernetes サービス GKE を利用することでだいぶ楽できる</li>
 </ul>
 </li>
 </ol>
 
 
-<h2>マネージドk8sの選定基準</h2>
+<h3>マネージドk8sの選定基準</h3>
 
 <ul>
 <li>マネージドの範囲</li>
 <li>クラスタマネジメントの自動化機能</li>
-<li><p>k8sバージョンの追随スピード</p></li>
-<li><p>サイバーエージェントでは、アドテク分野やアベマTVなどいろいろなヘビーワークロードにもk8sで実装し、耐えうるシステムを構築</p></li>
-<li>ステートフル部分はマネージドサービスを利用する: Cloud SQL、BigQuery、…</li>
+<li>k8sバージョンの追随スピード</li>
+<li>他のマネージド・サービスとのインテグレーション</li>
+<li>ネットワーク周りの要件</li>
+<li>その他: virtual-kubelet の対応など</li>
 </ul>
 
 
-<h1>コンテナ開発プラットフォームに GKE を選択すべき 7 つの理由</h1>
+<h3>サイバーエージェントと GKE</h3>
+
+<ul>
+<li>サイバーエージェントでは、アドテク分野やアベマTVなどいろいろなヘビーワークロードにもk8sで実装し、耐えうるシステムを構築</li>
+<li>ステートフル部分はマネージドサービスを利用する: Cloud Storage, Cloud SQL、BigQuery、…</li>
+</ul>
+
+
+<h2>コンテナ開発プラットフォームに GKE を選択すべき 7 つの理由</h2>
 
 <ul>
 <li>Google Cloud Japan　田中 宏樹氏、岩成 祐樹氏</li>
 </ul>
 
 
-<h2>Security</h2>
+<h3>Security</h3>
 
 <ul>
 <li>セキュリティがクラウドの長所に</li>
-<li>GCPでは、徹底的な防御がデフォルトでON
+<li><p>GCPでは、徹底的な防御がデフォルトでON</p>
 
 <ul>
 <li>通信の暗号化</li>
@@ -331,23 +576,94 @@
 <li>ハードウェア</li>
 </ul>
 </li>
+<li><p>コンテナのセキュリティとは</p>
+
+<ul>
+<li>インフラストレクチャセキュリティ: インフラはコンテナを開発するのに安全か
+
+<ul>
+<li>k8s のセキュリティ機能を使って、ID, シークレット, ネットワークをどのように守るか</li>
+<li>GKEに備わるIAM, audit logging, networkingなどの機能をどのように活用するか</li>
+</ul>
+</li>
+<li>ソフトウェアサプライチェーン: 作成したコンテナはビルド、デプロイして問題ないか
+
+<ul>
+<li>コンテナイメージに脆弱性がないことをどのように保証するか</li>
+<li>ビル出されたイメージが、デプロイまでに改ざんされないことをどのように保証するか</li>
+</ul>
+</li>
+<li>ランタイムセキュリティ: 作成したコンテナは実行して問題ないか
+
+<ul>
+<li>コンテナが不審な挙動をしたときにどのように検知するか</li>
+<li>その際、ワークロードをどのように守り、分離するか</li>
+<li>どのようにコンテナのデプロイを安全にスケールさせるか</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>コンテナセキュリティの脅威とリスク</p></li>
+</ul>
+
+
+<table>
+<thead>
+<tr>
+<th>インフラストラクチャセキュリティ </th>
+<th> ソフトウェアサプライチェーン     </th>
+<th> ランタイムセキュリティ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>権限昇格                         </td>
+<td> パッチ適用漏れによる脆弱性       </td>
+<td> DDoS</td>
+</tr>
+<tr>
+<td>機密情報の漏洩                   </td>
+<td> サプライチェーンに聞いする脆弱性 </td>
+<td> Node への不正アクセス</td>
+</tr>
+<tr>
+<td>Kubernetes API の漏洩            </td>
+<td> 共通ライブラリのゼロデイ脆弱性   </td>
+<td> Container escape</td>
+</tr>
+<tr>
+<td>必要以上の権限を持つユーザ       </td>
+<td>                                  </td>
+<td> Flood event pipline</td>
+</tr>
+</tbody>
+</table>
+
+
+<ul>
 <li>コンテナのセキュリティ
 
 <ul>
-<li>インフラストレクチャセキュリティ
+<li>GKE: Use RBAC and IAM
 
 <ul>
-<li>インフラはコンテナを開発するのに安全か</li>
-<li>GKE: Use RBAC and IAM</li>
+<li>プロジェクトレベルでIAMを利用</li>
+<li>クラスタ/ネームスペースレベルでRBACを利用</li>
+</ul>
+</li>
 <li>プライベートクラスタと承認済みネットワーク</li>
-<li>Cloud Armor: スケーラブルなDDoS対策</li>
-<li>BackendConfg</li>
+<li>Cloud Armor: スケーラブルなDDoS対策/WAF</li>
+<li>BackendConfg
+
+<ul>
+<li>Kubernetes Engine Ingress controller で利用されるカスタムリソース定義</li>
+<li>BackendConfig オブジェクトとサービスポートを紐付けることで、GCLB 用の設定が可能</li>
+<li>GKE version 1.10.5-GKE.3 以降で利用可能</li>
 </ul>
 </li>
 <li>ソフトウェアサプライチェーン
 
 <ul>
-<li>作成したコンテナはビルド、デプロイして問題ないか</li>
 <li>CI/CDパイプラインは信頼できないデプロイを止めてくれない
 
 <ul>
@@ -355,21 +671,40 @@
 <li>Binary Authorization: QAされたコードだけを実行</li>
 </ul>
 </li>
-<li>Container Registry: 脆弱性スキャン</li>
-<li>Binary Authorization: 信頼されたコンテナイメージのみをGKE上にデプロイすることを保証するセキュリティコントロール機能</li>
+<li>Container Registry: 脆弱性スキャン
+
+<ul>
+<li>Ubuntu, Debian, Alpineのパッケージにある脆弱性を特定</li>
+<li>常時更新されるデータベースにより、スキャンが常に最新であることを保証</li>
+<li>検出可能な脆弱性を拡張するために、既存のツールをプラグインすることが可能</li>
+</ul>
+</li>
+<li>Binary Authorization: 信頼されたコンテナイメージのみをGKE上にデプロイすることを保証するセキュリティコントロール機能
+
+<ul>
+<li>検証済みイメージのみが、ビルドリリースプロセスと統合可能</li>
+<li>開発中に信頼された認証局により署名されたイメージが必要となる</li>
+<li>Kubernetes Engineにデプロイする前にシグネチャの検証を矯正することが可能</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>ランタイムセキュリティ
 
 <ul>
-<li>作成したコンテナは実行して問題ないか</li>
 <li>Container Optimized OS: GCE, GKEで利用可能な軽量なイメージ
 
 <ul>
 <li>runcの脆弱性 CVE-2019-5736の影響を受けなかった</li>
 </ul>
 </li>
-<li>3rdパーティツールの利用: aqua. sysdig, stackrock&hellip;</li>
+<li>Runtime security partners in Cloud SCC: 3rdパーティツールの利用
+
+<ul>
+<li>Cloud Security Command Center</li>
+<li>aqua, capsule8, stackrox, sysdig, twistlock&hellip;</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -377,24 +712,35 @@
 </ul>
 
 
-<h2>Network</h2>
+<h3>Network</h3>
 
 <ul>
 <li>さまざまなGCPサービスとの統合</li>
-<li>Google Cloud Load Bakancing</li>
-<li>世界中のCloud CDNとLB</li>
+<li>Google Cloud Load Bakancing
+
+<ul>
+<li>世界で一つのエニーキャストアドレスに対するリクエストを、複数のリージョンにまたがってデプロイされたGKEクラスタに対してルーティングすることが可能</li>
+</ul>
+</li>
+<li>世界中のCloud CDNとLB
+
+<ul>
+<li>9 つのリージョン、27 のゾーン、100 以上の接続ポイント（POP）、および延べ数十万 km に及ぶ光ファイバーケーブルで構築され、適切にプロビジョニングされたグローバルネットワーク</li>
+</ul>
+</li>
 <li>Container Native Load Balancing
 
 <ul>
 <li>LBからVM(Node)を介さずPodへ直接トラフィックを転送</li>
 <li>Double-hop問題を解決</li>
-<li>レイテンシーとルーティング問題を解決</li>
+<li>レイテンシーとルーティング性能問題を解決</li>
+<li>VPC-native clusters かつ Kubernetes version 1.10+ で利用可能</li>
 </ul>
 </li>
 </ul>
 
 
-<h2>Hybrid Cloud</h2>
+<h3>Hybrid Cloud</h3>
 
 <ul>
 <li>ゴール: コードをどこでも実行できる環境を整える</li>
@@ -415,22 +761,29 @@
 </ul>
 
 
-<h2>Observability</h2>
+<h3>Observability</h3>
 
 <ul>
 <li>ロギング
 
 <ul>
+<li>複数のアプリケーションやサービスから発生するログの収集</li>
 <li>GCP内部の情報に加えて、GCPの外部で発生するログについても収集できる基盤が必要</li>
 </ul>
 </li>
-<li>モニタリング</li>
+<li>モニタリング
+
+<ul>
+<li>収集したtログや指標を見える化し、アクションを提供する一連のプロセス</li>
+<li>アプリケーションのエラーが発生したり、しきい値を超えた際に、アラートを適切な担当者に正しく送る機能が必要</li>
+</ul>
+</li>
 <li>統合管理プラットフォーム
 
 <ul>
-<li>DevOpe/SRE</li>
-<li>Developer</li>
-<li>SecOps</li>
+<li>DevOpe/SRE: パフォーマンスの問題を調査するためには、すべてのクラスターの状況の理解が必要</li>
+<li>Developer: 最良のシステムを構築するためには、インフラストラクチャ、ワークロード、サービスを継続モニタリングが必要</li>
+<li>SecOps: セキュリティポリシーを見直してコンプライアンスを強化のため、すべてのクラスタの監査ログの収集が必要</li>
 </ul>
 </li>
 <li>Stackdriver: アプリケーション開発者と運用担当者にLoggingとMonitoring機能を提供する</li>
@@ -440,11 +793,17 @@
 <li>k8sのワークロードに最適化されたStackdriverのツール</li>
 </ul>
 </li>
-<li>work with Open Source: Prometheus</li>
+<li>work with Open Source: Prometheus
+
+<ul>
+<li>Google にインスパイアされたエンジニアが Prometheus イニシアティブをリード</li>
+<li>Open Source の Prometheus と、Stackdriver k8s Monitoring のシームレスなインテグレーション</li>
+</ul>
+</li>
 </ul>
 
 
-<h2>Contribution</h2>
+<h3>Contribution</h3>
 
 <ul>
 <li>Open source is free like a puppy</li>
@@ -454,16 +813,27 @@
 <li>To be Reliable
 
 <ul>
-<li>Regional clusters</li>
-<li>Regional Persistent Disks</li>
+<li>Regional clusters
+
+<ul>
+<li>Kubernetes コントロールプレーンを3つのゾーン (同一リージョン) で実行する</li>
+</ul>
+</li>
+<li>Regional Persistent Disks
+
+<ul>
+<li>セカンダリゾーンの Disk に対してデータをミラーリング</li>
+<li>ゾーン障害時、GKEはコンテナを問題のないゾーンにマイグレーション、強制的にミラーリングしてある Disk をアタッチ</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>To be Scalable
 
 <ul>
-<li>HPA: 水平スケーリング</li>
-<li>VPA: Podの垂直スケーリング</li>
-<li>CA: Nodeの水平スケーリング</li>
+<li>HPA: Pod の水平スケーリング</li>
+<li>VPA: Pod の垂直スケーリング</li>
+<li>CA: Node の水平スケーリング</li>
 <li>Node Auto-Provisioning</li>
 </ul>
 </li>
@@ -485,14 +855,14 @@
 </ul>
 
 
-<h1>GKE を用いたレガシー システムからのリプレース事例</h1>
+<h2>GKE を用いたレガシー システムからのリプレース事例</h2>
 
 <ul>
 <li>富士フイルム株式会社　小林 大助 氏</li>
 </ul>
 
 
-<h2>プロジェクト概要</h2>
+<h3>プロジェクト概要</h3>
 
 <ul>
 <li>FUJIFILM Prints &amp; Gifts
@@ -518,7 +888,7 @@
 </ul>
 
 
-<h2>GKE利用までの経緯</h2>
+<h3>GKE利用までの経緯</h3>
 
 <ul>
 <li>S→T→P→D→C→A
@@ -526,6 +896,7 @@
 <ul>
 <li>PDCAに加えて See + Think</li>
 <li>富士フィルムではSTを重視</li>
+<li>現状分析をしっかり行い、目的を明確にする</li>
 </ul>
 </li>
 <li>モノリシックなアプリケーションにより影響範囲の見定めが難しい</li>
@@ -534,7 +905,7 @@
 <ul>
 <li>負荷量の変動に対してシステムが追随しにくい</li>
 <li>スケーラビリティを確保しやすい仕組みを最優先にする</li>
-<li>コンテナを利用</li>
+<li>コンテナを採用</li>
 </ul>
 </li>
 <li>保守面を意識すれば、オーケストレーションツールは使いたい。課題が2つ
@@ -558,50 +929,87 @@
 </ul>
 </li>
 <li>k8sがデファクトスタンダードになった: 規格争いによる技術の陳腐化懸念が後退</li>
-<li>主要ベンダがk8sマネージドサービスを展開</li>
+<li>主要ベンダがk8sマネージドサービスを展開: コンテナやオーケストレーションツールが動作する環境を自前で準備する必要がなくなり、安定動作する環境が整いつつある
+
+<ul>
 <li>2018年1月時点で日本国内GAしているのはGoogeのみ</li>
-<li>動作安定性</li>
+<li>動作安定性: k8s の開発元であること、コンテナを先取りしている取り組み、4年以上の安定動作運用実績があることから信頼性が高い。完全にコンテナ化できない部分でもライブマイグレーション機能の強みを活かせる</li>
+</ul>
+</li>
 </ul>
 
 
-<h2>取り組む上での課題: 組織面</h2>
+<h3>取り組む上での課題: 組織面</h3>
 
 <ul>
 <li>周囲の理解
 
 <ul>
+<li>コンテナやオーケストレーションツールに対する周囲の理解を深めなければならない</li>
 <li>技術的優位性を説明できないといけない</li>
 <li>総論は賛成、各論は？</li>
 <li>リスクを背負えるか: 納期遵守のPrj</li>
+<li>所属部門・関係部門の合意を取り付ける必要あり</li>
 </ul>
 </li>
-<li>技術学習、解説資料作成、説明行脚</li>
-<li>現場レベルでは味方は多かった</li>
+<li>近道はなし: 技術学習、解説資料作成、説明行脚</li>
+<li>現場レベルでは味方は多かった: 技術学習の協力や相談が効率化。求めるところが同じがゆえの連帯感。
+
+<ul>
+<li>プロジェクトメンバー</li>
+<li>インフラエンジニア</li>
+<li>部門横断のエンジニア</li>
+</ul>
+</li>
 <li>リスクに対しては、バックアッププランの準備、技術習得状況の説明、Googleエンジニアのバックアップ</li>
 </ul>
 
 
-<h2>取り組む上での課題: 開発面</h2>
+<h3>取り組む上での課題: 開発面</h3>
 
 <ul>
 <li>技術習得: 独学とハンズオン</li>
-<li>事前調査</li>
+<li>事前調査
+
+<ul>
+<li>レガシーシステムのルール把握: どの程度引きずられるか、実施してから発覚した問題あり</li>
+<li>効率的なシステム間連携に知識が必要
+
+<ul>
+<li>Pub/Sub 連携のイベント発火条件も当初は無駄が多かったプログラムか、サービス活用かの見極め
+
+<ul>
+<li>当初案: プログラム制御でイベント発火</li>
+<li>対応案: ファイル配置 → Cloud Functions で配置イベント検知 → Pub/Sub 投げ込み、のように分離</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li>運用: ログ出力やアラート関連は、メトリクスの書き方が困難だった</li>
 <li>設計・設定: マニフェストファイルの書き方、永続データの取扱いに関する適切なサービス選定がむずい</li>
 <li>基本設計: サービス分割はアトミックにすると障害復旧が難しいので、意味のある塊に</li>
 <li>商用利用に向けての課題: PaaSの特徴や仕様についてGoogleエンジニアのサポートを受けながら選定、確認を進める</li>
-<li>レガシーシステムとの連携: 基本は新システム側が全面降伏で対応</li>
+<li>レガシーシステムとの連携
+
+<ul>
+<li>レガシーシステム側を変えることは難しく、ルールに従う必要あり (IP制限、連携方法の指定など)</li>
+<li>基本は新システム側が全面降伏で対応: もともと予定していなかったインフラ構築やネットワーク設定が追加</li>
+</ul>
+</li>
 </ul>
 
 
-<h2>効果</h2>
+<h3>効果</h3>
 
 <ul>
 <li>スケーラビリティの確保はできた。ただし、今後悪化しないように管理していく必要がある</li>
 <li>保守運用コストは改善された
 
 <ul>
-<li>ランニングコスト 3/5</li>
+<li>モノリシックな構造を改善し、影響範囲を縮小できた。機能搭載費用 1/2に</li>
+<li>サーバリソースの有効活用によりランニングコスト 3/5に</li>
 <li>導入8ヶ月でサービスダウンタイムなし。安定稼働中。</li>
 </ul>
 </li>
@@ -618,7 +1026,7 @@
 </ul>
 
 
-<h1>コンテナによる開発と運用の進化</h1>
+<h2>コンテナによる開発と運用の進化</h2>
 
 <ul>
 <li><p>Google Cloud Japan　篠原 一徳氏、村上 大河氏</p></li>
@@ -767,8 +1175,10 @@
 
 <ul>
 <li>Mixer: テレメトリの収集</li>
-<li>Prometheus</li>
-<li>Grafana</li>
+<li>Prometheus: Mixer から提供される Istio メトリクスの保存と検索</li>
+<li>Grafana: ダッシュボードでメトリクスの可視化</li>
+<li>Jaeger: トレース情報の取得</li>
+<li>Kiali (addon): サービスグラフの管理</li>
 </ul>
 </li>
 </ul>
@@ -782,13 +1192,15 @@
 
 <ul>
 <li>マイクロサービスにより、データのサイロ化が進む</li>
+<li>そのとき、どのようにデータを伝送すればよいか</li>
+<li>また、ビジネス要件である分析も行いたい</li>
 </ul>
 </li>
 <li>CSM (Managed Istio) の Alphaユーザを募集中: <a href="https://docs.google.com/forms/d/1Qhj4qViWgaSAf9KUfowWRdVS6OHwg9cgEdYX2xbpLeM/viewform?edit_requested=true">https://docs.google.com/forms/d/1Qhj4qViWgaSAf9KUfowWRdVS6OHwg9cgEdYX2xbpLeM/viewform?edit_requested=true</a></li>
 </ul>
 
 
-<h1>事例セッション： FreakOut の広告プロダクトでの GKE 活用事例と GKE 新機能の導入について</h1>
+<h2>FreakOut の広告プロダクトでの GKE 活用事例と GKE 新機能の導入について</h2>
 
 <ul>
 <li><p>株式会社フリークアウト　西口 次郎 氏</p></li>
@@ -799,7 +1211,7 @@
 </ul>
 
 
-<h2>プロダクション環境でのGKE運用</h2>
+<h3>プロダクション環境でのGKE運用</h3>
 
 <ul>
 <li><a href="https://cloudplatform-jp.googleblog.com/2018/09/freakout-kubernetes-engine.html">Google Cloud Platform Japan 公式ブログ： 株式会社フリークアウトの導入事例： フルマネージドな Kubernetes Engine を駆使して、大規模アドプラットフォームをプレミアム メディア向けに提供</a></li>
@@ -808,7 +1220,7 @@
 <ul>
 <li>サービスごとにクラスタを分割</li>
 <li>広告配信、UI、バッチ</li>
-<li>CronJobを利用</li>
+<li>CronJob (>= k8s 1.8) を利用</li>
 <li>カナリーリリース環境を用意</li>
 <li>Stackdriverを活用</li>
 </ul>
@@ -820,6 +1232,7 @@
 
 <ul>
 <li>Prometheusと併用</li>
+<li>Grafana 5.3 で Stackdriver Datasource を利用中</li>
 </ul>
 </li>
 <li>Logging
@@ -832,7 +1245,7 @@
 <li>Profiler
 
 <ul>
-<li>常に最新のコーdンのプロファイルを可視化、比較</li>
+<li>常に最新のコードのプロファイルを可視化、比較</li>
 </ul>
 </li>
 </ul>
@@ -846,8 +1259,13 @@
 <li>数十億レコード/日</li>
 </ul>
 </li>
-<li>fluentd (Sidecar Container)からStreaming insert</li>
-<li>可視化はre:dash</li>
+<li>fluentd (Sidecar Container)からStreaming insert
+
+<ul>
+<li>リアルタイム集計</li>
+</ul>
+</li>
+<li>可視化はre:dashを利用</li>
 <li>MySQLのマスタデータもインポートしている</li>
 </ul>
 </li>
@@ -865,7 +1283,14 @@
 <ul>
 <li>k8s のYAMLファイルのカスタマイズ</li>
 <li>kubectrlのサブコマンドとしてマージされた</li>
-<li>Production/Staging/Cannaryなど環境ごとの設定を上書き</li>
+<li>Production/Staging/Cannaryなど環境ごとの設定を上書き
+
+<ul>
+<li>Replicas</li>
+<li>環境変数</li>
+<li>ConfigMap</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>Other tools
@@ -890,7 +1315,7 @@
 </ul>
 
 
-<h2>GKEでのCI/CD</h2>
+<h3>GKEでのCI/CD</h3>
 
 <ul>
 <li>Github</li>
@@ -903,7 +1328,7 @@
 </ul>
 
 
-<h3>CIのフロー</h3>
+<h4>CIのフロー</h4>
 
 <ol>
 <li>GithubへのPush</li>
@@ -918,7 +1343,7 @@
 </ol>
 
 
-<h2>CDのフロー</h2>
+<h4>CDのフロー</h4>
 
 <ol>
 <li>GithubでPRをマージ</li>
@@ -926,7 +1351,7 @@
 
 <ul>
 <li>docker build</li>
-<li>docker push</li>
+<li>docker push (to Container Registry)</li>
 <li>kubectrl set image</li>
 </ul>
 </li>
@@ -934,16 +1359,22 @@
 
 <ul>
 <li>Pub/SubへのPublish</li>
-<li>Cloud FunctionsでSlackツウイ</li>
+<li>Cloud FunctionsでSlack通知</li>
 </ul>
 </li>
 </ol>
 
 
-<h2>GKE 新機能の利用</h2>
+<h3>GKE 新機能の利用</h3>
 
 <ul>
-<li>VPC-native cluster (alias IP)</li>
+<li>VPC-native cluster (alias IP)
+
+<ul>
+<li>Cloud Memorystore for Redis の利用が可能</li>
+<li>Cloud SQL Private IP に接続可能</li>
+</ul>
+</li>
 <li>Cloud NAT
 
 <ul>
@@ -957,15 +1388,36 @@
 </li>
 </ul>
 </li>
-<li>Network Endpoint Groups
+<li>Network Endpoint Groups (NEGs)
 
 <ul>
 <li>コンテナネイティブの負荷分散</li>
 <li>Instance Groupはiptablesを介してPodへルーティングしていたが、Podへ直接ルーティング可能</li>
 <li>ネットワークパフォーマンス改善</li>
+<li>要 VPC-native cluster</li>
+<li>Service アノテーション <code>cloud.google.com/neg</code> に <code>{ "ingress": true }</code> を指定する</li>
 </ul>
 </li>
-<li>BackendConfig Custom resource</li>
+<li>BackendConfig Custom resource
+
+<ul>
+<li>GKE Ingressコントローラのカスタムリソース定義
+
+<ul>
+<li>Balancer Settings</li>
+<li>Cloud Armor</li>
+<li>Cloud IAP</li>
+<li>Cloud CDN</li>
+</ul>
+</li>
+<li>Service と BackendConfig を紐づけて使用する
+
+<ul>
+<li>Service アノテーション <code>beta.cloud.google.com/backend-configs</code></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
 </div>
