@@ -14,20 +14,25 @@ categories: kubernetes google gcp
 
 <!-- more -->
 
-# 「Kubernetes/Container による開発」の導入難易度とメリット
+## 「Kubernetes/Container による開発」の導入難易度とメリット
 
 - 株式会社サイバーエージェント　青山 真也 氏
 - [@amsy810](https://twitter.com/amsy810)
 
 - サイバーエージェントとk8s
-  - 2016年頃からk8sを採用
+  - 早いところでは2016年頃からk8sを採用
   - GKEとオンプレの採用が多い (半々くらい)
+  - オンプレミスでは独自のk8s as a Service基盤を構築
   - 新規事業の多くがk8s/Containerを利用している
   - レガシーシステムからコンテナへの移行も実施中
+  - 事例
+    - [レガシーシステムのコンテナ化に挑戦した話 / Legacy to Container - Speaker Deck](https://speakerdeck.com/wappy100/legacy-to-container)
+    - [ミドルウェア〜Webアプリまで全てをHelm化したサービスの運用事例 - Speaker Deck](https://speakerdeck.com/chokkoyamada/midoruuea-webapurimadequan-tewohelmhua-sitasabisufalseyun-yong-shi-li)
+    - [サイバーエージェントにおけるプライベートコンテナ基盤AKEを支える技術 - Speaker Deck](https://speakerdeck.com/masayaaoyama/saibaezientoniokerupuraibetokontenaji-pan-akewozhi-eruji-shu)
 - k8s
   - コンテナオーケストレーションシステムの一つ
-  - Borgベースなので、Googleの経験がk8sに引き継がれている
-  - 現在はCNCFが中立的にホスト。コミュニティによって改良されている
+  - Google のクラスタマネージャ Borg ベースなので、Googleの経験がk8sに引き継がれている
+  - 現在はCNCFが中立的にホスト。コミュニティによって改良されている。
 - オーケストレーションとは
   - プロビジョニングの一つ
     1. ブートストラッピング: サーバの準備、OSのインストール
@@ -50,12 +55,13 @@ categories: kubernetes google gcp
 
 ![CNCF trail map](/images/20190327_gc_k8sday/cncf-trail-map.png)
 
-## Containerization
+### Containerization
 
 レガシーシステムのマイグレーションもスタート地点はここから。実行環境込みのアプリケーションをSystemdに置き換えるイメージ
 
 1. 容易なイメージかと再現性 by Docker
     - アプリケーションと実行環境のイメージ化: 再現性の高い環境
+    - OCI v1.0 によるポータビリティ
     - ローカル環境でも同等の動作が保証される
 2. 軽量なイメージ by Docker
     - VMイメージと比べて軽量
@@ -64,7 +70,7 @@ categories: kubernetes google gcp
     - VMよりも起動停止が高速: プロセスの起動停止に相当
     - 高速なスケールアウトや障害時の復旧が可能
 
-## Orchestration
+### Orchestration
 
 1. 高い抽象度とクラウド非依存 by k8s
     - Load BalancerやStorageなども抽象化
@@ -73,19 +79,122 @@ categories: kubernetes google gcp
     - 基本的にはポータビリティがある
 2. 宣言的なAPIとCode by k8s
     - 構成情報はManifestsで宣言的に記述してAPIに登録: Infrastructure as Code
-    - Control LoopとReconciliation
+      - `$ kubectl apply -f manifest.yaml`
+    - Control LoopとReconciliation: 以下の処理を繰り替えす→ Control Loop
+      1. 現在の状態を観測
+      2. 現在の状態と理想状態を比較
+      3. 差分に対する処理を実施 (Reconcilation)
 3. 洗練された自動化 by k8s
     - 障害時のセルフヒーリング
+      - ReplicaSet ではコンテナの Replica 数を維持し続ける
+      - 障害などでコンテナが不足した場合は、別の Node 上で高速に起動
     - アプリケーションのアップグレード
+      - ロードバランサからの除外
+      - コンテナイメージのアップデート
+      - ロードバランサへの追加
     - コンテナ単位のヘルスチェック
     - コンテナ起動前の初期化処理
     - コンテナ停止時のSIGNAL
     - コンテナ開始直後、停止直前のフック
 4. 豊富なエコシステムと拡張性 by k8s
     - ![CNCF landscape](/images/20190327_gc_k8sday/cncf-landscape.png)
-    - 例) Managed Service via Kubernetes (Cloud SQL)
+    - 例
+```yaml
+# MySQL Cluster on Kubernetes
+apiVersion: mysql.oracl.com/v1alpha1
+kind: Cluster
+metadata:
+  name: mysql
+spec:
+  multiMaster: true
+  members: 3
+```
 
-## Cloud Nativeの難しさ
+```yaml
+# CI/CD on Kubernetes
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-
+spec:
+  entrypoint: whalesay
+  templates:
+  - name: whalesay
+    container:
+      image: docker/whalesay:latest
+      command: [cowsay]
+      args: ["hello world"]
+```
+
+```yaml
+# Serverless on Kubernetes
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: hello-world-go
+  namespace: default
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: docker.io/{username}/hello-world-go
+            env:
+            - name: TARGET
+              value: "Go sample v1"
+```
+
+```yaml
+# Service Mesh on Kubernetes
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subnet: v1
+      weight: 50
+    - destination:
+        host: reviews
+        subnet: v3
+      weight: 50
+```
+
+```yaml
+# Managed Service via Kubernetes (Cloud SQL)
+apiVersion: servicecatalog.k8s.io/v1alpha1
+kind: ServiceInstance
+metadata:
+  name: db
+spec:
+  clusterServiceClassExternalName: cloud-sql-mysql
+  clusterServicePlanExternalName: beta
+  parameters:
+    instanceId: sample-cloudsql
+    databaseVersion: MYSQL_5_7
+    region: asia-northeast1
+```
+
+```yaml
+# YOUR FEATURES with Kubernetes
+apiVersion: amsy.dev/v1beta1
+kind: MyResource
+metadata:
+  name: my-resource
+spec:
+  name: MasayaAoyama
+  replicas: 1
+```
+
+
+
+### Cloud Nativeの難しさ
 
 1. アプリケーションのアーキテクチャ
     - マイクロ/ミニサービスに適した技術
@@ -93,30 +202,47 @@ categories: kubernetes google gcp
     - Service Discovery経由で通信
     - ネットワークに一部制約がある (Source IPが消失する、など)
 2. セキュリティと分離性
-    - 仮想化の分離性: gVisorなどを利用する
+    - 仮想化の分離性
+      - runC (標準の Docker) では Kernel を共有
+      - gVisorなど分離性の高い Container Runtime を利用する
     - ネットワークの分離性
+      - Network Policy を利用できない環境ではコンテナ間の通信は筒抜け
 3. k8sの学習コスト
     - 学習コストは小さくないものの懸念するほどではない
-4. k8sクラスタの管理
-    - GKEを利用することでだいぶ楽できる
+4. k8sクラスタの運用
+    - 一番つらいのは k8s クラスタの管理
+      - etcd のバックアップ
+      - Kubernetes Master のスケールアップ
+      - Kubernetes バージョンのアップグレード
+      - Kubernetes クラスタのオートスケール
+      - 障害時のノード復旧
+      - コンテナランタイム (Docker/ runC) の管理
+      - OS (Kernel) の管理、など
+    - マネージド Kubernetes サービス GKE を利用することでだいぶ楽できる
 
-## マネージドk8sの選定基準
+### マネージドk8sの選定基準
 
 - マネージドの範囲
 - クラスタマネジメントの自動化機能
 - k8sバージョンの追随スピード
+- 他のマネージド・サービスとのインテグレーション
+- ネットワーク周りの要件
+- その他: virtual-kubelet の対応など
+
+
+### サイバーエージェントと GKE
 
 - サイバーエージェントでは、アドテク分野やアベマTVなどいろいろなヘビーワークロードにもk8sで実装し、耐えうるシステムを構築
-- ステートフル部分はマネージドサービスを利用する: Cloud SQL、BigQuery、…
+- ステートフル部分はマネージドサービスを利用する: Cloud Storage, Cloud SQL、BigQuery、…
 
 
 
 
-# コンテナ開発プラットフォームに GKE を選択すべき 7 つの理由
+## コンテナ開発プラットフォームに GKE を選択すべき 7 つの理由
 
 - Google Cloud Japan　田中 宏樹氏、岩成 祐樹氏
 
-## Security
+### Security
 
 - セキュリティがクラウドの長所に
 - GCPでは、徹底的な防御がデフォルトでON
@@ -124,39 +250,74 @@ categories: kubernetes google gcp
   - ストレージの暗号化
   - 認証・認可
   - ハードウェア
+
+- コンテナのセキュリティとは
+  - インフラストレクチャセキュリティ: インフラはコンテナを開発するのに安全か
+    - k8s のセキュリティ機能を使って、ID, シークレット, ネットワークをどのように守るか
+    - GKEに備わるIAM, audit logging, networkingなどの機能をどのように活用するか
+  - ソフトウェアサプライチェーン: 作成したコンテナはビルド、デプロイして問題ないか
+    - コンテナイメージに脆弱性がないことをどのように保証するか
+    - ビル出されたイメージが、デプロイまでに改ざんされないことをどのように保証するか
+  - ランタイムセキュリティ: 作成したコンテナは実行して問題ないか
+    - コンテナが不審な挙動をしたときにどのように検知するか
+    - その際、ワークロードをどのように守り、分離するか
+    - どのようにコンテナのデプロイを安全にスケールさせるか
+
+- コンテナセキュリティの脅威とリスク
+
+インフラストラクチャセキュリティ | ソフトウェアサプライチェーン     | ランタイムセキュリティ
+---------------------------------|----------------------------------|-----------------------
+権限昇格                         | パッチ適用漏れによる脆弱性       | DDoS
+機密情報の漏洩                   | サプライチェーンに聞いする脆弱性 | Node への不正アクセス
+Kubernetes API の漏洩            | 共通ライブラリのゼロデイ脆弱性   | Container escape
+必要以上の権限を持つユーザ       |                                  | Flood event pipline
+
+
 - コンテナのセキュリティ
-  - インフラストレクチャセキュリティ
-    - インフラはコンテナを開発するのに安全か
     - GKE: Use RBAC and IAM
+      - プロジェクトレベルでIAMを利用
+      - クラスタ/ネームスペースレベルでRBACを利用
     - プライベートクラスタと承認済みネットワーク
-    - Cloud Armor: スケーラブルなDDoS対策
+    - Cloud Armor: スケーラブルなDDoS対策/WAF
     - BackendConfg
+      - Kubernetes Engine Ingress controller で利用されるカスタムリソース定義
+      - BackendConfig オブジェクトとサービスポートを紐付けることで、GCLB 用の設定が可能
+      - GKE version 1.10.5-GKE.3 以降で利用可能
   - ソフトウェアサプライチェーン
-    - 作成したコンテナはビルド、デプロイして問題ないか
     - CI/CDパイプラインは信頼できないデプロイを止めてくれない
       - イメージのメタデータ
       - Binary Authorization: QAされたコードだけを実行
     - Container Registry: 脆弱性スキャン
+      - Ubuntu, Debian, Alpineのパッケージにある脆弱性を特定
+      - 常時更新されるデータベースにより、スキャンが常に最新であることを保証
+      - 検出可能な脆弱性を拡張するために、既存のツールをプラグインすることが可能
     - Binary Authorization: 信頼されたコンテナイメージのみをGKE上にデプロイすることを保証するセキュリティコントロール機能
+      - 検証済みイメージのみが、ビルドリリースプロセスと統合可能
+      - 開発中に信頼された認証局により署名されたイメージが必要となる
+      - Kubernetes Engineにデプロイする前にシグネチャの検証を矯正することが可能
   - ランタイムセキュリティ
-    - 作成したコンテナは実行して問題ないか
     - Container Optimized OS: GCE, GKEで利用可能な軽量なイメージ
       - runcの脆弱性 CVE-2019-5736の影響を受けなかった
-    - 3rdパーティツールの利用: aqua. sysdig, stackrock...
+    - Runtime security partners in Cloud SCC: 3rdパーティツールの利用
+      - Cloud Security Command Center
+      - aqua, capsule8, stackrox, sysdig, twistlock...
 
-## Network
+### Network
 
 - さまざまなGCPサービスとの統合
 - Google Cloud Load Bakancing
+  - 世界で一つのエニーキャストアドレスに対するリクエストを、複数のリージョンにまたがってデプロイされたGKEクラスタに対してルーティングすることが可能
 - 世界中のCloud CDNとLB
+  - 9 つのリージョン、27 のゾーン、100 以上の接続ポイント（POP）、および延べ数十万 km に及ぶ光ファイバーケーブルで構築され、適切にプロビジョニングされたグローバルネットワーク
 - Container Native Load Balancing
   - LBからVM(Node)を介さずPodへ直接トラフィックを転送
   - Double-hop問題を解決
-  - レイテンシーとルーティング問題を解決
+  - レイテンシーとルーティング性能問題を解決
+  - VPC-native clusters かつ Kubernetes version 1.10+ で利用可能
 
 
 
-## Hybrid Cloud
+### Hybrid Cloud
 
 - ゴール: コードをどこでも実行できる環境を整える
 - GKE On-prem
@@ -167,32 +328,40 @@ categories: kubernetes google gcp
   - メルカリ: オンプレミスからの移行
 
 
-## Observability
+### Observability
 
 - ロギング
+  - 複数のアプリケーションやサービスから発生するログの収集
   - GCP内部の情報に加えて、GCPの外部で発生するログについても収集できる基盤が必要
 - モニタリング
+  - 収集したtログや指標を見える化し、アクションを提供する一連のプロセス
+  - アプリケーションのエラーが発生したり、しきい値を超えた際に、アラートを適切な担当者に正しく送る機能が必要
 - 統合管理プラットフォーム
-  - DevOpe/SRE
-  - Developer
-  - SecOps
+  - DevOpe/SRE: パフォーマンスの問題を調査するためには、すべてのクラスターの状況の理解が必要
+  - Developer: 最良のシステムを構築するためには、インフラストラクチャ、ワークロード、サービスを継続モニタリングが必要
+  - SecOps: セキュリティポリシーを見直してコンプライアンスを強化のため、すべてのクラスタの監査ログの収集が必要
 - Stackdriver: アプリケーション開発者と運用担当者にLoggingとMonitoring機能を提供する
 - Stackdriver Kubernetes Monitoring
   - k8sのワークロードに最適化されたStackdriverのツール
 - work with Open Source: Prometheus
+  - Google にインスパイアされたエンジニアが Prometheus イニシアティブをリード
+  - Open Source の Prometheus と、Stackdriver k8s Monitoring のシームレスなインテグレーション
 
 
-## Contribution
+### Contribution
 
 - Open source is free like a puppy
 - GKE is going to ..
   - To be Reliable
     - Regional clusters
+      - Kubernetes コントロールプレーンを3つのゾーン (同一リージョン) で実行する
     - Regional Persistent Disks
+      - セカンダリゾーンの Disk に対してデータをミラーリング
+      - ゾーン障害時、GKEはコンテナを問題のないゾーンにマイグレーション、強制的にミラーリングしてある Disk をアタッチ
   - To be Scalable
-    - HPA: 水平スケーリング
-    - VPA: Podの垂直スケーリング
-    - CA: Nodeの水平スケーリング
+    - HPA: Pod の水平スケーリング
+    - VPA: Pod の垂直スケーリング
+    - CA: Node の水平スケーリング
     - Node Auto-Provisioning
   - To be Open
     - OSS Friendly ecosystem
@@ -200,13 +369,13 @@ categories: kubernetes google gcp
       - Kanico
       - Knative
 
-# GKE を用いたレガシー システムからのリプレース事例
+## GKE を用いたレガシー システムからのリプレース事例
 
 - 富士フイルム株式会社　小林 大助 氏
 
 
 
-## プロジェクト概要
+### プロジェクト概要
 
 - FUJIFILM Prints & Gifts
   - [写真プリント | FUJIFILMプリント＆ギフト | 富士フイルムの公式ストア](https://pg-ja.fujifilm.com/photo-print)
@@ -218,16 +387,17 @@ categories: kubernetes google gcp
   - モノ消費からコト消費へ
 
 
-## GKE利用までの経緯
+### GKE利用までの経緯
 
 - S→T→P→D→C→A
   - PDCAに加えて See + Think
   - 富士フィルムではSTを重視
+  - 現状分析をしっかり行い、目的を明確にする
 - モノリシックなアプリケーションにより影響範囲の見定めが難しい
 - 特に苦労しているのは季節イベント、キャンペーン
   - 負荷量の変動に対してシステムが追随しにくい
   - スケーラビリティを確保しやすい仕組みを最優先にする
-  - コンテナを利用
+  - コンテナを採用
 - 保守面を意識すれば、オーケストレーションツールは使いたい。課題が2つ
   - 何が標準か
     - 流行度
@@ -237,37 +407,50 @@ categories: kubernetes google gcp
     - 使いこなせないと意味がない
     - 運用環境に耐えうるレベルか
 - k8sがデファクトスタンダードになった: 規格争いによる技術の陳腐化懸念が後退
-- 主要ベンダがk8sマネージドサービスを展開
-- 2018年1月時点で日本国内GAしているのはGoogeのみ
-- 動作安定性
+- 主要ベンダがk8sマネージドサービスを展開: コンテナやオーケストレーションツールが動作する環境を自前で準備する必要がなくなり、安定動作する環境が整いつつある
+  - 2018年1月時点で日本国内GAしているのはGoogeのみ
+  - 動作安定性: k8s の開発元であること、コンテナを先取りしている取り組み、4年以上の安定動作運用実績があることから信頼性が高い。完全にコンテナ化できない部分でもライブマイグレーション機能の強みを活かせる
 
 
-## 取り組む上での課題: 組織面
+### 取り組む上での課題: 組織面
 
 - 周囲の理解
+  - コンテナやオーケストレーションツールに対する周囲の理解を深めなければならない
   - 技術的優位性を説明できないといけない
   - 総論は賛成、各論は？
   - リスクを背負えるか: 納期遵守のPrj
-- 技術学習、解説資料作成、説明行脚
-- 現場レベルでは味方は多かった
+  - 所属部門・関係部門の合意を取り付ける必要あり
+- 近道はなし: 技術学習、解説資料作成、説明行脚
+- 現場レベルでは味方は多かった: 技術学習の協力や相談が効率化。求めるところが同じがゆえの連帯感。
+  - プロジェクトメンバー
+  - インフラエンジニア
+  - 部門横断のエンジニア
 - リスクに対しては、バックアッププランの準備、技術習得状況の説明、Googleエンジニアのバックアップ
 
 
-## 取り組む上での課題: 開発面
+### 取り組む上での課題: 開発面
 
 - 技術習得: 独学とハンズオン
 - 事前調査
+  - レガシーシステムのルール把握: どの程度引きずられるか、実施してから発覚した問題あり
+  - 効率的なシステム間連携に知識が必要
+    - Pub/Sub 連携のイベント発火条件も当初は無駄が多かったプログラムか、サービス活用かの見極め
+      - 当初案: プログラム制御でイベント発火
+      - 対応案: ファイル配置 → Cloud Functions で配置イベント検知 → Pub/Sub 投げ込み、のように分離
 - 運用: ログ出力やアラート関連は、メトリクスの書き方が困難だった
 - 設計・設定: マニフェストファイルの書き方、永続データの取扱いに関する適切なサービス選定がむずい
 - 基本設計: サービス分割はアトミックにすると障害復旧が難しいので、意味のある塊に
 - 商用利用に向けての課題: PaaSの特徴や仕様についてGoogleエンジニアのサポートを受けながら選定、確認を進める
-- レガシーシステムとの連携: 基本は新システム側が全面降伏で対応
+- レガシーシステムとの連携
+  - レガシーシステム側を変えることは難しく、ルールに従う必要あり (IP制限、連携方法の指定など)
+  - 基本は新システム側が全面降伏で対応: もともと予定していなかったインフラ構築やネットワーク設定が追加
 
-## 効果
+### 効果
 
 - スケーラビリティの確保はできた。ただし、今後悪化しないように管理していく必要がある
 - 保守運用コストは改善された
-  - ランニングコスト 3/5
+  - モノリシックな構造を改善し、影響範囲を縮小できた。機能搭載費用 1/2に
+  - サーバリソースの有効活用によりランニングコスト 3/5に
   - 導入8ヶ月でサービスダウンタイムなし。安定稼働中。
 - 機能改善スピードは向上できた
   - 対応速度が約2倍に
@@ -277,7 +460,7 @@ categories: kubernetes google gcp
 - クラウドベンダエンジニアの協力は偉大
 
 
-# コンテナによる開発と運用の進化
+## コンテナによる開発と運用の進化
 
 - Google Cloud Japan　篠原 一徳氏、村上 大河氏
 
@@ -346,14 +529,20 @@ categories: kubernetes google gcp
     - 可観測性
       - Istioの監視
         - Mixer: テレメトリの収集
-        - Prometheus
-        - Grafana
+        - Prometheus: Mixer から提供される Istio メトリクスの保存と検索
+        - Grafana: ダッシュボードでメトリクスの可視化
+        - Jaeger: トレース情報の取得
+        - Kiali (addon): サービスグラフの管理
   - Istio on GCP
 - データレイク
   - マイクロサービスにより、データのサイロ化が進む
+  - そのとき、どのようにデータを伝送すればよいか
+  - また、ビジネス要件である分析も行いたい
 - CSM (Managed Istio) の Alphaユーザを募集中: https://docs.google.com/forms/d/1Qhj4qViWgaSAf9KUfowWRdVS6OHwg9cgEdYX2xbpLeM/viewform?edit_requested=true
 
-# 事例セッション： FreakOut の広告プロダクトでの GKE 活用事例と GKE 新機能の導入について
+
+
+## FreakOut の広告プロダクトでの GKE 活用事例と GKE 新機能の導入について
 
 - 株式会社フリークアウト　西口 次郎 氏
 
@@ -363,28 +552,30 @@ categories: kubernetes google gcp
 - LayApp: アプリエンゲージメントプラットフォーム
 
 
-## プロダクション環境でのGKE運用
+### プロダクション環境でのGKE運用
 
 - [Google Cloud Platform Japan 公式ブログ： 株式会社フリークアウトの導入事例： フルマネージドな Kubernetes Engine を駆使して、大規模アドプラットフォームをプレミアム メディア向けに提供](https://cloudplatform-jp.googleblog.com/2018/09/freakout-kubernetes-engine.html)
 - GKE
   - サービスごとにクラスタを分割
   - 広告配信、UI、バッチ
-  - CronJobを利用
+  - CronJob (>= k8s 1.8) を利用
   - カナリーリリース環境を用意
   - Stackdriverを活用
 - Stackdriver
   - Monitoring
     - Prometheusと併用
+    - Grafana 5.3 で Stackdriver Datasource を利用中
   - Logging
     - コンテナのエラーログなどを集約
     - アラート: Pub/Sub → Cloud Functions → Slack
   - Profiler
-    - 常に最新のコーdンのプロファイルを可視化、比較
+    - 常に最新のコードのプロファイルを可視化、比較
 - BigQuery
   - すべてのアクセスログ、アプリケーションログを集約
     - 数十億レコード/日
   - fluentd (Sidecar Container)からStreaming insert
-  - 可視化はre:dash
+    - リアルタイム集計
+  - 可視化はre:dashを利用
   - MySQLのマスタデータもインポートしている
 - Vulnerability scanning
   - GCRの機能
@@ -395,6 +586,9 @@ categories: kubernetes google gcp
   - k8s のYAMLファイルのカスタマイズ
   - kubectrlのサブコマンドとしてマージされた
   - Production/Staging/Cannaryなど環境ごとの設定を上書き
+    - Replicas
+    - 環境変数
+    - ConfigMap
 - Other tools
   - stern
     - 複数のコンテナのログをすばやく確認できる
@@ -403,7 +597,7 @@ categories: kubernetes google gcp
     - 複数クラスタ/開発・本番環境の切り替えに
     - ネームスペースの切り替えも可能
 
-## GKEでのCI/CD
+### GKEでのCI/CD
 
 - Github
 - CircleCI
@@ -413,7 +607,7 @@ categories: kubernetes google gcp
 - Cloud Functions: Slack通知
 - Slack: エンジニア通知
 
-### CIのフロー
+#### CIのフロー
 
 1. GithubへのPush
 2. テスト・ビルド
@@ -421,29 +615,40 @@ categories: kubernetes google gcp
     - CloudBuildでのビルド
 3. カナリアリリース
 
-## CDのフロー
+#### CDのフロー
 
 1. GithubでPRをマージ
 2. ビルド&デプロイ
     - docker build
-    - docker push
+    - docker push (to Container Registry)
     - kubectrl set image
 3. notification
     - Pub/SubへのPublish
-    - Cloud FunctionsでSlackツウイ
+    - Cloud FunctionsでSlack通知
 
 
-## GKE 新機能の利用
+### GKE 新機能の利用
 
 - VPC-native cluster (alias IP)
+  - Cloud Memorystore for Redis の利用が可能
+  - Cloud SQL Private IP に接続可能
 - Cloud NAT
   - マネージドNATサービス
   - アウトバウンドアクセスのゲートウェイ
   - 外部アクセスするIPアドレスを限定する用途で使用
     - IPアドレスの事前登録が必須な外部API
-- Network Endpoint Groups
+- Network Endpoint Groups (NEGs)
   - コンテナネイティブの負荷分散
   - Instance Groupはiptablesを介してPodへルーティングしていたが、Podへ直接ルーティング可能
   - ネットワークパフォーマンス改善
+  - 要 VPC-native cluster
+  - Service アノテーション `cloud.google.com/neg` に `{ "ingress": true }` を指定する
 - BackendConfig Custom resource
+  - GKE Ingressコントローラのカスタムリソース定義
+    - Balancer Settings
+    - Cloud Armor
+    - Cloud IAP
+    - Cloud CDN
+  - Service と BackendConfig を紐づけて使用する
+    - Service アノテーション `beta.cloud.google.com/backend-configs`
 
