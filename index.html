@@ -9,7 +9,8 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="zsh でインクリメンタルな補完を行うため、Incremental completion on zsh を導入した。 こんな感じで便利。 ">
+  <meta name="description" content="Slack commands を Google Cloud Functions で実装する。 Slack commands は slack 上で /command arguments 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+詳細は公式 API &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +81,70 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/04/06/slack-commands-by-cloud-functions/">Slack Commands by Cloud Functions</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-06T09:19:00+09:00" pubdate data-updated="true">2019-04-06</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Slack commands を Google Cloud Functions で実装する。</p>
+
+<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+詳細は公式 API ページを参照: <a href="https://api.slack.com/slash-commands">Slash Commands | Slack</a></p>
+
+<p><a href="http://momota.github.io/blog/2015/01/11/lita/">過去につくった Slack Bot</a> が動かなくなったので、GCP を利用して作り直そうというのが背景。</p>
+
+<p>クラウドへのデプロイについては serverless framework を利用した。</p>
+
+<ul>
+<li>参考
+
+<ul>
+<li><a href="http://momota.github.io/blog/2015/01/11/lita/">lita で Slack Bot (on heroku) をつくる &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>今回は、slack で <code>/ping</code> というコマンドを実行したら、<code>pong</code> と返すような slack command を作る。
+できあがりは以下。</p>
+
+<p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif" alt="slack command screenshot" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2019/04/06/slack-commands-by-cloud-functions/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -641,52 +706,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/10/11/dockerize-flask-app/">Flask アプリ (チャットボット) のコンテナ化</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2018-10-11T10:54:00+09:00" pubdate data-updated="true">2018-10-11</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>以下で作ったようなFlaskアプリ (チャットボット) をコンテナ化 (Docker) する。</p>
-
-<ul>
-<li><a href="http://momota.github.io/blog/2018/06/19/unittest/">Python unittest で Flask (チャットボット) の単体テスト &ndash; momota.txt</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/10/11/dockerize-flask-app/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -702,6 +721,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/04/06/slack-commands-by-cloud-functions/">slack commands by cloud functions</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/03/29/incremental-completion-for-zsh/">zshプラグイン: Incremental completion for zsh</a>
       </li>
     
@@ -715,10 +738,6 @@
     
       <li class="post">
         <a href="/blog/2019/01/31/gdg-tokyo/">[参加レポート]GDG-Tokyo New Year Party 2019</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/01/10/cloud-native-meetup-tokyo/">[参加レポート]Cloud Native Meetup Tokyo #6</a>
       </li>
     
   </ul>

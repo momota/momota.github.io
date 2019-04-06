@@ -4,7 +4,7 @@
   <title><![CDATA[Category: python | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-01T17:02:14+09:00</updated>
+  <updated>2019-04-06T10:40:16+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,311 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[slack commands by cloud functions]]></title>
+    <link href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/"/>
+    <updated>2019-04-06T09:19:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions</id>
+    <content type="html"><![CDATA[<p>Slack commands を Google Cloud Functions で実装する。</p>
+
+<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+詳細は公式 API ページを参照: <a href="https://api.slack.com/slash-commands">Slash Commands | Slack</a></p>
+
+<p><a href="http://momota.github.io/blog/2015/01/11/lita/">過去につくった Slack Bot</a> が動かなくなったので、GCP を利用して作り直そうというのが背景。</p>
+
+<p>クラウドへのデプロイについては serverless framework を利用した。</p>
+
+<ul>
+<li>参考
+
+<ul>
+<li><a href="http://momota.github.io/blog/2015/01/11/lita/">lita で Slack Bot (on heroku) をつくる &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a></li>
+</ul>
+</li>
+</ul>
+
+
+<p>今回は、slack で <code>/ping</code> というコマンドを実行したら、<code>pong</code> と返すような slack command を作る。
+できあがりは以下。</p>
+
+<p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif" alt="slack command screenshot" /></p>
+
+<!-- more -->
+
+
+<h3>事前設定</h3>
+
+<p>serverless framework のインストール方法は <a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a> を参照。</p>
+
+<p>今回は、AWS Lambda (Javascript) ではなく GCP (Python) を使う。</p>
+
+<p>事前に GCP のクレデンシャル設定が必要となる。</p>
+
+<ul>
+<li>GCP クレデンシャル設定は公式を参照してほしい: <a href="https://serverless.com/framework/docs/providers/google/guide/credentials/">Serverless Framework &ndash; Google Cloud Functions Guide &ndash; Credentials</a></li>
+<li>概要は以下。
+
+<ol>
+<li>請求先アカウントを作成</li>
+<li>新規の Google Cloudプロジェクトを作成 (プロジェクトIDを控える)</li>
+<li>必要な API を有効化。以下。
+
+<ul>
+<li>Google Cloud Functions</li>
+<li>Google Cloud Deployment Manager</li>
+<li>Google Cloud Storage</li>
+<li>Stackdriver Logging</li>
+</ul>
+</li>
+<li>クレデンシャルを入手する
+
+<ul>
+<li>サービスアカウントを作成</li>
+<li>ロールの付与
+
+<ul>
+<li>Deployment Manager Editor</li>
+<li>Storage Admin</li>
+<li>Logging Admin</li>
+<li>Cloud Functions Developer</li>
+</ul>
+</li>
+<li>クレデンシャルキーファイルの作成 (keyfile.json)</li>
+<li>キーファイルのデプロイ: <code>~/.gcloud/keyfile.json</code> など</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+
+
+<h3>serverless サービスの作成</h3>
+
+<p>ここでは <code>ping</code> という名前でサービス (プロジェクトのようなもの) を作成する。</p>
+
+<p>```sh
+$ serverless create &mdash;template google-python &mdash;path ping
+Serverless: Generating boilerplate&hellip;
+Serverless: Generating boilerplate in &ldquo;/path-you-want/ping&rdquo;</p>
+
+<hr />
+
+<p>|   _   .&mdash;&mdash;&ndash;.&mdash;&mdash;.&mdash;.&mdash;.&mdash;&mdash;&ndash;.&mdash;&mdash;|  .&mdash;&mdash;&ndash;.&mdash;&mdash;&ndash;.&mdash;&mdash;&ndash;.
+|   |<em><strong>|  &ndash;</strong>|   </em>|  |  |  &ndash;<strong>|   _|  |  &ndash;</strong>|<strong> &mdash;|</strong> &mdash;|
+|<strong><strong>   |</strong></strong><em>|<strong>|  _</strong>/|</em><em><em><strong>|</strong>| |<strong>|</strong></em></em><em>|</em><strong><strong>|</strong></strong>_|
+|   |   |             The Serverless Application Framework
+|       |                           serverless.com, v1.40.0
+ &mdash;&mdash;&mdash;&ndash;'</p>
+
+<p>Serverless: Successfully generated boilerplate for template: &ldquo;google-python&rdquo;
+```</p>
+
+<p>作成したサービス名と同名のディレクトリが作成されるので、移動する。</p>
+
+<p><code>sh
+$ cd ping
+</code></p>
+
+<p>以下のファイルが自動生成されている。</p>
+
+<p><code>sh
+$ ls -la
+合計 24
+drwxr-xr-x 2 momota momota 4096  4月  2 22:45 .
+drwxr-xr-x 5 momota momota 4096  4月  2 22:45 ..
+-rw-r--r-- 1 momota momota  597  4月  2 22:45 .gitignore
+-rw-r--r-- 1 momota momota  362  4月  2 22:45 main.py
+-rw-r--r-- 1 momota momota  303  4月  2 22:45 package.json
+-rw-r--r-- 1 momota momota 1431  4月  2 22:45 serverless.yml
+</code></p>
+
+<h3>プロバイダプラグインのインストール</h3>
+
+<p>プロジェクトディレクトリで <code>npm install</code> する。</p>
+
+<p><code>sh
+$ npm install
+</code></p>
+
+<h3>プロバイダプロパティの更新</h3>
+
+<p><code>serverless.yml</code> を編集する。</p>
+
+<p><code>project</code> フィールドにGCP プロジェクト ID の指定するのと、<code>credentials</code> フィールドにcredentials ファイルの相対パスを指定する。
+<code>functions</code> 以下の memorySize, timeout, labels はお好みで設定する。</p>
+
+<p><code>handler</code> フィールドで指定している ping が後述する Python コードの関数名になっており、Cloud Functions 起動時に当該関数が呼び出される。</p>
+
+<p>```yaml
+service: ping</p>
+
+<p>provider:
+  name: google
+  stage: dev
+  runtime: python37
+  region: us-central1
+  project: YOUR-GCP-PROJECT-ID
+  credentials: ~/.gcloud/YOUR-KEYFILE.json</p>
+
+<p>plugins:
+  &ndash; serverless-google-cloudfunctions</p>
+
+<p>package:
+  exclude:</p>
+
+<pre><code>- node_modules/**
+- .gitignore
+- .git/**
+</code></pre>
+
+<p>functions:
+  ping-command:</p>
+
+<pre><code>handler: ping
+events:
+  - http: path
+memorySize: 256
+timeout: 60s
+labels: {
+    application: slack-slash-command,
+    environment: production,
+    owner: momota
+}
+</code></pre>
+
+<p>```</p>
+
+<h3>Functions コードの実装</h3>
+
+<p>Slack から ping を受けたら pong を返す Python コードを書く。</p>
+
+<p>Slack command が実行されとき Slack から送信されるリクエストは以下のようなフォーマットになっている。</p>
+
+<p><code>
+token=gIkuvaNzQIHg97ATvDxqgjtO
+&amp;team_id=T0001
+&amp;team_domain=example
+&amp;enterprise_id=E0001
+&amp;enterprise_name=Globular%20Construct%20Inc
+&amp;channel_id=C2147483705
+&amp;channel_name=test
+&amp;user_id=U2147483697
+&amp;user_name=Steve
+&amp;command=/weather
+&amp;text=94070
+&amp;response_url=https://hooks.slack.com/commands/1234/5678
+&amp;trigger_id=13345224609.738474920.8088930838d88f008e0
+</code></p>
+
+<p>これに対して、以下のような Json フォーマットでレスポンスを返す必要がある。</p>
+
+<p>```json
+{</p>
+
+<pre><code>"response_type": "in_channel",
+"text": "It's 80 degrees right now.",
+"attachments": [
+    {
+        "text":"Partly cloudy today and tomorrow"
+    }
+]
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>main.py</code> を編集する。以下のようなコードになる。</p>
+
+<p>```python
+import json
+from flask import jsonify</p>
+
+<h1>ping を受けたら pong を返す関数</h1>
+
+<p>def command(query):</p>
+
+<pre><code>return 'pong :table_tennis_paddle_and_ball:'
+</code></pre>
+
+<p>def format_slack_message(message):</p>
+
+<pre><code>return {
+    'response_type': 'in_channel',
+    'text': message,
+    'attachments': []
+}
+</code></pre>
+
+<h1>Cloud Functions で起動される関数: メイン関数</h1>
+
+<p>def ping(request):</p>
+
+<pre><code># validate request
+if request.method != 'POST':
+    return 'Only POST requests are accepted', 405
+
+message = command(request.form['text'])
+response = format_slack_message(message)
+
+return jsonify(response)
+</code></pre>
+
+<p>```</p>
+
+<p>Flask ライブラリに依存しているので、<code>requirements.txt</code> を作る。</p>
+
+<p><code>sh
+$ echo "Flask==1.0.2" &gt;&gt; requirements.txt
+</code></p>
+
+<h3>GCP へのデプロイ</h3>
+
+<p><code>serverless deploy</code> により、GCS にソースコードがアップロードされ、Cloud Functions が Python 3.7 で起動する。
+これはマネジメントコンソールからも確認できる。</p>
+
+<p>```sh
+serverless deploy -v                                <br/>
+Serverless: Packaging service&hellip;
+Serverless: Excluding development dependencies&hellip;
+Serverless: Compiling function &ldquo;ping-command&rdquo;&hellip;
+Serverless: Uploading artifacts&hellip;
+Serverless: Artifacts successfully uploaded&hellip;
+Serverless: Updating deployment&hellip;
+Serverless: Checking deployment update progress&hellip;
+&hellip;&hellip;&hellip;&hellip;&hellip;&hellip;&hellip;&hellip;&hellip;&hellip;..
+Serverless: Done&hellip;
+Service Information
+service: ping
+project: YOUR-GCP-PROJECT-ID
+stage: dev
+region: us-central1</p>
+
+<p>Deployed functions
+ping-command
+  <a href="https://us-central1-YOUR-GCP-PROJECT-ID.cloudfunctions.net/ping">https://us-central1-YOUR-GCP-PROJECT-ID.cloudfunctions.net/ping</a>
+```</p>
+
+<h3>slack の設定</h3>
+
+<p><a href="https://api.slack.com/apps">Slack API： Applications | Slack</a> から <code>Create New App</code> ボタンをクリックしコマンドを作成する。</p>
+
+<p>設定のやり方はこのあたりを参考にしたら良いと思う。: <a href="https://qiita.com/t-mimura/items/d6541ec596bdebea5a7b">Slackのコマンドを作ろう！！ &ndash; Qiita</a></p>
+
+<p>command 作成時の <code>Request URL</code> に作成した Cloud Functions のエンドポイント <a href="https://us-central1-YOUR-GCP-PROJECT-ID.cloudfunctions.net/ping">https://us-central1-YOUR-GCP-PROJECT-ID.cloudfunctions.net/ping</a> を指定する。</p>
+
+<p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-config.png" alt="slack command config" /></p>
+
+<p>Slack の設定が終わると、Slack から使えるようになる。</p>
+
+<p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif" alt="slack command screenshot" /></p>
+
+<p>Functions は初回起動時に少し時間がかかる。
+Slack command は 3000 ms (3秒) 以内に応答しないとタイムアウトになってしまう。
+タイムアウト時は Slack command を再実行してみたら良い。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Flask アプリ (チャットボット) のコンテナ化]]></title>
