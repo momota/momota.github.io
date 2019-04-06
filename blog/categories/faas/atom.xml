@@ -4,7 +4,7 @@
   <title><![CDATA[Category: faas | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/faas/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-06T10:40:16+09:00</updated>
+  <updated>2019-04-06T10:44:49+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[slack commands by cloud functions]]></title>
+    <title type="html"><![CDATA[Google cloud functions で slack (slash) commands をつくる]]></title>
     <link href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/"/>
     <updated>2019-04-06T09:19:00+09:00</updated>
     <id>http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions</id>
