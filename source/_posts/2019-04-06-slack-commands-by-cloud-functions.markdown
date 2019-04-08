@@ -7,7 +7,7 @@ categories: slack google gcp functions serverless faas serverless-framework chat
 ---
 Slack commands を Google Cloud Functions で実装する。
 
-Slack commands は slack 上で `/command arguments` 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+Slack commands は slack 上で `/command arguments` 形式で入力すると何かしらの応答を返す仕組み。`/` から始まるのでSlack Slash command とも呼ばれるようだ。
 詳細は公式 API ページを参照: [Slash Commands | Slack](https://api.slack.com/slash-commands)
 
 [過去につくった Slack Bot](http://momota.github.io/blog/2015/01/11/lita/) が動かなくなったので、GCP を利用して作り直そうというのが背景。
@@ -20,7 +20,7 @@ Slack commands は slack 上で `/command arguments` 形式で入力すると何
 
 
 今回は、slack で `/ping` というコマンドを実行したら、`pong` と返すような slack command を作る。
-できあがりは以下。
+できあがりは以下のような感じ。
 
 ![slack command screenshot](/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif)
 
@@ -32,11 +32,11 @@ Slack commands は slack 上で `/command arguments` 形式で入力すると何
 
 serverless framework のインストール方法は [serverless framework による AWS Lambda ローカル開発 - momota.txt](http://momota.github.io/blog/2018/11/05/serverless-framework/) を参照。
 
-今回は、AWS Lambda (Javascript) ではなく GCP (Python) を使う。
+今回は、AWS Lambda (Javascript) ではなく GCP Cloud Functions (Python) を使う。
 
 事前に GCP のクレデンシャル設定が必要となる。
 
-- GCP クレデンシャル設定は公式を参照してほしい: [Serverless Framework - Google Cloud Functions Guide - Credentials](https://serverless.com/framework/docs/providers/google/guide/credentials/)
+- GCP クレデンシャル設定の詳細は公式を参照してほしい: [Serverless Framework - Google Cloud Functions Guide - Credentials](https://serverless.com/framework/docs/providers/google/guide/credentials/)
 - 概要は以下。
   1. 請求先アカウントを作成
   2. 新規の Google Cloudプロジェクトを作成 (プロジェクトIDを控える)
@@ -190,7 +190,7 @@ import json
 from flask import jsonify
 
 # ping を受けたら pong を返す関数
-def command(query):
+def ping_command(query):
     return 'pong :table_tennis_paddle_and_ball:'
 
 def format_slack_message(message):
@@ -206,7 +206,7 @@ def ping(request):
     if request.method != 'POST':
         return 'Only POST requests are accepted', 405
 
-    message = command(request.form['text'])
+    message = ping_command(request.form['text'])
     response = format_slack_message(message)
 
     return jsonify(response)
@@ -225,7 +225,7 @@ $ echo "Flask==1.0.2" >> requirements.txt
 
 
 ```sh
-serverless deploy -v                                  
+$ serverless deploy -v                                  
 Serverless: Packaging service...
 Serverless: Excluding development dependencies...
 Serverless: Compiling function "ping-command"...
