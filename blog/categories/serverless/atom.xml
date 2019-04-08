@@ -4,7 +4,7 @@
   <title><![CDATA[Category: serverless | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/serverless/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-06T10:44:49+09:00</updated>
+  <updated>2019-04-08T12:29:22+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -20,7 +20,7 @@
     <id>http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions</id>
     <content type="html"><![CDATA[<p>Slack commands を Google Cloud Functions で実装する。</p>
 
-<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。<code>/</code> から始まるのでSlack Slash command とも呼ばれるようだ。
 詳細は公式 API ページを参照: <a href="https://api.slack.com/slash-commands">Slash Commands | Slack</a></p>
 
 <p><a href="http://momota.github.io/blog/2015/01/11/lita/">過去につくった Slack Bot</a> が動かなくなったので、GCP を利用して作り直そうというのが背景。</p>
@@ -39,7 +39,7 @@
 
 
 <p>今回は、slack で <code>/ping</code> というコマンドを実行したら、<code>pong</code> と返すような slack command を作る。
-できあがりは以下。</p>
+できあがりは以下のような感じ。</p>
 
 <p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif" alt="slack command screenshot" /></p>
 
@@ -50,12 +50,12 @@
 
 <p>serverless framework のインストール方法は <a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a> を参照。</p>
 
-<p>今回は、AWS Lambda (Javascript) ではなく GCP (Python) を使う。</p>
+<p>今回は、AWS Lambda (Javascript) ではなく GCP Cloud Functions (Python) を使う。</p>
 
 <p>事前に GCP のクレデンシャル設定が必要となる。</p>
 
 <ul>
-<li>GCP クレデンシャル設定は公式を参照してほしい: <a href="https://serverless.com/framework/docs/providers/google/guide/credentials/">Serverless Framework &ndash; Google Cloud Functions Guide &ndash; Credentials</a></li>
+<li>GCP クレデンシャル設定の詳細は公式を参照してほしい: <a href="https://serverless.com/framework/docs/providers/google/guide/credentials/">Serverless Framework &ndash; Google Cloud Functions Guide &ndash; Credentials</a></li>
 <li>概要は以下。
 
 <ol>
@@ -235,7 +235,7 @@ from flask import jsonify</p>
 
 <h1>ping を受けたら pong を返す関数</h1>
 
-<p>def command(query):</p>
+<p>def ping_command(query):</p>
 
 <pre><code>return 'pong :table_tennis_paddle_and_ball:'
 </code></pre>
@@ -257,7 +257,7 @@ from flask import jsonify</p>
 if request.method != 'POST':
     return 'Only POST requests are accepted', 405
 
-message = command(request.form['text'])
+message = ping_command(request.form['text'])
 response = format_slack_message(message)
 
 return jsonify(response)
@@ -277,7 +277,7 @@ $ echo "Flask==1.0.2" &gt;&gt; requirements.txt
 これはマネジメントコンソールからも確認できる。</p>
 
 <p>```sh
-serverless deploy -v                                <br/>
+$ serverless deploy -v                                <br/>
 Serverless: Packaging service&hellip;
 Serverless: Excluding development dependencies&hellip;
 Serverless: Compiling function &ldquo;ping-command&rdquo;&hellip;

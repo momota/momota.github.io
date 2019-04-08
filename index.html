@@ -9,8 +9,7 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="Slack commands を Google Cloud Functions で実装する。 Slack commands は slack 上で /command arguments 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
-詳細は公式 API &hellip;">
+  <meta name="description" content="Slack commands を Google Cloud Functions で実装する。 Slack commands は slack 上で /command arguments 形式で入力すると何かしらの応答を返す仕組み。/ から始まるのでSlack Slash command &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -112,7 +111,7 @@
 
   <div class="entry-content"><p>Slack commands を Google Cloud Functions で実装する。</p>
 
-<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。Slash command とも呼ばれるようだ。
+<p>Slack commands は slack 上で <code>/command arguments</code> 形式で入力すると何かしらの応答を返す仕組み。<code>/</code> から始まるのでSlack Slash command とも呼ばれるようだ。
 詳細は公式 API ページを参照: <a href="https://api.slack.com/slash-commands">Slash Commands | Slack</a></p>
 
 <p><a href="http://momota.github.io/blog/2015/01/11/lita/">過去につくった Slack Bot</a> が動かなくなったので、GCP を利用して作り直そうというのが背景。</p>
@@ -131,7 +130,7 @@
 
 
 <p>今回は、slack で <code>/ping</code> というコマンドを実行したら、<code>pong</code> と返すような slack command を作る。
-できあがりは以下。</p>
+できあがりは以下のような感じ。</p>
 
 <p><img src="/images/20190406_slack-commands-by-cloud-functions/slack-ping-command.gif" alt="slack command screenshot" /></p>
 
