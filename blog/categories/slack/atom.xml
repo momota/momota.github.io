@@ -4,7 +4,7 @@
   <title><![CDATA[Category: slack | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/slack/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-13T22:39:43+09:00</updated>
+  <updated>2019-04-14T00:23:21+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -257,6 +257,10 @@ Slack command は 3000 ms (3秒) 以内に応答しないとタイムアウト�
 <p><a href="https://thecatapi.com/">TheCatAPI</a> のような外部 API に依存している場合、3 秒以内のレスポンスを保証できない可能性が高くなる。
 そこで、バックエンドの Functions がリクエストを受けたら即時にレスポンスを返し、スレッドにより非同期で応答する。
 Slack としても、そのような仕組みを支援するためにレスポンス用 URL を付与して、バックエンド側にリクエストを投げてくれる。</p>
+
+<p>以下のようなイメージ。</p>
+
+<p><img src="/images/20190413_neko-slack-command/seq.png" alt="change async sequence" /></p>
 
 <p>スレッド処理のため、メイン処理を関数化し、レスポンス用 URL へ返答するよう書き換える。</p>
 

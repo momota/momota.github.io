@@ -413,6 +413,10 @@ Slack command は 3000 ms (3秒) 以内に応答しないとタイムアウト�
 そこで、バックエンドの Functions がリクエストを受けたら即時にレスポンスを返し、スレッドにより非同期で応答する。
 Slack としても、そのような仕組みを支援するためにレスポンス用 URL を付与して、バックエンド側にリクエストを投げてくれる。</p>
 
+<p>以下のようなイメージ。</p>
+
+<p><img src="/images/20190413_neko-slack-command/seq.png" alt="change async sequence" /></p>
+
 <p>スレッド処理のため、メイン処理を関数化し、レスポンス用 URL へ返答するよう書き換える。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
