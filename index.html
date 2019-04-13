@@ -9,7 +9,7 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="Slack commands を Google Cloud Functions で実装する。 Slack commands は slack 上で /command arguments 形式で入力すると何かしらの応答を返す仕組み。/ から始まるのでSlack Slash command &hellip;">
+  <meta name="description" content="心の平穏のために、猫の画像をランダムに表示してくれる Slack command /neko を作った。 Slack で /neko と打つと、Cloud Functions にリクエストが飛び、Functions が TheCatAPI からランダムに猫画像 URL を取得するもの。 参考 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,86 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/04/13/slack-command/">ねこの画像をランダムに表示する Slack Command</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-13T19:06:00+09:00" pubdate data-updated="true">2019-04-13</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>心の平穏のために、猫の画像をランダムに表示してくれる Slack command <code>/neko</code> を作った。</p>
+
+<p>Slack で <code>/neko</code> と打つと、Cloud Functions にリクエストが飛び、Functions が <a href="https://thecatapi.com/">TheCatAPI</a> からランダムに猫画像 URL を取得するもの。</p>
+
+<p><img src="/images/20190413_neko-slack-command/neko-command.png" alt="slack neko command" /></p>
+
+<ul>
+<li>参考
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/">Google cloud functions で slack (slash) commands をつくる &ndash; momota.txt</a></li>
+</ul>
+</li>
+</ul>
+
+
+<table>
+<thead>
+<tr>
+<th> 使ったもの                  </th>
+<th> 用途                </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Google Cloud Functions      </td>
+<td> バックエンド        </td>
+</tr>
+<tr>
+<td> Python 3.7                  </td>
+<td> Functionsの実装言語 </td>
+</tr>
+<tr>
+<td> Serverless framework 1.40.0 </td>
+<td> GCPへのデプロイ     </td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2019/04/13/slack-command/">続きを読む &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -652,59 +732,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/10/16/selenium-with-headless-mode-browser/">Windows + Chrome Headless Mode + Ruby + Selenium</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2018-10-16T11:31:00+09:00" pubdate data-updated="true">2018-10-16</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Selenium と Ruby によりテストの自動化であったり、入力の自動化を進めている。
-コマンドラインから実行すればよいことがほとんどで、ブラウザのGUIが起動しなくてもよい。
-したがって、GUI が起動しない Google Chrome の Headless モードを使った Selenium スクリプトへ順次移行していこうと思う。</p>
-
-<p>動作の軽量化もちょっとは期待できるかも。 (比較計測はしていない)</p>
-
-<p>以下は、関連記事。</p>
-
-<ul>
-<li><a href="http://momota.github.io/blog/2016/02/26/selenium/">ブラウザ操作の自動化： selenium と ruby &ndash; momota.txt</a></li>
-<li><a href="http://momota.github.io/blog/2016/05/28/selenium-know-how/">seleniumノウハウ &ndash; momota.txt</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/10/16/selenium-with-headless-mode-browser/">続きを読む &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -720,6 +747,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/04/13/slack-command/">ねこの画像をランダムに表示する slack command</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/04/06/slack-commands-by-cloud-functions/">Google cloud functions で slack (slash) commands をつくる</a>
       </li>
     
@@ -733,10 +764,6 @@
     
       <li class="post">
         <a href="/blog/2019/02/15/devsumi/">[参加レポート]Developers Summit 2019</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/01/31/gdg-tokyo/">[参加レポート]GDG-Tokyo New Year Party 2019</a>
       </li>
     
   </ul>

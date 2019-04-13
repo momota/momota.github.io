@@ -4,7 +4,7 @@
   <title><![CDATA[Category: slack | momota.txt]]></title>
   <link href="http://momota.github.io/blog/categories/slack/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-08T12:29:22+09:00</updated>
+  <updated>2019-04-13T22:39:43+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,394 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ねこの画像をランダムに表示する slack command]]></title>
+    <link href="http://momota.github.io/blog/2019/04/13/slack-command/"/>
+    <updated>2019-04-13T19:06:00+09:00</updated>
+    <id>http://momota.github.io/blog/2019/04/13/slack-command</id>
+    <content type="html"><![CDATA[<p>心の平穏のために、猫の画像をランダムに表示してくれる Slack command <code>/neko</code> を作った。</p>
+
+<p>Slack で <code>/neko</code> と打つと、Cloud Functions にリクエストが飛び、Functions が <a href="https://thecatapi.com/">TheCatAPI</a> からランダムに猫画像 URL を取得するもの。</p>
+
+<p><img src="/images/20190413_neko-slack-command/neko-command.png" alt="slack neko command" /></p>
+
+<ul>
+<li>参考
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/">Google cloud functions で slack (slash) commands をつくる &ndash; momota.txt</a></li>
+</ul>
+</li>
+</ul>
+
+
+<table>
+<thead>
+<tr>
+<th> 使ったもの                  </th>
+<th> 用途                </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Google Cloud Functions      </td>
+<td> バックエンド        </td>
+</tr>
+<tr>
+<td> Python 3.7                  </td>
+<td> Functionsの実装言語 </td>
+</tr>
+<tr>
+<td> Serverless framework 1.40.0 </td>
+<td> GCPへのデプロイ     </td>
+</tr>
+</tbody>
+</table>
+
+
+<!-- more -->
+
+
+<h2>Serverless framework の初期設定</h2>
+
+<p>```sh</p>
+
+<h1>create new service</h1>
+
+<p>$ serverless create &mdash;template google-python &mdash;path neko</p>
+
+<h1>go to the service directory</h1>
+
+<p>$ cd neko</p>
+
+<h1>install provider plugins</h1>
+
+<p>$ npm install
+```</p>
+
+<p><code>serverless.yml</code> を自分の GCP 環境に合わせて編集する。</p>
+
+<p>```yaml
+service: neko</p>
+
+<p>provider:
+  name: google
+  stage: dev
+  runtime: python37
+  region: YOUR-REGION
+  project: YOUR-GCP-PROJECT-ID
+  credentials: ~/.gcloud/YOUR-KEYFILE.json</p>
+
+<p>plugins:
+  &ndash; serverless-google-cloudfunctions</p>
+
+<p>package:
+  exclude:</p>
+
+<pre><code>- node_modules/**
+- .gitignore
+- .git/**
+</code></pre>
+
+<p>functions:
+  neko-command:</p>
+
+<pre><code>handler: neko
+events:
+  - http: path
+memorySize: 256
+timeout: 60s
+labels: {
+    application: slack-slash-command,
+    environment: development,
+    owner: momota
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>neko コマンドの実装</h2>
+
+<p>まず <a href="https://thecatapi.com/">TheCatAPI</a> の API エンドポイントをコードの中に埋め込みたくないので、 <code>config.json</code> という外部ファイルに書き出し、実行時にそこから読み込むことにする。</p>
+
+<p>以下のような感じ。</p>
+
+<p>```json
+{</p>
+
+<pre><code>"API_URL": "https://api.thecatapi.com/v1/images/search?format=json"
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Functions 用のコードは以下のような感じ。</p>
+
+<p>```python
+import json
+import requests
+from flask import jsonify</p>
+
+<h1>外部ファイル config.json の読み込み</h1>
+
+<p>with open(&lsquo;config.json&rsquo;, &lsquo;r&rsquo;) as f:</p>
+
+<pre><code>data = f.read()
+</code></pre>
+
+<p>config = json.loads(data)</p>
+
+<h1>TheCatAPI を叩いて、レスポンス (JSON) から 猫画像 URL を取得</h1>
+
+<p>def neko_url():</p>
+
+<pre><code>res = requests.get(config['API_URL'])
+json_res = json.loads(res.text)
+return json_res[0]['url']
+</code></pre>
+
+<h1>Slackへの応答フォーマットに整形</h1>
+
+<p>def format_slack_message(message):</p>
+
+<pre><code>return {
+    'response_type': 'in_channel',
+    'text': message
+}
+</code></pre>
+
+<h1>Handler: Functions がリクエストを受けたときに実行する関数</h1>
+
+<p>def neko(request):</p>
+
+<pre><code>message = neko_url()
+response = format_slack_message('ねこです ' + message)
+return jsonify(response)
+</code></pre>
+
+<p>```</p>
+
+<p>あとは GCP にデプロイして、Slack の Slash command の設定をすれば使える。</p>
+
+<p><code>sh
+$ serverless deploy -v
+</code></p>
+
+<h2>ちょっと頑張る： Slack トークン認証とエラーハンドリング</h2>
+
+<p>Slack の Verification Token による簡易的な認証処理を追加する。</p>
+
+<p>Slack command のApp設定から、Basic Information > App Credentials > Verification Token からトークンを取得して、<code>config.json</code> に書く。</p>
+
+<p>```json
+{</p>
+
+<pre><code>"API_URL": "https://api.thecatapi.com/v1/images/search?format=json",
+"SLACK_TOKEN": "YOUR-VERIFICATION-TOKEN"
+</code></pre>
+
+<p>}
+```</p>
+
+<p>以下のような処理を追加し、認証処理とエラーハンドリング処理を追加する。</p>
+
+<p>とりあえず意図しないリクエストがバックエンド (Functions) にきたら、例外を投げる。</p>
+
+<p>```python
+def verify_request(request):</p>
+
+<pre><code># POSTメソッドじゃない
+if request.method != 'POST':
+    raise Exception(405, 'Only POST requests are accepted')
+
+# データが POST されていない
+if not request.form:
+    raise Exception(422, 'POST form is empty')
+
+# POST データに ’token’ フィールドにない
+if 'token' not in request.form:
+    raise Exception(422, 'POST form is invalid')
+
+# トークンがマッチしない
+if request.form['token'] != config['SLACK_TOKEN']:
+    raise Exception(403, 'Permission denied')
+</code></pre>
+
+<p>```</p>
+
+<p>メイン処理側では、例外を補足したら、それに応じたエラーを返すように変更する。</p>
+
+<p>```python
+def neko(request):</p>
+
+<pre><code>try:
+    # validate request
+    verify_request(request)
+
+    message = neko_url()
+    response = format_slack_message('ねこです ' + message)
+    return jsonify(response)
+except Exception as e:
+    code, msg = e.args
+    print('Exception occured: &lt;{}&gt; {}'.format(code, msg))
+    return (msg, code)
+</code></pre>
+
+<p>```</p>
+
+<h2>もうちょっと頑張る: 非同期処理</h2>
+
+<p><a href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/">前回</a>も述べたが、
+Slack command は 3000 ms (3秒) 以内に応答しないとタイムアウトになってしまう。</p>
+
+<p><a href="https://thecatapi.com/">TheCatAPI</a> のような外部 API に依存している場合、3 秒以内のレスポンスを保証できない可能性が高くなる。
+そこで、バックエンドの Functions がリクエストを受けたら即時にレスポンスを返し、スレッドにより非同期で応答する。
+Slack としても、そのような仕組みを支援するためにレスポンス用 URL を付与して、バックエンド側にリクエストを投げてくれる。</p>
+
+<p>スレッド処理のため、メイン処理を関数化し、レスポンス用 URL へ返答するよう書き換える。</p>
+
+<p>```python
+from threading import Thread</p>
+
+<p>def neko_async(response_url):</p>
+
+<pre><code>message = neko_url()
+response = format_slack_message('ねこです ' + message)
+post_data = json.dumps(response)
+
+post_response = post_to_slack(response_url, post_data)
+return
+</code></pre>
+
+<p>def neko(request):</p>
+
+<pre><code>try:
+    # validate request
+    verify_request(request)
+
+    # レスポンス用 URL の取得
+    response_url = request.form['response_url']
+
+    # スレッドで猫画像 URL処理を取得
+    thread = Thread(target=neko_async, kwargs={'response_url': response_url})
+    thread.run()
+
+    return ''
+except Exception as e:
+    code, msg = e.args
+    print('Exception occured: &lt;{}&gt; {}'.format(code, msg))
+    return (msg, code)
+</code></pre>
+
+<p>```</p>
+
+<p>最終的には以下のような感じになる。</p>
+
+<p>```python
+import json
+import requests
+from threading import Thread</p>
+
+<h1>外部ファイル config.json の読み込み</h1>
+
+<p>with open(&lsquo;config.json&rsquo;, &lsquo;r&rsquo;) as f:</p>
+
+<pre><code>data = f.read()
+</code></pre>
+
+<p>config = json.loads(data)</p>
+
+<h1>エラーハンドリングと簡易認証処理</h1>
+
+<p>def verify_request(request):</p>
+
+<pre><code># POSTメソッドじゃない
+if request.method != 'POST':
+    raise Exception(405, 'Only POST requests are accepted')
+
+# データが POST されていない
+if not request.form:
+    raise Exception(422, 'POST form is empty')
+
+# POST データに ’token’ フィールドにない
+if 'token' not in request.form:
+    raise Exception(422, 'POST form is invalid')
+
+# トークンがマッチしない
+if request.form['token'] != config['SLACK_TOKEN']:
+    raise Exception(403, 'Permission denied')
+</code></pre>
+
+<h1>スレッド処理用関数</h1>
+
+<p>def neko_async(response_url):</p>
+
+<pre><code>message = neko_url()
+response = format_slack_message('ねこです ' + message)
+post_data = json.dumps(response)
+
+post_response = post_to_slack(response_url, post_data)
+return
+</code></pre>
+
+<h1>TheCatAPI を叩いて、レスポンス (JSON) から 猫画像 URL を取得</h1>
+
+<p>def neko_url():</p>
+
+<pre><code>res = requests.get(config['API_URL'])
+json_res = json.loads(res.text)
+return json_res[0]['url']
+</code></pre>
+
+<h1>Slackへの応答フォーマットに整形</h1>
+
+<p>def format_slack_message(message):</p>
+
+<pre><code>return {
+    'response_type': 'in_channel',
+    'text': message
+}
+</code></pre>
+
+<h1>Slack レスポンス用 URL への POST処理</h1>
+
+<p>def post_to_slack(url, post_data):</p>
+
+<pre><code>post_headers = {
+    'Content-type': 'application/json; charset=utf-8'
+}
+
+return requests.post(
+    url,
+    data=post_data,
+    headers=post_headers
+)
+</code></pre>
+
+<h1>Handler: Functions がリクエストを受けたときに実行する関数</h1>
+
+<p>def neko(request):</p>
+
+<pre><code>try:
+    # validate request
+    verify_request(request)
+
+    response_url = request.form['response_url']
+    thread = Thread(target=neko_async, kwargs={'response_url': response_url})
+    thread.run()
+
+    return ''
+except Exception as e:
+    code, msg = e.args
+    print('Exception occured: &lt;{}&gt; {}'.format(code, msg))
+    return (msg, code)
+</code></pre>
+
+<p>```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Google cloud functions で slack (slash) commands をつくる]]></title>

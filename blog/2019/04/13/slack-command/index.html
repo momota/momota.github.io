@@ -1,0 +1,827 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ねこの画像をランダムに表示する slack command - momota.txt</title>
+  <meta name="author" content="momota">
+
+  
+  <meta name="description" content="心の平穏のために、猫の画像をランダムに表示してくれる Slack command /neko を作った。 Slack で /neko と打つと、Cloud Functions にリクエストが飛び、Functions が TheCatAPI からランダムに猫画像 URL を取得するもの。 参考 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://momota.github.io/blog/2019/04/13/slack-command/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="momota.txt" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-2571447-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">momota.txt</a></h1>
+  
+    <h2>hello, hello, hello, how low?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:momota.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">ねこの画像をランダムに表示する Slack Command</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-13T19:06:00+09:00" pubdate data-updated="true">2019-04-13</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>心の平穏のために、猫の画像をランダムに表示してくれる Slack command <code>/neko</code> を作った。</p>
+
+<p>Slack で <code>/neko</code> と打つと、Cloud Functions にリクエストが飛び、Functions が <a href="https://thecatapi.com/">TheCatAPI</a> からランダムに猫画像 URL を取得するもの。</p>
+
+<p><img src="/images/20190413_neko-slack-command/neko-command.png" alt="slack neko command" /></p>
+
+<ul>
+<li>参考
+
+<ul>
+<li><a href="http://momota.github.io/blog/2018/11/05/serverless-framework/">serverless framework による AWS Lambda ローカル開発 &ndash; momota.txt</a></li>
+<li><a href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/">Google cloud functions で slack (slash) commands をつくる &ndash; momota.txt</a></li>
+</ul>
+</li>
+</ul>
+
+
+<table>
+<thead>
+<tr>
+<th> 使ったもの                  </th>
+<th> 用途                </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Google Cloud Functions      </td>
+<td> バックエンド        </td>
+</tr>
+<tr>
+<td> Python 3.7                  </td>
+<td> Functionsの実装言語 </td>
+</tr>
+<tr>
+<td> Serverless framework 1.40.0 </td>
+<td> GCPへのデプロイ     </td>
+</tr>
+</tbody>
+</table>
+
+
+<!-- more -->
+
+
+<h2>Serverless framework の初期設定</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># create new service</span>
+</span><span class='line'><span class="nv">$ </span>serverless create --template google-python --path neko
+</span><span class='line'>
+</span><span class='line'><span class="c"># go to the service directory</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>neko
+</span><span class='line'>
+</span><span class='line'><span class="c"># install provider plugins</span>
+</span><span class='line'><span class="nv">$ </span>npm install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>serverless.yml</code> を自分の GCP 環境に合わせて編集する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">service</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">neko</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">provider</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">google</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">stage</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">dev</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">runtime</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">python37</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">region</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">YOUR-REGION</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">project</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">YOUR-GCP-PROJECT-ID</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">credentials</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">~/.gcloud/YOUR-KEYFILE.json</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">plugins</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">serverless-google-cloudfunctions</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">package</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">exclude</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">node_modules/**</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">.gitignore</span>
+</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">.git/**</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">functions</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">neko-command</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">handler</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">neko</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">events</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">path</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">memorySize</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">256</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">timeout</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">60s</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">labels</span><span class="p-Indicator">:</span> <span class="p-Indicator">{</span>
+</span><span class='line'>        <span class="nv">application</span><span class="p-Indicator">:</span> <span class="nv">slack-slash-command</span><span class="p-Indicator">,</span>
+</span><span class='line'>        <span class="nv">environment</span><span class="p-Indicator">:</span> <span class="nv">development</span><span class="p-Indicator">,</span>
+</span><span class='line'>        <span class="nv">owner</span><span class="p-Indicator">:</span> <span class="nv">momota</span>
+</span><span class='line'><span class="p-Indicator">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>neko コマンドの実装</h2>
+
+<p>まず <a href="https://thecatapi.com/">TheCatAPI</a> の API エンドポイントをコードの中に埋め込みたくないので、 <code>config.json</code> という外部ファイルに書き出し、実行時にそこから読み込むことにする。</p>
+
+<p>以下のような感じ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;API_URL&quot;</span><span class="p">:</span> <span class="s2">&quot;https://api.thecatapi.com/v1/images/search?format=json&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Functions 用のコードは以下のような感じ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">jsonify</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 外部ファイル config.json の読み込み</span>
+</span><span class='line'><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;config.json&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span class='line'><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># TheCatAPI を叩いて、レスポンス (JSON) から 猫画像 URL を取得</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko_url</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;API_URL&#39;</span><span class="p">])</span>
+</span><span class='line'>    <span class="n">json_res</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">json_res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;url&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Slackへの応答フォーマットに整形</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">format_slack_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;response_type&#39;</span><span class="p">:</span> <span class="s">&#39;in_channel&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">message</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Handler: Functions がリクエストを受けたときに実行する関数</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">message</span> <span class="o">=</span> <span class="n">neko_url</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">format_slack_message</span><span class="p">(</span><span class="s">&#39;ねこです &#39;</span> <span class="o">+</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>あとは GCP にデプロイして、Slack の Slash command の設定をすれば使える。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>serverless deploy -v
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>ちょっと頑張る： Slack トークン認証とエラーハンドリング</h2>
+
+<p>Slack の Verification Token による簡易的な認証処理を追加する。</p>
+
+<p>Slack command のApp設定から、Basic Information > App Credentials > Verification Token からトークンを取得して、<code>config.json</code> に書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;API_URL&quot;</span><span class="p">:</span> <span class="s2">&quot;https://api.thecatapi.com/v1/images/search?format=json&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;SLACK_TOKEN&quot;</span><span class="p">:</span> <span class="s2">&quot;YOUR-VERIFICATION-TOKEN&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下のような処理を追加し、認証処理とエラーハンドリング処理を追加する。</p>
+
+<p>とりあえず意図しないリクエストがバックエンド (Functions) にきたら、例外を投げる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">verify_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># POSTメソッドじゃない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">405</span><span class="p">,</span> <span class="s">&#39;Only POST requests are accepted&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># データが POST されていない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">422</span><span class="p">,</span> <span class="s">&#39;POST form is empty&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># POST データに ’token’ フィールドにない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="s">&#39;token&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">422</span><span class="p">,</span> <span class="s">&#39;POST form is invalid&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># トークンがマッチしない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;token&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;SLACK_TOKEN&#39;</span><span class="p">]:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&#39;Permission denied&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>メイン処理側では、例外を補足したら、それに応じたエラーを返すように変更する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">neko</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>        <span class="c"># validate request</span>
+</span><span class='line'>        <span class="n">verify_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">message</span> <span class="o">=</span> <span class="n">neko_url</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">format_slack_message</span><span class="p">(</span><span class="s">&#39;ねこです &#39;</span> <span class="o">+</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">code</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span>
+</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Exception occured: &lt;{}&gt; {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>もうちょっと頑張る: 非同期処理</h2>
+
+<p><a href="http://momota.github.io/blog/2019/04/06/slack-commands-by-cloud-functions/">前回</a>も述べたが、
+Slack command は 3000 ms (3秒) 以内に応答しないとタイムアウトになってしまう。</p>
+
+<p><a href="https://thecatapi.com/">TheCatAPI</a> のような外部 API に依存している場合、3 秒以内のレスポンスを保証できない可能性が高くなる。
+そこで、バックエンドの Functions がリクエストを受けたら即時にレスポンスを返し、スレッドにより非同期で応答する。
+Slack としても、そのような仕組みを支援するためにレスポンス用 URL を付与して、バックエンド側にリクエストを投げてくれる。</p>
+
+<p>スレッド処理のため、メイン処理を関数化し、レスポンス用 URL へ返答するよう書き換える。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko_async</span><span class="p">(</span><span class="n">response_url</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">message</span> <span class="o">=</span> <span class="n">neko_url</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">format_slack_message</span><span class="p">(</span><span class="s">&#39;ねこです &#39;</span> <span class="o">+</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">post_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">post_response</span> <span class="o">=</span> <span class="n">post_to_slack</span><span class="p">(</span><span class="n">response_url</span><span class="p">,</span> <span class="n">post_data</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>        <span class="c"># validate request</span>
+</span><span class='line'>        <span class="n">verify_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># レスポンス用 URL の取得</span>
+</span><span class='line'>        <span class="n">response_url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;response_url&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># スレッドで猫画像 URL処理を取得</span>
+</span><span class='line'>        <span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">neko_async</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;response_url&#39;</span><span class="p">:</span> <span class="n">response_url</span><span class="p">})</span>
+</span><span class='line'>        <span class="n">thread</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">code</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span>
+</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Exception occured: &lt;{}&gt; {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最終的には以下のような感じになる。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">json</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 外部ファイル config.json の読み込み</span>
+</span><span class='line'><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;config.json&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span class='line'><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># エラーハンドリングと簡易認証処理</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">verify_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># POSTメソッドじゃない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">405</span><span class="p">,</span> <span class="s">&#39;Only POST requests are accepted&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># データが POST されていない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">422</span><span class="p">,</span> <span class="s">&#39;POST form is empty&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># POST データに ’token’ フィールドにない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="s">&#39;token&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">422</span><span class="p">,</span> <span class="s">&#39;POST form is invalid&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># トークンがマッチしない</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;token&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;SLACK_TOKEN&#39;</span><span class="p">]:</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&#39;Permission denied&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># スレッド処理用関数</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko_async</span><span class="p">(</span><span class="n">response_url</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">message</span> <span class="o">=</span> <span class="n">neko_url</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">format_slack_message</span><span class="p">(</span><span class="s">&#39;ねこです &#39;</span> <span class="o">+</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">post_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">post_response</span> <span class="o">=</span> <span class="n">post_to_slack</span><span class="p">(</span><span class="n">response_url</span><span class="p">,</span> <span class="n">post_data</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># TheCatAPI を叩いて、レスポンス (JSON) から 猫画像 URL を取得</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko_url</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">res</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;API_URL&#39;</span><span class="p">])</span>
+</span><span class='line'>    <span class="n">json_res</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">json_res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;url&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Slackへの応答フォーマットに整形</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">format_slack_message</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;response_type&#39;</span><span class="p">:</span> <span class="s">&#39;in_channel&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">message</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Slack レスポンス用 URL への POST処理</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">post_to_slack</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">post_data</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">post_headers</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s">&#39;application/json; charset=utf-8&#39;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">url</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">data</span><span class="o">=</span><span class="n">post_data</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">headers</span><span class="o">=</span><span class="n">post_headers</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Handler: Functions がリクエストを受けたときに実行する関数</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">neko</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>        <span class="c"># validate request</span>
+</span><span class='line'>        <span class="n">verify_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">response_url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;response_url&#39;</span><span class="p">]</span>
+</span><span class='line'>        <span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">neko_async</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;response_url&#39;</span><span class="p">:</span> <span class="n">response_url</span><span class="p">})</span>
+</span><span class='line'>        <span class="n">thread</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">code</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span>
+</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Exception occured: &lt;{}&gt; {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">momota</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2019-04-13T19:06:00+09:00" pubdate data-updated="true">2019-04-13</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/chatops/'>chatops</a>, <a class='category' href='/blog/categories/faas/'>faas</a>, <a class='category' href='/blog/categories/functions/'>functions</a>, <a class='category' href='/blog/categories/gcp/'>gcp</a>, <a class='category' href='/blog/categories/google/'>google</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/serverless/'>serverless</a>, <a class='category' href='/blog/categories/serverless-framework/'>serverless-framework</a>, <a class='category' href='/blog/categories/slack/'>slack</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://momota.github.io/blog/2019/04/13/slack-command/" data-via="momota" data-counturl="http://momota.github.io/blog/2019/04/13/slack-command/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+  <div style="float:left">
+    <a href="http://b.hatena.ne.jp/entry/http://momota.github.io/blog/2019/04/13/slack-command/" class="hatena-bookmark-button" data-hatena-bookmark-layout="standard" title="このエントリーをはてなブックマークに追加"><img src="http://b.st-hatena.com/images/entry-button/button-only.gif" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a>
+    <script type="text/javascript" src="http://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+  </div>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/04/06/slack-commands-by-cloud-functions/" title="Previous Post: Google cloud functions で slack (slash) commands をつくる">&laquo; Google cloud functions で slack (slash) commands をつくる</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/04/13/slack-command/">ねこの画像をランダムに表示する slack command</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/04/06/slack-commands-by-cloud-functions/">Google cloud functions で slack (slash) commands をつくる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/03/29/incremental-completion-for-zsh/">zshプラグイン: Incremental completion for zsh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/03/27/gc_k8sday/">[参加レポート]Google Cloud Kubernetes Day</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/02/15/devsumi/">[参加レポート]Developers Summit 2019</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/momota">@momota</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'momota',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos',
+            blacklist: ''
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - momota -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'momota';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://momota.github.io/blog/2019/04/13/slack-command/';
+        var disqus_url = 'http://momota.github.io/blog/2019/04/13/slack-command/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
