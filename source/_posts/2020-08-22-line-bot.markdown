@@ -1,0 +1,267 @@
+---
+layout: post
+title: "Google Apps Script で LINE ボットを作る"
+date: 2020-08-22 08:40
+comments: true
+categories: gas google javascript serverless line
+---
+
+[Google Apps Script](https://script.google.com/home) (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。
+
+GAS から HTTP GETリクエストを出したり、受け付けたりできるので、この仕組みを使って、無料で LINE ボットをつくってみる。
+
+LINE ボットは、LINE Messaging API を利用すると簡単に作ることが可能。
+
+- 公式ドキュメント [Messaging API | LINE Developers](https://developers.line.biz/ja/services/messaging-api/)
+
+
+![line bot diagram](/images/20200822_line-bot/line_01_diagram.png)
+
+出所: [Messaging APIの概要 | LINE Developers](https://developers.line.biz/ja/docs/messaging-api/overview/)
+
+<!-- more -->
+
+LINE ボット開発の流れは以下。
+
+1. LINE Developers コンソールからチャネル作成
+2. ボットの開発・デプロイ (GAS)
+3. LINE Developers コンソールでのボット設定
+
+
+
+## 1. LINE Developers コンソールからチャネル作成
+
+流れは以下。
+
+1. LINE Developers 登録 (登録していない人のみ)
+2. 新規プロバイダー登録
+    - プロバイダーはアプリ提供者。個人でも、組織でも。
+3. チャネル作成
+    - チャネルは、LINEプラットフォームが提供する機能を、プロバイダーが開発するサービスで利用するための通信路
+
+詳細は [Messaging APIを始めよう | LINE Developers](https://developers.line.biz/ja/docs/messaging-api/getting-started/#using-console) を参照。
+
+
+チャネルが作成できたら、「Messaging API設定」からチャネルアクセストークン★を発行してメモっておく。
+後述のボット開発時に必要となる。
+
+
+
+## 2. ボットの開発・デプロイ (GAS)
+
+
+今回は、以下の機能をボットに持たせる。
+
+- 翻訳機能: 日本語を英訳する
+- ロギング機能: 履歴を Google Sheets に保存する
+
+
+まずは、新規 GAS プロジェクトを作る。
+[自分のプロジェクト - Apps Script](https://script.google.com/home) から「新しいプロジェクト」で作成可能。
+
+一つの `.gs` ファイルでも良いが、ここでは以下のファイル構成で開発する。
+
+```
+├── main.gs
+├── class.gs
+└── test.gs
+```
+
+話が逸れるが、2020年に入ってから GAS は V8 ランタイムをサポートし始めたので、`const` とかクラス定義、アロー関数が使えるようになった。
+[V8 Runtime Overview  |  Apps Script  |  Google Developers](https://developers.google.com/apps-script/guides/v8-runtime)
+
+
+### 翻訳機能
+
+LINE で投稿された文を英訳する。LINE から Webhook で受け取った日本語文字列を英語に翻訳し、レスポンス用のJSONを返すためのクラスを作る。
+
+翻訳には、GAS にビルトインされている `LanguageApp` を使う。
+[Class LanguageApp  |  Apps Script  |  Google Developers](https://developers.google.com/apps-script/reference/language/language-app)
+
+LINE Messaging APIレスポンスの認可には、上でメモったチャネルアクセストークン★が必要となる。トークンのハードコーディングを避けるため、`Script properties` へ事前に設定しておく。
+
+`Script properties` は、GAS コンソールのメニュー [File] > [Project properties] > [Script properties] から設定できる。ここでは、`LINE_ACCESS_TOKEN` で登録している。
+
+![GAS script properties](/images/20200822_line-bot/line_02_project-properties.png)
+
+
+
+`class.gs`  に以下を書く。
+
+```javascript
+class TranslateAPI {
+  // コンストラクタ
+  constructor(sourceLang='ja', destLang='en') {
+
+    // 日本語 → 英語に翻訳する
+    this.sourceLang = sourceLang;
+    this.destLang   = destLang;
+
+    // Script properties からチャネルアクセストークンを取得する
+    this.LINE_ACCESS_TOKEN = PropertiesService.getScriptProperties().getProperty('LINE_ACCESS_TOKEN');
+    if (!this.LINE_ACCESS_TOKEN) {
+      throw 'You should set "LINE_ACCESS_TOKEN" property from [File] > [Project properties] > [Script properties]';
+    }
+
+    // LINE Messaging API 応答メッセージ用のエンドポイント
+    this.REPLY_ENDPOINT = 'https://api.line.me/v2/bot/message/reply';
+  }
+
+  // 翻訳機能
+  translate(text) {
+    return LanguageApp.translate(text, this.sourceLang, this.destLang);
+  }
+
+  // レスポンス用メッセージ成形
+  getResponseJSON(data, replyToken) {
+    return {
+      'headers': {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + this.LINE_ACCESS_TOKEN,
+      },
+      'method': 'post',
+      'payload': JSON.stringify({
+        'replyToken': replyToken,
+        'messages': [{
+          'type': 'text',
+          'text': data,
+        }],
+      }),
+    };
+  }
+}
+```
+
+### ロギング機能
+
+
+LINE ボットとの会話履歴を Google Sheets に保存する。
+
+https://sheets.new から Google Sheets を新規作成する。
+作成したシートの URL から spreadsheetIDを取得する。
+
+<pre>
+ttps://docs.google.com/spreadsheets/d/<span style="color: #d33682; ">spreadsheetId</span>/edit#gid=0
+</pre>
+
+チャネルアクセストークンを `Script properties` に設定したのと同様に、`SHEET_ID` として登録する。
+
+
+`class.gs`  に以下を追記する。
+
+```javascript
+class TranslateLogger {
+  // コンストラクタ
+  constructor() {
+    // Script properties から spreadsheetID を取得する
+    const SHEET_ID = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+    
+    if (!SHEET_ID) {
+      throw 'You should set "SHEET_ID" property from [File] > [Project properties] > [Script properties]';
+    }
+
+    let sheets = SpreadsheetApp.openById(SHEET_ID);
+    this.sheet = sheets.getActiveSheet();
+  }
+
+  // 日付、翻訳前文字列、翻訳後文字列を Sheets に記録する
+  logToSheet(text, translated_text) {
+    let col     = 1,
+        new_row = this.sheet.getLastRow() + 1;
+
+    this.sheet.getRange(new_row, col++).setValue(new Date());
+    this.sheet.getRange(new_row, col++).setValue(text);
+    this.sheet.getRange(new_row, col++).setValue(translated_text);
+  }
+}
+```
+
+### メイン処理
+
+メイン処理は、LINE から日本語文を Webhook (HTTP POST) で受け取り、上述した翻訳処理、ログ処理を経て応答する。
+
+
+`main.gs` に書く。
+
+```javascript
+const doPost = e => {
+  const t = new TranslateAPI('ja', 'en');
+  const l = new TranslateLogger();
+
+  // WebHookで受信した応答用Token
+  const replyToken     = JSON.parse(e.postData.contents).events[0].replyToken;
+
+  // 受信した文字列を翻訳し、レスポンス用JSONに成形する
+  let text            = JSON.parse(e.postData.contents).events[0].message.text,
+      translated_text = t.translate(text),
+      json            = t.getResponseJSON(translated_text, replyToken);
+
+  // LINE Messaging APIへ応答する
+  UrlFetchApp.fetch(t.REPLY_ENDPOINT, json);
+
+  // ロギング
+  l.logToSheet(text, translated_text);
+
+  let response = ContentService.createTextOutput();
+  response.setMimeType(ContentService.MimeType.JSON);
+  response.setContent(JSON.stringify({'content': 'post ok'}));
+  return response;
+}
+```
+
+テストは省略。
+
+
+### GAS を Web アプリとしてデプロイ (公開) する
+
+開発したボットを、GAS コンソールメニューの [Publish] > [Deploy as Web app...] からデプロイする。
+「Who has access to the app:」 は「Anyone, even anonymous」に設定しておく。
+
+[Deploy] ボタンを押すと、Authorization requiredダイアログが出てくるので許可してあげる。
+
+許可すると、「Current web app URL:」で GAS のエンドポイント URL ☆が取得できるのでメモっておく。後ほど、LINE Developers コンソールで Webhook URL にこのエンドポイントを指定する。
+https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec 形式の URL。
+
+
+## 3.  LINE Developers コンソールでのボット設定
+
+以下を設定する。
+
+- Webhook URL の設定 (ボットのエンドポイント URL を指定)
+- 応答メッセージの無効化
+- ボットの QR コード確認
+
+詳細は [ボットを作成する | LINE Developers](https://developers.line.biz/ja/docs/messaging-api/building-bot/) を参照。
+
+LINE Developersコンソールから、先に作ったチャンネルの Messaging API 設定 > Webhook 設定の Webhook URL に先程デプロイした GAS のエンドポイント URL ☆ を設定する。
+
+次に、「Webhook の利用」を有効化する。
+
+応答メッセージの無効化もしておく。
+「応答メッセージ設定」の「編集」リンクから、「詳細設定」 > 「応答メッセージ」 をオフにしておく。
+
+
+![bot response settings on LINE Developers Console](/images/20200822_line-bot/line_03_response-settings.png)
+
+
+最後に、ボットの QR コードを取得し、LINE の友達に追加する。
+
+
+## 動作確認
+
+以下の日本語入力に対して、
+
+- 1997年にスタートして以来、毎年7月下旬頃に行われてきた国内最大規模のロックフェス「FUJI ROCK FESTIVAL」。今年は東京オリンピック開催の影響もあって8月21～23日に行われる予定だったが、新型コロナウイルスの感染拡大の影響により残念ながらそれも見送られることになった。
+
+以下の英訳分を返してくれている。
+
+- "FUJI ROCK FESTIVAL", the largest rock festival in Japan, has been held around late July every year since it started in 1997. This year it was scheduled to be held on August 21-23, partly due to the Tokyo Olympics, but unfortunately it was also postponed due to the spread of the new coronavirus infection.
+
+![bot conversation](/images/20200822_line-bot/line_04_test_conversation.png)
+
+
+会話のログも Google Sheets に取得できている。
+
+![logging bot conversation](/images/20200822_line-bot/line_05_log.png)
+
+
