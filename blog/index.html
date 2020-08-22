@@ -9,7 +9,7 @@
   <meta name="author" content="momota">
 
   
-  <meta name="description" content="心の平穏のために、猫の画像をランダムに表示してくれる Slack command /neko を作った。 Slack で /neko と打つと、Cloud Functions にリクエストが飛び、Functions が TheCatAPI からランダムに猫画像 URL を取得するもの。 参考 &hellip;">
+  <meta name="description" content="Google Apps Script (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,58 @@
   <div id="main">
     <div id="content">
       
+
+
+    <article class="post">
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2020/08/22/line-bot/">Google Apps Script で LINE ボットを作る</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2020-08-22T08:40:00+09:00" pubdate data-updated="true">2020-08-22</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://script.google.com/home">Google Apps Script</a> (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。</p>
+
+<p>GAS から HTTP GETリクエストを出したり、受け付けたりできるので、この仕組みを使って、無料で LINE ボットをつくってみる。</p>
+
+<p>LINE ボットは、LINE Messaging API を利用すると簡単に作ることが可能。</p>
+
+<ul>
+<li>公式ドキュメント <a href="https://developers.line.biz/ja/services/messaging-api/">Messaging API | LINE Developers</a></li>
+</ul>
+
+
+<p><img src="/images/20200822_line-bot/line_01_diagram.png" alt="line bot diagram" /></p>
+
+<p>出所: <a href="https://developers.line.biz/ja/docs/messaging-api/overview/">Messaging APIの概要 | LINE Developers</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2020/08/22/line-bot/">続きを読む &rarr;</a>
+    </footer>
+  
+
+</article>
 
 
     <article class="post">
@@ -589,128 +641,6 @@
 
 </article>
 
-
-    <article class="post">
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/10/26/kong/">API アグリゲーション: Kong</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2018-10-26T11:55:00+09:00" pubdate data-updated="true">2018-10-26</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/20181026_kong/kong-logo.png" alt="kong-logo" /></p>
-
-<h2>Kong の概要</h2>
-
-<ul>
-<li>Kong は、オープンソースの API ゲートウェイソフトウェア</li>
-<li>低レイテンシー、スケーラブルなアーキテクチャ</li>
-<li>フロントはNginx、バックエンド DB は PostgreSQL or Cassandra で構成される</li>
-<li>複数のマイクロサービス (API) をアグリゲーションし、以下のような機能を統合的に提供する
-
-<ul>
-<li>認証
-
-<ul>
-<li>Basic 認証</li>
-<li>API キー</li>
-<li>OAuth2</li>
-<li>JWT</li>
-<li>HMAC</li>
-<li>LDAP</li>
-</ul>
-</li>
-<li>セキュリティ
-
-<ul>
-<li>ACL</li>
-<li>CORS</li>
-<li>IP制限</li>
-<li>ボット検出</li>
-<li>SSL</li>
-</ul>
-</li>
-<li>トラフィック制御
-
-<ul>
-<li>レート制限</li>
-<li>応答速度制限</li>
-<li>リクエストサイズ制限</li>
-</ul>
-</li>
-<li>変換
-
-<ul>
-<li>リクエスト変換</li>
-<li>レスポンス変換</li>
-<li>Correlation ID</li>
-</ul>
-</li>
-<li>ロギング
-
-<ul>
-<li>TCP、UDP、HTTP、ファイル、Syslog、StatsD、Loggly</li>
-</ul>
-</li>
-<li>分析
-
-<ul>
-<li>Datadog、Galileo、Runscope</li>
-</ul>
-</li>
-<li>ロードバランシング</li>
-<li>サーキットブレーカー</li>
-</ul>
-</li>
-</ul>
-
-
-<p>最近はあまり流行っていないらしく、Web 上の記事が古かったので、使い方に関するメモ。といってもほぼチュートリアル通り。</p>
-
-<p>古いなと感じたのは、たとえば、マイクロサービスの流行りを受けてか、api という概念が service に置き換えられている感じだった。</p>
-
-<ul>
-<li>昔: <a href="http://kong-server:8001/apis">http://kong-server:8001/apis</a></li>
-<li>今: <a href="http://kong-server:8001/services">http://kong-server:8001/services</a></li>
-</ul>
-
-
-<h2>環境</h2>
-
-<ul>
-<li>Azure</li>
-<li>Kong: 0.14.1</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/10/26/kong/">続きを読む &rarr;</a>
-    </footer>
-  
-
-</article>
-
 <nav id="pagenavi">
     
     
@@ -721,7 +651,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2019 - momota -
+  Copyright &copy; 2020 - momota -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

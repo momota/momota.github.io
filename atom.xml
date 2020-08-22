@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2019-04-14T00:23:21+09:00</updated>
+  <updated>2020-08-22T12:33:22+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -12,6 +12,372 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Google Apps Script で LINE ボットを作る]]></title>
+    <link href="http://momota.github.io/blog/2020/08/22/line-bot/"/>
+    <updated>2020-08-22T08:40:00+09:00</updated>
+    <id>http://momota.github.io/blog/2020/08/22/line-bot</id>
+    <content type="html"><![CDATA[<p><a href="https://script.google.com/home">Google Apps Script</a> (GAS) は、Google が提供する JavaScript プラットフォームで、Google apps (Calendar, Docs, Drive, Gmail, Sheets, and Slides) に対して処理する JavaScript を簡単に書ける。</p>
+
+<p>GAS から HTTP GETリクエストを出したり、受け付けたりできるので、この仕組みを使って、無料で LINE ボットをつくってみる。</p>
+
+<p>LINE ボットは、LINE Messaging API を利用すると簡単に作ることが可能。</p>
+
+<ul>
+<li>公式ドキュメント <a href="https://developers.line.biz/ja/services/messaging-api/">Messaging API | LINE Developers</a></li>
+</ul>
+
+
+<p><img src="http://momota.github.io/images/20200822_line-bot/line_01_diagram.png" alt="line bot diagram" /></p>
+
+<p>出所: <a href="https://developers.line.biz/ja/docs/messaging-api/overview/">Messaging APIの概要 | LINE Developers</a></p>
+
+<!-- more -->
+
+
+<p>LINE ボット開発の流れは以下。</p>
+
+<ol>
+<li>LINE Developers コンソールからチャネル作成</li>
+<li>ボットの開発・デプロイ (GAS)</li>
+<li>LINE Developers コンソールでのボット設定</li>
+</ol>
+
+
+<h2>1. LINE Developers コンソールからチャネル作成</h2>
+
+<p>流れは以下。</p>
+
+<ol>
+<li>LINE Developers 登録 (登録していない人のみ)</li>
+<li>新規プロバイダー登録
+
+<ul>
+<li>プロバイダーはアプリ提供者。個人でも、組織でも。</li>
+</ul>
+</li>
+<li>チャネル作成
+
+<ul>
+<li>チャネルは、LINEプラットフォームが提供する機能を、プロバイダーが開発するサービスで利用するための通信路</li>
+</ul>
+</li>
+</ol>
+
+
+<p>詳細は <a href="https://developers.line.biz/ja/docs/messaging-api/getting-started/#using-console">Messaging APIを始めよう | LINE Developers</a> を参照。</p>
+
+<p>チャネルが作成できたら、「Messaging API設定」からチャネルアクセストークン★を発行してメモっておく。
+後述のボット開発時に必要となる。</p>
+
+<h2>2. ボットの開発・デプロイ (GAS)</h2>
+
+<p>今回は、以下の機能をボットに持たせる。</p>
+
+<ul>
+<li>翻訳機能: 日本語を英訳する</li>
+<li>ロギング機能: 履歴を Google Sheets に保存する</li>
+</ul>
+
+
+<p>まずは、新規 GAS プロジェクトを作る。
+<a href="https://script.google.com/home">自分のプロジェクト &ndash; Apps Script</a> から「新しいプロジェクト」で作成可能。</p>
+
+<p>一つの <code>.gs</code> ファイルでも良いが、ここでは以下のファイル構成で開発する。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>├── main.gs
+</span><span class='line'>├── class.gs
+</span><span class='line'>└── test.gs</span></code></pre></td></tr></table></div></figure>
+
+
+<p>話が逸れるが、2020年に入ってから GAS は V8 ランタイムをサポートし始めたので、<code>const</code> とかクラス定義、アロー関数が使えるようになった。
+<a href="https://developers.google.com/apps-script/guides/v8-runtime">V8 Runtime Overview  |  Apps Script  |  Google Developers</a></p>
+
+<h3>翻訳機能</h3>
+
+<p>LINE で投稿された文を英訳する。LINE から Webhook で受け取った日本語文字列を英語に翻訳し、レスポンス用のJSONを返すためのクラスを作る。</p>
+
+<p>翻訳には、GAS にビルトインされている <code>LanguageApp</code> を使う。
+<a href="https://developers.google.com/apps-script/reference/language/language-app">Class LanguageApp  |  Apps Script  |  Google Developers</a></p>
+
+<p>LINE Messaging APIレスポンスの認可には、上でメモったチャネルアクセストークン★が必要となる。トークンのハードコーディングを避けるため、<code>Script properties</code> へ事前に設定しておく。</p>
+
+<p><code>Script properties</code> は、GAS コンソールのメニュー [File] > [Project properties] > [Script properties] から設定できる。ここでは、<code>LINE_ACCESS_TOKEN</code> で登録している。</p>
+
+<p><img src="http://momota.github.io/images/20200822_line-bot/line_02_project-properties.png" alt="GAS script properties" /></p>
+
+<p><code>class.gs</code>  に以下を書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">class</span> <span class="nx">TranslateAPI</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// コンストラクタ</span>
+</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">sourceLang</span><span class="o">=</span><span class="s1">&#39;ja&#39;</span><span class="p">,</span> <span class="nx">destLang</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// 日本語 → 英語に翻訳する</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">sourceLang</span> <span class="o">=</span> <span class="nx">sourceLang</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">destLang</span>   <span class="o">=</span> <span class="nx">destLang</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Script properties からチャネルアクセストークンを取得する</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">LINE_ACCESS_TOKEN</span> <span class="o">=</span> <span class="nx">PropertiesService</span><span class="p">.</span><span class="nx">getScriptProperties</span><span class="p">().</span><span class="nx">getProperty</span><span class="p">(</span><span class="s1">&#39;LINE_ACCESS_TOKEN&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">LINE_ACCESS_TOKEN</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">throw</span> <span class="s1">&#39;You should set &quot;LINE_ACCESS_TOKEN&quot; property from [File] &gt; [Project properties] &gt; [Script properties]&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// LINE Messaging API 応答メッセージ用のエンドポイント</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">REPLY_ENDPOINT</span> <span class="o">=</span> <span class="s1">&#39;https://api.line.me/v2/bot/message/reply&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// 翻訳機能</span>
+</span><span class='line'>  <span class="nx">translate</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">LanguageApp</span><span class="p">.</span><span class="nx">translate</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">sourceLang</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">destLang</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// レスポンス用メッセージ成形</span>
+</span><span class='line'>  <span class="nx">getResponseJSON</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">replyToken</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s1">&#39;headers&#39;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="s1">&#39;application/json; charset=UTF-8&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s1">&#39;Authorization&#39;</span><span class="o">:</span> <span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">LINE_ACCESS_TOKEN</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>      <span class="s1">&#39;method&#39;</span><span class="o">:</span> <span class="s1">&#39;post&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s1">&#39;payload&#39;</span><span class="o">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+</span><span class='line'>        <span class="s1">&#39;replyToken&#39;</span><span class="o">:</span> <span class="nx">replyToken</span><span class="p">,</span>
+</span><span class='line'>        <span class="s1">&#39;messages&#39;</span><span class="o">:</span> <span class="p">[{</span>
+</span><span class='line'>          <span class="s1">&#39;type&#39;</span><span class="o">:</span> <span class="s1">&#39;text&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s1">&#39;text&#39;</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">}],</span>
+</span><span class='line'>      <span class="p">}),</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ロギング機能</h3>
+
+<p>LINE ボットとの会話履歴を Google Sheets に保存する。</p>
+
+<p><a href="https://sheets.new">https://sheets.new</a> から Google Sheets を新規作成する。
+作成したシートの URL から spreadsheetIDを取得する。</p>
+
+<pre>
+ttps://docs.google.com/spreadsheets/d/<span style="color: #d33682; ">spreadsheetId</span>/edit#gid=0
+</pre>
+
+
+<p>チャネルアクセストークンを <code>Script properties</code> に設定したのと同様に、<code>SHEET_ID</code> として登録する。</p>
+
+<p><code>class.gs</code>  に以下を追記する。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">class</span> <span class="nx">TranslateLogger</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// コンストラクタ</span>
+</span><span class='line'>  <span class="nx">constructor</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Script properties から spreadsheetID を取得する</span>
+</span><span class='line'>    <span class="kr">const</span> <span class="nx">SHEET_ID</span> <span class="o">=</span> <span class="nx">PropertiesService</span><span class="p">.</span><span class="nx">getScriptProperties</span><span class="p">().</span><span class="nx">getProperty</span><span class="p">(</span><span class="s1">&#39;SHEET_ID&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">SHEET_ID</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">throw</span> <span class="s1">&#39;You should set &quot;SHEET_ID&quot; property from [File] &gt; [Project properties] &gt; [Script properties]&#39;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">let</span> <span class="nx">sheets</span> <span class="o">=</span> <span class="nx">SpreadsheetApp</span><span class="p">.</span><span class="nx">openById</span><span class="p">(</span><span class="nx">SHEET_ID</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">sheet</span> <span class="o">=</span> <span class="nx">sheets</span><span class="p">.</span><span class="nx">getActiveSheet</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// 日付、翻訳前文字列、翻訳後文字列を Sheets に記録する</span>
+</span><span class='line'>  <span class="nx">logToSheet</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">translated_text</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">let</span> <span class="nx">col</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">new_row</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">sheet</span><span class="p">.</span><span class="nx">getLastRow</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">sheet</span><span class="p">.</span><span class="nx">getRange</span><span class="p">(</span><span class="nx">new_row</span><span class="p">,</span> <span class="nx">col</span><span class="o">++</span><span class="p">).</span><span class="nx">setValue</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">());</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">sheet</span><span class="p">.</span><span class="nx">getRange</span><span class="p">(</span><span class="nx">new_row</span><span class="p">,</span> <span class="nx">col</span><span class="o">++</span><span class="p">).</span><span class="nx">setValue</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">sheet</span><span class="p">.</span><span class="nx">getRange</span><span class="p">(</span><span class="nx">new_row</span><span class="p">,</span> <span class="nx">col</span><span class="o">++</span><span class="p">).</span><span class="nx">setValue</span><span class="p">(</span><span class="nx">translated_text</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>メイン処理</h3>
+
+<p>メイン処理は、LINE から日本語文を Webhook (HTTP POST) で受け取り、上述した翻訳処理、ログ処理を経て応答する。</p>
+
+<p><code>main.gs</code> に書く。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kr">const</span> <span class="nx">doPost</span> <span class="o">=</span> <span class="nx">e</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">TranslateAPI</span><span class="p">(</span><span class="s1">&#39;ja&#39;</span><span class="p">,</span> <span class="s1">&#39;en&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">TranslateLogger</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// WebHookで受信した応答用Token</span>
+</span><span class='line'>  <span class="kr">const</span> <span class="nx">replyToken</span>     <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">postData</span><span class="p">.</span><span class="nx">contents</span><span class="p">).</span><span class="nx">events</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">replyToken</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// 受信した文字列を翻訳し、レスポンス用JSONに成形する</span>
+</span><span class='line'>  <span class="kd">let</span> <span class="nx">text</span>            <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">postData</span><span class="p">.</span><span class="nx">contents</span><span class="p">).</span><span class="nx">events</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">message</span><span class="p">.</span><span class="nx">text</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">translated_text</span> <span class="o">=</span> <span class="nx">t</span><span class="p">.</span><span class="nx">translate</span><span class="p">(</span><span class="nx">text</span><span class="p">),</span>
+</span><span class='line'>      <span class="nx">json</span>            <span class="o">=</span> <span class="nx">t</span><span class="p">.</span><span class="nx">getResponseJSON</span><span class="p">(</span><span class="nx">translated_text</span><span class="p">,</span> <span class="nx">replyToken</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// LINE Messaging APIへ応答する</span>
+</span><span class='line'>  <span class="nx">UrlFetchApp</span><span class="p">.</span><span class="nx">fetch</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">REPLY_ENDPOINT</span><span class="p">,</span> <span class="nx">json</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// ロギング</span>
+</span><span class='line'>  <span class="nx">l</span><span class="p">.</span><span class="nx">logToSheet</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">translated_text</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">let</span> <span class="nx">response</span> <span class="o">=</span> <span class="nx">ContentService</span><span class="p">.</span><span class="nx">createTextOutput</span><span class="p">();</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">setMimeType</span><span class="p">(</span><span class="nx">ContentService</span><span class="p">.</span><span class="nx">MimeType</span><span class="p">.</span><span class="nx">JSON</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">setContent</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="s1">&#39;content&#39;</span><span class="o">:</span> <span class="s1">&#39;post ok&#39;</span><span class="p">}));</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">response</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>テストは省略。</p>
+
+<h3>GAS を Web アプリとしてデプロイ (公開) する</h3>
+
+<p>GAS コンソールメニューの [Publish] > [Deploy as Web app&hellip;] からデプロイする。
+「Who has access to the app:」 は「Anyone, even anonymous」に設定しておく。</p>
+
+<p>[Deploy] ボタンを押すと、Authorization requiredダイアログが出てくるので許可してあげる。</p>
+
+<p>許可すると、「Current web app URL:」で GAS のエンドポイント URL ☆が取得できるのでメモっておく。後ほど、LINE Developers コンソールで Webhook URL にこのエンドポイントを指定する。
+<a href="https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec">https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec</a> 形式の URL。</p>
+
+<h2>3.  LINE Developers コンソールでのボット設定</h2>
+
+<p>以下を設定する。</p>
+
+<ul>
+<li>Webhook URL の設定 (ボットのエンドポイント URL を指定)</li>
+<li>応答メッセージの無効化</li>
+<li>ボットの QR コード確認</li>
+</ul>
+
+
+<p>詳細は <a href="https://developers.line.biz/ja/docs/messaging-api/building-bot/">ボットを作成する | LINE Developers</a> を参照。</p>
+
+<p>LINE Developersコンソールから、先に作ったチャンネルの Messaging API 設定 > Webhook 設定の Webhook URL に先程デプロイした GAS のエンドポイント URL ☆ を設定する。</p>
+
+<p>次に、「Webhook の利用」を有効化する。</p>
+
+<p>応答メッセージの無効化もしておく。
+「応答メッセージ設定」の「編集」リンクから、「詳細設定」 > 「応答メッセージ」 をオフにしておく。</p>
+
+<p><img src="http://momota.github.io/images/20200822_line-bot/line_03_response-settings.png" alt="bot response settings on LINE Developers Console" /></p>
+
+<p>最後に、ボットの QR コードを取得し、LINE の友達に追加する。</p>
+
+<h2>動作確認</h2>
+
+<p>以下の日本語入力に対して、</p>
+
+<ul>
+<li>1997年にスタートして以来、毎年7月下旬頃に行われてきた国内最大規模のロックフェス「FUJI ROCK FESTIVAL」。今年は東京オリンピック開催の影響もあって8月21～23日に行われる予定だったが、新型コロナウイルスの感染拡大の影響により残念ながらそれも見送られることになった。</li>
+</ul>
+
+
+<p>以下の英訳分を返してくれている。</p>
+
+<ul>
+<li>&ldquo;FUJI ROCK FESTIVAL&rdquo;, the largest rock festival in Japan, has been held around late July every year since it started in 1997. This year it was scheduled to be held on August 21-23, partly due to the Tokyo Olympics, but unfortunately it was also postponed due to the spread of the new coronavirus infection.</li>
+</ul>
+
+
+<p><img src="http://momota.github.io/images/20200822_line-bot/line_04_test_conversation.png" alt="bot conversation" /></p>
+
+<p>会話のログも Google Sheets に取得できている。</p>
+
+<p><img src="http://momota.github.io/images/20200822_line-bot/line_05_log.png" alt="logging bot conversation" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ねこの画像をランダムに表示する slack command]]></title>
@@ -11294,71 +11660,6 @@ Homebrew って、ホームブリューと読んでいるけどホームブル�
 
 
 <p>なにも考えずに re-run できるのはうれしい。 (これが冪等性のパワーか)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ネットワークエンジニアのための cisco.vim]]></title>
-    <link href="http://momota.github.io/blog/2016/06/24/cisco-dot-vim/"/>
-    <updated>2016-06-24T16:42:00+09:00</updated>
-    <id>http://momota.github.io/blog/2016/06/24/cisco-dot-vim</id>
-    <content type="html"><![CDATA[<p>ネットワークエンジニアのみなさん、こんにちは。</p>
-
-<p><a href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a> の cisco バージョンです。</p>
-
-<p>cisco の configuration をカラーリングする vim プラグイン
-<a href="https://github.com/momota/cisco.vim">momota/cisco.vim</a> を作ったのでご活用下さい。</p>
-
-<p>対象は、cisco ルータと Catalyst スイッチ、Nexus スイッチです。</p>
-
-<p>色を付けることによって、configuration の解釈を手助けしたり、
-configuration 作成時のミスに気づきやすくしたりする効果が期待できます。
-(誤ったタームを入力すると色が付かないので)</p>
-
-<p>以下のようにカラーリングします。 (colorscheme は molokai)</p>
-
-<h2>before</h2>
-
-<p><img src="http://momota.github.io/images/20160624_cisco-config_before.png" alt="display_before" /></p>
-
-<h2>after</h2>
-
-<p><img src="http://momota.github.io/images/20160624_cisco-config_after.png" alt="display_after" /></p>
-
-<!-- more -->
-
-
-<h2>インストール</h2>
-
-<p>NeoBundle で vim プラグインを管理している人は以下の行を<code>.vimrc</code> に追加して</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'>NeoBundle <span class="s1">&#39;momota/cisco.vim&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>:NeoBundleInstall</code> でインストールする。</p>
-
-<p>その他は、<a href="https://github.com/momota/cisco.vim#installation">README/Installation</a> を参照。</p>
-
-<h2>使い方</h2>
-
-<p>cisco config ファイルを <code>.cisco</code> という拡張子で保存して vim で開くか、
-cisco config ファイルの先頭に以下行を追加して保存し vim で開くと色付けしてくれる。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="p">!</span> <span class="k">vim</span>: <span class="k">set</span> <span class="nb">ft</span><span class="p">=</span>cisco:
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>もしくは、cisco config ファイルを vim 開いている時に <code>:set ft=cisco</code> を実行する。</p>
-
-<h1>関連</h1>
-
-<ul>
-<li><a href="http://momota.github.io/blog/2016/06/22/junos-dot-vim/">ネットワークエンジニアのための junos.vim</a></li>
-</ul>
-
 ]]></content>
   </entry>
   
