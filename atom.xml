@@ -4,7 +4,7 @@
   <title><![CDATA[momota.txt]]></title>
   <link href="http://momota.github.io/atom.xml" rel="self"/>
   <link href="http://momota.github.io/"/>
-  <updated>2020-08-22T12:33:22+09:00</updated>
+  <updated>2020-08-22T12:41:27+09:00</updated>
   <id>http://momota.github.io/</id>
   <author>
     <name><![CDATA[momota]]></name>
@@ -323,7 +323,7 @@ ttps://docs.google.com/spreadsheets/d/<span style="color: #d33682; ">spreadsheet
 
 <h3>GAS を Web アプリとしてデプロイ (公開) する</h3>
 
-<p>GAS コンソールメニューの [Publish] > [Deploy as Web app&hellip;] からデプロイする。
+<p>開発したボットを、GAS コンソールメニューの [Publish] > [Deploy as Web app&hellip;] からデプロイする。
 「Who has access to the app:」 は「Anyone, even anonymous」に設定しておく。</p>
 
 <p>[Deploy] ボタンを押すと、Authorization requiredダイアログが出てくるので許可してあげる。</p>
